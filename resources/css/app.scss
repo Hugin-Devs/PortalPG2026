@@ -1,0 +1,58 @@
+// Variables personalizadas de GDC
+$primary: #273376;
+$secondary: #54595F;
+$danger: #A70336;
+$warning: #FFC907;
+
+@import 'bootstrap/scss/bootstrap';
+
+// Estilos personalizados
+body {
+    font-family: 'Instrument Sans', sans-serif;
+    color: #333333;
+    overflow-x: hidden;
+}
+
+h1, h2, h3, h4, h5, h6 {
+    font-family: 'Georama', sans-serif;
+    font-weight: 700;
+}
+
+.bg-primary {
+    background-color: $primary !important;
+}
+
+.border-primary {
+    border-color: $primary !important;
+}
+
+.text-primary {
+    color: $primary !important;
+}
+
+.btn-primary {
+    background-color: $primary;
+    border-color: $primary;
+}
+
+.btn-warning {
+    color: #000;
+}
+
+.card {
+    border: 1px solid #AFAFAF;
+    border-radius: 8px;
+}
+
+.navbar-brand span {
+    white-space: nowrap;
+}
+
+@media (max-width: 991.98px) {
+    .navbar-brand span {
+        font-size: 0.8rem !important;
+    }
+    .navbar-brand img {
+        height: 40px !important;
+    }
+}

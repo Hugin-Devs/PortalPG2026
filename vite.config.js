@@ -1,0 +1,17 @@
+import { defineConfig } from 'vite';
+import laravel from 'laravel-vite-plugin';
+
+export default defineConfig({
+    plugins: [
+        laravel({
+            input: ['resources/css/app.scss', 'resources/js/app.js'],
+            refresh: true,
+        }),
+    ],
+    server: {
+        cors: true,
+        hmr: {
+            host: 'portal2026.test',
+        },
+    },
+});
