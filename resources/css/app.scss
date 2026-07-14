@@ -11,6 +11,11 @@ body {
     font-family: 'Instrument Sans', sans-serif;
     color: #333333;
     overflow-x: hidden;
+    background: url('/images/fondo_6.jpg') center / cover no-repeat fixed;
+}
+
+.navbar {
+    background: url('/images/banner.png') center / cover no-repeat !important;
 }
 
 h1, h2, h3, h4, h5, h6 {
@@ -46,6 +51,90 @@ h1, h2, h3, h4, h5, h6 {
 
 .navbar-brand span {
     white-space: nowrap;
+}
+
+// Efecto esquinas en links del navbar
+.header .navbar .navbar-nav .nav-item {
+  display: inline-block;
+  list-style: none;
+  margin: .5em 1em;
+  padding: 0;
+}
+
+// Ajuste para links normales
+.header .navbar .navbar-nav .nav-link {
+  padding: .5em .8em;
+  color: #130f40;
+  position: relative;
+  text-decoration: none;
+  font-size: 19px;
+  transition: all .35s ease;
+  overflow: visible;
+}
+
+// Efecto de esquinas aplicado a TODOS los links, incluyendo el dropdown toggle
+.header .navbar .navbar-nav .nav-link::before,
+.header .navbar .navbar-nav .nav-link::after {
+  content: '';
+  height: 14px;
+  width: 14px;
+  position: absolute;
+  transition: all .35s ease;
+  opacity: 0;
+  z-index: 1;
+}
+
+.header .navbar .navbar-nav .nav-link::before {
+  right: 0;
+  top: 0;
+  border-top: 3px solid #C00930;
+  border-right: 3px solid #C00930;
+  transform: translate(-100%, 50%);
+}
+
+.header .navbar .navbar-nav .nav-link::after {
+  left: 0;
+  bottom: 0;
+  border-bottom: 3px solid #C00930;
+  border-left: 3px solid #C00930;
+  transform: translate(100%, -50%);
+}
+
+.header .navbar .navbar-nav .nav-link:hover::before,
+.header .navbar .navbar-nav .nav-link:hover::after {
+  transform: translate(0, 0);
+  opacity: 1;
+}
+
+.header .navbar .navbar-nav .nav-link:hover {
+  color: #C00930;
+}
+
+// Ajuste específico para que el dropdown toggle no se desplace o corte
+.header .navbar .nav-item.dropdown .nav-link {
+  padding-right: 1.5em !important; 
+}
+
+
+// Estilos del Footer
+.footer-link {
+    color: #212529;
+    transition: all 0.3s ease;
+    display: block;
+}
+
+.footer-link .footer-text {
+    transition: all 0.3s ease;
+    display: inline-block;
+}
+
+.footer-link:hover {
+    color: #A70336 !important;
+}
+
+.footer-link:hover .footer-text {
+    transform: translateX(5px);
+    font-weight: bold;
 }
 
 @media (max-width: 991.98px) {

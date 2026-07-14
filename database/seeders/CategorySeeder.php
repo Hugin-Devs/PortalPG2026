@@ -18,6 +18,7 @@ class CategorySeeder extends Seeder
             ['name' => 'Economía', 'slug' => 'economia'],
             ['name' => 'Cultura', 'slug' => 'cultura'],
             ['name' => 'Deporte', 'slug' => 'deporte'],
+            ['name' => 'Educación', 'slug' => 'educacion'],
         ];
 
         foreach ($categories as $cat) {

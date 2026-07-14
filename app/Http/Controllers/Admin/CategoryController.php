@@ -1,0 +1,72 @@
+<?php
+
+namespace App\Http\Controllers\Admin;
+
+use App\Http\Controllers\Controller;
+use App\Models\Category;
+use Illuminate\Http\Request;
+use Illuminate\Support\Str;
+
+class CategoryController extends Controller
+{
+    public function index()
+    {
+        $categories = Category::with('parent')->orderBy('order')->paginate(10);
+        return view('admin.categories.index', compact('categories'));
+    }
+
+    public function create()
+    {
+        $categories = Category::whereNull('parent_id')->get();
+        return view('admin.categories.create', compact('categories'));
+    }
+
+    public function store(Request $request)
+    {
+        $data = $request->validate([
+            'name' => 'required|max:255',
+            'description' => 'nullable',
+            'icon' => 'nullable|max:255',
+            'parent_id' => 'nullable|exists:categories,id',
+            'order' => 'nullable|integer|min:0',
+        ]);
+
+        $data['slug'] = Str::slug($request->name);
+
+        Category::create($data);
+        return redirect('/admin/categorias')->with('success', 'Categoría creada correctamente.');
+    }
+
+    public function edit(Category $category)
+    {
+        $categories = Category::whereNull('parent_id')->where('id', '!=', $category->id)->get();
+        return view('admin.categories.edit', compact('category', 'categories'));
+    }
+
+    public function update(Request $request, Category $category)
+    {
+        $data = $request->validate([
+            'name' => 'required|max:255',
+            'description' => 'nullable',
+            'icon' => 'nullable|max:255',
+            'parent_id' => 'nullable|exists:categories,id',
+            'order' => 'nullable|integer|min:0',
+            'is_active' => 'nullable|boolean',
+        ]);
+
+        $data['slug'] = Str::slug($request->name);
+        $data['is_active'] = $request->has('is_active');
+
+        $category->update($data);
+        return redirect('/admin/categorias')->with('success', 'Categoría actualizada correctamente.');
+    }
+
+    public function destroy(Category $category)
+    {
+        if ($category->posts()->count() > 0) {
+            return back()->with('error', 'No se puede eliminar una categoría con noticias asociadas.');
+        }
+        $category->delete();
+        return redirect('/admin/categorias')->with('success', 'Categoría eliminada correctamente.');
+    }
+}
