@@ -43,4 +43,17 @@ class User extends Authenticatable
         'email_verified_at' => 'datetime',
         'password' => 'hashed',
     ];
+
+    public function hasPermission($permissionSlug): bool
+    {
+        if ($this->role === 'superadmin') {
+            return true;
+        }
+
+        return \DB::table('role_permission')
+            ->join('permissions', 'role_permission.permission_id', '=', 'permissions.id')
+            ->where('role_permission.role', $this->role)
+            ->where('permissions.slug', $permissionSlug)
+            ->exists();
+    }
 }

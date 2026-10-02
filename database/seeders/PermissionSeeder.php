@@ -64,7 +64,7 @@ class PermissionSeeder extends Seeder
         DB::table('role_permission')->insert($data);
 
         // Asignar permisos básicos a admin
-        $adminSlugs = ['news.view', 'news.create', 'news.edit', 'categories.view', 'partners.view', 'media.view', 'media.upload', 'about.edit', 'org.view', 'org.create', 'org.edit'];
+        $adminSlugs = ['news.view', 'news.create', 'news.edit', 'categories.view', 'categories.create', 'categories.edit', 'categories.delete', 'partners.view', 'media.view', 'media.upload', 'about.edit', 'org.view', 'org.create', 'org.edit'];
         $adminIds = Permission::whereIn('slug', $adminSlugs)->pluck('id');
         $dataAdmin = $adminIds->map(fn($id) => [
             'role' => 'admin',

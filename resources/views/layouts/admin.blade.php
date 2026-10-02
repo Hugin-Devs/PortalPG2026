@@ -16,15 +16,30 @@
             <hr>
             <ul class="nav flex-column">
                 <li class="nav-item"><a class="nav-link text-white" href="{{ url('/admin') }}">Dashboard</a></li>
+                @if(auth()->user()->hasPermission('news.view'))
                 <li class="nav-item"><a class="nav-link text-white" href="{{ url('/admin/noticias') }}">Noticias</a></li>
+                @endif
+                @if(auth()->user()->hasPermission('categories.view'))
                 <li class="nav-item"><a class="nav-link text-white" href="{{ url('/admin/categorias') }}">Categorías</a></li>
-                <!-- <li class="nav-item"><a class="nav-link text-white" href="{{ url('/admin/servicios') }}">Servicios</a></li> -->
+                @endif
+                @if(auth()->user()->hasPermission('partners.view'))
                 <li class="nav-item"><a class="nav-link text-white" href="{{ url('/admin/entes') }}">Entes Afiliados</a></li>
+                @endif
+                @if(auth()->user()->hasPermission('users.view'))
                 <li class="nav-item"><a class="nav-link text-white" href="{{ url('/admin/usuarios') }}">Usuarios</a></li>
+                @endif
+                @if(auth()->user()->hasPermission('media.view'))
                 <li class="nav-item"><a class="nav-link text-white" href="{{ url('/admin/medios') }}">Medios</a></li>
+                @endif
+                @if(auth()->user()->hasPermission('about.edit'))
                 <li class="nav-item"><a class="nav-link text-white" href="{{ url('/admin/nosotros') }}">Sobre Nosotros</a></li>
+                @endif
+                @if(auth()->user()->hasPermission('org.view'))
                 <li class="nav-item"><a class="nav-link text-white" href="{{ url('/admin/estructura') }}">Estructura Org.</a></li>
+                @endif
+                @if(auth()->user()->hasPermission('roles.manage'))
                 <li class="nav-item"><a class="nav-link text-white" href="{{ url('/admin/roles') }}">Roles y Permisos</a></li>
+                @endif
                 <li class="nav-item mt-3">
                     <form action="{{ url('/admin/logout') }}" method="POST">
                         @csrf

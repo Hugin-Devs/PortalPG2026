@@ -28,12 +28,14 @@ class RoleController extends Controller
     public function update(Request $request)
     {
         $role = $request->input('role');
-        $permissionIds = $request->input('permissions', []);
+        $permissionIds = $request->input('permissions', '');
+
+        $ids = $permissionIds ? explode(',', $permissionIds) : [];
 
         \DB::table('role_permission')->where('role', $role)->delete();
 
         $data = [];
-        foreach ($permissionIds as $permId) {
+        foreach ($ids as $permId) {
             $data[] = [
                 'role' => $role,
                 'permission_id' => $permId,
@@ -42,7 +44,9 @@ class RoleController extends Controller
             ];
         }
 
-        \DB::table('role_permission')->insert($data);
+        if (!empty($data)) {
+            \DB::table('role_permission')->insert($data);
+        }
 
         return back()->with('success', "Permisos actualizados para el rol \"$role\".");
     }

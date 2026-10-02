@@ -21,7 +21,7 @@
                 <div class="collapse navbar-collapse flex-column" id="navbarNav">
                     <form class="d-flex w-100 my-2 my-lg-0 pb-2 border-bottom border-light" action="{{ route('search') }}" method="GET">
                         <input class="form-control form-control-sm me-2" type="search" name="q" placeholder="Buscar..." aria-label="Buscar" required>
-                        <button class="btn btn-outline-danger btn-sm" type="submit">Buscar</button>
+                        <button class="btn btn-outline-primary btn-sm" type="submit">Buscar</button>
                     </form>
                     <ul class="navbar-nav ms-auto w-100 justify-content-end">
                         <li class="nav-item"><a class="nav-link" href="{{ url('/') }}">Inicio</a></li>
@@ -60,11 +60,11 @@
                 <div class="col-md-3">
                     <h6 style="color: #212529;">Enlaces</h6>
                     <ul class="list-unstyled small">
-                        <li><a href="{{ url('/') }}" class="text-decoration-none footer-link"><i class="fas fa-arrow-right text-danger me-1"></i><span class="footer-text">Inicio</span></a></li>
-                        <li><a href="{{ route('news.index') }}" class="text-decoration-none footer-link"><i class="fas fa-arrow-right text-danger me-1"></i><span class="footer-text">Noticias</span></a></li>
-                        <li><a href="{{ route('services.index') }}" class="text-decoration-none footer-link"><i class="fas fa-arrow-right text-danger me-1"></i><span class="footer-text">Entes</span></a></li>
-                        <li><a href="{{ route('contact.index') }}" class="text-decoration-none footer-link"><i class="fas fa-arrow-right text-danger me-1"></i><span class="footer-text">Contacto</span></a></li>
-                        <li><a href="{{ route('about.index') }}" class="text-decoration-none footer-link"><i class="fas fa-arrow-right text-danger me-1"></i><span class="footer-text">Sobre Nosotros</span></a></li>
+                        <li><a href="{{ url('/') }}" class="text-decoration-none footer-link"><i class="fas fa-arrow-right text-primary me-1"></i><span class="footer-text">Inicio</span></a></li>
+                        <li><a href="{{ route('news.index') }}" class="text-decoration-none footer-link"><i class="fas fa-arrow-right text-primary me-1"></i><span class="footer-text">Noticias</span></a></li>
+                        <li><a href="{{ route('services.index') }}" class="text-decoration-none footer-link"><i class="fas fa-arrow-right text-primary me-1"></i><span class="footer-text">Entes</span></a></li>
+                        <li><a href="{{ route('contact.index') }}" class="text-decoration-none footer-link"><i class="fas fa-arrow-right text-primary me-1"></i><span class="footer-text">Contacto</span></a></li>
+                        <li><a href="{{ route('about.index') }}" class="text-decoration-none footer-link"><i class="fas fa-arrow-right text-primary me-1"></i><span class="footer-text">Sobre Nosotros</span></a></li>
                     </ul>
                 </div>
                 <div class="col-md-3">

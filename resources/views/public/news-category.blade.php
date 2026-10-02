@@ -12,7 +12,7 @@
         </ol>
     </nav>
 
-    <h1 class="text-primary fw-bold mb-4 border-bottom border-danger pb-2">{{ $category->name }}</h1>
+    <h1 class="text-primary fw-bold mb-4 border-bottom border-primary pb-2">{{ $category->name }}</h1>
 
     @if($category->description)
         <p class="lead mb-4">{{ $category->description }}</p>
@@ -32,7 +32,7 @@
                 <div class="card-body d-flex flex-column">
                     <h5 class="card-title">{{ $post->title }}</h5>
                     <p class="card-text text-secondary flex-grow-1">{{ Str::limit($post->excerpt, 100) }}</p>
-                    <a href="{{ route('news.show', $post->slug) }}" class="text-danger fw-bold text-decoration-none">Leer más →</a>
+                    <a href="{{ route('news.show', $post->slug) }}" class="text-primary fw-bold text-decoration-none">Leer más →</a>
                 </div>
             </div>
         </div>

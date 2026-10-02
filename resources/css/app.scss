@@ -87,16 +87,16 @@ h1, h2, h3, h4, h5, h6 {
 .header .navbar .navbar-nav .nav-link::before {
   right: 0;
   top: 0;
-  border-top: 3px solid #C00930;
-  border-right: 3px solid #C00930;
+  border-top: 3px solid $primary;
+  border-right: 3px solid $primary;
   transform: translate(-100%, 50%);
 }
 
 .header .navbar .navbar-nav .nav-link::after {
   left: 0;
   bottom: 0;
-  border-bottom: 3px solid #C00930;
-  border-left: 3px solid #C00930;
+  border-bottom: 3px solid $primary;
+  border-left: 3px solid $primary;
   transform: translate(100%, -50%);
 }
 
@@ -107,7 +107,7 @@ h1, h2, h3, h4, h5, h6 {
 }
 
 .header .navbar .navbar-nav .nav-link:hover {
-  color: #C00930;
+  color: $primary;
 }
 
 // Ajuste específico para que el dropdown toggle no se desplace o corte
@@ -129,7 +129,7 @@ h1, h2, h3, h4, h5, h6 {
 }
 
 .footer-link:hover {
-    color: #A70336 !important;
+    color: $primary !important;
 }
 
 .footer-link:hover .footer-text {

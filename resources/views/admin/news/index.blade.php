@@ -4,7 +4,9 @@
 <div class="container">
     <div class="d-flex justify-content-between align-items-center mb-4">
         <h1>Noticias</h1>
+        @if(auth()->user()->hasPermission('news.create'))
         <a href="{{ url('/admin/noticias/crear') }}" class="btn btn-primary">Nueva Noticia</a>
+        @endif
     </div>
 
     @if(session('success'))
@@ -38,12 +40,16 @@
                 </td>
                 <td>{{ $post->created_at->format('d/m/Y') }}</td>
                 <td>
+                    @if(auth()->user()->hasPermission('news.edit'))
                     <a href="{{ url('/admin/noticias/' . $post->id . '/editar') }}" class="btn btn-sm btn-warning">Editar</a>
+                    @endif
+                    @if(auth()->user()->hasPermission('news.delete'))
                     <form action="{{ url('/admin/noticias/' . $post->id) }}" method="POST" style="display:inline">
                         @csrf
                         @method('DELETE')
                         <button type="submit" class="btn btn-sm btn-danger" onclick="return confirm('Eliminar esta noticia?')">Eliminar</button>
                     </form>
+                    @endif
                 </td>
             </tr>
             @endforeach

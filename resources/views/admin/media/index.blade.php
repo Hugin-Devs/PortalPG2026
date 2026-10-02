@@ -10,6 +10,7 @@
         <div class="alert alert-success">{{ session('success') }}</div>
     @endif
 
+    @if(auth()->user()->hasPermission('media.upload'))
     <div class="card mb-4">
         <div class="card-body">
             <form action="{{ url('/admin/medios') }}" method="POST" enctype="multipart/form-data">
@@ -26,6 +27,7 @@
             </form>
         </div>
     </div>
+    @endif
 
     <div class="row g-3">
         @foreach($media as $item)
@@ -40,11 +42,13 @@
                 @endif
                 <div class="card-body p-2">
                     <small class="text-muted d-block text-truncate" title="{{ $item->original_name }}">{{ $item->original_name }}</small>
+                    @if(auth()->user()->hasPermission('media.delete'))
                     <form action="{{ url('/admin/medios/' . $item->id) }}" method="POST">
                         @csrf
                         @method('DELETE')
                         <button type="submit" class="btn btn-sm btn-danger mt-1" onclick="return confirm('Eliminar este archivo?')">Eliminar</button>
                     </form>
+                    @endif
                 </div>
             </div>
         </div>

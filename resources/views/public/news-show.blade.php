@@ -21,7 +21,7 @@
         <div class="text-muted mb-4">
             <span>{{ $post->published_at?->format('d/m/Y') ?? $post->created_at->format('d/m/Y') }}</span>
             @if($post->category)
-                <span class="ms-3">Categoría: <a href="{{ route('news.category', $post->category->slug) }}" class="text-danger">{{ $post->category->name }}</a></span>
+                <span class="ms-3">Categoría: <a href="{{ route('news.category', $post->category->slug) }}" class="text-primary">{{ $post->category->name }}</a></span>
             @endif
             <span class="ms-3">{{ $post->views }} vistas</span>
         </div>
@@ -48,7 +48,7 @@
                     <div class="card-body">
                         <h5 class="card-title">{{ $rel->title }}</h5>
                         <p class="card-text text-secondary">{{ Str::limit($rel->excerpt, 80) }}</p>
-                        <a href="{{ route('news.show', $rel->slug) }}" class="text-danger fw-bold text-decoration-none">Leer más →</a>
+                        <a href="{{ route('news.show', $rel->slug) }}" class="text-primary fw-bold text-decoration-none">Leer más →</a>
                     </div>
                 </div>
             </div>

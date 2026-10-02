@@ -307,9 +307,9 @@ intranet-gdc/
 
 | Color | Hex | Uso |
 |---|---|---|
-| Azul oscuro (primary) | `#273376` | Títulos, header, footer, enlaces, botones |
-| Rojo/burgundy | `#A70336` | Acentos, hover, badges |
-| Amarillo/dorado | `#FFC907` | Detalles decorativos, alertas |
+| Azul oscuro (primary) | `#273376` | Acento de UI pública: títulos, separadores, hover navbar, flechas y hover del footer, badges de categoría, CTAs outline, botones |
+| Rojo/burgundy (danger) | `#A70336` | Solo estados de sistema en admin: alertas de error, botones Eliminar, badge “No” / superadmin |
+| Amarillo/dorado | `#FFC907` | Detalles decorativos, botones warning (hero, Editar en admin) |
 | Blanco | `#FFFFFF` | Fondos |
 | Gris oscuro | `#333333` | Texto del cuerpo |
 | Gris secundario | `#54595F` | Metadatos, textos secundarios |

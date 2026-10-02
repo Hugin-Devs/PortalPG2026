@@ -265,9 +265,9 @@ Extraída directamente del CSS del sitio de referencia (Elementor Kit):
 
 | Color | Hex | Uso |
 |---|---|---|
-| Azul oscuro (primary) | `#273376` | Títulos, header, footer, enlaces, botones outline |
-| Rojo/burgundy | `#A70336` | Acentos principales, hover de enlaces, header, footer, badges |
-| Amarillo/dorado (accent) | `#FFC907` | Detalles decorativos, hover states, highlights |
+| Azul oscuro (primary) | `#273376` | Acento de UI pública: títulos, header, footer, enlaces, hover navbar, separadores, badges de categoría, CTAs outline, botones |
+| Rojo/burgundy (danger) | `#A70336` | Solo estados de sistema en admin: alertas de error, botones Eliminar, badge “No” / superadmin |
+| Amarillo/dorado (accent) | `#FFC907` | Detalles decorativos, botones warning (hero, Editar en admin) |
 | Blanco | `#FFFFFF` | Fondos de cards, texto sobre fondos oscuros |
 | Gris oscuro (texto) | `#333333` | Texto del cuerpo |
 | Gris secundario | `#54595F` | Texto secundario, meta-info |

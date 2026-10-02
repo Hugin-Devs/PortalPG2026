@@ -4,7 +4,7 @@
 
 @section('content')
 <div class="container my-5">
-    <h1 class="text-primary fw-bold mb-5 border-bottom border-danger pb-2 text-center">GOBIERNO DEL DISTRITO CAPITAL</h1>
+    <h1 class="text-primary fw-bold mb-5 border-bottom border-primary pb-2 text-center">GOBIERNO DEL DISTRITO CAPITAL</h1>
 
     <div class="row g-4 mb-5">
         <div class="col-md-4">
@@ -28,7 +28,7 @@
     </div>
 
     <section class="mt-5">
-        <h3 class="text-primary fw-bold mb-4 text-center border-bottom border-danger pb-2">ESTRUCTURA ORGANIZATIVA</h3>
+        <h3 class="text-primary fw-bold mb-4 text-center border-bottom border-primary pb-2">ESTRUCTURA ORGANIZATIVA</h3>
         <div id="orgCarousel" class="carousel slide" data-bs-ride="carousel">
             <div class="carousel-inner">
                 @forelse($members->chunk(3) as $chunkIndex => $chunk)
@@ -40,7 +40,7 @@
                                 <img src="{{ $member->photo ? asset($member->photo) : asset('images/user-placeholder.png') }}" class="card-img-top" alt="{{ $member->name }}" style="height: 200px; object-fit: cover;">
                                 <div class="card-body text-center">
                                     <h5 class="card-title">{{ $member->name }}</h5>
-                                    <h6 class="text-danger">{{ $member->position }}</h6>
+                                    <h6 class="text-primary">{{ $member->position }}</h6>
                                     <p class="card-text small">{{ $member->description }}</p>
                                 </div>
                             </div>
@@ -68,7 +68,7 @@
     </section>
 
     <section class="my-5 bg-white p-5 rounded shadow-sm">
-        <h3 class="text-primary fw-bold mb-4 border-bottom border-danger pb-2">CONTACTO</h3>
+        <h3 class="text-primary fw-bold mb-4 border-bottom border-primary pb-2">CONTACTO</h3>
         @if(session('success'))
             <div class="alert alert-success">{{ session('success') }}</div>
         @endif

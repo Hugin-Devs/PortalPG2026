@@ -15,7 +15,7 @@ class CategorySeeder extends Seeder
         $categories = [
             ['name' => 'Nacionales', 'slug' => 'nacionales'],
             ['name' => 'Política', 'slug' => 'politica'],
-            ['name' => 'Economía', 'slug' => 'economia'],
+            ['name' => 'Comunal', 'slug' => 'comunal'],
             ['name' => 'Cultura', 'slug' => 'cultura'],
             ['name' => 'Deporte', 'slug' => 'deporte'],
             ['name' => 'Educación', 'slug' => 'educacion'],

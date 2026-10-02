@@ -31,16 +31,10 @@
                         <td>{{ $permission->name }}</td>
                         @foreach($roles as $role)
                             <td class="text-center">
-                                <form action="{{ url('/admin/roles') }}" method="POST">
-                                    @csrf
-                                    <input type="hidden" name="role" value="{{ $role }}">
-                                    <input type="hidden" name="permissions[]" value="{{ $permission->id }}">
-                                    <input type="checkbox" class="form-check-input permission-checkbox"
-                                           data-role="{{ $role }}"
-                                           data-permission="{{ $permission->id }}"
-                                           {{ in_array($permission->id, $rolePermissions[$role] ?? []) ? 'checked' : '' }}
-                                           onchange="this.form.submit()">
-                                </form>
+                                <input type="checkbox" class="form-check-input perm-checkbox"
+                                       data-role="{{ $role }}"
+                                       value="{{ $permission->id }}"
+                                       {{ in_array($permission->id, $rolePermissions[$role] ?? []) ? 'checked' : '' }}>
                             </td>
                         @endforeach
                     </tr>
@@ -49,8 +43,29 @@
         </table>
     </div>
 
+    @foreach($roles as $role)
+        <form id="role-form-{{ $role }}" action="{{ url('/admin/roles') }}" method="POST" style="display:none">
+            @csrf
+            <input type="hidden" name="role" value="{{ $role }}">
+            <input type="hidden" name="permissions" id="permissions-input-{{ $role }}" value="">
+        </form>
+    @endforeach
+
     <p class="text-muted small mt-3">
         <strong>Nota:</strong> Marcar/desmarcar un permiso lo asigna o remueve inmediatamente para el rol seleccionado.
     </p>
 </div>
+
+<script>
+document.querySelectorAll('.perm-checkbox').forEach(function(cb) {
+    cb.addEventListener('change', function() {
+        var role = this.dataset.role;
+        var checked = document.querySelectorAll('.perm-checkbox[data-role="' + role + '"]:checked');
+        var ids = [];
+        checked.forEach(function(c) { ids.push(c.value); });
+        document.getElementById('permissions-input-' + role).value = ids.join(',');
+        document.getElementById('role-form-' + role).submit();
+    });
+});
+</script>
 @endsection

@@ -4,7 +4,9 @@
 <div class="container">
     <div class="d-flex justify-content-between align-items-center mb-4">
         <h1>Categorías</h1>
+        @if(auth()->user()->hasPermission('categories.create'))
         <a href="{{ url('/admin/categorias/crear') }}" class="btn btn-primary">Nueva Categoría</a>
+        @endif
     </div>
 
     @if(session('success'))
@@ -40,12 +42,16 @@
                     @endif
                 </td>
                 <td>
+                    @if(auth()->user()->hasPermission('categories.edit'))
                     <a href="{{ url('/admin/categorias/' . $category->id . '/editar') }}" class="btn btn-sm btn-warning">Editar</a>
+                    @endif
+                    @if(auth()->user()->hasPermission('categories.delete'))
                     <form action="{{ url('/admin/categorias/' . $category->id) }}" method="POST" style="display:inline">
                         @csrf
                         @method('DELETE')
                         <button type="submit" class="btn btn-sm btn-danger" onclick="return confirm('Eliminar esta categoría?')">Eliminar</button>
                     </form>
+                    @endif
                 </td>
             </tr>
             @endforeach

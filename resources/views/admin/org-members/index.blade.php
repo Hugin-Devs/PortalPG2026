@@ -4,7 +4,9 @@
 <div class="container">
     <div class="d-flex justify-content-between align-items-center mb-4">
         <h1>Estructura Organizativa</h1>
+        @if(auth()->user()->hasPermission('org.create'))
         <a href="{{ url('/admin/estructura/crear') }}" class="btn btn-primary">Nuevo Miembro</a>
+        @endif
     </div>
 
     @if(session('success'))
@@ -35,12 +37,16 @@
                     @endif
                 </td>
                 <td>
+                    @if(auth()->user()->hasPermission('org.edit'))
                     <a href="{{ url('/admin/estructura/' . $member->id . '/editar') }}" class="btn btn-sm btn-warning">Editar</a>
+                    @endif
+                    @if(auth()->user()->hasPermission('org.delete'))
                     <form action="{{ url('/admin/estructura/' . $member->id) }}" method="POST" style="display:inline">
                         @csrf
                         @method('DELETE')
                         <button type="submit" class="btn btn-sm btn-danger" onclick="return confirm('Eliminar este miembro?')">Eliminar</button>
                     </form>
+                    @endif
                 </td>
             </tr>
             @endforeach

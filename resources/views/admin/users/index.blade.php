@@ -4,7 +4,9 @@
 <div class="container">
     <div class="d-flex justify-content-between align-items-center mb-4">
         <h1>Usuarios</h1>
+        @if(auth()->user()->hasPermission('users.create'))
         <a href="{{ url('/admin/usuarios/crear') }}" class="btn btn-primary">Nuevo Usuario</a>
+        @endif
     </div>
 
     @if(session('success'))
@@ -36,8 +38,10 @@
                 </td>
                 <td>{{ $user->created_at->format('d/m/Y') }}</td>
                 <td>
+                    @if(auth()->user()->hasPermission('users.edit'))
                     <a href="{{ url('/admin/usuarios/' . $user->id . '/editar') }}" class="btn btn-sm btn-warning">Editar</a>
-                    @if($user->id !== auth()->id())
+                    @endif
+                    @if($user->id !== auth()->id() && auth()->user()->hasPermission('users.delete'))
                     <form action="{{ url('/admin/usuarios/' . $user->id) }}" method="POST" style="display:inline">
                         @csrf
                         @method('DELETE')
