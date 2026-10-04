@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Admin - Intranet GDC</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     @vite(['resources/css/app.scss', 'resources/js/app.js'])
 </head>
 <body>
@@ -30,6 +31,9 @@
                 @endif
                 @if(auth()->user()->hasPermission('media.view'))
                 <li class="nav-item"><a class="nav-link text-white" href="{{ url('/admin/medios') }}">Medios</a></li>
+                @endif
+                @if(auth()->user()->hasPermission('gacetas.view'))
+                <li class="nav-item"><a class="nav-link text-white {{ request()->routeIs('admin.gacetas.*') ? 'active' : '' }}" href="{{ url('/admin/gacetas') }}">Gacetas</a></li>
                 @endif
                 @if(auth()->user()->hasPermission('about.edit'))
                 <li class="nav-item"><a class="nav-link text-white" href="{{ url('/admin/nosotros') }}">Sobre Nosotros</a></li>

@@ -17,6 +17,7 @@ Route::redirect('/servicios', '/entes');
 Route::get('/sobre-nosotros', [App\Http\Controllers\Public\AboutController::class, 'index'])->name('about.index');
 Route::get('/contacto', [ContactController::class, 'index'])->name('contact.index');
 Route::post('/contacto', [ContactController::class, 'store'])->name('contact.store');
+Route::get('/gacetas', [App\Http\Controllers\Public\GacetaController::class, 'index'])->name('gacetas.index');
 Route::get('/buscar', [App\Http\Controllers\Public\SearchController::class, 'index'])->name('search');
 Route::get('/pagina/{slug}', [PageController::class, 'show'])->name('page.show');
 
@@ -64,6 +65,13 @@ Route::prefix('admin')->group(function () {
         Route::get('/medios', [App\Http\Controllers\Admin\MediaController::class, 'index'])->name('admin.media.index')->middleware('permission:media.view');
         Route::post('/medios', [App\Http\Controllers\Admin\MediaController::class, 'store'])->name('admin.media.store')->middleware('permission:media.upload');
         Route::delete('/medios/{media}', [App\Http\Controllers\Admin\MediaController::class, 'destroy'])->name('admin.media.destroy')->middleware('permission:media.delete');
+
+        // Admin - Gacetas
+        Route::get('/gacetas', [App\Http\Controllers\Admin\GacetaController::class, 'index'])->name('admin.gacetas.index')->middleware('permission:gacetas.view');
+        Route::post('/gacetas', [App\Http\Controllers\Admin\GacetaController::class, 'store'])->name('admin.gacetas.store')->middleware('permission:gacetas.create');
+        Route::get('/gacetas/{gaceta}/editar', [App\Http\Controllers\Admin\GacetaController::class, 'edit'])->name('admin.gacetas.edit')->middleware('permission:gacetas.edit');
+        Route::put('/gacetas/{gaceta}', [App\Http\Controllers\Admin\GacetaController::class, 'update'])->name('admin.gacetas.update')->middleware('permission:gacetas.edit');
+        Route::delete('/gacetas/{gaceta}', [App\Http\Controllers\Admin\GacetaController::class, 'destroy'])->name('admin.gacetas.destroy')->middleware('permission:gacetas.delete');
 
         // Admin - Sobre Nosotros
         Route::get('/nosotros', [App\Http\Controllers\Admin\AboutController::class, 'index'])->name('admin.about.index')->middleware('permission:about.edit');

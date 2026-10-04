@@ -36,15 +36,15 @@ Portal2026/
 │   ├── Http/
 │   │   ├── Controllers/
 │   │   │   ├── Admin/            # Auth, Dashboard, News, Category, User,
-│   │   │   │                     # Partner, Media, OrgMember, About, Role, Rrss
-│   │   │   └── Public/           # Home, News, Ente, About, Contact, Search, Page
+│   │   │   │                     # Partner, Media, OrgMember, About, Role, Rrss, Gaceta
+│   │   │   └── Public/           # Home, News, Ente, About, Contact, Search, Page, Gaceta
 │   │   └── Middleware/
 │   │       ├── CheckPermission.php   # alias 'permission' (superadmin tiene bypass)
 │   │       └── CheckRole.php         # alias 'role'
-│   └── Models/                   # Category, Media, OrgMember, Page, Partner,
+│   └── Models/                   # Category, Gaceta, Media, OrgMember, Page, Partner,
 │                                 # Permission, Post, Setting, User
 ├── database/
-│   ├── migrations/               # 15 migraciones (incl. org_members, permissions,
+│   ├── migrations/               # 16 migraciones (incl. org_members, permissions,
 │   │                             #  role_permission con unique(role, permission_id))
 │   └── seeders/                  # Database, Category, Post, User, Permission,
 │                                 # ContactSetting, SocialSetting
@@ -60,10 +60,10 @@ Portal2026/
 │       │                         # admin.blade.php (sidebar + checks de permisos)
 │       ├── public/               # home, news, news-show, news-category,
 │       │                         # entes, ente-show, about, contact,
-│       │                         # search, page
+│       │                         # search, page, gacetas
 │       └── admin/                # auth, dashboard, news, categories, users,
 │                                 # partners, media, org-members, about, roles,
-│                                 # contact, rrss
+│                                 # contact, rrss, gacetas
 ├── routes/web.php
 ├── vite.config.js
 ├── composer.json
@@ -200,6 +200,19 @@ Portal2026/
 | read_at | timestamp | nullable — se marca al abrir el detalle en el admin |
 | timestamps | | |
 
+### 4.12 gacetas (Gacetas Oficiales)
+| Campo | Tipo | Notas |
+|---|---|---|
+| id | bigint PK | |
+| numero | varchar(20) | solo dígitos (1–6), p.ej. `045`; sin unicidad |
+| fecha | date | fecha de publicación; índice |
+| path | varchar | ruta en disco `public/gacetas/` |
+| original_name | varchar | nombre original del archivo |
+| mime_type | varchar | `application/pdf` o `image/*` |
+| size | bigint | nullable |
+| user_id | bigint FK nullable | usuario que la cargó (users, `nullOnDelete`) |
+| timestamps | | |
+
 ---
 
 ## 5. Rutas
@@ -218,6 +231,7 @@ Portal2026/
 | GET | `/contacto` | `Public\ContactController@index` | contact.index |
 | POST | `/contacto` | `Public\ContactController@store` | contact.store |
 | GET | `/buscar` | `Public\SearchController@index` | search |
+| GET | `/gacetas` | `Public\GacetaController@index` | gacetas.index |
 | GET | `/pagina/{slug}` | `Public\PageController@show` | page.show |
 | GET | `/servicios` | redirect 301 → `/entes` | (compatibilidad) |
 
@@ -235,6 +249,7 @@ Todas las rutas de gestión llevan además `middleware('permission:...')` (ver s
 | GET | `/admin/entes` (+ crear/editar/PUT/DELETE) | `partners.*` | `Admin\PartnerController` |
 | GET | `/admin/usuarios` (+ crear/editar/PUT/DELETE) | `users.*` | `Admin\UserController` |
 | GET/POST/DELETE | `/admin/medios` | `media.*` | `Admin\MediaController` |
+| GET/POST | `/admin/gacetas` (+ editar/PUT/DELETE) | `gacetas.*` | `Admin\GacetaController` |
 | GET/PUT | `/admin/nosotros` | `about.edit` | `Admin\AboutController` |
 | GET/PUT | `/admin/contacto` | `contact.edit` | `Admin\ContactController` |
 | GET/DELETE | `/admin/contacto/mensajes` (+ `/{contact}`) | `contact.view` / `contact.delete` | `Admin\ContactController` |
@@ -258,6 +273,7 @@ Todas las rutas de gestión llevan además `middleware('permission:...')` (ver s
 | `AboutController` | `index()` | ✅ Página institucional |
 | `ContactController` | `index, store` | ✅ Valida y **persiste** en `contacts` (bandeja en el admin) |
 | `PageController` | `show($slug)` | ✅ Páginas estáticas |
+| `GacetaController` | `index()` | ✅ Listado de gacetas ordenado por `fecha DESC, numero DESC` (paginado 12); cada card abre el archivo en pestaña nueva |
 | `SearchController` | `index()` | ✅ Búsqueda por título/contenido/extracto |
 
 ### 6.2 Admin (`app/Http/Controllers/Admin/`)
@@ -276,6 +292,7 @@ Todas las rutas de gestión llevan además `middleware('permission:...')` (ver s
 | `ContactController` | `editInfo, updateInfo, messages, showMessage, destroyMessage` | ✅ Info de contacto en `settings` (`contact_address/phone/email/hours/map_url`) + bandeja de mensajes (`contacts`); parcial público `_contact-info` con defaults |
 | `RoleController` | `index, update` | ✅ Matriz rol×permiso (un formulario JS por rol) |
 | `RrssController` | `index, update` | ✅ Redes sociales: 7 settings `social_facebook/instagram/youtube/x/threads/telegram/whatsapp` (`url` + `max:255`) |
+| `GacetaController` | `index, store, edit, update, destroy` | ✅ Gacetas Oficiales: subida a `gacetas/` en disco `public` (PDF/imagen ≤20 MB), `numero` (solo dígitos) + `fecha`; `update` puede reemplazar el archivo (borra el anterior); `destroy` borra archivo físico |
 
 ---
 
@@ -301,6 +318,7 @@ Todas las rutas de gestión llevan además `middleware('permission:...')` (ver s
 | `contact.blade.php` | Formulario de contacto + datos de contacto | ✅ |
 | `search.blade.php` | Resultados de búsqueda | ✅ |
 | `page.blade.php` | Páginas estáticas | ✅ |
+| `gacetas.blade.php` | Gacetas Oficiales: grid de cards (miniatura real si es imagen, icono PDF si no), "Gaceta Oficial N° {numero}" + fecha; click abre el archivo en pestaña nueva | ✅ |
 | `_social-links.blade.php` | Parcial de íconos de redes (1 query `whereIn`; solo renderiza URLs `http(s)://`; vacío = oculto) — solo en el footer | ✅ |
 
 ### 7.3 Admin (`resources/views/admin/`)
@@ -314,6 +332,7 @@ Todas las rutas de gestión llevan además `middleware('permission:...')` (ver s
 | Usuarios | `users/{index,create,edit}` | ✅ |
 | Entes afiliados | `partners/{index,create,edit}` | ✅ Subida de logo (`file`, preview, quitar) |
 | Medios | `media/index.blade.php` | ✅ Grid + subida |
+| Gacetas Oficiales | `gacetas/{index,edit}` | ✅ Grid + formulario "Nueva Gaceta" (archivo + N° + fecha) y edición con preview |
 | Estructura org. | `org-members/{index,create,edit}` | ✅ |
 | Sobre Nosotros | `about/index.blade.php` | ✅ Edición inline |
 | Contacto | `contact/{index,messages,message-show}` | ✅ Info (5 campos) + bandeja con estado Nuevo/Leído, detalle y borrado |
@@ -376,7 +395,7 @@ Páginas personalizadas en español para todos los tipos de error HTTP, con bot�
 
 ### Sistema de permisos (granular, por rol)
 
-- **Tabla**: `permissions` (29 permisos con `slug` tipo `news.create`) + `role_permission` (rol ↔ permiso, con índice único). Reparto: superadmin 29 / admin 17 / editor 3.
+- **Tabla**: `permissions` (33 permisos con `slug` tipo `news.create`) + `role_permission` (rol ↔ permiso, con índice único). Reparto: superadmin 33 / admin 21 / editor 3.
 - **Middleware**: alias `permission` registrado en `app/Http/Kernel.php` → `App\Http\Middleware\CheckPermission`. Aplicado ruta a ruta en `routes/web.php` (ej. `->middleware('permission:news.edit')`). El rol `superadmin` tiene bypass.
 - **Consulta en vista**: `auth()->user()->hasPermission('slug')` (`app/Models/User.php`) — las vistas del admin ocultan botones/menús sin permiso.
 - **Gestión**: módulo `/admin/roles` (`RoleController`) muestra la matriz rol×permiso; cada rol envía un solo formulario (JS junta los checkbox en un input oculto) y `update()` reemplaza las asignaciones del rol.
@@ -404,7 +423,7 @@ Ejecutan en este orden (definido en `DatabaseSeeder`):
 | `CategorySeeder` | 6 categorías: Nacionales, Política, Comunal, Cultura, Deporte, Educación |
 | `PostSeeder` | 5 posts de prueba (3 destacados, 2 normales) — requiere ≥1 categoría y ≥1 usuario |
 | `UserSeeder` | 3 usuarios: superadmin, admin, editor (password `password`) — `firstOrCreate` + restaura nombre/rol canónicos |
-| `PermissionSeeder` | 29 permisos + asignaciones a los 3 roles |
+| `PermissionSeeder` | 33 permisos + asignaciones a los 3 roles |
 | `PartnerSeeder` | **Borrador** — array vacío, pendiente de contenido (name, description, url, order; slug auto y logo vía panel) |
 | `ContactSettingSeeder` | Los 5 settings de contacto (`contact_address/phone/email/hours/map_url`) con los valores por defecto — `firstOrCreate`: **no pisa** lo editado desde `/admin/contacto` |
 | `SocialSettingSeeder` | Los 7 settings de redes (`social_facebook/instagram/youtube/x/threads/telegram/whatsapp`) vacíos — `firstOrCreate`: **no pisa** lo editado desde `/admin/rrss` |
@@ -453,7 +472,7 @@ php artisan serve
 - [x] Layouts público y admin (sidebar con checks de permisos)
 - [x] Migraciones de **todas** las tablas (incluye `org_members`, `permissions`, `role_permission`)
 - [x] Modelos Eloquent (10) con relaciones y slugs
-- [x] Seeders: categorías, posts, usuarios (3 roles), permisos (29) — todos idempotentes; `PartnerSeeder` creado como borrador (contenido pendiente)
+- [x] Seeders: categorías, posts, usuarios (3 roles), permisos (33) — todos idempotentes; `PartnerSeeder` creado como borrador (contenido pendiente)
 - [x] Autenticación admin (login independiente + logout)
 - [x] Roles y permisos granulares: middleware `permission:*`, `User::hasPermission()`, ocultación en UI, módulo `/admin/roles`
 - [x] CRUD admin: noticias, categorías, usuarios, entes afiliados, medios, estructura organizativa, "Sobre Nosotros"
@@ -471,6 +490,7 @@ php artisan serve
 - [x] Redes sociales: módulo `/admin/rrss` (sidebar "Redes Sociales", permiso `rrss.manage`, solo superadmin; renombrado desde "Configuración" con rename in-place del permiso) con 7 URLs en `settings`; parcial `_social-links` con íconos **solo en el footer** — vacío = oculto; **falta recibir las URLs reales para cargarlas**
 - [x] Botones de compartir en el detalle de noticia (Facebook, X, WhatsApp, Telegram + "Copiar enlace" con vanilla JS) — enlaces `target="_blank" rel="noopener noreferrer"`, SPECS §4.6
 - [x] Lazy loading (`loading="lazy" decoding="async"`) en las imágenes bajo el fold: grids de noticias (inicio/listado/categoría), entes, estructura organizativa y logos del footer; hero e imagen del artículo quedan eager (LCP) — SPECS §9.2
+- [x] **Gacetas Oficiales**: CRUD admin `/admin/gacetas` (grid + formulario archivo + N° + fecha; edición con preview y reemplazo de archivo; permisos `gacetas.*` para superadmin y admin) + página pública `/gacetas` con grid de miniaturas (icono PDF para PDFs), título "Gaceta Oficial N° {numero}", orden `fecha DESC`, click abre el archivo en pestaña nueva; item en el navbar antes de "Intranet"
 
 ### 🔴 Pendiente
 - [ ] **Dashboard real** — hoy es stub ("Bienvenido" + logout); SPECS §5.4 pide tarjetas de conteos (noticias, usuarios, vistas del mes), últimas noticias y gráfico opcional
@@ -484,7 +504,6 @@ php artisan serve
 - [ ] **Front de la página de detalle de entes** (`/entes/{slug}`) — skeleton funcional (logo, nombre, descripción, botón); falta definir el diseño (¿banner?, ¿más campos?)
 - [ ] **Contenido del `PartnerSeeder`** — borrador con array vacío, pendiente que se indique el listado de entes
 - [ ] Videos YouTube en home: `$videos` llega vacío del `HomeController` (fuente de datos sin definir)
-- [ ] **Gacetas Oficiales** — funcionalidad por definir (publicación/listado de gacetas oficiales); no contemplada en SPECS
 - [ ] Editor WYSIWYG para contenido (hoy es `<textarea>` con HTML a mano — SPECS §9.4 pide TinyMCE/Trix)
 - [ ] SEO: sitemap.xml, meta tags dinámicos (og:image, description)
 - [ ] Imágenes WebP con fallback
