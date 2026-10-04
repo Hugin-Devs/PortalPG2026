@@ -31,76 +31,39 @@ Inspirado en: https://mippci.gob.ve
 ## 3. Estructura del Proyecto
 
 ```
-intranet-gdc/
+Portal2026/
 ├── app/
 │   ├── Http/
 │   │   ├── Controllers/
-│   │   │   ├── Admin/
-│   │   │   │   ├── AuthController.php
-│   │   │   │   ├── DashboardController.php
-│   │   │   │   └── NewsController.php
-│   │   │   └── Public/
-│   │   │       ├── HomeController.php
-│   │   │       ├── NewsController.php
-│   │   │       ├── PageController.php
-│   │   │       ├── ServiceController.php
-│   │   │       └── ContactController.php
-│   │   └── ...
-│   └── Models/
-│       ├── Category.php
-│       ├── Media.php
-│       ├── Page.php
-│       ├── Partner.php
-│       ├── Post.php
-│       ├── Service.php
-│       ├── Setting.php
-│       └── User.php
-├── config/
+│   │   │   ├── Admin/            # Auth, Dashboard, News, Category, User,
+│   │   │   │                     # Partner, Media, OrgMember, About, Role, Service
+│   │   │   └── Public/           # Home, News, Service, About, Contact, Search, Page
+│   │   └── Middleware/
+│   │       ├── CheckPermission.php   # alias 'permission' (superadmin tiene bypass)
+│   │       └── CheckRole.php         # alias 'role'
+│   └── Models/                   # Category, Media, OrgMember, Page, Partner,
+│                                 # Permission, Post, Service, Setting, User
 ├── database/
-│   ├── migrations/
-│   │   ├── 2014_10_12_000000_create_users_table.php
-│   │   ├── 2014_10_12_100000_create_password_reset_tokens_table.php
-│   │   ├── 2019_08_19_000000_create_failed_jobs_table.php
-│   │   ├── 2019_12_14_000001_create_personal_access_tokens_table.php
-│   │   ├── 2026_07_07_171525_create_categories_table.php
-│   │   ├── 2026_07_07_171526_create_posts_table.php
-│   │   ├── 2026_07_07_171527_create_partners_table.php
-│   │   ├── 2026_07_07_171527_create_services_table.php
-│   │   ├── 2026_07_07_171528_create_media_table.php
-│   │   ├── 2026_07_07_171528_create_pages_table.php
-│   │   └── 2026_07_07_171529_create_settings_table.php
-│   └── seeders/
-│       ├── DatabaseSeeder.php
-│       ├── CategorySeeder.php
-│       └── PostSeeder.php
+│   ├── migrations/               # 14 migraciones (incl. org_members, permissions,
+│   │                             #  role_permission con unique(role, permission_id))
+│   └── seeders/                  # Database, Category, Post, User, Permission
 ├── public/
-│   ├── build/          # Assets compilados por Vite
-│   ├── images/         # Imágenes estáticas (logo, etc.)
-│   └── ...
+│   ├── build/                    # Assets compilados por Vite
+│   ├── images/                   # Logo e imágenes estáticas
+│   └── storage -> ../storage/app/public   # symlink (uploads de medios)
 ├── resources/
-│   ├── css/
-│   │   └── app.scss    # Estilos personalizados + Bootstrap
-│   ├── images/
-│   │   └── logo.png
-│   ├── js/
-│   │   └── app.js      # Bootstrap JS + inicializaciones
+│   ├── css/app.scss              # Sass personalizado + Bootstrap
+│   ├── js/app.js                 # Bootstrap JS + inicializaciones (vanilla)
 │   └── views/
-│       ├── layouts/
-│       │   ├── public.blade.php
-│       │   └── admin.blade.php
-│       ├── public/
-│       │   ├── home.blade.php
-│       │   └── news.blade.php
-│       └── admin/
-│           ├── auth/
-│           │   └── login.blade.php
-│           ├── dashboard/
-│           │   └── index.blade.php
-│           └── news/
-│               ├── index.blade.php
-│               └── create.blade.php
-├── routes/
-│   └── web.php
+│       ├── layouts/              # public.blade.php (navbar+footer),
+│       │                         # admin.blade.php (sidebar + checks de permisos)
+│       ├── public/               # home, news, news-show, news-category,
+│       │                         # services, services-show, about, contact,
+│       │                         # search, page
+│       └── admin/                # auth, dashboard, news, categories, users,
+│                                 # partners, media, org-members, about, roles,
+│                                 # services (vistas listas, rutas deshabilitadas)
+├── routes/web.php
 ├── vite.config.js
 ├── composer.json
 └── package.json
@@ -208,6 +171,33 @@ intranet-gdc/
 | value | text | nullable |
 | timestamps | | |
 
+### 4.9 org_members (Estructura Organizativa)
+| Campo | Tipo | Notas |
+|---|---|---|
+| id | bigint PK | |
+| name | varchar(255) | |
+| position | varchar(255) | cargo |
+| order | integer | default 0 |
+| is_active | boolean | default true |
+| timestamps | | |
+
+### 4.10 permissions
+| Campo | Tipo | Notas |
+|---|---|---|
+| id | bigint PK | |
+| name | varchar(255) | nombre legible |
+| slug | varchar(255) | unique — ej. `news.create` |
+| group | varchar(255) | agrupación en la UI de roles |
+| timestamps | | |
+
+### 4.11 role_permission (rol ↔ permiso)
+| Campo | Tipo | Notas |
+|---|---|---|
+| id | bigint PK | |
+| role | varchar(255) | `superadmin` / `admin` / `editor` — único junto con `permission_id` |
+| permission_id | bigint FK | permissions, cascadeOnDelete |
+| timestamps | | |
+
 ---
 
 ## 5. Rutas
@@ -222,55 +212,66 @@ intranet-gdc/
 | GET | `/categoria/{slug}` | `Public\NewsController@category` | news.category |
 | GET | `/servicios` | `Public\ServiceController@index` | services.index |
 | GET | `/servicios/{slug}` | `Public\ServiceController@show` | services.show |
+| GET | `/sobre-nosotros` | `Public\AboutController@index` | about.index |
 | GET | `/contacto` | `Public\ContactController@index` | contact.index |
 | POST | `/contacto` | `Public\ContactController@store` | contact.store |
+| GET | `/buscar` | `Public\SearchController@index` | search |
 | GET | `/pagina/{slug}` | `Public\PageController@show` | page.show |
 
-### 5.2 Admin
+### 5.2 Admin (prefijo `/admin`, dentro de middleware `auth`)
 
-| Método | URI | Middleware | Controlador |
+Todas las rutas de gestión llevan además `middleware('permission:...')` (ver sección 9).
+
+| Método | URI | Permiso | Controlador |
 |---|---|---|---|
-| GET | `/admin/login` | web | `Admin\AuthController@showLogin` |
-| POST | `/admin/login` | web | `Admin\AuthController@login` |
-| GET | `/admin` | auth | `Admin\DashboardController@index` |
-| POST | `/admin/logout` | auth | `Admin\AuthController@logout` |
-| GET | `/admin/noticias` | auth | `Admin\NewsController@index` |
-| GET | `/admin/noticias/crear` | auth | `Admin\NewsController@create` |
-| POST | `/admin/noticias` | auth | `Admin\NewsController@store` |
+| GET/POST | `/admin/login` | — | `Admin\AuthController` |
+| POST | `/admin/logout` | — | `Admin\AuthController@logout` |
+| GET | `/admin` | — | `Admin\DashboardController@index` |
+| GET | `/admin/noticias` (+ crear/editar/PUT/DELETE) | `news.*` | `Admin\NewsController` |
+| GET | `/admin/categorias` (+ crear/editar/PUT/DELETE) | `categories.*` | `Admin\CategoryController` |
+| GET | `/admin/entes` (+ crear/editar/PUT/DELETE) | `partners.*` | `Admin\PartnerController` |
+| GET | `/admin/usuarios` (+ crear/editar/PUT/DELETE) | `users.*` | `Admin\UserController` |
+| GET/POST/DELETE | `/admin/medios` | `media.*` | `Admin\MediaController` |
+| GET/PUT | `/admin/nosotros` | `about.edit` | `Admin\AboutController` |
+| GET | `/admin/estructura` (+ crear/editar/PUT/DELETE) | `org.*` | `Admin\OrgMemberController` |
+| GET/POST | `/admin/roles` | `roles.manage` | `Admin\RoleController` |
+
+> **Nota:** las rutas del CRUD de **servicios** en el admin están **comentadas deliberadamente** (`routes/web.php`), junto con su enlace en el sidebar. El módulo existe a medias (controlador y vistas) pero su alcance no está definido; se omitió a propósito.
 
 ---
 
 ## 6. Controladores
 
-### 6.1 Públicos
+### 6.1 Públicos (`app/Http/Controllers/Public/`)
 
 | Controlador | Métodos | Estado |
 |---|---|---|
-| `Public\HomeController` | `index()` | ✅ Funcional. Retorna vista con `$featuredPosts`, `$latestPosts`, `$categories` |
-| `Public\NewsController` | `index()` | ✅ Vista básica (protegida con layout) |
-| | `show($slug)` | 🔴 Pendiente |
-| | `category($slug)` | 🔴 Pendiente |
-| | `search()` | 🔴 Pendiente |
-| `Public\ServiceController` | `index()` | 🔴 Pendiente |
-| | `show($slug)` | 🔴 Pendiente |
-| `Public\ContactController` | `index()` | 🔴 Pendiente |
-| | `store()` | 🔴 Pendiente |
-| `Public\PageController` | `show($slug)` | 🔴 Pendiente |
+| `HomeController` | `index()` | ✅ Destacados + últimos + categorías + "más leído" + `$videos` (placeholder) |
+| `NewsController` | `index()` | ✅ Listado paginado |
+| | `show($slug)` | ✅ Detalle + incrementa `views` + relacionados |
+| | `category($slug)` | ✅ Filtrado por categoría |
+| `ServiceController` | `index()` / `show($slug)` | ✅ Listado y detalle |
+| `AboutController` | `index()` | ✅ Página institucional |
+| `ContactController` | `index()` | ✅ Formulario |
+| | `store()` | ⚠️ Valida y confirma con mensaje; **no persiste** (no hay tabla `contacts`) |
+| `PageController` | `show($slug)` | ✅ Páginas estáticas |
+| `SearchController` | `index()` | ✅ Búsqueda por título/contenido/extracto |
 
-### 6.2 Admin
+### 6.2 Admin (`app/Http/Controllers/Admin/`)
 
 | Controlador | Métodos | Estado |
 |---|---|---|
-| `Admin\AuthController` | `showLogin()` | ✅ Login independiente (sin sidebar) |
-| | `login()` | ✅ Autenticación con email/password |
-| | `logout()` | ✅ Cierra sesión y redirige a login |
-| `Admin\DashboardController` | `index()` | ✅ Dashboard básico con bienvenida |
-| `Admin\NewsController` | `index()` | ✅ Listado paginado de noticias |
-| | `create()` | ✅ Formulario de creación con categorías |
-| | `store()` | ✅ Guarda noticia con slug automático |
-| | `edit($id)` | 🔴 Pendiente |
-| | `update($id)` | 🔴 Pendiente |
-| | `destroy($id)` | 🔴 Pendiente |
+| `AuthController` | `showLogin` / `login` / `logout` | ✅ |
+| `DashboardController` | `index()` | ✅ |
+| `NewsController` | CRUD completo (`index, create, store, edit, update, destroy`) | ✅ Slug automático, soft deletes |
+| `CategoryController` | CRUD completo | ✅ |
+| `UserController` | CRUD completo | ✅ Asignación de roles |
+| `PartnerController` | CRUD completo | ✅ Entes afiliados (footer) |
+| `MediaController` | `index, store, destroy` | ✅ Sube a disco `public/uploads`, requiere `storage:link` |
+| `OrgMemberController` | CRUD completo | ✅ Estructura organizativa |
+| `AboutController` | `index, update` | ✅ Edición de "Sobre Nosotros" |
+| `RoleController` | `index, update` | ✅ Matriz rol×permiso (un formulario JS por rol) |
+| `ServiceController` | CRUD completo | ⏸️ **Omitido** — rutas comentadas, alcance no definido |
 
 ---
 
@@ -283,21 +284,35 @@ intranet-gdc/
 | `layouts/public.blade.php` | Layout público: header con logo + navbar + footer |
 | `layouts/admin.blade.php` | Layout admin: sidebar + topbar + main |
 
-### 7.2 Públicas
+### 7.2 Públicas (`resources/views/public/`)
 
 | Archivo | Secciones | Estado |
 |---|---|---|
-| `public/home.blade.php` | Hero slider, "Infórmate y Comunica", Grid de noticias | ✅ |
-| `public/news.blade.php` | Listado de noticias | Esqueleto (pendiente lógica) |
+| `home.blade.php` | Hero slider, "Infórmate y Comunica", grid de noticias, "Lo más leído", slider de videos | ✅ |
+| `news.blade.php` | Listado paginado de noticias | ✅ |
+| `news-show.blade.php` | Detalle de noticia + relacionados | ✅ |
+| `news-category.blade.php` | Noticias por categoría | ✅ |
+| `services.blade.php` / `services-show.blade.php` | Listado y detalle de servicios/entes | ✅ |
+| `about.blade.php` | "Sobre Nosotros" | ✅ |
+| `contact.blade.php` | Formulario de contacto + datos de contacto | ✅ |
+| `search.blade.php` | Resultados de búsqueda | ✅ |
+| `page.blade.php` | Páginas estáticas | ✅ |
 
-### 7.3 Admin
+### 7.3 Admin (`resources/views/admin/`)
 
-| Archivo | Descripción | Estado |
+| Módulo | Archivos | Estado |
 |---|---|---|
-| `admin/auth/login.blade.php` | Login independiente con logo + formulario + enlace "Volver al inicio" | ✅ |
-| `admin/dashboard/index.blade.php` | Dashboard con bienvenida al usuario | ✅ |
-| `admin/news/index.blade.php` | Tabla de noticias con acciones | ✅ |
-| `admin/news/create.blade.php` | Formulario de creación de noticia | ✅ |
+| Auth | `auth/login.blade.php` | ✅ Login independiente |
+| Dashboard | `dashboard/index.blade.php` | ✅ |
+| Noticias | `news/{index,create,edit}` | ✅ |
+| Categorías | `categories/{index,create,edit}` | ✅ |
+| Usuarios | `users/{index,create,edit}` | ✅ |
+| Entes afiliados | `partners/{index,create,edit}` | ✅ |
+| Medios | `media/index.blade.php` | ✅ Grid + subida |
+| Estructura org. | `org-members/{index,create,edit}` | ✅ |
+| Sobre Nosotros | `about/index.blade.php` | ✅ Edición inline |
+| Roles y permisos | `roles/index.blade.php` | ✅ Matriz con envío JS |
+| Servicios | `services/{index,create,edit}` | ⏸️ Vistas listas, rutas deshabilitadas |
 
 ---
 
@@ -344,27 +359,37 @@ intranet-gdc/
 4. Si es válido, redirige a `/admin`
 5. Middleware `auth` protege todas las rutas admin
 
-### Usuario por defecto (creado con tinker)
-```php
-User::create([
-    'name' => 'Admin',
-    'email' => 'admin@gdc.gob.ve',
-    'password' => bcrypt('password'),
-    'role' => 'superadmin'
-]);
-```
+### Sistema de permisos (granular, por rol)
+
+- **Tabla**: `permissions` (25 permisos con `slug` tipo `news.create`) + `role_permission` (rol ↔ permiso, con índice único).
+- **Middleware**: alias `permission` registrado en `app/Http/Kernel.php` → `App\Http\Middleware\CheckPermission`. Aplicado ruta a ruta en `routes/web.php` (ej. `->middleware('permission:news.edit')`). El rol `superadmin` tiene bypass.
+- **Consulta en vista**: `auth()->user()->hasPermission('slug')` (`app/Models/User.php`) — las vistas del admin ocultan botones/menús sin permiso.
+- **Gestión**: módulo `/admin/roles` (`RoleController`) muestra la matriz rol×permiso; cada rol envía un solo formulario (JS junta los checkbox en un input oculto) y `update()` reemplaza las asignaciones del rol.
+
+### Usuarios por defecto (seed)
+
+Creados por `UserSeeder` — password: `password`
+
+| Email | Rol |
+|---|---|
+| `admin@gdc.gob.ve` | superadmin |
+| `admin2@gdc.gob.ve` | admin |
+| `editor@gdc.gob.ve` | editor |
 
 ---
 
 ## 10. Seeders
 
-### CategorySeeder
-Crea 5 categorías:
-- Nacionales, Política, Economía, Cultura, Deporte
+Ejecutan en este orden (definido en `DatabaseSeeder`):
 
-### PostSeeder
-Crea 5 posts de prueba (3 destacados, 2 normales).
-Requiere que exista al menos 1 categoría y 1 usuario.
+| Seeder | Qué crea |
+|---|---|
+| `CategorySeeder` | 6 categorías: Nacionales, Política, Comunal, Cultura, Deporte, Educación |
+| `PostSeeder` | 5 posts de prueba (3 destacados, 2 normales) — requiere ≥1 categoría y ≥1 usuario |
+| `UserSeeder` | 3 usuarios: superadmin, admin, editor (password `password`) — `firstOrCreate` |
+| `PermissionSeeder` | 25 permisos + asignaciones a los 3 roles |
+
+**Idempotentes**: los 4 seeders se pueden re-ejecutar sin duplicar filas ni fallar (`firstOrCreate` / `updateOrCreate` / `upsert` contra el índice único `role+permission_id`).
 
 ### Ejecutar seeders
 ```powershell
@@ -404,65 +429,73 @@ php artisan serve
 ## 12. Estado del Desarrollo
 
 ### ✅ Completado
-- [x] Proyecto Laravel 10 creado
-- [x] Bootstrap 5.3 configurado con Vite + Sass
-- [x] Layouts público y admin
-- [x] Migraciones de todas las tablas
-- [x] Modelos Eloquent
-- [x] Seeders (categorías y posts)
-- [x] Sistema de autenticación admin
-- [x] Login independiente (sin sidebar)
-- [x] Dashboard básico
-- [x] CRUD de noticias (index, create, store)
-- [x] Home pública con slider + categorías + grid
-- [x] Logo institucional en navbar
-- [x] Base de datos MySQL
+- [x] Proyecto Laravel 10 + Bootstrap 5.3 (Vite + Sass), sin Livewire/Vue/React/jQuery
+- [x] Layouts público y admin (sidebar con checks de permisos)
+- [x] Migraciones de **todas** las tablas (incluye `org_members`, `permissions`, `role_permission`)
+- [x] Modelos Eloquent (10) con relaciones y slugs
+- [x] Seeders: categorías, posts, usuarios (3 roles), permisos (25) — `UserSeeder`/`PermissionSeeder` idempotentes
+- [x] Autenticación admin (login independiente + logout)
+- [x] Roles y permisos granulares: middleware `permission:*`, `User::hasPermission()`, ocultación en UI, módulo `/admin/roles`
+- [x] CRUD admin: noticias, categorías, usuarios, entes afiliados, medios, estructura organizativa, "Sobre Nosotros"
+- [x] Home pública: hero slider de destacados, categorías, grid de noticias, "Lo más leído"
+- [x] Páginas públicas: listado/detalle de noticias, por categoría, servicios, sobre nosotros, contacto, búsqueda, páginas estáticas
+- [x] Contador de visitas (`views`) en detalle de noticia
+- [x] Footer con entes afiliados desde BD
+- [x] Gestor de medios (subida a `public/uploads` vía disco `public`)
+- [x] `storage:link` configurado
+- [x] Paleta y tipografía institucional (`#273376`, Georama / Instrument Sans)
 
 ### 🔴 Pendiente
-- [ ] Editar/Eliminar noticias en admin
-- [ ] Página individual de noticia (`/noticias/{slug}`)
-- [ ] Página de categoría (`/categoria/{slug}`)
-- [ ] Página de servicios (`/servicios`)
-- [ ] Página de contacto (`/contacto`)
-- [ ] Gestión de usuarios en admin
-- [ ] Gestión de categorías en admin
-- [ ] Gestión de servicios en admin
-- [ ] Gestión de entes afiliados (partners)
-- [ ] Gestión de páginas estáticas
-- [ ] Gestor de medios
-- [ ] Página "Quiénes somos"
-- [ ] Sidebar "Lo más leído" en home
-- [ ] Slider de videos YouTube
-- [ ] Footer con logos de entes afiliados
-- [ ] Roles y permisos (middleware)
-- [ ] Búsqueda de noticias
-- [ ] Sitemap
+- [ ] **Módulo de servicios en el admin** — omitido a propósito: rutas comentadas (`routes/web.php`) y alcance por definir (¿qué son "los servicios"?)
+- [ ] Contacto: persistencia de mensajes (hoy valida y confirma; no existe tabla `contacts`)
+- [ ] Videos YouTube en home: `$videos` llega vacío del `HomeController` (fuente de datos sin definir)
+- [ ] Editor WYSIWYG para contenido (hoy es `<textarea>` con HTML a mano — SPECS §9.4 pide TinyMCE/Trix)
+- [ ] SEO: sitemap.xml, meta tags dinámicos (og:image, description)
+- [ ] Imágenes WebP con fallback + lazy loading
+- [ ] Cache de consultas pesadas
+
+### 🌟 Mejoras futuras (SPECS §10, fuera de alcance)
+Newsletter, API REST, comentarios, galería, eventos, versión en inglés.
 
 ---
 
 ## 13. Cómo Iniciar el Proyecto
 
+Requisitos: Laragon con Apache, MySQL y PHP 8.3; Node.js; Composer.
+
 ```powershell
 # 1. Navegar al proyecto
 cd C:\Users\aegir\Documents\GitHub\Portal2026
 
-# 2. Configurar PATH (si no está en variables de entorno)
-$env:Path = "C:\laragon\bin\php\php-8.3.30-Win32-vs16-x64;C:\laragon\bin\composer;C:\laragon\bin\nodejs\node-v22;C:\laragon\bin\npm;" + $env:Path
+# 2. Configurar PATH de sesión (ajustar versión de PHP si difiere)
+$env:Path = "D:\laragon\bin\php\php-8.3.30-Win32-vs16-x64;D:\laragon\bin\composer;D:\laragon\bin\mysql\mysql-8.4.3-winx64\bin;" + $env:Path
 
-# 3. Compilar assets
+# 3. Dependencias (solo la primera vez)
+composer install
+npm ci
+
+# 4. Compilar assets (cuando cambien Sass/JS)
 npm run build
 
-# 4. Migrar base de datos y poblar
+# 5. Base de datos (primera vez / tras migrate:fresh)
 php artisan migrate --force
 php artisan db:seed
+php artisan storage:link   # enlace público -> storage/app/public (subidas de medios)
 
-# 5. Iniciar servidor
-php artisan serve --port=8000
+# 6. Arrancar Apache y MySQL desde Laragon (Inicio > Arrancar todo)
+#    - Ojo: no correr XAMPP al mismo tiempo (puertos 80/3306 ocupados)
+#    - Vhost ya configurado: portal2026.test -> Portal2026/public
+#    - Entrada en C:\Windows\System32\drivers\etc\hosts: 127.0.0.1 portal2026.test
 
-# 6. Abrir navegador en:
-#    http://localhost:8000
-#    http://localhost:8000/admin/login
+# 7. Abrir navegador en:
+#    http://portal2026.test
+#    http://portal2026.test/admin/login   (admin@gdc.gob.ve / password)
+
+# Alternativa sin vhost:
+php artisan serve --port=8000   #  →  http://localhost:8000
 ```
+
+Tras un reinicio del equipo, solo hace falta: arrancar Laragon (*Inicio > Arrancar todo*) — los vhost, hosts y `storage:link` ya quedan configurados.
 
 ---
 
@@ -479,9 +512,10 @@ php artisan optimize:clear
 # Reconstruir assets
 npm run build
 
-# Crear usuario admin (ejecutar en tinker)
+# Usuarios por defecto: ya los crea UserSeeder (password: "password")
+# Si necesitas uno adicional con tinker:
 php artisan tinker
-\User::create(['name'=>'Admin','email'=>'admin@gdc.gob.ve','password'=>bcrypt('password'),'role'=>'superadmin']);
+\App\Models\User::create(['name'=>'Nuevo','email'=>'nuevo@gdc.gob.ve','password'=>bcrypt('password'),'role'=>'admin']);
 
 # Refrescar BD
 php artisan migrate:fresh --seed
