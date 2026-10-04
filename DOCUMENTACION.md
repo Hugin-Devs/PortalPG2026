@@ -292,7 +292,7 @@ Todas las rutas de gestión llevan además `middleware('permission:...')` (ver s
 
 | Archivo | Secciones | Estado |
 |---|---|---|
-| `home.blade.php` | Hero slider, "Infórmate y Comunica", grid de noticias, "Lo más leído", slider de videos | ✅ |
+| `home.blade.php` | Hero slider de destacados (imagen de fondo con velo + fallback azul si no hay imagen), categorías, grid de noticias, "Lo más leído", slider de videos | ✅ |
 | `news.blade.php` | Listado paginado de noticias | ✅ |
 | `news-show.blade.php` | Detalle de noticia + relacionados | ✅ |
 | `news-category.blade.php` | Noticias por categoría | ✅ |
