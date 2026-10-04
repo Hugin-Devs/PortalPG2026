@@ -15,7 +15,7 @@
                     <img src="{{ asset('images/logo.png') }}" alt="Logo GDC" height="60" class="me-3">
                     <span class="text-primary fw-bold fs-5 border-start border-primary ps-3">Gobierno de Distrito Capital</span>
                 </a>
-                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-label="Alternar navegación" aria-controls="navbarNav">
                     <span class="navbar-toggler-icon"></span>
                 </button>
                 <div class="collapse navbar-collapse flex-column" id="navbarNav">
@@ -24,19 +24,19 @@
                         <button class="btn btn-outline-primary btn-sm" type="submit">Buscar</button>
                     </form>
                     <ul class="navbar-nav ms-auto w-100 justify-content-end">
-                        <li class="nav-item"><a class="nav-link" href="{{ url('/') }}">Inicio</a></li>
-                        <li class="nav-item"><a class="nav-link" href="{{ route('news.index') }}">Noticias</a></li>
-                        <li class="nav-item"><a class="nav-link" href="{{ route('entes.index') }}">Entes</a></li>
-                        <li class="nav-item"><a class="nav-link" href="{{ route('about.index') }}">Sobre Nosotros</a></li>
+                        <li class="nav-item"><a class="nav-link {{ request()->routeIs('home') ? 'active' : '' }}" href="{{ url('/') }}">Inicio</a></li>
+                        <li class="nav-item"><a class="nav-link {{ request()->routeIs('news.*') ? 'active' : '' }}" href="{{ route('news.index') }}">Noticias</a></li>
+                        <li class="nav-item"><a class="nav-link {{ request()->routeIs('entes.*') ? 'active' : '' }}" href="{{ route('entes.index') }}">Entes</a></li>
+                        <li class="nav-item"><a class="nav-link {{ request()->routeIs('about.index') ? 'active' : '' }}" href="{{ route('about.index') }}">Sobre Nosotros</a></li>
                         <!-- <li class="nav-item"><a class="nav-link" href="{{ route('contact.index') }}">Contacto</a></li> -->
                         <!--
                         <li class="nav-item"><a class="nav-link" href="{{ url('/admin/login') }}">Gestión</a></li>
                         -->
                         <li class="nav-item dropdown">
-                            <a class="nav-link " href="#" id="serviciosDropdown" role="button" data-bs-toggle="dropdown">Intranet GDC</a>
+                            <a class="nav-link dropdown-toggle" href="#" id="serviciosDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">Intranet GDC</a>
                             <ul class="dropdown-menu dropdown-menu-end">
-                                <li><a class="dropdown-item" target="_blank" href="https://www.gdc.gob.ve/extranet/">Funcionarios Activos</a></li>
-                                <li><a class="dropdown-item" href="{{ url('#') }}">Jubilados</a></li>
+                                <li><a class="dropdown-item" target="_blank" rel="noopener" href="https://www.gdc.gob.ve/extranet/">Funcionarios Activos</a></li>
+                                <li><a class="dropdown-item" href="#">Jubilados</a></li>
                                 <li><a class="dropdown-item" href="{{ url('/admin/login') }}">Gestión Aplicaciones</a></li>
                             </ul>
                         </li>

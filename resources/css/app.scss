@@ -115,6 +115,12 @@ h1, h2, h3, h4, h5, h6 {
   padding-right: 1.5em !important; 
 }
 
+// Página actual en el menú (la regla custom de arriba tiene más especificidad que la de Bootstrap)
+.header .navbar .navbar-nav .nav-link.active {
+  color: $primary;
+  font-weight: 600;
+}
+
 
 // Estilos del Footer
 .footer-link {
