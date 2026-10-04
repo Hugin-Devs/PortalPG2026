@@ -11,6 +11,12 @@
             @error('name') <div class="text-danger">{{ $message }}</div> @enderror
         </div>
         <div class="mb-3">
+            <label>Descripción</label>
+            <textarea name="description" class="form-control" rows="3">{{ old('description') }}</textarea>
+            <div class="form-text">Texto corto que se muestra en el listado y en la página del ente</div>
+            @error('description') <div class="text-danger">{{ $message }}</div> @enderror
+        </div>
+        <div class="mb-3">
             <label>Logo</label>
             <input type="file" name="logo" class="form-control" accept="image/png,image/jpeg,image/gif,image/svg+xml,image/webp">
             <div class="form-text">PNG, JPG, GIF, SVG o WebP · máx. 2 MB</div>

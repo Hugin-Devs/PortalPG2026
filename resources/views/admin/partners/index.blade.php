@@ -17,6 +17,7 @@
         <thead>
             <tr>
                 <th>Nombre</th>
+                <th>Descripción</th>
                 <th>Logo</th>
                 <th>URL</th>
                 <th>Orden</th>
@@ -28,6 +29,7 @@
             @foreach($partners as $partner)
             <tr>
                 <td>{{ $partner->name }}</td>
+                <td>{{ $partner->description ? \Illuminate\Support\Str::limit($partner->description, 60) : '-' }}</td>
                 <td>
                     @if($partner->logo)
                         <img src="{{ asset('storage/' . $partner->logo) }}" alt="{{ $partner->name }}" height="30">

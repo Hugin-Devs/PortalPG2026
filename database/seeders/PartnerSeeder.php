@@ -11,16 +11,20 @@ class PartnerSeeder extends Seeder
      * Borrador — pendiente de contenido.
      * Los logos NO se siembran aquí: se cargan desde /admin/entes (upload).
      * Estructura de cada entrada:
-     *   ['name' => '...', 'logo' => null, 'url' => 'https://...', 'order' => 1, 'is_active' => true]
+     *   ['name' => '...', 'description' => '...', 'logo' => null, 'url' => 'https://...', 'order' => 1, 'is_active' => true]
+     * El slug se genera automáticamente con Str::slug(name).
      */
     public function run(): void
     {
         $partners = [
-            // ['name' => 'Institución Ejemplo', 'logo' => null, 'url' => 'https://ejemplo.gob.ve', 'order' => 1, 'is_active' => true],
+            // ['name' => 'Institución Ejemplo', 'description' => 'Descripción corta del ente.', 'logo' => null, 'url' => 'https://ejemplo.gob.ve', 'order' => 1, 'is_active' => true],
         ];
 
         foreach ($partners as $attrs) {
-            Partner::updateOrCreate(['name' => $attrs['name']], $attrs);
+            Partner::updateOrCreate(
+                ['name' => $attrs['name']],
+                $attrs + ['slug' => \Illuminate\Support\Str::slug($attrs['name'])]
+            );
         }
     }
 }

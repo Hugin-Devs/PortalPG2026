@@ -26,7 +26,7 @@
                     <ul class="navbar-nav ms-auto w-100 justify-content-end">
                         <li class="nav-item"><a class="nav-link" href="{{ url('/') }}">Inicio</a></li>
                         <li class="nav-item"><a class="nav-link" href="{{ route('news.index') }}">Noticias</a></li>
-                        <li class="nav-item"><a class="nav-link" href="{{ route('services.index') }}">Entes</a></li>
+                        <li class="nav-item"><a class="nav-link" href="{{ route('entes.index') }}">Entes</a></li>
                         <li class="nav-item"><a class="nav-link" href="{{ route('about.index') }}">Sobre Nosotros</a></li>
                         <!-- <li class="nav-item"><a class="nav-link" href="{{ route('contact.index') }}">Contacto</a></li> -->
                         <!--
@@ -62,7 +62,7 @@
                     <ul class="list-unstyled small">
                         <li><a href="{{ url('/') }}" class="text-decoration-none footer-link"><i class="fas fa-arrow-right text-primary me-1"></i><span class="footer-text">Inicio</span></a></li>
                         <li><a href="{{ route('news.index') }}" class="text-decoration-none footer-link"><i class="fas fa-arrow-right text-primary me-1"></i><span class="footer-text">Noticias</span></a></li>
-                        <li><a href="{{ route('services.index') }}" class="text-decoration-none footer-link"><i class="fas fa-arrow-right text-primary me-1"></i><span class="footer-text">Entes</span></a></li>
+                        <li><a href="{{ route('entes.index') }}" class="text-decoration-none footer-link"><i class="fas fa-arrow-right text-primary me-1"></i><span class="footer-text">Entes</span></a></li>
                         <li><a href="{{ route('contact.index') }}" class="text-decoration-none footer-link"><i class="fas fa-arrow-right text-primary me-1"></i><span class="footer-text">Contacto</span></a></li>
                         <li><a href="{{ route('about.index') }}" class="text-decoration-none footer-link"><i class="fas fa-arrow-right text-primary me-1"></i><span class="footer-text">Sobre Nosotros</span></a></li>
                     </ul>

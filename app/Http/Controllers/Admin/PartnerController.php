@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\Partner;
 use Illuminate\Http\Request;
+use Illuminate\Support\Str;
 
 class PartnerController extends Controller
 {
@@ -23,10 +24,13 @@ class PartnerController extends Controller
     {
         $data = $request->validate([
             'name' => 'required|max:255',
+            'description' => 'nullable|string',
             'logo' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg,webp|max:2048',
             'url' => 'nullable|url',
             'order' => 'nullable|integer|min:0',
         ]);
+
+        $data['slug'] = $this->uniqueSlug($request->name);
 
         if ($request->hasFile('logo')) {
             $data['logo'] = $this->storeLogo($request->file('logo'));
@@ -47,6 +51,7 @@ class PartnerController extends Controller
     {
         $data = $request->validate([
             'name' => 'required|max:255',
+            'description' => 'nullable|string',
             'logo' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg,webp|max:2048',
             'url' => 'nullable|url',
             'order' => 'nullable|integer|min:0',
@@ -56,6 +61,10 @@ class PartnerController extends Controller
 
         $data['is_active'] = $request->has('is_active');
         unset($data['remove_logo']);
+
+        if ($partner->slug !== Str::slug($request->name)) {
+            $data['slug'] = $this->uniqueSlug($request->name, $partner->id);
+        }
 
         if ($request->hasFile('logo')) {
             $old = $partner->logo;
@@ -89,5 +98,22 @@ class PartnerController extends Controller
     {
         $filename = time() . '_' . uniqid() . '.' . $file->getClientOriginalExtension();
         return $file->storeAs('partners', $filename, 'public');
+    }
+
+    private function uniqueSlug(string $name, ?int $ignoreId = null): string
+    {
+        $base = Str::slug($name) ?: 'ente';
+        $slug = $base;
+        $i = 2;
+
+        while (
+            Partner::where('slug', $slug)
+                ->when($ignoreId, fn ($q) => $q->where('id', '!=', $ignoreId))
+                ->exists()
+        ) {
+            $slug = $base . '-' . $i++;
+        }
+
+        return $slug;
     }
 }

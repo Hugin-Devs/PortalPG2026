@@ -37,7 +37,7 @@ Portal2026/
 │   │   ├── Controllers/
 │   │   │   ├── Admin/            # Auth, Dashboard, News, Category, User,
 │   │   │   │                     # Partner, Media, OrgMember, About, Role, Service
-│   │   │   └── Public/           # Home, News, Service, About, Contact, Search, Page
+│   │   │   └── Public/           # Home, News, Ente, About, Contact, Search, Page
 │   │   └── Middleware/
 │   │       ├── CheckPermission.php   # alias 'permission' (superadmin tiene bypass)
 │   │       └── CheckRole.php         # alias 'role'
@@ -58,7 +58,7 @@ Portal2026/
 │       ├── layouts/              # public.blade.php (navbar+footer),
 │       │                         # admin.blade.php (sidebar + checks de permisos)
 │       ├── public/               # home, news, news-show, news-category,
-│       │                         # services, services-show, about, contact,
+│       │                         # entes, ente-show, about, contact,
 │       │                         # search, page
 │       └── admin/                # auth, dashboard, news, categories, users,
 │                                 # partners, media, org-members, about, roles,
@@ -116,7 +116,8 @@ Portal2026/
 | timestamps | | |
 | deleted_at | timestamp | softDeletes |
 
-### 4.4 services
+### 4.4 services — **tabla dormida, no usada por el front**
+La página pública de Entes usa `partners` (ver 4.5). El CRUD admin de servicios está omitido y esta tabla queda reservada para un hipotético módulo de servicios institucionales (PNI, Visa, SIVERIF… según SPECS).
 | Campo | Tipo | Notas |
 |---|---|---|
 | id | bigint PK | |
@@ -135,6 +136,8 @@ Portal2026/
 |---|---|---|
 | id | bigint PK | |
 | name | varchar(255) | |
+| slug | varchar(255) | unique, nullable — auto `Str::slug(name)` (sufijo si colisiona); usado en `/entes/{slug}` |
+| description | text | nullable — tarjeta del listado y página de detalle |
 | logo | varchar(255) | nullable — ruta bajo disco público (ej. `partners/1791…png`); se sube desde `/admin/entes`, nunca se escribe a mano |
 | url | varchar(255) | nullable |
 | order | integer | default 0 |
@@ -210,13 +213,14 @@ Portal2026/
 | GET | `/noticias` | `Public\NewsController@index` | news.index |
 | GET | `/noticias/{slug}` | `Public\NewsController@show` | news.show |
 | GET | `/categoria/{slug}` | `Public\NewsController@category` | news.category |
-| GET | `/servicios` | `Public\ServiceController@index` | services.index |
-| GET | `/servicios/{slug}` | `Public\ServiceController@show` | services.show |
+| GET | `/entes` | `Public\EnteController@index` | entes.index |
+| GET | `/entes/{slug}` | `Public\EnteController@show` | entes.show |
 | GET | `/sobre-nosotros` | `Public\AboutController@index` | about.index |
 | GET | `/contacto` | `Public\ContactController@index` | contact.index |
 | POST | `/contacto` | `Public\ContactController@store` | contact.store |
 | GET | `/buscar` | `Public\SearchController@index` | search |
 | GET | `/pagina/{slug}` | `Public\PageController@show` | page.show |
+| GET | `/servicios` | redirect 301 → `/entes` | (compatibilidad) |
 
 ### 5.2 Admin (prefijo `/admin`, dentro de middleware `auth`)
 
@@ -250,7 +254,7 @@ Todas las rutas de gestión llevan además `middleware('permission:...')` (ver s
 | `NewsController` | `index()` | ✅ Listado paginado |
 | | `show($slug)` | ✅ Detalle + incrementa `views` + relacionados |
 | | `category($slug)` | ✅ Filtrado por categoría |
-| `ServiceController` | `index()` / `show($slug)` | ✅ Listado y detalle |
+| `EnteController` | `index()` / `show($slug)` | ✅ Listado y detalle de entes (sobre `partners`, activos y por `order`) |
 | `AboutController` | `index()` | ✅ Página institucional |
 | `ContactController` | `index()` | ✅ Formulario |
 | | `store()` | ⚠️ Valida y confirma con mensaje; **no persiste** (no hay tabla `contacts`) |
@@ -292,7 +296,7 @@ Todas las rutas de gestión llevan además `middleware('permission:...')` (ver s
 | `news.blade.php` | Listado paginado de noticias | ✅ |
 | `news-show.blade.php` | Detalle de noticia + relacionados | ✅ |
 | `news-category.blade.php` | Noticias por categoría | ✅ |
-| `services.blade.php` / `services-show.blade.php` | Listado y detalle de servicios/entes | ✅ |
+| `entes.blade.php` / `ente-show.blade.php` | Listado (logo, nombre, descripción, link externo o a detalle) y detalle | ✅ (front de detalle pendiente de diseño) |
 | `about.blade.php` | "Sobre Nosotros" | ✅ |
 | `contact.blade.php` | Formulario de contacto + datos de contacto | ✅ |
 | `search.blade.php` | Resultados de búsqueda | ✅ |
@@ -390,7 +394,7 @@ Ejecutan en este orden (definido en `DatabaseSeeder`):
 | `PostSeeder` | 5 posts de prueba (3 destacados, 2 normales) — requiere ≥1 categoría y ≥1 usuario |
 | `UserSeeder` | 3 usuarios: superadmin, admin, editor (password `password`) — `firstOrCreate` + restaura nombre/rol canónicos |
 | `PermissionSeeder` | 25 permisos + asignaciones a los 3 roles |
-| `PartnerSeeder` | **Borrador** — array vacío, pendiente de contenido (los logos se suben desde `/admin/entes`) |
+| `PartnerSeeder` | **Borrador** — array vacío, pendiente de contenido (name, description, url, order; slug auto y logo vía panel) |
 
 **Idempotentes**: los 5 seeders se pueden re-ejecutar sin duplicar filas ni fallar (`firstOrCreate` / `updateOrCreate` / `upsert` contra el índice único `role+permission_id`).
 
@@ -441,7 +445,7 @@ php artisan serve
 - [x] Roles y permisos granulares: middleware `permission:*`, `User::hasPermission()`, ocultación en UI, módulo `/admin/roles`
 - [x] CRUD admin: noticias, categorías, usuarios, entes afiliados, medios, estructura organizativa, "Sobre Nosotros"
 - [x] Home pública: hero slider de destacados, categorías, grid de noticias, "Lo más leído"
-- [x] Páginas públicas: listado/detalle de noticias, por categoría, servicios, sobre nosotros, contacto, búsqueda, páginas estáticas
+- [x] Páginas públicas: listado/detalle de noticias, por categoría, entes (sobre `partners`), sobre nosotros, contacto, búsqueda, páginas estáticas
 - [x] Contador de visitas (`views`) en detalle de noticia
 - [x] Footer con entes afiliados desde BD
 - [x] Gestor de medios (subida a `public/uploads` vía disco `public`)
@@ -449,7 +453,10 @@ php artisan serve
 - [x] Paleta y tipografía institucional (`#273376`, Georama / Instrument Sans)
 
 ### 🔴 Pendiente
-- [ ] **Módulo de servicios en el admin** — omitido a propósito: rutas comentadas (`routes/web.php`) y alcance por definir (¿qué son "los servicios"?)
+- [ ] **Front de la página de detalle de entes** (`/entes/{slug}`) — skeleton funcional (logo, nombre, descripción, botón); falta definir el diseño (¿banner?, ¿más campos?)
+- [ ] **Redes sociales en header y footer** (SPECS §4.1: Facebook, Instagram, YouTube, X, Threads, Telegram, WhatsApp) — pendiente de URLs reales
+- [ ] **Módulo de servicios en el admin** — omitido a propósito: rutas comentadas (`routes/web.php`); la tabla `services` está dormida (la página pública de Entes usa `partners`)
+- [ ] **Contenido del `PartnerSeeder`** — borrador con array vacío, pendiente que se indique el listado de entes
 - [ ] Contacto: persistencia de mensajes (hoy valida y confirma; no existe tabla `contacts`)
 - [ ] Videos YouTube en home: `$videos` llega vacío del `HomeController` (fuente de datos sin definir)
 - [ ] Editor WYSIWYG para contenido (hoy es `<textarea>` con HTML a mano — SPECS §9.4 pide TinyMCE/Trix)

@@ -12,6 +12,12 @@
             @error('name') <div class="text-danger">{{ $message }}</div> @enderror
         </div>
         <div class="mb-3">
+            <label>Descripción</label>
+            <textarea name="description" class="form-control" rows="3">{{ old('description', $partner->description) }}</textarea>
+            <div class="form-text">Texto corto que se muestra en el listado y en la página del ente</div>
+            @error('description') <div class="text-danger">{{ $message }}</div> @enderror
+        </div>
+        <div class="mb-3">
             <label>Logo</label>
             @if($partner->logo)
                 <div class="mb-2">
