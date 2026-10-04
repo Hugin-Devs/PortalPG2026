@@ -37,7 +37,7 @@
                         @foreach($chunk as $member)
                         <div class="col-md-4 mb-3">
                             <div class="card shadow-sm h-100">
-                                <img src="{{ $member->photo ? asset($member->photo) : asset('images/user-placeholder.png') }}" class="card-img-top" alt="{{ $member->name }}" style="height: 200px; object-fit: cover;">
+                                <img src="{{ $member->photo ? asset($member->photo) : asset('images/user-placeholder.png') }}" class="card-img-top" alt="{{ $member->name }}" loading="lazy" decoding="async" style="height: 200px; object-fit: cover;">
                                 <div class="card-body text-center">
                                     <h5 class="card-title">{{ $member->name }}</h5>
                                     <h6 class="text-primary">{{ $member->position }}</h6>

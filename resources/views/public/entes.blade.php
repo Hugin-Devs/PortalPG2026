@@ -15,7 +15,7 @@
             <div class="card h-100 border-0 shadow-sm text-center p-3">
                 @if($ente->logo)
                     <div class="mb-3">
-                        <img src="{{ asset('storage/' . $ente->logo) }}" alt="{{ $ente->name }}" height="70" class="mx-auto">
+                        <img src="{{ asset('storage/' . $ente->logo) }}" alt="{{ $ente->name }}" height="70" loading="lazy" decoding="async" class="mx-auto">
                     </div>
                 @endif
                 <h5 class="card-title text-primary">{{ $ente->name }}</h5>

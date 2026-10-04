@@ -312,14 +312,14 @@ Todas las rutas de gestión llevan además `middleware('permission:...')` (ver s
 |---|---|---|
 | `home.blade.php` | Hero slider de destacados (imagen de fondo con velo + fallback azul si no hay imagen), categorías, grid de noticias, "Lo más leído", slider de videos | ✅ |
 | `news.blade.php` | Listado paginado de noticias | ✅ |
-| `news-show.blade.php` | Detalle de noticia + relacionados | ✅ |
+| `news-show.blade.php` | Detalle de noticia + botones de compartir (FB, X, WhatsApp, Telegram, copiar enlace) + relacionados | ✅ |
 | `news-category.blade.php` | Noticias por categoría | ✅ |
 | `entes.blade.php` / `ente-show.blade.php` | Listado (logo, nombre, descripción, link externo o a detalle) y detalle | ✅ (front de detalle pendiente de diseño) |
 | `about.blade.php` | "Sobre Nosotros" | ✅ |
 | `contact.blade.php` | Formulario de contacto + datos de contacto | ✅ |
 | `search.blade.php` | Resultados de búsqueda | ✅ |
 | `page.blade.php` | Páginas estáticas | ✅ |
-| `_social-links.blade.php` | Parcial de íconos de redes (1 query `whereIn`; solo renderiza URLs `http(s)://`; vacío = oculto) — en header y footer | ✅ |
+| `_social-links.blade.php` | Parcial de íconos de redes (1 query `whereIn`; solo renderiza URLs `http(s)://`; vacío = oculto) — solo en el footer | ✅ |
 
 ### 7.3 Admin (`resources/views/admin/`)
 
@@ -487,16 +487,19 @@ php artisan serve
 - [x] Módulo de contacto: edición de la información visible (dirección, teléfono, email, horario, mapa) desde `/admin/contacto` vía `settings`, con parcial pública `_contact-info` en home + /contacto + sobre-nosotros
 - [x] Persistencia de mensajes del formulario: tabla `contacts`, guardado en `Public\ContactController@store` y bandeja en `/admin/contacto/mensajes` (paginada, badge Nuevo/Leído, detalle que marca `read_at`, borrado)
 - [x] Vistas de error en español (400/401/403/404/405/408/410/419/422/429/500/503) con botones Volver/Inicio (y Recargar en 419, Reintentar en 503); 5xx standalone sin dependencias
-- [x] Redes sociales: módulo `/admin/rrss` (sidebar "Redes Sociales", permiso `rrss.manage`, solo superadmin; renombrado desde "Configuración" con rename in-place del permiso) con 7 URLs en `settings`; parcial `_social-links` con íconos en header y footer — vacío = oculto; **falta recibir las URLs reales para cargarlas**
+- [x] Redes sociales: módulo `/admin/rrss` (sidebar "Redes Sociales", permiso `rrss.manage`, solo superadmin; renombrado desde "Configuración" con rename in-place del permiso) con 7 URLs en `settings`; parcial `_social-links` con íconos **solo en el footer** — vacío = oculto; **falta recibir las URLs reales para cargarlas**
+- [x] Botones de compartir en el detalle de noticia (Facebook, X, WhatsApp, Telegram + "Copiar enlace" con vanilla JS) — enlaces `target="_blank" rel="noopener noreferrer"`, SPECS §4.6
+- [x] Lazy loading (`loading="lazy" decoding="async"`) en las imágenes bajo el fold: grids de noticias (inicio/listado/categoría), entes, estructura organizativa y logos del footer; hero e imagen del artículo quedan eager (LCP) — SPECS §9.2
 
 ### 🔴 Pendiente
 - [ ] **Front de la página de detalle de entes** (`/entes/{slug}`) — skeleton funcional (logo, nombre, descripción, botón); falta definir el diseño (¿banner?, ¿más campos?)
 - [ ] **Módulo de servicios en el admin** — omitido a propósito: rutas comentadas (`routes/web.php`); la tabla `services` está dormida (la página pública de Entes usa `partners`)
 - [ ] **Contenido del `PartnerSeeder`** — borrador con array vacío, pendiente que se indique el listado de entes
 - [ ] Videos YouTube en home: `$videos` llega vacío del `HomeController` (fuente de datos sin definir)
+- [ ] **Gacetas Oficiales** — funcionalidad por definir (publicación/listado de gacetas oficiales); no contemplada en SPECS
 - [ ] Editor WYSIWYG para contenido (hoy es `<textarea>` con HTML a mano — SPECS §9.4 pide TinyMCE/Trix)
 - [ ] SEO: sitemap.xml, meta tags dinámicos (og:image, description)
-- [ ] Imágenes WebP con fallback + lazy loading
+- [ ] Imágenes WebP con fallback
 - [ ] Cache de consultas pesadas
 
 ### 🌟 Mejoras futuras (SPECS §10, fuera de alcance)

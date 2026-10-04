@@ -26,6 +26,30 @@
             <span class="ms-3">{{ $post->views }} vistas</span>
         </div>
 
+        @php
+            $shareUrl = route('news.show', $post->slug);
+            $shareTitle = rawurlencode($post->title);
+            $shareText = rawurlencode($post->title . ' ' . $shareUrl);
+        @endphp
+        <div class="d-flex flex-wrap align-items-center gap-2 mb-4" data-testid="share-bar">
+            <span class="text-muted small fw-bold me-1">COMPARTIR:</span>
+            <a class="btn btn-outline-primary btn-sm" href="https://www.facebook.com/sharer/sharer.php?u={{ rawurlencode($shareUrl) }}" target="_blank" rel="noopener noreferrer" aria-label="Compartir en Facebook"><i class="fa-brands fa-facebook-f"></i></a>
+            <a class="btn btn-outline-primary btn-sm" href="https://twitter.com/intent/tweet?url={{ rawurlencode($shareUrl) }}&text={{ $shareTitle }}" target="_blank" rel="noopener noreferrer" aria-label="Compartir en X"><i class="fa-brands fa-x-twitter"></i></a>
+            <a class="btn btn-outline-primary btn-sm" href="https://wa.me/?text={{ $shareText }}" target="_blank" rel="noopener noreferrer" aria-label="Compartir en WhatsApp"><i class="fa-brands fa-whatsapp"></i></a>
+            <a class="btn btn-outline-primary btn-sm" href="https://t.me/share/url?url={{ rawurlencode($shareUrl) }}&text={{ $shareTitle }}" target="_blank" rel="noopener noreferrer" aria-label="Compartir en Telegram"><i class="fa-brands fa-telegram"></i></a>
+            <button type="button" class="btn btn-outline-secondary btn-sm" id="copyLinkBtn" aria-label="Copiar enlace"><i class="fa-solid fa-link me-1"></i><span id="copyLinkText">Copiar enlace</span></button>
+        </div>
+        <script>
+            document.getElementById('copyLinkBtn').addEventListener('click', function () {
+                navigator.clipboard.writeText({!! json_encode($shareUrl) !!}).then(function () {
+                    var label = document.getElementById('copyLinkText');
+                    var previous = label.textContent;
+                    label.textContent = '¡Copiado!';
+                    setTimeout(function () { label.textContent = previous; }, 2000);
+                });
+            });
+        </script>
+
         @if($post->featured_image)
             <img src="{{ asset('storage/' . $post->featured_image) }}" alt="{{ $post->title }}" class="img-fluid rounded mb-4 w-100" style="max-height: 400px; object-fit: cover;">
         @endif

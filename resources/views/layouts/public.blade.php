@@ -40,9 +40,6 @@
                                 <li><a class="dropdown-item" href="{{ url('/admin/login') }}">Gestión Aplicaciones</a></li>
                             </ul>
                         </li>
-                        <li class="nav-item d-flex align-items-center ms-lg-3">
-                            @include('public._social-links', ['linkClass' => 'text-primary', 'ulClass' => 'gap-2'])
-                        </li>
                     </ul>
                 </div>
             </div>
@@ -81,7 +78,7 @@
                                 <a href="{{ $partner->url }}" target="_blank" title="{{ $partner->name }}">
                             @endif
                             @if($partner->logo)
-                                <img src="{{ asset('storage/' . $partner->logo) }}" alt="{{ $partner->name }}" height="30" class="bg-white rounded p-1">
+                                <img src="{{ asset('storage/' . $partner->logo) }}" alt="{{ $partner->name }}" height="30" loading="lazy" decoding="async" class="bg-white rounded p-1">
                             @else
                                 <span class="small" style="color: #212529;">{{ $partner->name }}</span>
                             @endif
