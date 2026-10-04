@@ -254,7 +254,7 @@ Todas las rutas de gestión llevan además `middleware('permission:...')` (ver s
 | GET/DELETE | `/admin/contacto/mensajes` (+ `/{contact}`) | `contact.view` / `contact.delete` | `Admin\ContactController` |
 | GET | `/admin/estructura` (+ crear/editar/PUT/DELETE) | `org.*` | `Admin\OrgMemberController` |
 | GET/POST | `/admin/roles` | `roles.manage` | `Admin\RoleController` |
-| GET/PUT | `/admin/configuracion` | `settings.manage` | `Admin\SettingController` |
+| GET/PUT | `/admin/rrss` | `rrss.manage` | `Admin\RrssController` |
 
 > **Nota:** las rutas del CRUD de **servicios** en el admin están **comentadas deliberadamente** (`routes/web.php`), junto con su enlace en el sidebar. El módulo existe a medias (controlador y vistas) pero su alcance no está definido; se omitió a propósito.
 
@@ -292,7 +292,7 @@ Todas las rutas de gestión llevan además `middleware('permission:...')` (ver s
 | `AboutController` | `index, update` | ✅ Edición de "Sobre Nosotros" |
 | `ContactController` | `editInfo, updateInfo, messages, showMessage, destroyMessage` | ✅ Info de contacto en `settings` (`contact_address/phone/email/hours/map_url`) + bandeja de mensajes (`contacts`); parcial público `_contact-info` con defaults |
 | `RoleController` | `index, update` | ✅ Matriz rol×permiso (un formulario JS por rol) |
-| `SettingController` | `index, update` | ✅ Redes sociales: 7 settings `social_facebook/instagram/youtube/x/threads/telegram/whatsapp` (`url` + `max:255`) |
+| `RrssController` | `index, update` | ✅ Redes sociales: 7 settings `social_facebook/instagram/youtube/x/threads/telegram/whatsapp` (`url` + `max:255`) |
 | `ServiceController` | CRUD completo | ⏸️ **Omitido** — rutas comentadas, alcance no definido |
 
 ---
@@ -335,7 +335,7 @@ Todas las rutas de gestión llevan además `middleware('permission:...')` (ver s
 | Estructura org. | `org-members/{index,create,edit}` | ✅ |
 | Sobre Nosotros | `about/index.blade.php` | ✅ Edición inline |
 | Contacto | `contact/{index,messages,message-show}` | ✅ Info (5 campos) + bandeja con estado Nuevo/Leído, detalle y borrado |
-| Configuración | `settings/index.blade.php` | ✅ Redes sociales: 7 URLs (vacío = oculto en el sitio) |
+| Redes Sociales | `rrss/index.blade.php` | ✅ 7 URLs de redes (vacío = oculto en el sitio) |
 | Roles y permisos | `roles/index.blade.php` | ✅ Matriz con envío JS |
 | Servicios | `services/{index,create,edit}` | ⏸️ Vistas listas, rutas deshabilitadas |
 
@@ -426,7 +426,7 @@ Ejecutan en este orden (definido en `DatabaseSeeder`):
 | `PermissionSeeder` | 29 permisos + asignaciones a los 3 roles |
 | `PartnerSeeder` | **Borrador** — array vacío, pendiente de contenido (name, description, url, order; slug auto y logo vía panel) |
 | `ContactSettingSeeder` | Los 5 settings de contacto (`contact_address/phone/email/hours/map_url`) con los valores por defecto — `firstOrCreate`: **no pisa** lo editado desde `/admin/contacto` |
-| `SocialSettingSeeder` | Los 7 settings de redes (`social_facebook/instagram/youtube/x/threads/telegram/whatsapp`) vacíos — `firstOrCreate`: **no pisa** lo editado desde `/admin/configuracion` |
+| `SocialSettingSeeder` | Los 7 settings de redes (`social_facebook/instagram/youtube/x/threads/telegram/whatsapp`) vacíos — `firstOrCreate`: **no pisa** lo editado desde `/admin/rrss` |
 
 **Idempotentes**: los 7 seeders se pueden re-ejecutar sin duplicar filas ni fallar (`firstOrCreate` / `updateOrCreate` / `upsert` contra el índice único `role+permission_id`).
 
@@ -487,7 +487,7 @@ php artisan serve
 - [x] Módulo de contacto: edición de la información visible (dirección, teléfono, email, horario, mapa) desde `/admin/contacto` vía `settings`, con parcial pública `_contact-info` en home + /contacto + sobre-nosotros
 - [x] Persistencia de mensajes del formulario: tabla `contacts`, guardado en `Public\ContactController@store` y bandeja en `/admin/contacto/mensajes` (paginada, badge Nuevo/Leído, detalle que marca `read_at`, borrado)
 - [x] Vistas de error en español (400/401/403/404/405/408/410/419/422/429/500/503) con botones Volver/Inicio (y Recargar en 419, Reintentar en 503); 5xx standalone sin dependencias
-- [x] Redes sociales: módulo `/admin/configuracion` (permiso `settings.manage`, solo superadmin) con 7 URLs en `settings`; parcial `_social-links` con íconos en header y footer — vacío = oculto; **falta recibir las URLs reales para cargarlas**
+- [x] Redes sociales: módulo `/admin/rrss` (sidebar "Redes Sociales", permiso `rrss.manage`, solo superadmin; renombrado desde "Configuración" con rename in-place del permiso) con 7 URLs en `settings`; parcial `_social-links` con íconos en header y footer — vacío = oculto; **falta recibir las URLs reales para cargarlas**
 
 ### 🔴 Pendiente
 - [ ] **Front de la página de detalle de entes** (`/entes/{slug}`) — skeleton funcional (logo, nombre, descripción, botón); falta definir el diseño (¿banner?, ¿más campos?)

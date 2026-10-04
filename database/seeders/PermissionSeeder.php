@@ -48,9 +48,16 @@ class PermissionSeeder extends Seeder
             ['name' => 'Eliminar estructura', 'slug' => 'org.delete', 'group' => 'Estructura Org.'],
             // Roles
             ['name' => 'Gestionar roles', 'slug' => 'roles.manage', 'group' => 'Roles'],
-            // Configuración
-            ['name' => 'Gestionar configuración', 'slug' => 'settings.manage', 'group' => 'Configuración'],
+            // Redes Sociales
+            ['name' => 'Gestionar redes sociales', 'slug' => 'rrss.manage', 'group' => 'Redes Sociales'],
         ];
+
+        // Renombre in-place idempotente (conserva permission_id y sus asignaciones)
+        Permission::where('slug', 'settings.manage')->update([
+            'slug' => 'rrss.manage',
+            'name' => 'Gestionar redes sociales',
+            'group' => 'Redes Sociales',
+        ]);
 
         foreach ($permissions as $perm) {
             Permission::firstOrCreate(

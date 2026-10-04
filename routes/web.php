@@ -96,8 +96,8 @@ Route::prefix('admin')->group(function () {
         Route::get('/roles', [App\Http\Controllers\Admin\RoleController::class, 'index'])->name('admin.roles.index')->middleware('permission:roles.manage');
         Route::post('/roles', [App\Http\Controllers\Admin\RoleController::class, 'update'])->name('admin.roles.update')->middleware('permission:roles.manage');
 
-        // Admin - Configuración
-        Route::get('/configuracion', [App\Http\Controllers\Admin\SettingController::class, 'index'])->name('admin.settings.index')->middleware('permission:settings.manage');
-        Route::put('/configuracion', [App\Http\Controllers\Admin\SettingController::class, 'update'])->name('admin.settings.update')->middleware('permission:settings.manage');
+        // Admin - Redes Sociales
+        Route::get('/rrss', [App\Http\Controllers\Admin\RrssController::class, 'index'])->name('admin.rrss.index')->middleware('permission:rrss.manage');
+        Route::put('/rrss', [App\Http\Controllers\Admin\RrssController::class, 'update'])->name('admin.rrss.update')->middleware('permission:rrss.manage');
     });
 });

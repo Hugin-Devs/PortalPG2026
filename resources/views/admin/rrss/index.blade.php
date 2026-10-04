@@ -2,14 +2,14 @@
 
 @section('content')
 <div class="container">
-    <h1>Configuración</h1>
-    <p class="text-muted">Ajustes generales del portal.</p>
+    <h1>Redes Sociales</h1>
+    <p class="text-muted">Íconos de redes sociales que se muestran en el encabezado y el pie del sitio.</p>
 
     @if(session('success'))
         <div class="alert alert-success">{{ session('success') }}</div>
     @endif
 
-    <form action="{{ url('/admin/configuracion') }}" method="POST">
+    <form action="{{ url('/admin/rrss') }}" method="POST">
         @csrf
         @method('PUT')
 

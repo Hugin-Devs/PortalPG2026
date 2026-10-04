@@ -6,7 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Setting;
 use Illuminate\Http\Request;
 
-class SettingController extends Controller
+class RrssController extends Controller
 {
     private const SOCIAL_FIELDS = [
         'facebook' => 'social_facebook',
@@ -25,7 +25,7 @@ class SettingController extends Controller
             $social[$field] = Setting::where('key', $key)->first()?->value ?? '';
         }
 
-        return view('admin.settings.index', ['social' => $social]);
+        return view('admin.rrss.index', ['social' => $social]);
     }
 
     public function update(Request $request)
@@ -43,6 +43,6 @@ class SettingController extends Controller
             );
         }
 
-        return redirect('/admin/configuracion')->with('success', 'Redes sociales actualizadas correctamente.');
+        return redirect('/admin/rrss')->with('success', 'Redes sociales actualizadas correctamente.');
     }
 }
