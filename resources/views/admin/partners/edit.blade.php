@@ -3,20 +3,35 @@
 @section('content')
 <div class="container">
     <h1>Editar Ente Afiliado</h1>
-    <form action="{{ url('/admin/entes/' . $partner->id) }}" method="POST">
+    <form action="{{ url('/admin/entes/' . $partner->id) }}" method="POST" enctype="multipart/form-data">
         @csrf
         @method('PUT')
         <div class="mb-3">
             <label>Nombre</label>
             <input type="text" name="name" class="form-control" value="{{ old('name', $partner->name) }}" required>
+            @error('name') <div class="text-danger">{{ $message }}</div> @enderror
         </div>
         <div class="mb-3">
-            <label>Logo (ruta)</label>
-            <input type="text" name="logo" class="form-control" value="{{ old('logo', $partner->logo) }}">
+            <label>Logo</label>
+            @if($partner->logo)
+                <div class="mb-2">
+                    <img src="{{ asset('storage/' . $partner->logo) }}" alt="{{ $partner->name }}" height="40" class="bg-white rounded p-1 border">
+                </div>
+            @endif
+            <input type="file" name="logo" class="form-control" accept="image/png,image/jpeg,image/gif,image/svg+xml,image/webp">
+            <div class="form-text">PNG, JPG, GIF, SVG o WebP · máx. 2 MB — deja vacío para mantener el actual</div>
+            @error('logo') <div class="text-danger">{{ $message }}</div> @enderror
+            @if($partner->logo)
+                <div class="form-check mt-2">
+                    <input type="checkbox" name="remove_logo" value="1" class="form-check-input" id="removeLogo">
+                    <label class="form-check-label" for="removeLogo">Quitar imagen actual</label>
+                </div>
+            @endif
         </div>
         <div class="mb-3">
             <label>Sitio Web</label>
-            <input type="url" name="url" class="form-control" value="{{ old('url', $partner->url) }}">
+            <input type="url" name="url" class="form-control" value="{{ old('url', $partner->url) }}" placeholder="https://...">
+            @error('url') <div class="text-danger">{{ $message }}</div> @enderror
         </div>
         <div class="mb-3">
             <label>Orden</label>

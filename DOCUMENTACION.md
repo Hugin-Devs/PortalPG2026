@@ -135,7 +135,7 @@ Portal2026/
 |---|---|---|
 | id | bigint PK | |
 | name | varchar(255) | |
-| logo | varchar(255) | nullable |
+| logo | varchar(255) | nullable — ruta bajo disco público (ej. `partners/1791…png`); se sube desde `/admin/entes`, nunca se escribe a mano |
 | url | varchar(255) | nullable |
 | order | integer | default 0 |
 | is_active | boolean | default true |
@@ -266,7 +266,7 @@ Todas las rutas de gestión llevan además `middleware('permission:...')` (ver s
 | `NewsController` | CRUD completo (`index, create, store, edit, update, destroy`) | ✅ Slug automático, soft deletes |
 | `CategoryController` | CRUD completo | ✅ |
 | `UserController` | CRUD completo | ✅ Asignación de roles |
-| `PartnerController` | CRUD completo | ✅ Entes afiliados (footer) |
+| `PartnerController` | CRUD completo | ✅ Entes afiliados (footer); logo por **upload** a `partners/` en disco `public` (reemplaza y borra el anterior; checkbox "quitar imagen"; borra archivo al eliminar el ente) |
 | `MediaController` | `index, store, destroy` | ✅ Sube a disco `public/uploads`, requiere `storage:link` |
 | `OrgMemberController` | CRUD completo | ✅ Estructura organizativa |
 | `AboutController` | `index, update` | ✅ Edición de "Sobre Nosotros" |
@@ -307,7 +307,7 @@ Todas las rutas de gestión llevan además `middleware('permission:...')` (ver s
 | Noticias | `news/{index,create,edit}` | ✅ |
 | Categorías | `categories/{index,create,edit}` | ✅ |
 | Usuarios | `users/{index,create,edit}` | ✅ |
-| Entes afiliados | `partners/{index,create,edit}` | ✅ |
+| Entes afiliados | `partners/{index,create,edit}` | ✅ Subida de logo (`file`, preview, quitar) |
 | Medios | `media/index.blade.php` | ✅ Grid + subida |
 | Estructura org. | `org-members/{index,create,edit}` | ✅ |
 | Sobre Nosotros | `about/index.blade.php` | ✅ Edición inline |
@@ -388,10 +388,11 @@ Ejecutan en este orden (definido en `DatabaseSeeder`):
 |---|---|
 | `CategorySeeder` | 6 categorías: Nacionales, Política, Comunal, Cultura, Deporte, Educación |
 | `PostSeeder` | 5 posts de prueba (3 destacados, 2 normales) — requiere ≥1 categoría y ≥1 usuario |
-| `UserSeeder` | 3 usuarios: superadmin, admin, editor (password `password`) — `firstOrCreate` |
+| `UserSeeder` | 3 usuarios: superadmin, admin, editor (password `password`) — `firstOrCreate` + restaura nombre/rol canónicos |
 | `PermissionSeeder` | 25 permisos + asignaciones a los 3 roles |
+| `PartnerSeeder` | **Borrador** — array vacío, pendiente de contenido (los logos se suben desde `/admin/entes`) |
 
-**Idempotentes**: los 4 seeders se pueden re-ejecutar sin duplicar filas ni fallar (`firstOrCreate` / `updateOrCreate` / `upsert` contra el índice único `role+permission_id`).
+**Idempotentes**: los 5 seeders se pueden re-ejecutar sin duplicar filas ni fallar (`firstOrCreate` / `updateOrCreate` / `upsert` contra el índice único `role+permission_id`).
 
 ### Ejecutar seeders
 ```powershell
@@ -435,7 +436,7 @@ php artisan serve
 - [x] Layouts público y admin (sidebar con checks de permisos)
 - [x] Migraciones de **todas** las tablas (incluye `org_members`, `permissions`, `role_permission`)
 - [x] Modelos Eloquent (10) con relaciones y slugs
-- [x] Seeders: categorías, posts, usuarios (3 roles), permisos (25) — `UserSeeder`/`PermissionSeeder` idempotentes
+- [x] Seeders: categorías, posts, usuarios (3 roles), permisos (25) — todos idempotentes; `PartnerSeeder` creado como borrador (contenido pendiente)
 - [x] Autenticación admin (login independiente + logout)
 - [x] Roles y permisos granulares: middleware `permission:*`, `User::hasPermission()`, ocultación en UI, módulo `/admin/roles`
 - [x] CRUD admin: noticias, categorías, usuarios, entes afiliados, medios, estructura organizativa, "Sobre Nosotros"

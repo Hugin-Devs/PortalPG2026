@@ -17,6 +17,7 @@ class DatabaseSeeder extends Seeder
             PostSeeder::class,
             UserSeeder::class,
             PermissionSeeder::class,
+            PartnerSeeder::class,
         ]);
     }
 }

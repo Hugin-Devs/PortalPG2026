@@ -23,10 +23,16 @@ class PartnerController extends Controller
     {
         $data = $request->validate([
             'name' => 'required|max:255',
-            'logo' => 'nullable|max:255',
+            'logo' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg,webp|max:2048',
             'url' => 'nullable|url',
             'order' => 'nullable|integer|min:0',
         ]);
+
+        if ($request->hasFile('logo')) {
+            $data['logo'] = $this->storeLogo($request->file('logo'));
+        } else {
+            unset($data['logo']);
+        }
 
         Partner::create($data);
         return redirect('/admin/entes')->with('success', 'Ente afiliado creado correctamente.');
@@ -41,13 +47,30 @@ class PartnerController extends Controller
     {
         $data = $request->validate([
             'name' => 'required|max:255',
-            'logo' => 'nullable|max:255',
+            'logo' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg,webp|max:2048',
             'url' => 'nullable|url',
             'order' => 'nullable|integer|min:0',
             'is_active' => 'nullable|boolean',
+            'remove_logo' => 'nullable|boolean',
         ]);
 
         $data['is_active'] = $request->has('is_active');
+        unset($data['remove_logo']);
+
+        if ($request->hasFile('logo')) {
+            $old = $partner->logo;
+            $data['logo'] = $this->storeLogo($request->file('logo'));
+            if ($old) {
+                \Storage::disk('public')->delete($old);
+            }
+        } elseif ($request->boolean('remove_logo')) {
+            if ($partner->logo) {
+                \Storage::disk('public')->delete($partner->logo);
+            }
+            $data['logo'] = null;
+        } else {
+            unset($data['logo']);
+        }
 
         $partner->update($data);
         return redirect('/admin/entes')->with('success', 'Ente afiliado actualizado correctamente.');
@@ -55,7 +78,16 @@ class PartnerController extends Controller
 
     public function destroy(Partner $partner)
     {
+        if ($partner->logo) {
+            \Storage::disk('public')->delete($partner->logo);
+        }
         $partner->delete();
         return redirect('/admin/entes')->with('success', 'Ente afiliado eliminado correctamente.');
+    }
+
+    private function storeLogo($file): string
+    {
+        $filename = time() . '_' . uniqid() . '.' . $file->getClientOriginalExtension();
+        return $file->storeAs('partners', $filename, 'public');
     }
 }
