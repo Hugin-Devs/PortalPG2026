@@ -37,6 +37,10 @@ class PermissionSeeder extends Seeder
             ['name' => 'Eliminar medios', 'slug' => 'media.delete', 'group' => 'Medios'],
             // Sobre Nosotros
             ['name' => 'Editar Sobre Nosotros', 'slug' => 'about.edit', 'group' => 'Sobre Nosotros'],
+            // Contacto
+            ['name' => 'Editar información de contacto', 'slug' => 'contact.edit', 'group' => 'Contacto'],
+            ['name' => 'Ver mensajes de contacto', 'slug' => 'contact.view', 'group' => 'Contacto'],
+            ['name' => 'Eliminar mensajes de contacto', 'slug' => 'contact.delete', 'group' => 'Contacto'],
             // Estructura Org.
             ['name' => 'Ver estructura', 'slug' => 'org.view', 'group' => 'Estructura Org.'],
             ['name' => 'Crear estructura', 'slug' => 'org.create', 'group' => 'Estructura Org.'],
@@ -76,7 +80,7 @@ class PermissionSeeder extends Seeder
         $assign('superadmin', Permission::pluck('id'));
 
         // Permisos básicos a admin
-        $adminSlugs = ['news.view', 'news.create', 'news.edit', 'categories.view', 'categories.create', 'categories.edit', 'categories.delete', 'partners.view', 'media.view', 'media.upload', 'about.edit', 'org.view', 'org.create', 'org.edit'];
+        $adminSlugs = ['news.view', 'news.create', 'news.edit', 'categories.view', 'categories.create', 'categories.edit', 'categories.delete', 'partners.view', 'media.view', 'media.upload', 'about.edit', 'org.view', 'org.create', 'org.edit', 'contact.view', 'contact.edit', 'contact.delete'];
         $assign('admin', Permission::whereIn('slug', $adminSlugs)->pluck('id'));
 
         // Permisos mínimos a editor

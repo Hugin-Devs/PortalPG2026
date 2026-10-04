@@ -237,6 +237,7 @@ Todas las rutas de gestión llevan además `middleware('permission:...')` (ver s
 | GET | `/admin/usuarios` (+ crear/editar/PUT/DELETE) | `users.*` | `Admin\UserController` |
 | GET/POST/DELETE | `/admin/medios` | `media.*` | `Admin\MediaController` |
 | GET/PUT | `/admin/nosotros` | `about.edit` | `Admin\AboutController` |
+| GET/PUT | `/admin/contacto` | `contact.edit` | `Admin\ContactController` |
 | GET | `/admin/estructura` (+ crear/editar/PUT/DELETE) | `org.*` | `Admin\OrgMemberController` |
 | GET/POST | `/admin/roles` | `roles.manage` | `Admin\RoleController` |
 
@@ -274,6 +275,7 @@ Todas las rutas de gestión llevan además `middleware('permission:...')` (ver s
 | `MediaController` | `index, store, destroy` | ✅ Sube a disco `public/uploads`, requiere `storage:link`; **biblioteca reutilizable** desde el modal "Elegir de la biblioteca" de noticias |
 | `OrgMemberController` | CRUD completo | ✅ Estructura organizativa |
 | `AboutController` | `index, update` | ✅ Edición de "Sobre Nosotros" |
+| `ContactController` | `editInfo, updateInfo` | ✅ Información de contacto en `settings` (`contact_address/phone/email/hours/map_url`); parcial público `_contact-info` con defaults |
 | `RoleController` | `index, update` | ✅ Matriz rol×permiso (un formulario JS por rol) |
 | `ServiceController` | CRUD completo | ⏸️ **Omitido** — rutas comentadas, alcance no definido |
 
@@ -315,6 +317,7 @@ Todas las rutas de gestión llevan además `middleware('permission:...')` (ver s
 | Medios | `media/index.blade.php` | ✅ Grid + subida |
 | Estructura org. | `org-members/{index,create,edit}` | ✅ |
 | Sobre Nosotros | `about/index.blade.php` | ✅ Edición inline |
+| Contacto | `contact/index.blade.php` | ✅ 5 campos (dirección, teléfono, email, horario, URL del mapa) |
 | Roles y permisos | `roles/index.blade.php` | ✅ Matriz con envío JS |
 | Servicios | `services/{index,create,edit}` | ⏸️ Vistas listas, rutas deshabilitadas |
 
@@ -365,7 +368,7 @@ Todas las rutas de gestión llevan además `middleware('permission:...')` (ver s
 
 ### Sistema de permisos (granular, por rol)
 
-- **Tabla**: `permissions` (25 permisos con `slug` tipo `news.create`) + `role_permission` (rol ↔ permiso, con índice único).
+- **Tabla**: `permissions` (28 permisos con `slug` tipo `news.create`) + `role_permission` (rol ↔ permiso, con índice único). Reparto: superadmin 28 / admin 17 / editor 3.
 - **Middleware**: alias `permission` registrado en `app/Http/Kernel.php` → `App\Http\Middleware\CheckPermission`. Aplicado ruta a ruta en `routes/web.php` (ej. `->middleware('permission:news.edit')`). El rol `superadmin` tiene bypass.
 - **Consulta en vista**: `auth()->user()->hasPermission('slug')` (`app/Models/User.php`) — las vistas del admin ocultan botones/menús sin permiso.
 - **Gestión**: módulo `/admin/roles` (`RoleController`) muestra la matriz rol×permiso; cada rol envía un solo formulario (JS junta los checkbox en un input oculto) y `update()` reemplaza las asignaciones del rol.
@@ -393,7 +396,7 @@ Ejecutan en este orden (definido en `DatabaseSeeder`):
 | `CategorySeeder` | 6 categorías: Nacionales, Política, Comunal, Cultura, Deporte, Educación |
 | `PostSeeder` | 5 posts de prueba (3 destacados, 2 normales) — requiere ≥1 categoría y ≥1 usuario |
 | `UserSeeder` | 3 usuarios: superadmin, admin, editor (password `password`) — `firstOrCreate` + restaura nombre/rol canónicos |
-| `PermissionSeeder` | 25 permisos + asignaciones a los 3 roles |
+| `PermissionSeeder` | 28 permisos + asignaciones a los 3 roles |
 | `PartnerSeeder` | **Borrador** — array vacío, pendiente de contenido (name, description, url, order; slug auto y logo vía panel) |
 
 **Idempotentes**: los 5 seeders se pueden re-ejecutar sin duplicar filas ni fallar (`firstOrCreate` / `updateOrCreate` / `upsert` contra el índice único `role+permission_id`).
@@ -440,7 +443,7 @@ php artisan serve
 - [x] Layouts público y admin (sidebar con checks de permisos)
 - [x] Migraciones de **todas** las tablas (incluye `org_members`, `permissions`, `role_permission`)
 - [x] Modelos Eloquent (10) con relaciones y slugs
-- [x] Seeders: categorías, posts, usuarios (3 roles), permisos (25) — todos idempotentes; `PartnerSeeder` creado como borrador (contenido pendiente)
+- [x] Seeders: categorías, posts, usuarios (3 roles), permisos (28) — todos idempotentes; `PartnerSeeder` creado como borrador (contenido pendiente)
 - [x] Autenticación admin (login independiente + logout)
 - [x] Roles y permisos granulares: middleware `permission:*`, `User::hasPermission()`, ocultación en UI, módulo `/admin/roles`
 - [x] CRUD admin: noticias, categorías, usuarios, entes afiliados, medios, estructura organizativa, "Sobre Nosotros"
@@ -452,6 +455,7 @@ php artisan serve
 - [x] Imagen destacada de noticias integrada con la biblioteca: upload propio (≤10 MB) **o** selección desde Medios, auto-registro en `media`, quitar imagen; 4 vistas públicas renderizan con `asset('storage/...')`
 - [x] `storage:link` configurado
 - [x] Paleta y tipografía institucional (`#273376`, Georama / Instrument Sans)
+- [x] Módulo de contacto: edición de la información visible (dirección, teléfono, email, horario, mapa) desde `/admin/contacto` vía `settings`, con parcial pública `_contact-info` en home + /contacto + sobre-nosotros
 
 ### 🔴 Pendiente
 - [ ] **Front de la página de detalle de entes** (`/entes/{slug}`) — skeleton funcional (logo, nombre, descripción, botón); falta definir el diseño (¿banner?, ¿más campos?)

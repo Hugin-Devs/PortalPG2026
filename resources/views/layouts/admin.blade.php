@@ -34,6 +34,9 @@
                 @if(auth()->user()->hasPermission('about.edit'))
                 <li class="nav-item"><a class="nav-link text-white" href="{{ url('/admin/nosotros') }}">Sobre Nosotros</a></li>
                 @endif
+                @if(auth()->user()->hasPermission('contact.edit'))
+                <li class="nav-item"><a class="nav-link text-white" href="{{ url('/admin/contacto') }}">Contacto</a></li>
+                @endif
                 @if(auth()->user()->hasPermission('org.view'))
                 <li class="nav-item"><a class="nav-link text-white" href="{{ url('/admin/estructura') }}">Estructura Org.</a></li>
                 @endif

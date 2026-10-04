@@ -77,6 +77,10 @@ Route::prefix('admin')->group(function () {
         Route::get('/nosotros', [App\Http\Controllers\Admin\AboutController::class, 'index'])->name('admin.about.index')->middleware('permission:about.edit');
         Route::put('/nosotros', [App\Http\Controllers\Admin\AboutController::class, 'update'])->name('admin.about.update')->middleware('permission:about.edit');
 
+        // Admin - Contacto
+        Route::get('/contacto', [App\Http\Controllers\Admin\ContactController::class, 'editInfo'])->name('admin.contact.edit')->middleware('permission:contact.edit');
+        Route::put('/contacto', [App\Http\Controllers\Admin\ContactController::class, 'updateInfo'])->name('admin.contact.update')->middleware('permission:contact.edit');
+
         // Admin - Estructura Organizativa
         Route::get('/estructura', [App\Http\Controllers\Admin\OrgMemberController::class, 'index'])->name('admin.org-members.index')->middleware('permission:org.view');
         Route::get('/estructura/crear', [App\Http\Controllers\Admin\OrgMemberController::class, 'create'])->name('admin.org-members.create')->middleware('permission:org.create');
