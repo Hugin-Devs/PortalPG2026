@@ -48,6 +48,8 @@ class PermissionSeeder extends Seeder
             ['name' => 'Eliminar estructura', 'slug' => 'org.delete', 'group' => 'Estructura Org.'],
             // Roles
             ['name' => 'Gestionar roles', 'slug' => 'roles.manage', 'group' => 'Roles'],
+            // Configuración
+            ['name' => 'Gestionar configuración', 'slug' => 'settings.manage', 'group' => 'Configuración'],
         ];
 
         foreach ($permissions as $perm) {

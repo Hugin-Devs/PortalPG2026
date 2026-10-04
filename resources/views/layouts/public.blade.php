@@ -40,6 +40,9 @@
                                 <li><a class="dropdown-item" href="{{ url('/admin/login') }}">Gestión Aplicaciones</a></li>
                             </ul>
                         </li>
+                        <li class="nav-item d-flex align-items-center ms-lg-3">
+                            @include('public._social-links', ['linkClass' => 'text-primary', 'ulClass' => 'gap-2'])
+                        </li>
                     </ul>
                 </div>
             </div>
@@ -56,6 +59,9 @@
                 <div class="col-md-6">
                     <h5 style="color: #212529;">Gobierno de Distrito Capital</h5>
                     <p class="small">Portal institucional oficial</p>
+                    <div class="mt-2">
+                        @include('public._social-links', ['linkClass' => 'text-dark', 'ulClass' => 'gap-3'])
+                    </div>
                 </div>
                 <div class="col-md-3">
                     <h6 style="color: #212529;">Enlaces</h6>

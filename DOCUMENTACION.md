@@ -254,6 +254,7 @@ Todas las rutas de gestión llevan además `middleware('permission:...')` (ver s
 | GET/DELETE | `/admin/contacto/mensajes` (+ `/{contact}`) | `contact.view` / `contact.delete` | `Admin\ContactController` |
 | GET | `/admin/estructura` (+ crear/editar/PUT/DELETE) | `org.*` | `Admin\OrgMemberController` |
 | GET/POST | `/admin/roles` | `roles.manage` | `Admin\RoleController` |
+| GET/PUT | `/admin/configuracion` | `settings.manage` | `Admin\SettingController` |
 
 > **Nota:** las rutas del CRUD de **servicios** en el admin están **comentadas deliberadamente** (`routes/web.php`), junto con su enlace en el sidebar. El módulo existe a medias (controlador y vistas) pero su alcance no está definido; se omitió a propósito.
 
@@ -291,6 +292,7 @@ Todas las rutas de gestión llevan además `middleware('permission:...')` (ver s
 | `AboutController` | `index, update` | ✅ Edición de "Sobre Nosotros" |
 | `ContactController` | `editInfo, updateInfo, messages, showMessage, destroyMessage` | ✅ Info de contacto en `settings` (`contact_address/phone/email/hours/map_url`) + bandeja de mensajes (`contacts`); parcial público `_contact-info` con defaults |
 | `RoleController` | `index, update` | ✅ Matriz rol×permiso (un formulario JS por rol) |
+| `SettingController` | `index, update` | ✅ Redes sociales: 7 settings `social_facebook/instagram/youtube/x/threads/telegram/whatsapp` (`url` + `max:255`) |
 | `ServiceController` | CRUD completo | ⏸️ **Omitido** — rutas comentadas, alcance no definido |
 
 ---
@@ -317,6 +319,7 @@ Todas las rutas de gestión llevan además `middleware('permission:...')` (ver s
 | `contact.blade.php` | Formulario de contacto + datos de contacto | ✅ |
 | `search.blade.php` | Resultados de búsqueda | ✅ |
 | `page.blade.php` | Páginas estáticas | ✅ |
+| `_social-links.blade.php` | Parcial de íconos de redes (1 query `whereIn`; solo renderiza URLs `http(s)://`; vacío = oculto) — en header y footer | ✅ |
 
 ### 7.3 Admin (`resources/views/admin/`)
 
@@ -332,6 +335,7 @@ Todas las rutas de gestión llevan además `middleware('permission:...')` (ver s
 | Estructura org. | `org-members/{index,create,edit}` | ✅ |
 | Sobre Nosotros | `about/index.blade.php` | ✅ Edición inline |
 | Contacto | `contact/{index,messages,message-show}` | ✅ Info (5 campos) + bandeja con estado Nuevo/Leído, detalle y borrado |
+| Configuración | `settings/index.blade.php` | ✅ Redes sociales: 7 URLs (vacío = oculto en el sitio) |
 | Roles y permisos | `roles/index.blade.php` | ✅ Matriz con envío JS |
 | Servicios | `services/{index,create,edit}` | ⏸️ Vistas listas, rutas deshabilitadas |
 
@@ -391,7 +395,7 @@ Páginas personalizadas en español para todos los tipos de error HTTP, con bot�
 
 ### Sistema de permisos (granular, por rol)
 
-- **Tabla**: `permissions` (28 permisos con `slug` tipo `news.create`) + `role_permission` (rol ↔ permiso, con índice único). Reparto: superadmin 28 / admin 17 / editor 3.
+- **Tabla**: `permissions` (29 permisos con `slug` tipo `news.create`) + `role_permission` (rol ↔ permiso, con índice único). Reparto: superadmin 29 / admin 17 / editor 3.
 - **Middleware**: alias `permission` registrado en `app/Http/Kernel.php` → `App\Http\Middleware\CheckPermission`. Aplicado ruta a ruta en `routes/web.php` (ej. `->middleware('permission:news.edit')`). El rol `superadmin` tiene bypass.
 - **Consulta en vista**: `auth()->user()->hasPermission('slug')` (`app/Models/User.php`) — las vistas del admin ocultan botones/menús sin permiso.
 - **Gestión**: módulo `/admin/roles` (`RoleController`) muestra la matriz rol×permiso; cada rol envía un solo formulario (JS junta los checkbox en un input oculto) y `update()` reemplaza las asignaciones del rol.
@@ -419,11 +423,12 @@ Ejecutan en este orden (definido en `DatabaseSeeder`):
 | `CategorySeeder` | 6 categorías: Nacionales, Política, Comunal, Cultura, Deporte, Educación |
 | `PostSeeder` | 5 posts de prueba (3 destacados, 2 normales) — requiere ≥1 categoría y ≥1 usuario |
 | `UserSeeder` | 3 usuarios: superadmin, admin, editor (password `password`) — `firstOrCreate` + restaura nombre/rol canónicos |
-| `PermissionSeeder` | 28 permisos + asignaciones a los 3 roles |
+| `PermissionSeeder` | 29 permisos + asignaciones a los 3 roles |
 | `PartnerSeeder` | **Borrador** — array vacío, pendiente de contenido (name, description, url, order; slug auto y logo vía panel) |
 | `ContactSettingSeeder` | Los 5 settings de contacto (`contact_address/phone/email/hours/map_url`) con los valores por defecto — `firstOrCreate`: **no pisa** lo editado desde `/admin/contacto` |
+| `SocialSettingSeeder` | Los 7 settings de redes (`social_facebook/instagram/youtube/x/threads/telegram/whatsapp`) vacíos — `firstOrCreate`: **no pisa** lo editado desde `/admin/configuracion` |
 
-**Idempotentes**: los 6 seeders se pueden re-ejecutar sin duplicar filas ni fallar (`firstOrCreate` / `updateOrCreate` / `upsert` contra el índice único `role+permission_id`).
+**Idempotentes**: los 7 seeders se pueden re-ejecutar sin duplicar filas ni fallar (`firstOrCreate` / `updateOrCreate` / `upsert` contra el índice único `role+permission_id`).
 
 ### Ejecutar seeders
 ```powershell
@@ -467,7 +472,7 @@ php artisan serve
 - [x] Layouts público y admin (sidebar con checks de permisos)
 - [x] Migraciones de **todas** las tablas (incluye `org_members`, `permissions`, `role_permission`)
 - [x] Modelos Eloquent (10) con relaciones y slugs
-- [x] Seeders: categorías, posts, usuarios (3 roles), permisos (28) — todos idempotentes; `PartnerSeeder` creado como borrador (contenido pendiente)
+- [x] Seeders: categorías, posts, usuarios (3 roles), permisos (29) — todos idempotentes; `PartnerSeeder` creado como borrador (contenido pendiente)
 - [x] Autenticación admin (login independiente + logout)
 - [x] Roles y permisos granulares: middleware `permission:*`, `User::hasPermission()`, ocultación en UI, módulo `/admin/roles`
 - [x] CRUD admin: noticias, categorías, usuarios, entes afiliados, medios, estructura organizativa, "Sobre Nosotros"
@@ -482,10 +487,10 @@ php artisan serve
 - [x] Módulo de contacto: edición de la información visible (dirección, teléfono, email, horario, mapa) desde `/admin/contacto` vía `settings`, con parcial pública `_contact-info` en home + /contacto + sobre-nosotros
 - [x] Persistencia de mensajes del formulario: tabla `contacts`, guardado en `Public\ContactController@store` y bandeja en `/admin/contacto/mensajes` (paginada, badge Nuevo/Leído, detalle que marca `read_at`, borrado)
 - [x] Vistas de error en español (400/401/403/404/405/408/410/419/422/429/500/503) con botones Volver/Inicio (y Recargar en 419, Reintentar en 503); 5xx standalone sin dependencias
+- [x] Redes sociales: módulo `/admin/configuracion` (permiso `settings.manage`, solo superadmin) con 7 URLs en `settings`; parcial `_social-links` con íconos en header y footer — vacío = oculto; **falta recibir las URLs reales para cargarlas**
 
 ### 🔴 Pendiente
 - [ ] **Front de la página de detalle de entes** (`/entes/{slug}`) — skeleton funcional (logo, nombre, descripción, botón); falta definir el diseño (¿banner?, ¿más campos?)
-- [ ] **Redes sociales en header y footer** (SPECS §4.1: Facebook, Instagram, YouTube, X, Threads, Telegram, WhatsApp) — pendiente de URLs reales
 - [ ] **Módulo de servicios en el admin** — omitido a propósito: rutas comentadas (`routes/web.php`); la tabla `services` está dormida (la página pública de Entes usa `partners`)
 - [ ] **Contenido del `PartnerSeeder`** — borrador con array vacío, pendiente que se indique el listado de entes
 - [ ] Videos YouTube en home: `$videos` llega vacío del `HomeController` (fuente de datos sin definir)

@@ -95,5 +95,9 @@ Route::prefix('admin')->group(function () {
         // Admin - Roles y Permisos
         Route::get('/roles', [App\Http\Controllers\Admin\RoleController::class, 'index'])->name('admin.roles.index')->middleware('permission:roles.manage');
         Route::post('/roles', [App\Http\Controllers\Admin\RoleController::class, 'update'])->name('admin.roles.update')->middleware('permission:roles.manage');
+
+        // Admin - Configuración
+        Route::get('/configuracion', [App\Http\Controllers\Admin\SettingController::class, 'index'])->name('admin.settings.index')->middleware('permission:settings.manage');
+        Route::put('/configuracion', [App\Http\Controllers\Admin\SettingController::class, 'update'])->name('admin.settings.update')->middleware('permission:settings.manage');
     });
 });

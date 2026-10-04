@@ -19,6 +19,7 @@ class DatabaseSeeder extends Seeder
             PermissionSeeder::class,
             PartnerSeeder::class,
             ContactSettingSeeder::class,
+            SocialSettingSeeder::class,
         ]);
     }
 }

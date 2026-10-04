@@ -46,6 +46,9 @@
                 @if(auth()->user()->hasPermission('roles.manage'))
                 <li class="nav-item"><a class="nav-link text-white" href="{{ url('/admin/roles') }}">Roles y Permisos</a></li>
                 @endif
+                @if(auth()->user()->hasPermission('settings.manage'))
+                <li class="nav-item"><a class="nav-link text-white" href="{{ url('/admin/configuracion') }}">Configuración</a></li>
+                @endif
                 <li class="nav-item mt-3">
                     <form action="{{ url('/admin/logout') }}" method="POST">
                         @csrf
