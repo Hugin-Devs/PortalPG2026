@@ -44,14 +44,6 @@ Route::prefix('admin')->group(function () {
         Route::put('/categorias/{category}', [App\Http\Controllers\Admin\CategoryController::class, 'update'])->name('admin.categories.update')->middleware('permission:categories.edit');
         Route::delete('/categorias/{category}', [App\Http\Controllers\Admin\CategoryController::class, 'destroy'])->name('admin.categories.destroy')->middleware('permission:categories.delete');
 
-        // Admin - Servicios (comentado)
-        // Route::get('/servicios', [App\Http\Controllers\Admin\ServiceController::class, 'index'])->name('admin.services.index');
-        // Route::get('/servicios/crear', [App\Http\Controllers\Admin\ServiceController::class, 'create'])->name('admin.services.create');
-        // Route::post('/servicios', [App\Http\Controllers\Admin\ServiceController::class, 'store'])->name('admin.services.store');
-        // Route::get('/servicios/{service}/editar', [App\Http\Controllers\Admin\ServiceController::class, 'edit'])->name('admin.services.edit');
-        // Route::put('/servicios/{service}', [App\Http\Controllers\Admin\ServiceController::class, 'update'])->name('admin.services.update');
-        // Route::delete('/servicios/{service}', [App\Http\Controllers\Admin\ServiceController::class, 'destroy'])->name('admin.services.destroy');
-
         // Admin - Entes Afiliados
         Route::get('/entes', [App\Http\Controllers\Admin\PartnerController::class, 'index'])->name('admin.partners.index')->middleware('permission:partners.view');
         Route::get('/entes/crear', [App\Http\Controllers\Admin\PartnerController::class, 'create'])->name('admin.partners.create')->middleware('permission:partners.create');

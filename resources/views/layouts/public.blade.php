@@ -28,10 +28,6 @@
                         <li class="nav-item"><a class="nav-link {{ request()->routeIs('news.*') ? 'active' : '' }}" href="{{ route('news.index') }}">Noticias</a></li>
                         <li class="nav-item"><a class="nav-link {{ request()->routeIs('entes.*') ? 'active' : '' }}" href="{{ route('entes.index') }}">Entes</a></li>
                         <li class="nav-item"><a class="nav-link {{ request()->routeIs('about.index') ? 'active' : '' }}" href="{{ route('about.index') }}">Sobre Nosotros</a></li>
-                        <!-- <li class="nav-item"><a class="nav-link" href="{{ route('contact.index') }}">Contacto</a></li> -->
-                        <!--
-                        <li class="nav-item"><a class="nav-link" href="{{ url('/admin/login') }}">Gestión</a></li>
-                        -->
                         <li class="nav-item dropdown">
                             <a class="nav-link" href="#" id="serviciosDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">Intranet GDC</a>
                             <ul class="dropdown-menu dropdown-menu-end">

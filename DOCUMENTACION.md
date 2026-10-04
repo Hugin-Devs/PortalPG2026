@@ -36,17 +36,18 @@ Portal2026/
 │   ├── Http/
 │   │   ├── Controllers/
 │   │   │   ├── Admin/            # Auth, Dashboard, News, Category, User,
-│   │   │   │                     # Partner, Media, OrgMember, About, Role, Service
+│   │   │   │                     # Partner, Media, OrgMember, About, Role, Rrss
 │   │   │   └── Public/           # Home, News, Ente, About, Contact, Search, Page
 │   │   └── Middleware/
 │   │       ├── CheckPermission.php   # alias 'permission' (superadmin tiene bypass)
 │   │       └── CheckRole.php         # alias 'role'
 │   └── Models/                   # Category, Media, OrgMember, Page, Partner,
-│                                 # Permission, Post, Service, Setting, User
+│                                 # Permission, Post, Setting, User
 ├── database/
-│   ├── migrations/               # 14 migraciones (incl. org_members, permissions,
+│   ├── migrations/               # 15 migraciones (incl. org_members, permissions,
 │   │                             #  role_permission con unique(role, permission_id))
-│   └── seeders/                  # Database, Category, Post, User, Permission
+│   └── seeders/                  # Database, Category, Post, User, Permission,
+│                                 # ContactSetting, SocialSetting
 ├── public/
 │   ├── build/                    # Assets compilados por Vite
 │   ├── images/                   # Logo e imágenes estáticas
@@ -62,7 +63,7 @@ Portal2026/
 │       │                         # search, page
 │       └── admin/                # auth, dashboard, news, categories, users,
 │                                 # partners, media, org-members, about, roles,
-│                                 # services (vistas listas, rutas deshabilitadas)
+│                                 # contact, rrss
 ├── routes/web.php
 ├── vite.config.js
 ├── composer.json
@@ -116,22 +117,7 @@ Portal2026/
 | timestamps | | |
 | deleted_at | timestamp | softDeletes |
 
-### 4.4 services — **tabla dormida, no usada por el front**
-La página pública de Entes usa `partners` (ver 4.5). El CRUD admin de servicios está omitido y esta tabla queda reservada para un hipotético módulo de servicios institucionales (PNI, Visa, SIVERIF… según SPECS).
-| Campo | Tipo | Notas |
-|---|---|---|
-| id | bigint PK | |
-| title | varchar(255) | |
-| slug | varchar(255) | unique |
-| description | text | nullable |
-| content | longtext | nullable |
-| icon | varchar(255) | nullable |
-| external_url | varchar(255) | nullable |
-| order | integer | default 0 |
-| is_active | boolean | default true |
-| timestamps | | |
-
-### 4.5 partners (Entes Afiliados)
+### 4.4 partners (Entes Afiliados)
 | Campo | Tipo | Notas |
 |---|---|---|
 | id | bigint PK | |
@@ -144,7 +130,7 @@ La página pública de Entes usa `partners` (ver 4.5). El CRUD admin de servicio
 | is_active | boolean | default true |
 | timestamps | | |
 
-### 4.6 pages
+### 4.5 pages
 | Campo | Tipo | Notas |
 |---|---|---|
 | id | bigint PK | |
@@ -154,7 +140,7 @@ La página pública de Entes usa `partners` (ver 4.5). El CRUD admin de servicio
 | is_active | boolean | default true |
 | timestamps | | |
 
-### 4.7 media
+### 4.6 media
 | Campo | Tipo | Notas |
 |---|---|---|
 | id | bigint PK | |
@@ -166,7 +152,7 @@ La página pública de Entes usa `partners` (ver 4.5). El CRUD admin de servicio
 | user_id | bigint FK | uploader |
 | timestamps | | |
 
-### 4.8 settings
+### 4.7 settings
 | Campo | Tipo | Notas |
 |---|---|---|
 | id | bigint PK | |
@@ -174,7 +160,7 @@ La página pública de Entes usa `partners` (ver 4.5). El CRUD admin de servicio
 | value | text | nullable |
 | timestamps | | |
 
-### 4.9 org_members (Estructura Organizativa)
+### 4.8 org_members (Estructura Organizativa)
 | Campo | Tipo | Notas |
 |---|---|---|
 | id | bigint PK | |
@@ -184,7 +170,7 @@ La página pública de Entes usa `partners` (ver 4.5). El CRUD admin de servicio
 | is_active | boolean | default true |
 | timestamps | | |
 
-### 4.10 permissions
+### 4.9 permissions
 | Campo | Tipo | Notas |
 |---|---|---|
 | id | bigint PK | |
@@ -193,7 +179,7 @@ La página pública de Entes usa `partners` (ver 4.5). El CRUD admin de servicio
 | group | varchar(255) | agrupación en la UI de roles |
 | timestamps | | |
 
-### 4.11 role_permission (rol ↔ permiso)
+### 4.10 role_permission (rol ↔ permiso)
 | Campo | Tipo | Notas |
 |---|---|---|
 | id | bigint PK | |
@@ -203,7 +189,7 @@ La página pública de Entes usa `partners` (ver 4.5). El CRUD admin de servicio
 
 ---
 
-### 4.12 contacts (mensajes del formulario)
+### 4.11 contacts (mensajes del formulario)
 | Campo | Tipo | Notas |
 |---|---|---|
 | id | bigint PK | |
@@ -256,8 +242,6 @@ Todas las rutas de gestión llevan además `middleware('permission:...')` (ver s
 | GET/POST | `/admin/roles` | `roles.manage` | `Admin\RoleController` |
 | GET/PUT | `/admin/rrss` | `rrss.manage` | `Admin\RrssController` |
 
-> **Nota:** las rutas del CRUD de **servicios** en el admin están **comentadas deliberadamente** (`routes/web.php`), junto con su enlace en el sidebar. El módulo existe a medias (controlador y vistas) pero su alcance no está definido; se omitió a propósito.
-
 ---
 
 ## 6. Controladores
@@ -273,7 +257,6 @@ Todas las rutas de gestión llevan además `middleware('permission:...')` (ver s
 | `EnteController` | `index()` / `show($slug)` | ✅ Listado y detalle de entes (sobre `partners`, activos y por `order`) |
 | `AboutController` | `index()` | ✅ Página institucional |
 | `ContactController` | `index, store` | ✅ Valida y **persiste** en `contacts` (bandeja en el admin) |
-| | `store()` | ⚠️ Valida y confirma con mensaje; **no persiste** (no hay tabla `contacts`) |
 | `PageController` | `show($slug)` | ✅ Páginas estáticas |
 | `SearchController` | `index()` | ✅ Búsqueda por título/contenido/extracto |
 
@@ -293,7 +276,6 @@ Todas las rutas de gestión llevan además `middleware('permission:...')` (ver s
 | `ContactController` | `editInfo, updateInfo, messages, showMessage, destroyMessage` | ✅ Info de contacto en `settings` (`contact_address/phone/email/hours/map_url`) + bandeja de mensajes (`contacts`); parcial público `_contact-info` con defaults |
 | `RoleController` | `index, update` | ✅ Matriz rol×permiso (un formulario JS por rol) |
 | `RrssController` | `index, update` | ✅ Redes sociales: 7 settings `social_facebook/instagram/youtube/x/threads/telegram/whatsapp` (`url` + `max:255`) |
-| `ServiceController` | CRUD completo | ⏸️ **Omitido** — rutas comentadas, alcance no definido |
 
 ---
 
@@ -337,7 +319,6 @@ Todas las rutas de gestión llevan además `middleware('permission:...')` (ver s
 | Contacto | `contact/{index,messages,message-show}` | ✅ Info (5 campos) + bandeja con estado Nuevo/Leído, detalle y borrado |
 | Redes Sociales | `rrss/index.blade.php` | ✅ 7 URLs de redes (vacío = oculto en el sitio) |
 | Roles y permisos | `roles/index.blade.php` | ✅ Matriz con envío JS |
-| Servicios | `services/{index,create,edit}` | ⏸️ Vistas listas, rutas deshabilitadas |
 
 ### 7.4 Vistas de error (`resources/views/errors/`)
 
@@ -492,8 +473,15 @@ php artisan serve
 - [x] Lazy loading (`loading="lazy" decoding="async"`) en las imágenes bajo el fold: grids de noticias (inicio/listado/categoría), entes, estructura organizativa y logos del footer; hero e imagen del artículo quedan eager (LCP) — SPECS §9.2
 
 ### 🔴 Pendiente
+- [ ] **Dashboard real** — hoy es stub ("Bienvenido" + logout); SPECS §5.4 pide tarjetas de conteos (noticias, usuarios, vistas del mes), últimas noticias y gráfico opcional
+- [ ] **CRUD de páginas estáticas en el admin** — tabla `pages` vacía y sin rutas admin; `/pagina/{slug}` siempre responde 404
+- [ ] **Usuarios: `is_active` + `last_login_at`** — columnas inexistentes; sin "última conexión" en el listado ni bloqueo de login a inactivos (SPECS §7.1)
+- [ ] **Medios: subida múltiple + "Copiar URL"** — hoy solo 1 archivo por vez (SPECS §5.4)
+- [ ] **Tags en noticias** — SPECS §5.4; sin columna ni UI (form/listado/filtro)
+- [ ] **Filtro por categoría en `/noticias`** — SPECS §4.5 pide navegación por categorías (tabs/sidebar)
+- [ ] **Configuración general** (nombre del sitio, logo) — SPECS §5.4; el nombre "Configuración" quedó libre tras renombrar el módulo a "Redes Sociales"
+- [ ] **Navbar: "Jubilados" con `href="#"`** — enlace pendiente de destino real
 - [ ] **Front de la página de detalle de entes** (`/entes/{slug}`) — skeleton funcional (logo, nombre, descripción, botón); falta definir el diseño (¿banner?, ¿más campos?)
-- [ ] **Módulo de servicios en el admin** — omitido a propósito: rutas comentadas (`routes/web.php`); la tabla `services` está dormida (la página pública de Entes usa `partners`)
 - [ ] **Contenido del `PartnerSeeder`** — borrador con array vacío, pendiente que se indique el listado de entes
 - [ ] Videos YouTube en home: `$videos` llega vacío del `HomeController` (fuente de datos sin definir)
 - [ ] **Gacetas Oficiales** — funcionalidad por definir (publicación/listado de gacetas oficiales); no contemplada en SPECS
