@@ -80,6 +80,9 @@ Route::prefix('admin')->group(function () {
         // Admin - Contacto
         Route::get('/contacto', [App\Http\Controllers\Admin\ContactController::class, 'editInfo'])->name('admin.contact.edit')->middleware('permission:contact.edit');
         Route::put('/contacto', [App\Http\Controllers\Admin\ContactController::class, 'updateInfo'])->name('admin.contact.update')->middleware('permission:contact.edit');
+        Route::get('/contacto/mensajes', [App\Http\Controllers\Admin\ContactController::class, 'messages'])->name('admin.contact.messages')->middleware('permission:contact.view');
+        Route::get('/contacto/mensajes/{contact}', [App\Http\Controllers\Admin\ContactController::class, 'showMessage'])->name('admin.contact.message.show')->middleware('permission:contact.view');
+        Route::delete('/contacto/mensajes/{contact}', [App\Http\Controllers\Admin\ContactController::class, 'destroyMessage'])->name('admin.contact.message.destroy')->middleware('permission:contact.delete');
 
         // Admin - Estructura Organizativa
         Route::get('/estructura', [App\Http\Controllers\Admin\OrgMemberController::class, 'index'])->name('admin.org-members.index')->middleware('permission:org.view');

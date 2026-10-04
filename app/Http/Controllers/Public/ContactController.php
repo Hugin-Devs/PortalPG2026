@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Public;
 
 use App\Http\Controllers\Controller;
+use App\Models\Contact;
 use Illuminate\Http\Request;
 
 class ContactController extends Controller
@@ -21,7 +22,8 @@ class ContactController extends Controller
             'message' => 'required',
         ]);
 
-        // Por ahora solo redirige con éxito
+        Contact::create($data);
+
         return back()->with('success', 'Mensaje enviado correctamente. Nos pondremos en contacto pronto.');
     }
 }

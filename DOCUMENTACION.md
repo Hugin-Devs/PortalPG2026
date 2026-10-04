@@ -203,6 +203,19 @@ La página pública de Entes usa `partners` (ver 4.5). El CRUD admin de servicio
 
 ---
 
+### 4.12 contacts (mensajes del formulario)
+| Campo | Tipo | Notas |
+|---|---|---|
+| id | bigint PK | |
+| name | varchar(255) | |
+| email | varchar(255) | |
+| subject | varchar(255) | |
+| message | text | |
+| read_at | timestamp | nullable — se marca al abrir el detalle en el admin |
+| timestamps | | |
+
+---
+
 ## 5. Rutas
 
 ### 5.1 Públicas
@@ -238,6 +251,7 @@ Todas las rutas de gestión llevan además `middleware('permission:...')` (ver s
 | GET/POST/DELETE | `/admin/medios` | `media.*` | `Admin\MediaController` |
 | GET/PUT | `/admin/nosotros` | `about.edit` | `Admin\AboutController` |
 | GET/PUT | `/admin/contacto` | `contact.edit` | `Admin\ContactController` |
+| GET/DELETE | `/admin/contacto/mensajes` (+ `/{contact}`) | `contact.view` / `contact.delete` | `Admin\ContactController` |
 | GET | `/admin/estructura` (+ crear/editar/PUT/DELETE) | `org.*` | `Admin\OrgMemberController` |
 | GET/POST | `/admin/roles` | `roles.manage` | `Admin\RoleController` |
 
@@ -257,7 +271,7 @@ Todas las rutas de gestión llevan además `middleware('permission:...')` (ver s
 | | `category($slug)` | ✅ Filtrado por categoría |
 | `EnteController` | `index()` / `show($slug)` | ✅ Listado y detalle de entes (sobre `partners`, activos y por `order`) |
 | `AboutController` | `index()` | ✅ Página institucional |
-| `ContactController` | `index()` | ✅ Formulario |
+| `ContactController` | `index, store` | ✅ Valida y **persiste** en `contacts` (bandeja en el admin) |
 | | `store()` | ⚠️ Valida y confirma con mensaje; **no persiste** (no hay tabla `contacts`) |
 | `PageController` | `show($slug)` | ✅ Páginas estáticas |
 | `SearchController` | `index()` | ✅ Búsqueda por título/contenido/extracto |
@@ -275,7 +289,7 @@ Todas las rutas de gestión llevan además `middleware('permission:...')` (ver s
 | `MediaController` | `index, store, destroy` | ✅ Sube a disco `public/uploads`, requiere `storage:link`; **biblioteca reutilizable** desde el modal "Elegir de la biblioteca" de noticias |
 | `OrgMemberController` | CRUD completo | ✅ Estructura organizativa |
 | `AboutController` | `index, update` | ✅ Edición de "Sobre Nosotros" |
-| `ContactController` | `editInfo, updateInfo` | ✅ Información de contacto en `settings` (`contact_address/phone/email/hours/map_url`); parcial público `_contact-info` con defaults |
+| `ContactController` | `editInfo, updateInfo, messages, showMessage, destroyMessage` | ✅ Info de contacto en `settings` (`contact_address/phone/email/hours/map_url`) + bandeja de mensajes (`contacts`); parcial público `_contact-info` con defaults |
 | `RoleController` | `index, update` | ✅ Matriz rol×permiso (un formulario JS por rol) |
 | `ServiceController` | CRUD completo | ⏸️ **Omitido** — rutas comentadas, alcance no definido |
 
@@ -317,7 +331,7 @@ Todas las rutas de gestión llevan además `middleware('permission:...')` (ver s
 | Medios | `media/index.blade.php` | ✅ Grid + subida |
 | Estructura org. | `org-members/{index,create,edit}` | ✅ |
 | Sobre Nosotros | `about/index.blade.php` | ✅ Edición inline |
-| Contacto | `contact/index.blade.php` | ✅ 5 campos (dirección, teléfono, email, horario, URL del mapa) |
+| Contacto | `contact/{index,messages,message-show}` | ✅ Info (5 campos) + bandeja con estado Nuevo/Leído, detalle y borrado |
 | Roles y permisos | `roles/index.blade.php` | ✅ Matriz con envío JS |
 | Servicios | `services/{index,create,edit}` | ⏸️ Vistas listas, rutas deshabilitadas |
 
@@ -456,13 +470,13 @@ php artisan serve
 - [x] `storage:link` configurado
 - [x] Paleta y tipografía institucional (`#273376`, Georama / Instrument Sans)
 - [x] Módulo de contacto: edición de la información visible (dirección, teléfono, email, horario, mapa) desde `/admin/contacto` vía `settings`, con parcial pública `_contact-info` en home + /contacto + sobre-nosotros
+- [x] Persistencia de mensajes del formulario: tabla `contacts`, guardado en `Public\ContactController@store` y bandeja en `/admin/contacto/mensajes` (paginada, badge Nuevo/Leído, detalle que marca `read_at`, borrado)
 
 ### 🔴 Pendiente
 - [ ] **Front de la página de detalle de entes** (`/entes/{slug}`) — skeleton funcional (logo, nombre, descripción, botón); falta definir el diseño (¿banner?, ¿más campos?)
 - [ ] **Redes sociales en header y footer** (SPECS §4.1: Facebook, Instagram, YouTube, X, Threads, Telegram, WhatsApp) — pendiente de URLs reales
 - [ ] **Módulo de servicios en el admin** — omitido a propósito: rutas comentadas (`routes/web.php`); la tabla `services` está dormida (la página pública de Entes usa `partners`)
 - [ ] **Contenido del `PartnerSeeder`** — borrador con array vacío, pendiente que se indique el listado de entes
-- [ ] Contacto: persistencia de mensajes (hoy valida y confirma; no existe tabla `contacts`)
 - [ ] Videos YouTube en home: `$videos` llega vacío del `HomeController` (fuente de datos sin definir)
 - [ ] Editor WYSIWYG para contenido (hoy es `<textarea>` con HTML a mano — SPECS §9.4 pide TinyMCE/Trix)
 - [ ] SEO: sitemap.xml, meta tags dinámicos (og:image, description)
