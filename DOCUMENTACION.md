@@ -376,6 +376,8 @@ Creados por `UserSeeder` — password: `password`
 | `admin2@gdc.gob.ve` | admin |
 | `editor@gdc.gob.ve` | editor |
 
+> El seed es **autoritativo en nombre y rol**: si cambias el rol de un usuario desde `/admin/usuarios`, un `php artisan db:seed` lo restaura al canónico (el password de usuarios existentes no se pisa). Si el "superadmin" desaparece del panel, es que su rol fue editado — ejecuta el seed o corrige el rol en BD.
+
 ---
 
 ## 10. Seeders

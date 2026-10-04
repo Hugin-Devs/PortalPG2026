@@ -10,31 +10,31 @@ class UserSeeder extends Seeder
 {
     public function run(): void
     {
-        User::firstOrCreate(
-            ['email' => 'admin@gdc.gob.ve'],
-            [
-                'name' => 'Super Administrador',
-                'password' => Hash::make('password'),
-                'role' => 'superadmin',
-            ]
-        );
+        // El seed es autoritativo en name/role: si alguien cambió el rol desde
+        // /admin/usuarios, un re-seed restaura el estado canónico.
+        // El password solo se asigna al crear (no se pisa en usuarios existentes).
+        $users = [
+            ['email' => 'admin@gdc.gob.ve', 'name' => 'Super Administrador', 'role' => 'superadmin'],
+            ['email' => 'editor@gdc.gob.ve', 'name' => 'Editor Principal', 'role' => 'editor'],
+            ['email' => 'admin2@gdc.gob.ve', 'name' => 'Administrador', 'role' => 'admin'],
+        ];
 
-        User::firstOrCreate(
-            ['email' => 'editor@gdc.gob.ve'],
-            [
-                'name' => 'Editor Principal',
-                'password' => Hash::make('password'),
-                'role' => 'editor',
-            ]
-        );
+        foreach ($users as $attrs) {
+            $user = User::firstOrCreate(
+                ['email' => $attrs['email']],
+                [
+                    'name' => $attrs['name'],
+                    'password' => Hash::make('password'),
+                    'role' => $attrs['role'],
+                ]
+            );
 
-        User::firstOrCreate(
-            ['email' => 'admin2@gdc.gob.ve'],
-            [
-                'name' => 'Administrador',
-                'password' => Hash::make('password'),
-                'role' => 'admin',
-            ]
-        );
+            if ($user->name !== $attrs['name'] || $user->role !== $attrs['role']) {
+                $user->update([
+                    'name' => $attrs['name'],
+                    'role' => $attrs['role'],
+                ]);
+            }
+        }
     }
 }
