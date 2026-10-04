@@ -13,16 +13,18 @@ class PostSeeder extends Seeder
     public function run(): void
     {
         $category = \App\Models\Category::first();
-        $user = \App\Models\User::first() ?? \App\Models\User::create([
-            'name' => 'Admin',
+        $user = \App\Models\User::first() ?? \App\Models\User::firstOrCreate([
             'email' => 'admin@gdc.gob.ve',
+        ], [
+            'name' => 'Admin',
             'password' => bcrypt('password'),
         ]);
 
         for ($i = 1; $i <= 5; $i++) {
-            \App\Models\Post::create([
-                'title' => "Noticia Destacada $i",
+            \App\Models\Post::updateOrCreate([
                 'slug' => "noticia-destacada-$i",
+            ], [
+                'title' => "Noticia Destacada $i",
                 'content' => "Contenido de la noticia $i...",
                 'user_id' => $user->id,
                 'category_id' => $category->id,

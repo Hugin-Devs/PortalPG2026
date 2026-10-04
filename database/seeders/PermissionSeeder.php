@@ -53,36 +53,34 @@ class PermissionSeeder extends Seeder
             );
         }
 
-        // Asignar todos los permisos a superadmin
-        $allIds = Permission::pluck('id');
-        $data = $allIds->map(fn($id) => [
-            'role' => 'superadmin',
-            'permission_id' => $id,
-            'created_at' => now(),
-            'updated_at' => now(),
-        ])->toArray();
-        DB::table('role_permission')->insert($data);
+        // Asignación de permisos por rol (idempotente: upsert contra el índice
+        // único role+permission_id, seguro de re-ejecutar sin duplicar ni fallar)
+        $assign = function (string $role, $ids): void {
+            $rows = $ids->map(fn ($id) => [
+                'role' => $role,
+                'permission_id' => $id,
+                'created_at' => now(),
+                'updated_at' => now(),
+            ])->toArray();
 
-        // Asignar permisos básicos a admin
+            if ($rows !== []) {
+                DB::table('role_permission')->upsert(
+                    $rows,
+                    ['role', 'permission_id'],
+                    ['updated_at']
+                );
+            }
+        };
+
+        // Todos los permisos a superadmin
+        $assign('superadmin', Permission::pluck('id'));
+
+        // Permisos básicos a admin
         $adminSlugs = ['news.view', 'news.create', 'news.edit', 'categories.view', 'categories.create', 'categories.edit', 'categories.delete', 'partners.view', 'media.view', 'media.upload', 'about.edit', 'org.view', 'org.create', 'org.edit'];
-        $adminIds = Permission::whereIn('slug', $adminSlugs)->pluck('id');
-        $dataAdmin = $adminIds->map(fn($id) => [
-            'role' => 'admin',
-            'permission_id' => $id,
-            'created_at' => now(),
-            'updated_at' => now(),
-        ])->toArray();
-        DB::table('role_permission')->insert($dataAdmin);
+        $assign('admin', Permission::whereIn('slug', $adminSlugs)->pluck('id'));
 
-        // Asignar permisos mínimos a editor
+        // Permisos mínimos a editor
         $editorSlugs = ['news.view', 'news.create', 'news.edit'];
-        $editorIds = Permission::whereIn('slug', $editorSlugs)->pluck('id');
-        $dataEditor = $editorIds->map(fn($id) => [
-            'role' => 'editor',
-            'permission_id' => $id,
-            'created_at' => now(),
-            'updated_at' => now(),
-        ])->toArray();
-        DB::table('role_permission')->insert($dataEditor);
+        $assign('editor', Permission::whereIn('slug', $editorSlugs)->pluck('id'));
     }
 }

@@ -22,7 +22,7 @@ class CategorySeeder extends Seeder
         ];
 
         foreach ($categories as $cat) {
-            \App\Models\Category::create($cat);
+            \App\Models\Category::updateOrCreate(['slug' => $cat['slug']], $cat);
         }
     }
 }
