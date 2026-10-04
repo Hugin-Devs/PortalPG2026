@@ -33,7 +33,7 @@
                         <li class="nav-item"><a class="nav-link" href="{{ url('/admin/login') }}">Gestión</a></li>
                         -->
                         <li class="nav-item dropdown">
-                            <a class="nav-link dropdown-toggle" href="#" id="serviciosDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">Intranet GDC</a>
+                            <a class="nav-link" href="#" id="serviciosDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">Intranet GDC</a>
                             <ul class="dropdown-menu dropdown-menu-end">
                                 <li><a class="dropdown-item" target="_blank" rel="noopener" href="https://www.gdc.gob.ve/extranet/">Funcionarios Activos</a></li>
                                 <li><a class="dropdown-item" href="#">Jubilados</a></li>
