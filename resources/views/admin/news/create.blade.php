@@ -3,7 +3,7 @@
 @section('content')
 <div class="container">
     <h1>Nueva Noticia</h1>
-    <form action="{{ url('/admin/noticias') }}" method="POST">
+    <form action="{{ url('/admin/noticias') }}" method="POST" enctype="multipart/form-data">
         @csrf
         <div class="mb-3">
             <label>Título</label>
@@ -25,6 +25,7 @@
             <label>Contenido</label>
             <textarea name="content" class="form-control" rows="10" required></textarea>
         </div>
+        @include('admin.news._image-field')
         <button type="submit" class="btn btn-primary">Guardar</button>
     </form>
 </div>

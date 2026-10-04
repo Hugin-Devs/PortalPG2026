@@ -267,11 +267,11 @@ Todas las rutas de gestión llevan además `middleware('permission:...')` (ver s
 |---|---|---|
 | `AuthController` | `showLogin` / `login` / `logout` | ✅ |
 | `DashboardController` | `index()` | ✅ |
-| `NewsController` | CRUD completo (`index, create, store, edit, update, destroy`) | ✅ Slug automático, soft deletes |
+| `NewsController` | CRUD completo (`index, create, store, edit, update, destroy`) | ✅ Slug automático, soft deletes; **imagen destacada**: archivo nuevo (≤10 MB, `image|mimes:...`) o path de la biblioteca (validado `Rule::exists('media','path')` con `mime_type LIKE image/%`); archivos nuevos se auto-registran en `media` (carpeta `uploads/`); prioridad: quitar > archivo > biblioteca > conservar; **no** borra archivos al reemplazar (limpieza desde `/admin/medios`) |
 | `CategoryController` | CRUD completo | ✅ |
 | `UserController` | CRUD completo | ✅ Asignación de roles |
 | `PartnerController` | CRUD completo | ✅ Entes afiliados (footer); logo por **upload** a `partners/` en disco `public` (reemplaza y borra el anterior; checkbox "quitar imagen"; borra archivo al eliminar el ente) |
-| `MediaController` | `index, store, destroy` | ✅ Sube a disco `public/uploads`, requiere `storage:link` |
+| `MediaController` | `index, store, destroy` | ✅ Sube a disco `public/uploads`, requiere `storage:link`; **biblioteca reutilizable** desde el modal "Elegir de la biblioteca" de noticias |
 | `OrgMemberController` | CRUD completo | ✅ Estructura organizativa |
 | `AboutController` | `index, update` | ✅ Edición de "Sobre Nosotros" |
 | `RoleController` | `index, update` | ✅ Matriz rol×permiso (un formulario JS por rol) |
@@ -308,7 +308,7 @@ Todas las rutas de gestión llevan además `middleware('permission:...')` (ver s
 |---|---|---|
 | Auth | `auth/login.blade.php` | ✅ Login independiente |
 | Dashboard | `dashboard/index.blade.php` | ✅ |
-| Noticias | `news/{index,create,edit}` | ✅ |
+| Noticias | `news/{index,create,edit}` + parcial `news/_image-field` | ✅ Imagen destacada: preview + upload + modal de biblioteca (vanilla JS inline) |
 | Categorías | `categories/{index,create,edit}` | ✅ |
 | Usuarios | `users/{index,create,edit}` | ✅ |
 | Entes afiliados | `partners/{index,create,edit}` | ✅ Subida de logo (`file`, preview, quitar) |
@@ -449,6 +449,7 @@ php artisan serve
 - [x] Contador de visitas (`views`) en detalle de noticia
 - [x] Footer con entes afiliados desde BD
 - [x] Gestor de medios (subida a `public/uploads` vía disco `public`)
+- [x] Imagen destacada de noticias integrada con la biblioteca: upload propio (≤10 MB) **o** selección desde Medios, auto-registro en `media`, quitar imagen; 4 vistas públicas renderizan con `asset('storage/...')`
 - [x] `storage:link` configurado
 - [x] Paleta y tipografía institucional (`#273376`, Georama / Instrument Sans)
 

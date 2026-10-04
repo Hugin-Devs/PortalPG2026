@@ -3,7 +3,7 @@
 @section('content')
 <div class="container">
     <h1>Editar Noticia</h1>
-    <form action="{{ url('/admin/noticias/' . $post->id) }}" method="POST">
+    <form action="{{ url('/admin/noticias/' . $post->id) }}" method="POST" enctype="multipart/form-data">
         @csrf
         @method('PUT')
         <div class="mb-3">
@@ -26,6 +26,7 @@
             <label>Contenido</label>
             <textarea name="content" class="form-control" rows="10" required>{{ old('content', $post->content) }}</textarea>
         </div>
+        @include('admin.news._image-field')
         <div class="mb-3 form-check">
             <input type="checkbox" name="is_featured" class="form-check-input" value="1" id="isFeatured" {{ $post->is_featured ? 'checked' : '' }}>
             <label class="form-check-label" for="isFeatured">Destacado</label>
