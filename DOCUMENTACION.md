@@ -335,6 +335,15 @@ Todas las rutas de gestión llevan además `middleware('permission:...')` (ver s
 | Roles y permisos | `roles/index.blade.php` | ✅ Matriz con envío JS |
 | Servicios | `services/{index,create,edit}` | ⏸️ Vistas listas, rutas deshabilitadas |
 
+### 7.4 Vistas de error (`resources/views/errors/`)
+
+Páginas personalizadas en español para todos los tipos de error HTTP, con botón **Volver** (history con fallback a `/`) e **Ir al inicio**:
+
+| Código | Tipo | Presentación |
+|---|---|---|
+| 400, 401, 403, 404, 405, 408, 410, 419, 422, 429 | 4xx | Extienden `layouts.public` (parcial `_box`); 419 agrega **Recargar e intentar**, 401 **Iniciar sesión**, 403 **Ir al panel** si hay sesión |
+| 500, 503 | 5xx | Standalone (parcial `_standalone`, HTML+CSS inline, sin layout/BD/Vite) para renderizar aunque el sitio esté caído; 503 agrega **Reintentar** |
+
 ---
 
 ## 8. Diseño y Paleta de Colores
@@ -472,6 +481,7 @@ php artisan serve
 - [x] Paleta y tipografía institucional (`#273376`, Georama / Instrument Sans)
 - [x] Módulo de contacto: edición de la información visible (dirección, teléfono, email, horario, mapa) desde `/admin/contacto` vía `settings`, con parcial pública `_contact-info` en home + /contacto + sobre-nosotros
 - [x] Persistencia de mensajes del formulario: tabla `contacts`, guardado en `Public\ContactController@store` y bandeja en `/admin/contacto/mensajes` (paginada, badge Nuevo/Leído, detalle que marca `read_at`, borrado)
+- [x] Vistas de error en español (400/401/403/404/405/408/410/419/422/429/500/503) con botones Volver/Inicio (y Recargar en 419, Reintentar en 503); 5xx standalone sin dependencias
 
 ### 🔴 Pendiente
 - [ ] **Front de la página de detalle de entes** (`/entes/{slug}`) — skeleton funcional (logo, nombre, descripción, botón); falta definir el diseño (¿banner?, ¿más campos?)
