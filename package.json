@@ -2,7 +2,7 @@
     "private": true,
     "scripts": {
         "dev": "vite",
-        "build": "vite build"
+        "build": "node scripts/copy-tinymce.js && vite build"
     },
     "devDependencies": {
         "@popperjs/core": "^2.11.8",
@@ -10,6 +10,11 @@
         "bootstrap": "^5.3.8",
         "laravel-vite-plugin": "^0.7.2",
         "sass": "^1.101.0",
+        "tinymce-i18n": "^26.9.28",
         "vite": "^4.0.0"
+    },
+    "dependencies": {
+        "@fortawesome/fontawesome-free": "^7.3.1",
+        "tinymce": "^8.9.2"
     }
 }
