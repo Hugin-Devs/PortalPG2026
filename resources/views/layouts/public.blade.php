@@ -63,8 +63,9 @@
                         <li><a href="{{ url('/') }}" class="text-decoration-none footer-link"><i class="fas fa-arrow-right text-primary me-1"></i><span class="footer-text">Inicio</span></a></li>
                         <li><a href="{{ route('news.index') }}" class="text-decoration-none footer-link"><i class="fas fa-arrow-right text-primary me-1"></i><span class="footer-text">Noticias</span></a></li>
                         <li><a href="{{ route('entes.index') }}" class="text-decoration-none footer-link"><i class="fas fa-arrow-right text-primary me-1"></i><span class="footer-text">Entes</span></a></li>
-                        <li><a href="{{ route('contact.index') }}" class="text-decoration-none footer-link"><i class="fas fa-arrow-right text-primary me-1"></i><span class="footer-text">Contacto</span></a></li>
                         <li><a href="{{ route('about.index') }}" class="text-decoration-none footer-link"><i class="fas fa-arrow-right text-primary me-1"></i><span class="footer-text">Sobre Nosotros</span></a></li>
+                        <li><a href="{{ route('gacetas.index') }}" class="text-decoration-none footer-link"><i class="fas fa-arrow-right text-primary me-1"></i><span class="footer-text">Gacetas Oficiales</span></a></li>
+                        <li><a href="{{ route('contact.index') }}" class="text-decoration-none footer-link"><i class="fas fa-arrow-right text-primary me-1"></i><span class="footer-text">Contacto</span></a></li>
                     </ul>
                 </div>
                 <div class="col-md-3">

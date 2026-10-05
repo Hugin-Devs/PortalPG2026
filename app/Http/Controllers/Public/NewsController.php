@@ -15,7 +15,9 @@ class NewsController extends Controller
             ->latest()
             ->paginate(9);
 
-        return view('public.news', compact('posts'));
+        $categories = $this->categoriesForNav();
+
+        return view('public.news', compact('posts', 'categories'));
     }
 
     public function show($slug)
@@ -47,6 +49,20 @@ class NewsController extends Controller
             ->latest()
             ->paginate(9);
 
-        return view('public.news-category', compact('posts', 'category'));
+        $categories = $this->categoriesForNav();
+
+        return view('public.news-category', compact('posts', 'category', 'categories'));
+    }
+
+    private function categoriesForNav()
+    {
+        return Category::where('is_active', true)
+            ->withCount(['posts as published_count' => function ($q) {
+                $q->where('status', 'published');
+            }])
+            ->having('published_count', '>', 0)
+            ->orderBy('order')
+            ->orderBy('name')
+            ->get();
     }
 }
