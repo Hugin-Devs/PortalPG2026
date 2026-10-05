@@ -22,6 +22,8 @@ $n = ([regex]::Matches($r.Content, 'target="_blank" rel="noopener noreferrer"'))
 Check ($n -ge 4) ">=4 enlaces con target blank + noopener (got $n)" "noopener insuficiente (got $n)"
 Check ($r.Content -match 'facebook\.com/sharer/sharer\.php\?u=[a-z]+%3A%2F%2F') 'URL codificada (%3A%2F%2F)' 'URL sin codificar'
 Check ($r.Content -match 'navigator\.clipboard\.writeText') 'JS vanilla copiar' 'sin JS copiar'
+Check ($r.Content -match 'isSecureContext') 'guarda secure context' 'sin guarda isSecureContext'
+Check ($r.Content -match 'execCommand\(''copy''\)') 'fallback execCommand copy' 'sin fallback execCommand'
 Check (-not ($r.Content -match 'jquery|cdn\.jsdelivr.*share|addthis|sharethis')) 'sin librerias de terceros' 'libreria de compartir detectada'
 
 Write-Output '--- 2. Lazy loading en grids (bajo el fold) ---'

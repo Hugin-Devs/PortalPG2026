@@ -40,13 +40,36 @@
             <button type="button" class="btn btn-outline-secondary btn-sm" id="copyLinkBtn" aria-label="Copiar enlace"><i class="fa-solid fa-link me-1"></i><span id="copyLinkText">Copiar enlace</span></button>
         </div>
         <script>
+            function copyLinkFeedback(ok) {
+                var label = document.getElementById('copyLinkText');
+                var previous = label.textContent;
+                label.textContent = ok ? '¡Copiado!' : 'No se pudo copiar';
+                setTimeout(function () { label.textContent = previous; }, 2000);
+            }
+            function copyLinkFallback(text) {
+                var ta = document.createElement('textarea');
+                ta.value = text;
+                ta.setAttribute('readonly', '');
+                ta.style.position = 'fixed';
+                ta.style.opacity = '0';
+                document.body.appendChild(ta);
+                ta.select();
+                var ok = false;
+                try { ok = document.execCommand('copy'); } catch (e) { ok = false; }
+                document.body.removeChild(ta);
+                return ok;
+            }
             document.getElementById('copyLinkBtn').addEventListener('click', function () {
-                navigator.clipboard.writeText({!! json_encode($shareUrl) !!}).then(function () {
-                    var label = document.getElementById('copyLinkText');
-                    var previous = label.textContent;
-                    label.textContent = '¡Copiado!';
-                    setTimeout(function () { label.textContent = previous; }, 2000);
-                });
+                var url = {!! json_encode($shareUrl) !!};
+                if (navigator.clipboard && window.isSecureContext) {
+                    navigator.clipboard.writeText(url).then(function () {
+                        copyLinkFeedback(true);
+                    }).catch(function () {
+                        copyLinkFeedback(copyLinkFallback(url));
+                    });
+                } else {
+                    copyLinkFeedback(copyLinkFallback(url));
+                }
             });
         </script>
 
