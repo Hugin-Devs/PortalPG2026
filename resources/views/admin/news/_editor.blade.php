@@ -4,6 +4,7 @@
     document.addEventListener('DOMContentLoaded', function () {
         tinymce.init({
             selector: '#content',
+            license_key: 'gpl',
             language: 'es',
             language_url: '{{ asset('vendor/tinymce/langs/es.js') }}',
             base_url: '{{ asset('vendor/tinymce') }}',

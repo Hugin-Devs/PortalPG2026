@@ -57,6 +57,7 @@ $sess = Login 'admin@gdc.gob.ve'
 $r = Invoke-WebRequest "$base/admin/noticias/crear" -WebSession $sess -UseBasicParsing
 Check ($r.Content -match 'tinymce\.min\.js') 'script tinymce cargado' 'falta script tinymce'
 Check ($r.Content -match 'id="content"') 'textarea content presente' 'falta textarea content'
+Check ($r.Content -match "license_key") 'license_key gpl declarado' 'falta license_key'
 Check ($r.Content -match 'images_upload_handler') 'handler de subida configurado' 'falta handler subida'
 Check ($r.Content -match 'vendor/tinymce') 'base_url vendor/tinymce' 'falta base_url'
 Check ($r.Content -match "language_url") 'idioma configurado' 'falta idioma'
