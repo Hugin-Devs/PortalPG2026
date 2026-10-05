@@ -1,4 +1,4 @@
-<textarea name="content" id="content" class="form-control" rows="10" required>{{ $value ?? '' }}</textarea>
+<textarea name="content" id="content" class="form-control" rows="10">{{ $value ?? '' }}</textarea>
 <script src="{{ asset('vendor/tinymce/tinymce.min.js') }}"></script>
 <script>
     document.addEventListener('DOMContentLoaded', function () {
@@ -26,6 +26,8 @@
                     formData.append('_token', tokenInput ? tokenInput.value : '');
                     var xhr = new XMLHttpRequest();
                     xhr.open('POST', '{{ url('/admin/medios') }}');
+                    xhr.setRequestHeader('Accept', 'application/json');
+                    xhr.setRequestHeader('X-Requested-With', 'XMLHttpRequest');
                     xhr.upload.onprogress = function (e) {
                         if (e.lengthComputable && progress) { progress((e.loaded / e.total) * 100); }
                     };
@@ -50,5 +52,17 @@
                 });
             }
         });
+        var contentField = document.getElementById('content');
+        var form = contentField.closest('form');
+        if (form) {
+            form.addEventListener('submit', function (e) {
+                tinymce.triggerSave();
+                var v = (contentField.value || '').replace(/\s|&nbsp;/g, '');
+                if (!v || v === '<p></p>' || v === '<p><br></p>' || v === '<p><br/></p>') {
+                    e.preventDefault();
+                    alert('El campo Contenido es obligatorio.');
+                }
+            });
+        }
     });
 </script>

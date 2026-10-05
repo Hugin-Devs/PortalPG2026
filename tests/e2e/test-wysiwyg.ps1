@@ -58,6 +58,10 @@ $r = Invoke-WebRequest "$base/admin/noticias/crear" -WebSession $sess -UseBasicP
 Check ($r.Content -match 'tinymce\.min\.js') 'script tinymce cargado' 'falta script tinymce'
 Check ($r.Content -match 'id="content"') 'textarea content presente' 'falta textarea content'
 Check ($r.Content -match "license_key") 'license_key gpl declarado' 'falta license_key'
+Check ($r.Content -match "setRequestHeader\('Accept', 'application/json'\)") 'handler envia Accept json' 'falta Accept json en handler'
+Check ($r.Content -match "setRequestHeader\('X-Requested-With', 'XMLHttpRequest'\)") 'handler envia X-Requested-With' 'falta X-Requested-With'
+Check ($r.Content -notmatch 'id="content"[^>]*\brequired\b') 'textarea content sin required nativo' 'textarea tiene required nativo'
+Check ($r.Content -match 'triggerSave') 'guard de submit con triggerSave' 'falta guard de submit'
 Check ($r.Content -match 'images_upload_handler') 'handler de subida configurado' 'falta handler subida'
 Check ($r.Content -match 'vendor/tinymce') 'base_url vendor/tinymce' 'falta base_url'
 Check ($r.Content -match "language_url") 'idioma configurado' 'falta idioma'
@@ -94,6 +98,27 @@ Sql "INSERT INTO portal2026.posts (title, slug, excerpt, content, category_id, u
 $r = Invoke-WebRequest "$base/noticias/e2e-wysiwyg-plano" -UseBasicParsing
 Check ($r.Content -match '<br />|<br>') 'texto plano usa nl2br' 'sin <br> en texto plano'
 Check ($r.Content -notmatch 'Linea uno&lt;') 'sin escape residual' 'escape residual'
+
+Write-Output '--- 5b. Guardar noticia con imagen inline (data URI) ---'
+$b64 = 'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8BQDwAEhQGAhKmMIQAAAABJRU5ErkJggg=='
+$imgHtml = '<p>Texto con imagen:</p><img src="data:image/png;base64,' + $b64 + '" alt="x">'
+$r = Post-Form "$base/admin/noticias" @{
+    _token = $token; title = 'E2E WYSIWYG Imagen'; category_id = '1'
+    excerpt = 'Extracto img'; content = $imgHtml; status = 'published'
+} $sess
+Check ($r.FinalUri -match '/admin/noticias$') 'guarda con imagen inline' "uri: $($r.FinalUri)"
+$row = Sql "SELECT content FROM portal2026.posts WHERE title='E2E WYSIWYG Imagen';"
+Check ($row -match 'data:image/png;base64') 'imagen inline persistida' 'imagen no persistida'
+
+Write-Output '--- 5c. Contenido vacio -> validacion del servidor ---'
+Invoke-WebRequest "$base/admin/noticias/crear" -WebSession $sess -UseBasicParsing | Out-Null
+$r = Post-Form "$base/admin/noticias" @{
+    _token = $token; title = 'E2E WYSIWYG Vacio'; category_id = '1'
+    excerpt = 'x'; content = ''; status = 'draft'
+} $sess
+Check ($r.FinalUri -match '/crear') "vuelve al form con error (uri: $($r.FinalUri))" "no valido: $($r.FinalUri)"
+$cnt = Sql "SELECT COUNT(*) FROM portal2026.posts WHERE title='E2E WYSIWYG Vacio';"
+Check ($cnt -eq '0') 'no creo el post vacio' "creo post: $cnt"
 
 Write-Output '--- 6. Upload handler JSON (subida desde el editor) ---'
 $png = [Convert]::FromBase64String('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8BQDwAEhQGAhKmMIQAAAABJRU5ErkJggg==')
