@@ -288,7 +288,7 @@ Todas las rutas de gestión llevan además `middleware('permission:...')` (ver s
 | `CategoryController` | CRUD completo | ✅ |
 | `UserController` | CRUD completo | ✅ Asignación de roles + checkbox `is_active` (marcado por defecto al crear) + guard: no puedes desactivarte a ti mismo |
 | `PartnerController` | CRUD completo | ✅ Entes afiliados (footer); logo por **upload** a `partners/` en disco `public` (reemplaza y borra el anterior; checkbox "quitar imagen"; borra archivo al eliminar el ente) |
-| `MediaController` | `index, store, destroy` | ✅ Subida **múltiple** a disco `public/uploads` (`files[]`, 10 MB por archivo), requiere `storage:link`; **biblioteca reutilizable** desde el modal "Elegir de la biblioteca" de noticias |
+| `MediaController` | `index, store, destroy` | ✅ Subida **múltiple** a disco `public/uploads` (`files[]`, 10 MB por archivo), requiere `storage:link`; respuesta **JSON** (`{location}`) para el editor TinyMCE; **biblioteca reutilizable** desde el modal "Elegir de la biblioteca" de noticias + botón "Copiar URL" |
 | `OrgMemberController` | CRUD completo | ✅ Estructura organizativa |
 | `AboutController` | `index, update` | ✅ Edición de "Sobre Nosotros" |
 | `ContactController` | `editInfo, updateInfo, messages, showMessage, destroyMessage` | ✅ Info de contacto en `settings` (`contact_address/phone/email/hours/map_url`) + bandeja de mensajes (`contacts`); parcial público `_contact-info` con defaults |
@@ -313,7 +313,7 @@ Todas las rutas de gestión llevan además `middleware('permission:...')` (ver s
 |---|---|---|
 | `home.blade.php` | Hero slider de destacados (imagen de fondo con velo + fallback azul si no hay imagen), categorías, grid de noticias, "Lo más leído", slider de videos | ✅ |
 | `news.blade.php` | Listado paginado de noticias + filtro por categoría (sidebar desktop con conteos + buscador; pills en móvil) | ✅ |
-| `news-show.blade.php` | Detalle de noticia + botones de compartir (FB, X, WhatsApp, Telegram, copiar enlace con vanilla JS y fallback para HTTP plano) + relacionados | ✅ |
+| `news-show.blade.php` | Detalle de noticia + botones de compartir (FB, X, WhatsApp, Telegram, copiar enlace con vanilla JS y fallback para HTTP plano) + relacionados; contenido vía `rendered_content` (HTML del editor, con compat nl2br para texto plano legado) | ✅ |
 | `news-category.blade.php` | Noticias por categoría + mismo nav de categorías (activa resaltada) | ✅ |
 | `_category-pills.blade.php` | Pills scrollables de categorías (móvil/tablet) | ✅ |
 | `_category-sidebar.blade.php` | Sidebar desktop: buscador + categorías con conteo de publicadas | ✅ |
@@ -321,7 +321,7 @@ Todas las rutas de gestión llevan además `middleware('permission:...')` (ver s
 | `about.blade.php` | "Sobre Nosotros" | ✅ |
 | `contact.blade.php` | Formulario de contacto + datos de contacto | ✅ |
 | `search.blade.php` | Resultados de búsqueda | ✅ |
-| `page.blade.php` | Páginas estáticas | ✅ |
+| `page.blade.php` | Páginas estáticas — contenido vía `rendered_content` (HTML o texto plano con nl2br) | ✅ |
 | `gacetas.blade.php` | Gacetas Oficiales: grid de cards (miniatura real si es imagen, icono PDF si no), "Gaceta Oficial N° {numero}" + fecha; click abre el archivo en pestaña nueva | ✅ |
 | `_social-links.blade.php` | Parcial de íconos de redes (1 query `whereIn`; solo renderiza URLs `http(s)://`; vacío = oculto) — solo en el footer | ✅ |
 
@@ -331,7 +331,7 @@ Todas las rutas de gestión llevan además `middleware('permission:...')` (ver s
 |---|---|---|
 | Auth | `auth/login.blade.php` | ✅ Login independiente |
 | Dashboard | `dashboard/index.blade.php` | ✅ |
-| Noticias | `news/{index,create,edit}` + parcial `news/_image-field` | ✅ Imagen destacada: preview + upload + modal de biblioteca (vanilla JS inline) |
+| Noticias | `news/{index,create,edit}` + parciales `news/_image-field`, `news/_editor` | ✅ Imagen destacada: preview + upload + modal de biblioteca (vanilla JS inline); contenido con **TinyMCE 8 auto-hospedado** (`public/vendor/tinymce`, español, subida de imágenes a `/admin/medios` vía handler JSON) |
 | Categorías | `categories/{index,create,edit}` | ✅ |
 | Usuarios | `users/{index,create,edit}` | ✅ Columnas Estado (Activo/Inactivo) y Última conexión; checkbox "Usuario activo" |
 | Entes afiliados | `partners/{index,create,edit}` | ✅ Subida de logo (`file`, preview, quitar) |
@@ -399,7 +399,7 @@ Páginas personalizadas en español para todos los tipos de error HTTP, con bot�
 
 ### Sistema de permisos (granular, por rol)
 
-- **Tabla**: `permissions` (33 permisos con `slug` tipo `news.create`) + `role_permission` (rol ↔ permiso, con índice único). Reparto: superadmin 33 / admin 21 / editor 3.
+- **Tabla**: `permissions` (33 permisos con `slug` tipo `news.create`) + `role_permission` (rol ↔ permiso, con índice único). Reparto: superadmin 33 / admin 21 / editor 5 (`news.*`, `media.view`, `media.upload`).
 - **Middleware**: alias `permission` registrado en `app/Http/Kernel.php` → `App\Http\Middleware\CheckPermission`. Aplicado ruta a ruta en `routes/web.php` (ej. `->middleware('permission:news.edit')`). El rol `superadmin` tiene bypass.
 - **Consulta en vista**: `auth()->user()->hasPermission('slug')` (`app/Models/User.php`) — las vistas del admin ocultan botones/menús sin permiso.
 - **Gestión**: módulo `/admin/roles` (`RoleController`) muestra la matriz rol×permiso; cada rol envía un solo formulario (JS junta los checkbox en un input oculto) y `update()` reemplaza las asignaciones del rol.
@@ -497,12 +497,15 @@ php artisan serve
 - [x] **Gacetas Oficiales**: CRUD admin `/admin/gacetas` (grid + formulario archivo + N° + fecha; edición con preview y reemplazo de archivo; permisos `gacetas.*` para superadmin y admin) + página pública `/gacetas` con grid de miniaturas (icono PDF para PDFs), título "Gaceta Oficial N° {numero}", orden `fecha DESC`, click abre el archivo en pestaña nueva; item en el navbar antes de "Intranet"
 - [x] **Filtro por categoría en `/noticias`** (SPECS §4.5): sidebar de 2 columnas en desktop (categorías activas con conteo de publicadas + buscador) y pills scrollables en móvil; también en `/categoria/{slug}` con estado activo resaltado; parciales `_category-pills` y `_category-sidebar` (SPECS §4.5 "sidebar o tabs")
 - [x] **Footer**: enlaces en el orden del navbar — Inicio, Noticias, Entes, Sobre Nosotros, Gacetas Oficiales, Contacto (Contacto al final, sin bloque Intranet)
-- [x] **Suite E2E en el proyecto** (`tests/e2e/`): 11 suites PowerShell + `render_errors.php`, rutas portables (`$PSScriptRoot`, temp del sistema); limpiezas quirúrgicas con snapshot/restauración de datos preexistentes (nunca pisan datos reales)
+- [x] **Suite E2E en el proyecto** (`tests/e2e/`): 12 suites PowerShell + `render_errors.php`, rutas portables (`$PSScriptRoot`, temp del sistema); limpiezas quirúrgicas con snapshot/restauración de datos preexistentes (nunca pisan datos reales)
 - [x] **Medios: subida múltiple** (SPECS §5.4): input `files[]` con selección múltiple + lista de seleccionados, validación 10 MB por archivo, flash con conteo
 - [x] **Usuarios: `is_active` + `last_login_at`** (SPECS §7.1): migración + checkbox "Usuario activo" (default activo), badge Estado y columna Última conexión en el listado; login bloquea inactivos con mensaje genérico y registra `last_login_at`; guard de auto-desactivación
+- [x] **Font Awesome offline** (SPECS §9.2): FA 7.3.1 vía npm (`@fortawesome/fontawesome-free`) importado en `app.js` — webfonts emitidos por Vite como assets locales; sin CDN, portal funciona **offline**; elimina el warning de consola `Glyph bbox was incorrect` del CDN 6.4.0
+- [x] **Editor WYSIWYG** (SPECS §9.4): TinyMCE 8 auto-hospedado (`tinymce` + `tinymce-i18n` por npm → `public/vendor/tinymce` vía `scripts/copy-tinymce.js` en `npm run build`), español, vanilla JS; en `content` de noticias; subida de imágenes desde el editor a `/admin/medios` (respuesta JSON `location`); render compatible (`rendered_content`: HTML crudo / nl2br para texto plano legado)
+- [x] **"Copiar URL" en Medios** (SPECS §5.4): botón por card con patrón doble (Clipboard API + fallback `execCommand`) — para pegar imágenes/documentos en el contenido
+- [x] **Permisos**: `media.view` + `media.upload` para el rol editor (puede subir imágenes a sus noticias y copiar URLs); reparto 33/21/5
 
 ### 🔴 Pendiente
-- [ ] **Font Awesome offline + warnings de consola** — el CDN 6.4.0 lanza `downloadable font: glyf: Glyph bbox was incorrect…` (`fa-solid-900.woff2`) y el portal debe funcionar **offline**: descargar FA (npm `@fortawesome/fontawesome-free` + `@import` en `app.scss` vía Vite, webfonts como assets locales) y quitar el `<link>` CDN de `layouts/public.blade.php` y `layouts/admin.blade.php`
 - [ ] **Dashboard real** — hoy es stub ("Bienvenido" + logout); SPECS §5.4 pide tarjetas de conteos (noticias, usuarios, vistas del mes), últimas noticias y gráfico opcional
 - [ ] **CRUD de páginas estáticas en el admin** — tabla `pages` vacía y sin rutas admin; `/pagina/{slug}` siempre responde 404
 - [ ] **Configuración general** (nombre del sitio, logo) — SPECS §5.4; el nombre "Configuración" quedó libre tras renombrar el módulo a "Redes Sociales"
@@ -510,7 +513,6 @@ php artisan serve
 - [ ] **Front de la página de detalle de entes** (`/entes/{slug}`) — skeleton funcional (logo, nombre, descripción, botón); falta definir el diseño (¿banner?, ¿más campos?)
 - [ ] **Contenido del `PartnerSeeder`** — borrador con array vacío, pendiente que se indique el listado de entes
 - [ ] Videos YouTube en home: `$videos` llega vacío del `HomeController` (fuente de datos sin definir)
-- [ ] Editor WYSIWYG para contenido (hoy es `<textarea>` con HTML a mano — SPECS §9.4 pide TinyMCE/Trix)
 - [ ] SEO: sitemap.xml, meta tags dinámicos (og:image, description)
 - [ ] Imágenes WebP con fallback
 - [ ] Cache de consultas pesadas
@@ -520,7 +522,6 @@ Newsletter, API REST, comentarios, galería, eventos, versión en inglés.
 
 ### ⏸️ Omitidos / diferidos
 - **Tags en noticias** (SPECS §5.4) — omitido por decisión; si se retoma, opción simple recomendada: columna `posts.tags` (varchar separado por comas) con chips en el detalle, sin página por tag.
-- **"Copiar URL" en Medios** (SPECS §5.4) — diferido: se implementará junto con el editor WYSIWYG, donde su flujo (subir → copiar URL → pegar) tiene sentido completo.
 
 ---
 
@@ -601,6 +602,7 @@ Suites PowerShell (Windows + Laragon) contra `http://portal2026.test`. Requieren
 | `test-gacetas.ps1` | CRUD de Gacetas Oficiales + vista pública + permisos |
 | `test-social.ps1` | Módulo Redes Sociales, permisos y iconos solo-footer |
 | `test-users.ps1` | `is_active`/`last_login_at`: bloqueo de login a inactivos, registro de último acceso, guard de auto-desactivación |
+| `test-wysiwyg.ps1` | Editor TinyMCE (assets offline), HTML crudo en detalle, compat texto plano, handler JSON de subida, "Copiar URL" en medios, permisos del editor |
 | `test-contact-info.ps1` | Info de contacto en settings + defaults + permisos |
 | `test-contact-messages.ps1` | Bandeja de mensajes (`contacts`) |
 | `test-entes.ps1` | CRUD de Entes afiliados + slugs + nav activo |

@@ -60,11 +60,12 @@
                 @endif
                 <div class="card-body p-2">
                     <small class="text-muted d-block text-truncate" title="{{ $item->original_name }}">{{ $item->original_name }}</small>
+                    <button type="button" class="btn btn-sm btn-outline-secondary copy-url-btn mt-1" data-url="{{ asset('storage/' . $item->path) }}">Copiar URL</button>
                     @if(auth()->user()->hasPermission('media.delete'))
-                    <form action="{{ url('/admin/medios/' . $item->id) }}" method="POST">
+                    <form action="{{ url('/admin/medios/' . $item->id) }}" method="POST" style="display:inline">
                         @csrf
                         @method('DELETE')
-                        <button type="submit" class="btn btn-sm btn-danger mt-1" onclick="return confirm('Eliminar este archivo?')">Eliminar</button>
+                        <button type="submit" class="btn btn-sm btn-danger" onclick="return confirm('Eliminar este archivo?')">Eliminar</button>
                     </form>
                     @endif
                 </div>
@@ -76,4 +77,38 @@
         {{ $media->links() }}
     </div>
 </div>
+<script>
+    function mediaCopyFeedback(btn, ok) {
+        var previous = btn.textContent;
+        btn.textContent = ok ? '¡Copiado!' : 'No se pudo copiar';
+        setTimeout(function () { btn.textContent = previous; }, 2000);
+    }
+    function mediaCopyFallback(text) {
+        var ta = document.createElement('textarea');
+        ta.value = text;
+        ta.setAttribute('readonly', '');
+        ta.style.position = 'fixed';
+        ta.style.opacity = '0';
+        document.body.appendChild(ta);
+        ta.select();
+        var ok = false;
+        try { ok = document.execCommand('copy'); } catch (e) { ok = false; }
+        document.body.removeChild(ta);
+        return ok;
+    }
+    document.querySelectorAll('.copy-url-btn').forEach(function (btn) {
+        btn.addEventListener('click', function () {
+            var url = btn.getAttribute('data-url');
+            if (navigator.clipboard && window.isSecureContext) {
+                navigator.clipboard.writeText(url).then(function () {
+                    mediaCopyFeedback(btn, true);
+                }).catch(function () {
+                    mediaCopyFeedback(btn, mediaCopyFallback(url));
+                });
+            } else {
+                mediaCopyFeedback(btn, mediaCopyFallback(url));
+            }
+        });
+    });
+</script>
 @endsection

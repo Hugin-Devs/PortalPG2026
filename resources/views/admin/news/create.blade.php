@@ -23,7 +23,7 @@
         </div>
         <div class="mb-3">
             <label>Contenido</label>
-            <textarea name="content" class="form-control" rows="10" required></textarea>
+            @include('admin.news._editor', ['value' => old('content')])
         </div>
         @include('admin.news._image-field')
         <button type="submit" class="btn btn-primary">Guardar</button>

@@ -98,7 +98,7 @@ class PermissionSeeder extends Seeder
         $assign('admin', Permission::whereIn('slug', $adminSlugs)->pluck('id'));
 
         // Permisos mínimos a editor
-        $editorSlugs = ['news.view', 'news.create', 'news.edit'];
+        $editorSlugs = ['news.view', 'news.create', 'news.edit', 'media.view', 'media.upload'];
         $assign('editor', Permission::whereIn('slug', $editorSlugs)->pluck('id'));
     }
 }

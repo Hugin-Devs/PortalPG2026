@@ -45,7 +45,7 @@ Check ($c -eq '33') "33 permisos (got $c)" 'permisos != 33'
 $c = (& $mysql -uroot -N -e 'SELECT COUNT(*) FROM portal2026.settings WHERE `key` LIKE ''social_%'';') -join ''
 Check ($c -eq '7') "7 settings sociales (got $c)" 'settings != 7'
 $c = (& $mysql -uroot -N -e 'SELECT COUNT(*) FROM portal2026.role_permission;') -join ''
-Check ($c -eq '57') "57 asignaciones 33+21+3 (got $c)" 'asignaciones != 57'
+Check ($c -eq '59') "59 asignaciones 33+21+5 (got $c)" 'asignaciones != 59'
 $c = (& $mysql -uroot -N -e 'SELECT slug FROM portal2026.permissions WHERE slug=''rrss.manage'';') -join ''
 Check ($c -eq 'rrss.manage') 'slug rrss.manage existe' "falta rrss.manage (got $c)"
 $c = (& $mysql -uroot -N -e 'SELECT COUNT(*) FROM portal2026.permissions WHERE slug=''settings.manage'';') -join ''

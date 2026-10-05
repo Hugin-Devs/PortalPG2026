@@ -14,7 +14,7 @@
     <h1 class="text-primary fw-bold mb-4">{{ $page->title }}</h1>
 
     <div class="content fs-5 lh-lg">
-        {!! nl2br(e($page->content)) !!}
+        {!! $page->rendered_content !!}
     </div>
 </div>
 @endsection

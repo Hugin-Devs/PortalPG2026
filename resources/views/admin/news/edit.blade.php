@@ -24,7 +24,7 @@
         </div>
         <div class="mb-3">
             <label>Contenido</label>
-            <textarea name="content" class="form-control" rows="10" required>{{ old('content', $post->content) }}</textarea>
+            @include('admin.news._editor', ['value' => old('content', $post->content)])
         </div>
         @include('admin.news._image-field')
         <div class="mb-3 form-check">

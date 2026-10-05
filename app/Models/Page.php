@@ -16,4 +16,11 @@ class Page extends Model
     protected $casts = [
         'is_active' => 'boolean',
     ];
+
+    public function getRenderedContentAttribute(): string
+    {
+        $c = (string) $this->content;
+
+        return preg_match('/<[a-z][^>]*>/i', $c) ? $c : nl2br(e($c));
+    }
 }

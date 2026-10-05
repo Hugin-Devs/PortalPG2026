@@ -36,6 +36,11 @@ class MediaController extends Controller
         }
 
         $count = count($request->file('files'));
+
+        if ($request->expectsJson()) {
+            return response()->json(['location' => asset('storage/' . $path)]);
+        }
+
         $msg = $count === 1 ? 'Archivo subido correctamente.' : "{$count} archivos subidos correctamente.";
 
         return redirect('/admin/medios')->with('success', $msg);

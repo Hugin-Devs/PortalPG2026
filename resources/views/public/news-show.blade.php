@@ -80,7 +80,7 @@
         <div class="lead mb-4 fw-semibold">{{ $post->excerpt }}</div>
 
         <div class="content fs-5 lh-lg">
-            {!! nl2br(e($post->content)) !!}
+            {!! $post->rendered_content !!}
         </div>
     </article>
 
