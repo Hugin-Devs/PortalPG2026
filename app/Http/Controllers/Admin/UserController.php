@@ -30,6 +30,7 @@ class UserController extends Controller
         ]);
 
         $data['password'] = Hash::make($data['password']);
+        $data['is_active'] = $request->has('is_active');
 
         User::create($data);
         return redirect('/admin/usuarios')->with('success', 'Usuario creado correctamente.');
@@ -42,6 +43,10 @@ class UserController extends Controller
 
     public function update(Request $request, User $user)
     {
+        if ($user->id === auth()->id() && ! $request->has('is_active')) {
+            return back()->with('error', 'No puedes desactivarte a ti mismo.');
+        }
+
         $data = $request->validate([
             'name' => 'required|max:255',
             'email' => 'required|email|unique:users,email,' . $user->id,
@@ -54,6 +59,8 @@ class UserController extends Controller
         } else {
             unset($data['password']);
         }
+
+        $data['is_active'] = $request->has('is_active');
 
         $user->update($data);
         return redirect('/admin/usuarios')->with('success', 'Usuario actualizado correctamente.');

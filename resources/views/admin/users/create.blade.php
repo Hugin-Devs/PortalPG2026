@@ -29,6 +29,10 @@
                 <option value="superadmin">Superadmin</option>
             </select>
         </div>
+        <div class="mb-3 form-check">
+            <input type="checkbox" name="is_active" class="form-check-input" id="isActive" checked>
+            <label class="form-check-label" for="isActive">Usuario activo</label>
+        </div>
         <button type="submit" class="btn btn-primary">Guardar</button>
         <a href="{{ url('/admin/usuarios') }}" class="btn btn-secondary">Cancelar</a>
     </form>

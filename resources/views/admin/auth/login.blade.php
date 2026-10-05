@@ -17,6 +17,9 @@
                 </div>
                 <div class="card shadow-sm">
                     <div class="card-body p-4">
+                        @if($errors->any())
+                            <div class="alert alert-danger">{{ $errors->first() }}</div>
+                        @endif
                         <form method="POST" action="{{ url('/admin/login') }}">
                             @csrf
                             <div class="mb-3">

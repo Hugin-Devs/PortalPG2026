@@ -83,6 +83,8 @@ Portal2026/
 | email_verified_at | timestamp | nullable |
 | password | varchar(255) | hasheado |
 | role | enum('superadmin','admin','editor') | default 'editor' |
+| is_active | boolean | default true — login bloqueado si es false (mensaje genérico) |
+| last_login_at | timestamp | nullable — se registra al iniciar sesión |
 | remember_token | varchar(100) | nullable |
 | timestamps | | |
 
@@ -280,11 +282,11 @@ Todas las rutas de gestión llevan además `middleware('permission:...')` (ver s
 
 | Controlador | Métodos | Estado |
 |---|---|---|
-| `AuthController` | `showLogin` / `login` / `logout` | ✅ |
+| `AuthController` | `showLogin` / `login` / `logout` | ✅ Login: registra `last_login_at`; cuentas **inactivas** rechazadas con mensaje genérico ("Credenciales inválidas.", redirect explícito al login) |
 | `DashboardController` | `index()` | ✅ |
 | `NewsController` | CRUD completo (`index, create, store, edit, update, destroy`) | ✅ Slug automático, soft deletes; **imagen destacada**: archivo nuevo (≤10 MB, `image|mimes:...`) o path de la biblioteca (validado `Rule::exists('media','path')` con `mime_type LIKE image/%`); archivos nuevos se auto-registran en `media` (carpeta `uploads/`); prioridad: quitar > archivo > biblioteca > conservar; **no** borra archivos al reemplazar (limpieza desde `/admin/medios`) |
 | `CategoryController` | CRUD completo | ✅ |
-| `UserController` | CRUD completo | ✅ Asignación de roles |
+| `UserController` | CRUD completo | ✅ Asignación de roles + checkbox `is_active` (marcado por defecto al crear) + guard: no puedes desactivarte a ti mismo |
 | `PartnerController` | CRUD completo | ✅ Entes afiliados (footer); logo por **upload** a `partners/` en disco `public` (reemplaza y borra el anterior; checkbox "quitar imagen"; borra archivo al eliminar el ente) |
 | `MediaController` | `index, store, destroy` | ✅ Subida **múltiple** a disco `public/uploads` (`files[]`, 10 MB por archivo), requiere `storage:link`; **biblioteca reutilizable** desde el modal "Elegir de la biblioteca" de noticias |
 | `OrgMemberController` | CRUD completo | ✅ Estructura organizativa |
@@ -331,7 +333,7 @@ Todas las rutas de gestión llevan además `middleware('permission:...')` (ver s
 | Dashboard | `dashboard/index.blade.php` | ✅ |
 | Noticias | `news/{index,create,edit}` + parcial `news/_image-field` | ✅ Imagen destacada: preview + upload + modal de biblioteca (vanilla JS inline) |
 | Categorías | `categories/{index,create,edit}` | ✅ |
-| Usuarios | `users/{index,create,edit}` | ✅ |
+| Usuarios | `users/{index,create,edit}` | ✅ Columnas Estado (Activo/Inactivo) y Última conexión; checkbox "Usuario activo" |
 | Entes afiliados | `partners/{index,create,edit}` | ✅ Subida de logo (`file`, preview, quitar) |
 | Medios | `media/index.blade.php` | ✅ Grid + subida múltiple (`files[]`, lista de archivos seleccionados en vanilla JS) |
 | Gacetas Oficiales | `gacetas/{index,edit}` | ✅ Grid + formulario "Nueva Gaceta" (archivo + N° + fecha) y edición con preview |
@@ -495,14 +497,14 @@ php artisan serve
 - [x] **Gacetas Oficiales**: CRUD admin `/admin/gacetas` (grid + formulario archivo + N° + fecha; edición con preview y reemplazo de archivo; permisos `gacetas.*` para superadmin y admin) + página pública `/gacetas` con grid de miniaturas (icono PDF para PDFs), título "Gaceta Oficial N° {numero}", orden `fecha DESC`, click abre el archivo en pestaña nueva; item en el navbar antes de "Intranet"
 - [x] **Filtro por categoría en `/noticias`** (SPECS §4.5): sidebar de 2 columnas en desktop (categorías activas con conteo de publicadas + buscador) y pills scrollables en móvil; también en `/categoria/{slug}` con estado activo resaltado; parciales `_category-pills` y `_category-sidebar` (SPECS §4.5 "sidebar o tabs")
 - [x] **Footer**: enlaces en el orden del navbar — Inicio, Noticias, Entes, Sobre Nosotros, Gacetas Oficiales, Contacto (Contacto al final, sin bloque Intranet)
-- [x] **Suite E2E en el proyecto** (`tests/e2e/`): 10 suites PowerShell + `render_errors.php`, rutas portables (`$PSScriptRoot`, temp del sistema); limpiezas quirúrgicas con snapshot/restauración de datos preexistentes (nunca pisan datos reales)
+- [x] **Suite E2E en el proyecto** (`tests/e2e/`): 11 suites PowerShell + `render_errors.php`, rutas portables (`$PSScriptRoot`, temp del sistema); limpiezas quirúrgicas con snapshot/restauración de datos preexistentes (nunca pisan datos reales)
 - [x] **Medios: subida múltiple** (SPECS §5.4): input `files[]` con selección múltiple + lista de seleccionados, validación 10 MB por archivo, flash con conteo
+- [x] **Usuarios: `is_active` + `last_login_at`** (SPECS §7.1): migración + checkbox "Usuario activo" (default activo), badge Estado y columna Última conexión en el listado; login bloquea inactivos con mensaje genérico y registra `last_login_at`; guard de auto-desactivación
 
 ### 🔴 Pendiente
 - [ ] **Font Awesome offline + warnings de consola** — el CDN 6.4.0 lanza `downloadable font: glyf: Glyph bbox was incorrect…` (`fa-solid-900.woff2`) y el portal debe funcionar **offline**: descargar FA (npm `@fortawesome/fontawesome-free` + `@import` en `app.scss` vía Vite, webfonts como assets locales) y quitar el `<link>` CDN de `layouts/public.blade.php` y `layouts/admin.blade.php`
 - [ ] **Dashboard real** — hoy es stub ("Bienvenido" + logout); SPECS §5.4 pide tarjetas de conteos (noticias, usuarios, vistas del mes), últimas noticias y gráfico opcional
 - [ ] **CRUD de páginas estáticas en el admin** — tabla `pages` vacía y sin rutas admin; `/pagina/{slug}` siempre responde 404
-- [ ] **Usuarios: `is_active` + `last_login_at`** — columnas inexistentes; sin "última conexión" en el listado ni bloqueo de login a inactivos (SPECS §7.1)
 - [ ] **Configuración general** (nombre del sitio, logo) — SPECS §5.4; el nombre "Configuración" quedó libre tras renombrar el módulo a "Redes Sociales"
 - [ ] **Navbar: "Jubilados" con `href="#"`** — enlace pendiente de destino real
 - [ ] **Front de la página de detalle de entes** (`/entes/{slug}`) — skeleton funcional (logo, nombre, descripción, botón); falta definir el diseño (¿banner?, ¿más campos?)
@@ -598,6 +600,7 @@ Suites PowerShell (Windows + Laragon) contra `http://portal2026.test`. Requieren
 | `test-categorias.ps1` | Filtro por categoría en /noticias y /categoria/{slug}; orden y links del footer |
 | `test-gacetas.ps1` | CRUD de Gacetas Oficiales + vista pública + permisos |
 | `test-social.ps1` | Módulo Redes Sociales, permisos y iconos solo-footer |
+| `test-users.ps1` | `is_active`/`last_login_at`: bloqueo de login a inactivos, registro de último acceso, guard de auto-desactivación |
 | `test-contact-info.ps1` | Info de contacto en settings + defaults + permisos |
 | `test-contact-messages.ps1` | Bandeja de mensajes (`contacts`) |
 | `test-entes.ps1` | CRUD de Entes afiliados + slugs + nav activo |

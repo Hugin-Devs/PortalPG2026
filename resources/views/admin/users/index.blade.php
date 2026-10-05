@@ -22,6 +22,8 @@
                 <th>Nombre</th>
                 <th>Email</th>
                 <th>Rol</th>
+                <th>Estado</th>
+                <th>Última conexión</th>
                 <th>Registro</th>
                 <th>Acciones</th>
             </tr>
@@ -36,6 +38,10 @@
                         {{ ucfirst($user->role) }}
                     </span>
                 </td>
+                <td>
+                    <span class="badge bg-{{ $user->is_active ? 'success' : 'secondary' }}">{{ $user->is_active ? 'Activo' : 'Inactivo' }}</span>
+                </td>
+                <td>{{ $user->last_login_at?->format('d/m/Y H:i') ?? '—' }}</td>
                 <td>{{ $user->created_at->format('d/m/Y') }}</td>
                 <td>
                     @if(auth()->user()->hasPermission('users.edit'))

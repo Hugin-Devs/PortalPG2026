@@ -3,6 +3,9 @@
 @section('content')
 <div class="container">
     <h1>Editar Usuario</h1>
+    @if(session('error'))
+        <div class="alert alert-danger">{{ session('error') }}</div>
+    @endif
     <form action="{{ url('/admin/usuarios/' . $user->id) }}" method="POST">
         @csrf
         @method('PUT')
@@ -29,6 +32,10 @@
                 <option value="admin" {{ $user->role == 'admin' ? 'selected' : '' }}>Admin</option>
                 <option value="superadmin" {{ $user->role == 'superadmin' ? 'selected' : '' }}>Superadmin</option>
             </select>
+        </div>
+        <div class="mb-3 form-check">
+            <input type="checkbox" name="is_active" class="form-check-input" id="isActive" {{ $user->is_active ? 'checked' : '' }}>
+            <label class="form-check-label" for="isActive">Usuario activo</label>
         </div>
         <button type="submit" class="btn btn-primary">Actualizar</button>
         <a href="{{ url('/admin/usuarios') }}" class="btn btn-secondary">Cancelar</a>
