@@ -266,7 +266,7 @@ Todas las rutas de gestión llevan además `middleware('permission:...')` (ver s
 | Controlador | Métodos | Estado |
 |---|---|---|
 | `HomeController` | `index()` | ✅ Destacados + últimos + categorías + "más leído" + `$videos` (placeholder) |
-| `NewsController` | `index()` | ✅ Listado paginado |
+| `NewsController` | `index()` | ✅ Listado paginado + categorías para el filtro (sidebar/pills) |
 | | `show($slug)` | ✅ Detalle + incrementa `views` + relacionados |
 | | `category($slug)` | ✅ Filtrado por categoría |
 | `EnteController` | `index()` / `show($slug)` | ✅ Listado y detalle de entes (sobre `partners`, activos y por `order`) |
@@ -310,9 +310,11 @@ Todas las rutas de gestión llevan además `middleware('permission:...')` (ver s
 | Archivo | Secciones | Estado |
 |---|---|---|
 | `home.blade.php` | Hero slider de destacados (imagen de fondo con velo + fallback azul si no hay imagen), categorías, grid de noticias, "Lo más leído", slider de videos | ✅ |
-| `news.blade.php` | Listado paginado de noticias | ✅ |
+| `news.blade.php` | Listado paginado de noticias + filtro por categoría (sidebar desktop con conteos + buscador; pills en móvil) | ✅ |
 | `news-show.blade.php` | Detalle de noticia + botones de compartir (FB, X, WhatsApp, Telegram, copiar enlace) + relacionados | ✅ |
-| `news-category.blade.php` | Noticias por categoría | ✅ |
+| `news-category.blade.php` | Noticias por categoría + mismo nav de categorías (activa resaltada) | ✅ |
+| `_category-pills.blade.php` | Pills scrollables de categorías (móvil/tablet) | ✅ |
+| `_category-sidebar.blade.php` | Sidebar desktop: buscador + categorías con conteo de publicadas | ✅ |
 | `entes.blade.php` / `ente-show.blade.php` | Listado (logo, nombre, descripción, link externo o a detalle) y detalle | ✅ (front de detalle pendiente de diseño) |
 | `about.blade.php` | "Sobre Nosotros" | ✅ |
 | `contact.blade.php` | Formulario de contacto + datos de contacto | ✅ |
@@ -491,14 +493,15 @@ php artisan serve
 - [x] Botones de compartir en el detalle de noticia (Facebook, X, WhatsApp, Telegram + "Copiar enlace" con vanilla JS) — enlaces `target="_blank" rel="noopener noreferrer"`, SPECS §4.6
 - [x] Lazy loading (`loading="lazy" decoding="async"`) en las imágenes bajo el fold: grids de noticias (inicio/listado/categoría), entes, estructura organizativa y logos del footer; hero e imagen del artículo quedan eager (LCP) — SPECS §9.2
 - [x] **Gacetas Oficiales**: CRUD admin `/admin/gacetas` (grid + formulario archivo + N° + fecha; edición con preview y reemplazo de archivo; permisos `gacetas.*` para superadmin y admin) + página pública `/gacetas` con grid de miniaturas (icono PDF para PDFs), título "Gaceta Oficial N° {numero}", orden `fecha DESC`, click abre el archivo en pestaña nueva; item en el navbar antes de "Intranet"
+- [x] **Filtro por categoría en `/noticias`** (SPECS §4.5): sidebar de 2 columnas en desktop (categorías activas con conteo de publicadas + buscador) y pills scrollables en móvil; también en `/categoria/{slug}` con estado activo resaltado; parciales `_category-pills` y `_category-sidebar` (SPECS §4.5 "sidebar o tabs")
+- [x] **Footer**: enlaces en el orden del navbar — Inicio, Noticias, Entes, Sobre Nosotros, Gacetas Oficiales, Contacto (Contacto al final, sin bloque Intranet)
+- [x] **Suite E2E en el proyecto** (`tests/e2e/`): 10 suites PowerShell + `render_errors.php`, rutas portables (`$PSScriptRoot`, temp del sistema); limpiezas quirúrgicas con snapshot/restauración de datos preexistentes (nunca pisan datos reales)
 
 ### 🔴 Pendiente
 - [ ] **Dashboard real** — hoy es stub ("Bienvenido" + logout); SPECS §5.4 pide tarjetas de conteos (noticias, usuarios, vistas del mes), últimas noticias y gráfico opcional
 - [ ] **CRUD de páginas estáticas en el admin** — tabla `pages` vacía y sin rutas admin; `/pagina/{slug}` siempre responde 404
 - [ ] **Usuarios: `is_active` + `last_login_at`** — columnas inexistentes; sin "última conexión" en el listado ni bloqueo de login a inactivos (SPECS §7.1)
 - [ ] **Medios: subida múltiple + "Copiar URL"** — hoy solo 1 archivo por vez (SPECS §5.4)
-- [ ] **Tags en noticias** — SPECS §5.4; sin columna ni UI (form/listado/filtro)
-- [ ] **Filtro por categoría en `/noticias`** — SPECS §4.5 pide navegación por categorías (tabs/sidebar)
 - [ ] **Configuración general** (nombre del sitio, logo) — SPECS §5.4; el nombre "Configuración" quedó libre tras renombrar el módulo a "Redes Sociales"
 - [ ] **Navbar: "Jubilados" con `href="#"`** — enlace pendiente de destino real
 - [ ] **Front de la página de detalle de entes** (`/entes/{slug}`) — skeleton funcional (logo, nombre, descripción, botón); falta definir el diseño (¿banner?, ¿más campos?)
@@ -511,6 +514,9 @@ php artisan serve
 
 ### 🌟 Mejoras futuras (SPECS §10, fuera de alcance)
 Newsletter, API REST, comentarios, galería, eventos, versión en inglés.
+
+### ⏸️ Omitidos / diferidos
+- **Tags en noticias** (SPECS §5.4) — omitido por decisión; si se retoma, opción simple recomendada: columna `posts.tags` (varchar separado por comas) con chips en el detalle, sin página por tag.
 
 ---
 
@@ -578,3 +584,33 @@ php artisan migrate:fresh --seed
 # Ver rutas
 php artisan route:list
 ```
+
+---
+
+## 14. Tests E2E (suite en `tests/e2e/`)
+
+Suites PowerShell (Windows + Laragon) contra `http://portal2026.test`. Requieren `mysql.exe` y `php.exe` de Laragon (rutas al inicio de cada script).
+
+| Suite | Cubre |
+|---|---|
+| `test-categorias.ps1` | Filtro por categoría en /noticias y /categoria/{slug}; orden y links del footer |
+| `test-gacetas.ps1` | CRUD de Gacetas Oficiales + vista pública + permisos |
+| `test-social.ps1` | Módulo Redes Sociales, permisos y iconos solo-footer |
+| `test-contact-info.ps1` | Info de contacto en settings + defaults + permisos |
+| `test-contact-messages.ps1` | Bandeja de mensajes (`contacts`) |
+| `test-entes.ps1` | CRUD de Entes afiliados + slugs + nav activo |
+| `test-media.ps1` | Medios + imagen destacada de noticias + biblioteca |
+| `test-partners.ps1` | Upload/replace/quitar logo de entes |
+| `test-share.ps1` | Botones de compartir + lazy loading |
+| `test-errors.ps1` | Páginas de error HTTP (incl. 503 real vía `artisan down`) |
+
+Ejecución:
+
+```powershell
+powershell -NoProfile -ExecutionPolicy Bypass -File tests\e2e\test-categorias.ps1
+```
+
+Garantías de las suites:
+- **No destructivas**: solo borran las filas/archivos que ellas crean; donde mutan settings (`social_*`, `contact_*`) hacen **snapshot y restauración** de los valores previos; los asserts no asumen BD vacía (usan conteo base).
+- `test-errors.ps1` garantiza `artisan up` con `try/finally`.
+- `render_errors.php` renderiza las 12 vistas de error por CLI (se ejecuta desde `tests/e2e/`).
