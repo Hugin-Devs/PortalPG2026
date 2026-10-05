@@ -487,7 +487,7 @@ php artisan serve
 - [x] Gestor de medios (subida a `public/uploads` vía disco `public`)
 - [x] Imagen destacada de noticias integrada con la biblioteca: upload propio (≤10 MB) **o** selección desde Medios, auto-registro en `media`, quitar imagen; 4 vistas públicas renderizan con `asset('storage/...')`
 - [x] `storage:link` configurado
-- [x] Paleta y tipografía institucional (`#273376`, Georama / Instrument Sans)
+- [x] Paleta y tipografía institucional (`#273376`, Georama / Instrument Sans) — fuentes cargadas **localmente** vía `@fontsource/georama` (700) e `@fontsource/instrument-sans` (400-700) en `app.js`; woff2 emitidos por Vite, funciona **offline**
 - [x] Módulo de contacto: edición de la información visible (dirección, teléfono, email, horario, mapa) desde `/admin/contacto` vía `settings`, con parcial pública `_contact-info` en home + /contacto + sobre-nosotros
 - [x] Persistencia de mensajes del formulario: tabla `contacts`, guardado en `Public\ContactController@store` y bandeja en `/admin/contacto/mensajes` (paginada, badge Nuevo/Leído, detalle que marca `read_at`, borrado)
 - [x] Vistas de error en español (400/401/403/404/405/408/410/419/422/429/500/503) con botones Volver/Inicio (y Recargar en 419, Reintentar en 503); 5xx standalone sin dependencias
