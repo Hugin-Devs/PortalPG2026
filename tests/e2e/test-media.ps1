@@ -22,12 +22,13 @@ function Send-Multipart($url, $fields, $files, $sess) {
         $b = $enc.GetBytes($part); $ms.Write($b, 0, $b.Length)
     }
     foreach ($key in $files.Keys) {
-        $path = $files[$key]
-        $bytes = [System.IO.File]::ReadAllBytes($path)
-        $head = "--$boundary`r`nContent-Disposition: form-data; name=`"$key`"; filename=`"$(Split-Path $path -Leaf)`"`r`nContent-Type: image/png`r`n`r`n"
-        $b = $enc.GetBytes($head); $ms.Write($b, 0, $b.Length)
-        $ms.Write($bytes, 0, $bytes.Length)
-        $tail = "`r`n"; $b = $enc.GetBytes($tail); $ms.Write($b, 0, $b.Length)
+        foreach ($path in @($files[$key])) {
+            $bytes = [System.IO.File]::ReadAllBytes($path)
+            $head = "--$boundary`r`nContent-Disposition: form-data; name=`"$key`"; filename=`"$(Split-Path $path -Leaf)`"`r`nContent-Type: image/png`r`n`r`n"
+            $b = $enc.GetBytes($head); $ms.Write($b, 0, $b.Length)
+            $ms.Write($bytes, 0, $bytes.Length)
+            $tail = "`r`n"; $b = $enc.GetBytes($tail); $ms.Write($b, 0, $b.Length)
+        }
     }
     $end = $enc.GetBytes("--$boundary--`r`n"); $ms.Write($end, 0, $end.Length)
     $body = $ms.ToArray(); $ms.Dispose()
@@ -90,9 +91,25 @@ Check ($r.Content -match [regex]::Escape("storage/$fi")) 'home/listado muestra a
 Write-Output '--- 4. Subir 2a imagen a la biblioteca ---'
 $r = Invoke-WebRequest "$base/admin/medios" -WebSession $sess -UseBasicParsing
 $token = Get-Token $r.Content
-$r = Send-Multipart "$base/admin/medios" @{ _token = $token } @{ file = "$tmp\notimg2.png" } $sess
+$r = Send-Multipart "$base/admin/medios" @{ _token = $token } @{ 'files[]' = "$tmp\notimg2.png" } $sess
 $libPath = (Sql "SELECT path FROM portal2026.media ORDER BY id DESC LIMIT 1;")
 Check ($libPath -like 'uploads/*') "biblioteca: $libPath" 'subida a biblioteca fallo'
+
+Write-Output '--- 4b. Subida MULTIPLE (2 archivos en un request) ---'
+$png3 = [Convert]::FromBase64String('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8BQDwAEhQGAhKmMIQAAAABJRU5ErkJggg==')
+[System.IO.File]::WriteAllBytes("$tmp\notimg3.png", $png3)
+[System.IO.File]::WriteAllBytes("$tmp\notimg4.png", $png3)
+$r = Invoke-WebRequest "$base/admin/medios" -WebSession $sess -UseBasicParsing
+$token = Get-Token $r.Content
+$r = Send-Multipart "$base/admin/medios" @{ _token = $token } @{ 'files[]' = @("$tmp\notimg3.png", "$tmp\notimg4.png") } $sess
+Check ($r.Content -match '2 archivos subidos correctamente') 'flash plural 2 archivos' 'flash multiple incorrecto'
+$mrow = Sql "SELECT COUNT(*) FROM portal2026.media WHERE original_name IN ('notimg3.png','notimg4.png');"
+Check ($mrow -eq '2') "2 filas en media (got $mrow)" "filas != 2: $mrow"
+$mpaths = (Sql "SELECT path FROM portal2026.media WHERE original_name IN ('notimg3.png','notimg4.png');") -split "`n"
+$m1 = $mpaths[0].Trim(); $m2 = $mpaths[1].Trim()
+Check ((Test-Path "$pub\$m1") -and (Test-Path "$pub\$m2")) 'ambos archivos en disco' 'faltan archivos en disco'
+$r = Invoke-WebRequest "$base/admin/medios" -WebSession $sess -UseBasicParsing
+Check (($r.Content -match [regex]::Escape($m1)) -and ($r.Content -match [regex]::Escape($m2))) 'grid muestra ambos archivos' 'grid incompleto'
 
 Write-Output '--- 5. Edit page: modal con imagen de biblioteca + checkbox quitar ---'
 $r = Invoke-WebRequest "$base/admin/noticias/$id/editar" -WebSession $sess -UseBasicParsing
@@ -163,11 +180,11 @@ $cnt = Sql "SELECT COUNT(*) FROM portal2026.posts WHERE id=$id AND deleted_at IS
 Check ($cnt -eq '0') 'post eliminado del listado (soft delete)' "post visible aun: $cnt"
 $trashed = Sql "SELECT deleted_at IS NOT NULL FROM portal2026.posts WHERE id=$id;"
 Check ($trashed -eq '1') 'deleted_at seteado (soft delete ok)' "deleted_at no seteado: $trashed"
-foreach ($p in @($fi, $libPath)) {
-    if (Test-Path "$pub\$p") { Remove-Item "$pub\$p" -Force; Ok "borrado disco: $p" }
+foreach ($p in @($fi, $libPath, $m1, $m2)) {
+    if ($p -and (Test-Path "$pub\$p")) { Remove-Item "$pub\$p" -Force; Ok "borrado disco: $p" }
 }
-Sql "DELETE FROM portal2026.media WHERE path IN ('$fi','$libPath');" | Out-Null
-$cnt = Sql "SELECT COUNT(*) FROM portal2026.media WHERE path IN ('$fi','$libPath');"
+Sql "DELETE FROM portal2026.media WHERE path IN ('$fi','$libPath','$m1','$m2');" | Out-Null
+$cnt = Sql "SELECT COUNT(*) FROM portal2026.media WHERE path IN ('$fi','$libPath','$m1','$m2');"
 Check ($cnt -eq '0') 'media limpia' "media sucia: $cnt"
 Sql "DELETE FROM portal2026.posts WHERE title='E2E Imagen Destacada';" | Out-Null
 $cnt = Sql "SELECT COUNT(*) FROM portal2026.posts WHERE title='E2E Imagen Destacada';"

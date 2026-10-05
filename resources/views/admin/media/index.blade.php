@@ -17,8 +17,15 @@
                 @csrf
                 <div class="row g-3 align-items-end">
                     <div class="col-md-8">
-                        <label>Subir archivo</label>
-                        <input type="file" name="file" class="form-control" required>
+                        <label class="form-label">Subir archivos</label>
+                        <input type="file" name="files[]" class="form-control" multiple accept=".jpeg,.jpg,.png,.gif,.svg,.webp,.pdf,.doc,.docx" required>
+                        <ul class="small text-muted mt-2 mb-0" id="mediaSelectedList"></ul>
+                        @error('files')<div class="text-danger small mt-1">{{ $message }}</div>@enderror
+                        @foreach($errors->get('files.*') as $messages)
+                            @foreach($messages as $message)
+                                <div class="text-danger small">{{ $message }}</div>
+                            @endforeach
+                        @endforeach
                     </div>
                     <div class="col-md-4">
                         <button type="submit" class="btn btn-primary w-100">Subir</button>
@@ -27,6 +34,17 @@
             </form>
         </div>
     </div>
+    <script>
+        document.querySelector('input[name="files[]"]').addEventListener('change', function () {
+            var list = document.getElementById('mediaSelectedList');
+            list.innerHTML = '';
+            Array.prototype.forEach.call(this.files, function (f) {
+                var li = document.createElement('li');
+                li.textContent = f.name + ' (' + Math.max(1, Math.round(f.size / 1024)) + ' KB)';
+                list.appendChild(li);
+            });
+        });
+    </script>
     @endif
 
     <div class="row g-3">

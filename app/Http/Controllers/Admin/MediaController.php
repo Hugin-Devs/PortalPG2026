@@ -17,24 +17,28 @@ class MediaController extends Controller
     public function store(Request $request)
     {
         $request->validate([
-            'file' => 'required|mimes:jpeg,png,jpg,gif,svg,webp,pdf,doc,docx|max:10240',
+            'files' => 'required|array|min:1',
+            'files.*' => 'file|mimes:jpeg,png,jpg,gif,svg,webp,pdf,doc,docx|max:10240',
         ]);
 
-        $file = $request->file('file');
-        $originalName = $file->getClientOriginalName();
-        $filename = time() . '_' . uniqid() . '.' . $file->getClientOriginalExtension();
-        $path = $file->storeAs('uploads', $filename, 'public');
+        foreach ($request->file('files') as $file) {
+            $filename = time() . '_' . uniqid() . '.' . $file->getClientOriginalExtension();
+            $path = $file->storeAs('uploads', $filename, 'public');
 
-        Media::create([
-            'filename' => $filename,
-            'original_name' => $originalName,
-            'path' => $path,
-            'mime_type' => $file->getMimeType(),
-            'size' => $file->getSize(),
-            'user_id' => auth()->id(),
-        ]);
+            Media::create([
+                'filename' => $filename,
+                'original_name' => $file->getClientOriginalName(),
+                'path' => $path,
+                'mime_type' => $file->getMimeType(),
+                'size' => $file->getSize(),
+                'user_id' => auth()->id(),
+            ]);
+        }
 
-        return redirect('/admin/medios')->with('success', 'Archivo subido correctamente.');
+        $count = count($request->file('files'));
+        $msg = $count === 1 ? 'Archivo subido correctamente.' : "{$count} archivos subidos correctamente.";
+
+        return redirect('/admin/medios')->with('success', $msg);
     }
 
     public function destroy(Media $media)
