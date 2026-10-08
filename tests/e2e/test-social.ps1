@@ -41,17 +41,17 @@ Write-Output '--- 1. Seeders idempotentes ---'
 & $php artisan db:seed --class=PermissionSeeder --force 2>&1 | Out-Null
 & $php artisan db:seed --class=SocialSettingSeeder --force 2>&1 | Out-Null
 $c = (& $mysql -uroot -N -e 'SELECT COUNT(*) FROM portal2026.permissions;') -join ''
-Check ($c -eq '33') "33 permisos (got $c)" 'permisos != 33'
+Check ($c -eq '38') "38 permisos (got $c)" 'permisos != 38'
 $c = (& $mysql -uroot -N -e 'SELECT COUNT(*) FROM portal2026.settings WHERE `key` LIKE ''social_%'';') -join ''
 Check ($c -eq '7') "7 settings sociales (got $c)" 'settings != 7'
 $c = (& $mysql -uroot -N -e 'SELECT COUNT(*) FROM portal2026.role_permission;') -join ''
-Check ($c -eq '59') "59 asignaciones 33+21+5 (got $c)" 'asignaciones != 59'
+Check ($c -eq '64') "64 asignaciones 38+21+5 (got $c)" 'asignaciones != 64'
 $c = (& $mysql -uroot -N -e 'SELECT slug FROM portal2026.permissions WHERE slug=''rrss.manage'';') -join ''
 Check ($c -eq 'rrss.manage') 'slug rrss.manage existe' "falta rrss.manage (got $c)"
 $c = (& $mysql -uroot -N -e 'SELECT COUNT(*) FROM portal2026.permissions WHERE slug=''settings.manage'';') -join ''
-Check ($c -eq '0') 'slug settings.manage ya no existe' 'settings.manage aun existe'
-$c = (& $mysql -uroot -N -e 'SELECT `group` FROM portal2026.permissions WHERE slug=''rrss.manage'';') -join ''
-Check ($c -eq 'Redes Sociales') "grupo Redes Sociales (got $c)" 'grupo incorrecto'
+Check ($c -eq '1') 'slug settings.manage existe (Configuración)' "settings.manage count != 1 (got $c)"
+$c = (& $mysql -uroot -N -e 'SELECT COUNT(*) FROM portal2026.permissions WHERE slug=''rrss.manage'' AND `group` LIKE ''Gesti%Portal'' AND `module`=''Redes Sociales'';') -join ''
+Check ($c -eq '1') "rrss.manage en grupo Gestion Portal, modulo Redes Sociales (got $c)" 'grupo/modulo incorrecto'
 
 Write-Output '--- 2. Seeder no pisa valores editados ---'
 & $mysql -uroot -N -e 'UPDATE portal2026.settings SET value=''https://www.facebook.com/editado'' WHERE `key`=''social_facebook'';' 2>&1 | Out-Null

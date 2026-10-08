@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Media;
 use App\Models\Post;
 use App\Models\Category;
+use App\Services\Webp;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
@@ -118,6 +119,7 @@ class NewsController extends Controller
     {
         $filename = time() . '_' . uniqid() . '.' . $file->getClientOriginalExtension();
         $path = $file->storeAs('uploads', $filename, 'public');
+        Webp::convert($path);
 
         Media::create([
             'filename' => $filename,

@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\Media;
+use App\Services\Webp;
 use Illuminate\Http\Request;
 
 class MediaController extends Controller
@@ -24,6 +25,7 @@ class MediaController extends Controller
         foreach ($request->file('files') as $file) {
             $filename = time() . '_' . uniqid() . '.' . $file->getClientOriginalExtension();
             $path = $file->storeAs('uploads', $filename, 'public');
+            Webp::convert($path);
 
             Media::create([
                 'filename' => $filename,
@@ -49,6 +51,7 @@ class MediaController extends Controller
     public function destroy(Media $media)
     {
         \Storage::disk('public')->delete($media->path);
+        Webp::delete($media->path);
         $media->delete();
         return redirect('/admin/medios')->with('success', 'Archivo eliminado correctamente.');
     }

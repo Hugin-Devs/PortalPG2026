@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Public;
 use App\Http\Controllers\Controller;
 use App\Models\Post;
 use App\Models\Category;
+use Illuminate\Support\Facades\DB;
 
 class NewsController extends Controller
 {
@@ -28,6 +29,10 @@ class NewsController extends Controller
             ->firstOrFail();
 
         $post->increment('views');
+        DB::statement(
+            'INSERT INTO daily_views (day, post_id, count) VALUES (?, ?, 1) ON DUPLICATE KEY UPDATE count = count + 1',
+            [now()->toDateString(), $post->id]
+        );
 
         $related = Post::where('category_id', $post->category_id)
             ->where('id', '!=', $post->id)

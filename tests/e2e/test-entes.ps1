@@ -83,6 +83,24 @@ if ($r.Content -notmatch '<a class="nav-link active" href="[^"]*"[^>]*>Inicio</a
     if ($r.Content -notmatch 'nav-link active') { throw 'ningun nav activo en home' } else { Write-Output 'AVISO: revisar cual link esta activo en home' }
 } else { Write-Output 'HOME OK' }
 
+# --- 7b. Buscador en /entes (filtro client-side) ---
+$r = Invoke-WebRequest "$base/entes" -UseBasicParsing
+if ($r.StatusCode -ne 200) { throw "/entes no 200 ($($r.StatusCode))" }
+if ($r.Content -notmatch 'id="enteSearch"') { throw 'falta input enteSearch' }
+if ($r.Content -notmatch 'type="search"') { throw 'el input no es type=search' }
+if ($r.Content -notmatch 'aria-label="Buscar entre los entes afiliados"') { throw 'falta aria-label del buscador' }
+if ($r.Content -notmatch 'id="entesGrid"') { throw 'falta entesGrid' }
+$n = ([regex]::Matches($r.Content, 'data-name="')).Count
+if ($n -lt 3) { throw "data-name insuficientes ($n, esperado >= 3)" }
+if ($r.Content -notmatch 'data-desc="') { throw 'falta data-desc en las tarjetas' }
+if ($r.Content -notmatch 'id="entesNoResults"') { throw 'falta mensaje sin resultados' }
+if ($r.Content -notmatch "getElementById\('enteSearch'\)") { throw 'falta script del buscador' }
+if ($r.Content -notmatch "getElementById\('entesGrid'\)") { throw 'script no referencia entesGrid' }
+if ($r.Content -notmatch 'normalize') { throw 'falta normalizacion de acentos' }
+if ($r.Content -notmatch 'classList') { throw 'falta alternancia de clase d-none' }
+if ($r.Content -match 'jquery') { throw 'jquery detectado en la pagina' }
+Write-Output "BUSCADOR OK ($n tarjetas indexadas)"
+
 # --- 8. Limpieza ---
 $ids = Q "SELECT id FROM portal2026.partners WHERE name LIKE 'Ente Demo%';"
 foreach ($id in ($ids -split "`n")) {

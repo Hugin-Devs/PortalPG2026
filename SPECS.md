@@ -1,5 +1,12 @@
 # SPECS — Intranet GDC
 
+> ⚠️ **Documento histórico — requisitos originales (Julio 2026).**
+> No refleja lo implementado: prevalece **[DOCUMENTACION.md](DOCUMENTACION.md)** como fuente de verdad.
+> Divergencias conocidas: no existe `routes/admin.php` (todo está en `routes/web.php` con prefijo `/admin`);
+> el módulo de **Servicios** no se implementó (redirige a `/entes`); no se usa Alpine.js; el middleware
+> real se llama `permission` (no `admin.auth`); la tabla `services` no existe y el bloque de videos
+> del home quedó sin fuente de datos (`$videos` vacío).
+
 > Portal institucional informativo del ente GDC.
 > Inspirado en: https://mippci.gob.ve
 > Fecha: Julio 2026

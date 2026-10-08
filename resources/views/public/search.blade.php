@@ -1,6 +1,6 @@
 @extends('layouts.public')
 
-@section('title', 'Buscar: ' . $q . ' - Portal GDC')
+@section('title', 'Buscar: ' . $q)
 
 @section('content')
 <div class="container my-5">

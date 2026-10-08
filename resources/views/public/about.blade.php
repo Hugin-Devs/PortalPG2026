@@ -1,6 +1,6 @@
 @extends('layouts.public')
 
-@section('title', 'Sobre Nosotros - Portal GDC')
+@section('title', 'Sobre Nosotros')
 
 @section('content')
 <div class="container my-5">

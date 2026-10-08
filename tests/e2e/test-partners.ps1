@@ -7,9 +7,22 @@ $mysql = 'D:\laragon\bin\mysql\mysql-8.4.3-winx64\bin\mysql.exe'
 
 # --- 1. PNGs de prueba (1x1) ---
 $png1 = [Convert]::FromBase64String('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8BQDwAEhQGAhKmMIQAAAABJRU5ErkJggg==')
-$png2 = [Convert]::FromBase64String('iVBORw0KGgoAAAANSUhEUgAAAAIAAAACCAYAAABytg0kAAAAEUlEQVR42mM8z8Dwn4GBgYERABIcAgO2mGV+AAAAAElFTkSuQmCC')
+$png2 = [Convert]::FromBase64String('iVBORw0KGgoAAAANSUhEUgAAAAMAAAADCAIAAADZSiLoAAAACXBIWXMAAA7EAAAOxAGVKw4bAAAAF0lEQVQImWNUNy5jYGBgYGBgYoABBAsAFukA1tgNRvwAAAAASUVORK5CYII=')
 [System.IO.File]::WriteAllBytes("$tmp\logo1.png", $png1)
 [System.IO.File]::WriteAllBytes("$tmp\logo2.png", $png2)
+
+# --- Limpieza previa: artefactos de corridas anteriores ---
+$oldLogos = & $mysql -uroot -N -e "SELECT logo FROM portal2026.partners WHERE name IN ('Ente Prueba Upload','Ente Prueba Upload v2') AND logo IS NOT NULL;" 2>&1
+foreach ($lg in ($oldLogos -split "`n")) {
+    $lg = "$lg".Trim()
+    if ($lg) {
+        if (Test-Path "$storagePartners\$lg") { Remove-Item "$storagePartners\$lg" -Force }
+        $lgWp = [System.IO.Path]::ChangeExtension("$storagePartners\$lg", 'webp')
+        if (Test-Path $lgWp) { Remove-Item $lgWp -Force }
+    }
+}
+& $mysql -uroot -N -e "DELETE FROM portal2026.partners WHERE name IN ('Ente Prueba Upload','Ente Prueba Upload v2');" | Out-Null
+Write-Output 'pre-limpieza: artefactos de corridas anteriores removidos'
 
 function Get-Token($html) {
     if ($html -match 'name="_token"\s+value="([^"]+)"') { return $Matches[1] }
@@ -62,6 +75,8 @@ if (-not $logo) { throw 'logo no guardado en BD' }
 if (-not (Test-Path "$storagePartners\$logo")) { throw "archivo no existe: $storagePartners\$logo" }
 Write-Output 'ARCHIVO OK'
 $logo1Path = $logo
+$logo1Wp = [System.IO.Path]::ChangeExtension("$storagePartners\$logo1Path", 'webp')
+if (Test-Path $logo1Wp) { Write-Output 'WEBCONV OK (logo convertido a webp en upload)' } else { throw 'sidecar webp no generado en upload de logo' }
 
 # --- 5. Footer publico muestra el logo ---
 $r = Invoke-WebRequest "$base/" -UseBasicParsing
@@ -77,7 +92,10 @@ $row = & $mysql -uroot -N -e "SELECT logo FROM portal2026.partners WHERE id=$id;
 Write-Output "BD tras replace: logo=$row"
 if ($row -eq $logo1Path) { throw 'el logo no cambio' }
 if (Test-Path "$storagePartners\$logo1Path") { throw 'el archivo viejo NO se borro' } else { Write-Output 'archivo viejo eliminado OK' }
+if (Test-Path $logo1Wp) { throw 'el sidecar webp viejo NO se borro' } else { Write-Output 'sidecar webp viejo eliminado OK' }
 if (-not (Test-Path "$storagePartners\$row")) { throw 'archivo nuevo no existe' } else { Write-Output 'archivo nuevo OK' }
+$logo2Wp = [System.IO.Path]::ChangeExtension("$storagePartners\$row", 'webp')
+if (-not (Test-Path $logo2Wp)) { throw 'sidecar webp del logo nuevo no existe' } else { Write-Output 'sidecar webp nuevo OK' }
 
 # --- 7. Quitar logo con checkbox ---
 $curLogo = & $mysql -uroot -N -e "SELECT logo FROM portal2026.partners WHERE id=$id;" 2>&1
@@ -90,6 +108,8 @@ $isNull = & $mysql -uroot -N -e "SELECT logo IS NULL FROM portal2026.partners WH
 Write-Output "BD tras quitar: logo IS NULL=$isNull (esperado 1)"
 if ($isNull -ne '1') { throw 'logo no se quito en BD' } else { Write-Output 'logo=null OK' }
 if (Test-Path "$storagePartners\$curLogo") { throw 'archivo no se borro' } else { Write-Output 'archivo eliminado OK' }
+$curWp = [System.IO.Path]::ChangeExtension("$storagePartners\$curLogo", 'webp')
+if (Test-Path $curWp) { throw 'sidecar webp no se borro' } else { Write-Output 'sidecar webp eliminado OK' }
 
 # --- 8. Editar sin tocar logo (debe conservar logo null + sin error) ---
 $r = Invoke-WebRequest "$base/admin/entes/$id/editar" -WebSession $sess -UseBasicParsing

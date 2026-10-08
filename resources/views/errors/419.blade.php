@@ -1,6 +1,6 @@
 @extends('layouts.public')
 
-@section('title', 'Sesión expirada - Portal GDC')
+@section('title', 'Sesión expirada')
 
 @section('content')
 @include('errors._box', [

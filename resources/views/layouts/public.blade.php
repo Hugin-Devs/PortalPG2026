@@ -3,7 +3,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>@yield('title', 'Portal GDC')</title>
+    @php
+        $site = \App\Models\Setting::values();
+        $siteTitle = $site['site_name'] !== '' ? $site['site_name'] : 'Portal GDC';
+        $siteLogo = $site['site_logo'] !== '' ? 'storage/' . $site['site_logo'] : 'images/logo.png';
+    @endphp
+    <title>@hasSection('title')@yield('title') - {{ $siteTitle }}@else{{ $siteTitle }}@endif</title>
     @vite(['resources/css/app.scss', 'resources/js/app.js'])
 </head>
 <body>
@@ -11,7 +16,7 @@
         <nav class="navbar navbar-expand-lg navbar-light border-bottom">
             <div class="container">
                 <a class="navbar-brand d-flex align-items-center" href="{{ url('/') }}">
-                    <img src="{{ asset('images/logo.png') }}" alt="Logo GDC" height="60" class="me-3">
+                    <x-img path="{{ $siteLogo }}" alt="Logo GDC" height="60" class="me-3" />
                     <span class="text-primary fw-bold fs-5 border-start border-primary ps-3">Gobierno de Distrito Capital</span>
                 </a>
                 <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-label="Alternar navegación" aria-controls="navbarNav">
@@ -31,8 +36,12 @@
                         <li class="nav-item dropdown">
                             <a class="nav-link" href="#" id="serviciosDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">Intranet GDC</a>
                             <ul class="dropdown-menu dropdown-menu-end">
-                                <li><a class="dropdown-item" target="_blank" rel="noopener" href="https://www.gdc.gob.ve/extranet/">Funcionarios Activos</a></li>
-                                <li><a class="dropdown-item" href="#">Jubilados</a></li>
+                                @if($site['nav_funcionarios_url'] !== '')
+                                    <li><a class="dropdown-item" target="_blank" rel="noopener" href="{{ $site['nav_funcionarios_url'] }}">Funcionarios Activos</a></li>
+                                @endif
+                                @if($site['nav_jubilados_url'] !== '')
+                                    <li><a class="dropdown-item" target="_blank" rel="noopener" href="{{ $site['nav_jubilados_url'] }}">Jubilados</a></li>
+                                @endif
                                 <li><a class="dropdown-item" href="{{ url('/admin/login') }}">Gestión Aplicaciones</a></li>
                             </ul>
                         </li>
@@ -75,7 +84,7 @@
                                 <a href="{{ $partner->url }}" target="_blank" title="{{ $partner->name }}">
                             @endif
                             @if($partner->logo)
-                                <img src="{{ asset('storage/' . $partner->logo) }}" alt="{{ $partner->name }}" height="30" loading="lazy" decoding="async" class="bg-white rounded p-1">
+                                <x-img path="storage/{{ $partner->logo }}" alt="{{ $partner->name }}" height="30" loading="lazy" decoding="async" class="bg-white rounded p-1" />
                             @else
                                 <span class="small" style="color: #212529;">{{ $partner->name }}</span>
                             @endif

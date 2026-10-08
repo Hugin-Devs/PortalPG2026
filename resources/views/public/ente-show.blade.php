@@ -1,6 +1,6 @@
 @extends('layouts.public')
 
-@section('title', $ente->name . ' - Portal GDC')
+@section('title', $ente->name)
 
 @section('content')
 <div class="container my-5">
@@ -15,7 +15,7 @@
     <div class="row">
         <div class="col-lg-8">
             @if($ente->logo)
-                <img src="{{ asset('storage/' . $ente->logo) }}" alt="{{ $ente->name }}" height="90" class="mb-4 bg-white rounded p-2 border">
+                <x-img path="storage/{{ $ente->logo }}" alt="{{ $ente->name }}" height="90" class="mb-4 bg-white rounded p-2 border" />
             @endif
 
             <h1 class="text-primary fw-bold mb-4">{{ $ente->name }}</h1>

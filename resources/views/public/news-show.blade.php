@@ -1,6 +1,6 @@
 @extends('layouts.public')
 
-@section('title', $post->title . ' - Portal GDC')
+@section('title', $post->title)
 
 @section('content')
 <div class="container my-5">
@@ -74,7 +74,7 @@
         </script>
 
         @if($post->featured_image)
-            <img src="{{ asset('storage/' . $post->featured_image) }}" alt="{{ $post->title }}" class="img-fluid rounded mb-4 w-100" style="max-height: 400px; object-fit: cover;">
+            <x-img path="storage/{{ $post->featured_image }}" alt="{{ $post->title }}" class="img-fluid rounded mb-4 w-100" style="max-height: 400px; object-fit: cover;" />
         @endif
 
         <div class="lead mb-4 fw-semibold">{{ $post->excerpt }}</div>

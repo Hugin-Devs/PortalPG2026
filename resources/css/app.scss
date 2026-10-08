@@ -7,6 +7,10 @@ $warning: #FFC907;
 @import 'bootstrap/scss/bootstrap';
 
 // Estilos personalizados
+picture {
+    display: contents;
+}
+
 body {
     font-family: 'Instrument Sans', sans-serif;
     color: #333333;

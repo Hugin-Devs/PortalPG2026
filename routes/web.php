@@ -66,6 +66,12 @@ Route::prefix('admin')->group(function () {
         Route::post('/medios', [App\Http\Controllers\Admin\MediaController::class, 'store'])->name('admin.media.store')->middleware('permission:media.upload');
         Route::delete('/medios/{media}', [App\Http\Controllers\Admin\MediaController::class, 'destroy'])->name('admin.media.destroy')->middleware('permission:media.delete');
 
+        // Admin - Videos
+        Route::get('/videos', [App\Http\Controllers\Admin\VideoController::class, 'index'])->name('admin.videos.index')->middleware('permission:videos.view');
+        Route::post('/videos', [App\Http\Controllers\Admin\VideoController::class, 'store'])->name('admin.videos.store')->middleware('permission:videos.upload');
+        Route::post('/videos/destacar', [App\Http\Controllers\Admin\VideoController::class, 'destacar'])->name('admin.videos.destacar')->middleware('permission:videos.manage');
+        Route::delete('/videos/{video}', [App\Http\Controllers\Admin\VideoController::class, 'destroy'])->name('admin.videos.destroy')->middleware('permission:videos.delete');
+
         // Admin - Gacetas
         Route::get('/gacetas', [App\Http\Controllers\Admin\GacetaController::class, 'index'])->name('admin.gacetas.index')->middleware('permission:gacetas.view');
         Route::post('/gacetas', [App\Http\Controllers\Admin\GacetaController::class, 'store'])->name('admin.gacetas.store')->middleware('permission:gacetas.create');
@@ -99,5 +105,9 @@ Route::prefix('admin')->group(function () {
         // Admin - Redes Sociales
         Route::get('/rrss', [App\Http\Controllers\Admin\RrssController::class, 'index'])->name('admin.rrss.index')->middleware('permission:rrss.manage');
         Route::put('/rrss', [App\Http\Controllers\Admin\RrssController::class, 'update'])->name('admin.rrss.update')->middleware('permission:rrss.manage');
+
+        // Admin - Configuración General (solo superadmin)
+        Route::get('/configuracion', [App\Http\Controllers\Admin\SettingsController::class, 'index'])->name('admin.settings.index')->middleware('permission:settings.manage');
+        Route::put('/configuracion', [App\Http\Controllers\Admin\SettingsController::class, 'update'])->name('admin.settings.update')->middleware('permission:settings.manage');
     });
 });

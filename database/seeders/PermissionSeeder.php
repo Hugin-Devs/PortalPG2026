@@ -10,62 +10,57 @@ class PermissionSeeder extends Seeder
 {
     public function run(): void
     {
+        // Dos niveles de agrupación, alineados con el sidebar admin:
+        //  - `group`  = categoría (sección del sidebar): Gestión Noticias / Gestión Portal / Configuración Portal
+        //  - `module` = módulo/función (ítem del sidebar): Noticias, Medios, Videos, ...
         $permissions = [
-            // Noticias
-            ['name' => 'Ver noticias', 'slug' => 'news.view', 'group' => 'Noticias'],
-            ['name' => 'Crear noticias', 'slug' => 'news.create', 'group' => 'Noticias'],
-            ['name' => 'Editar noticias', 'slug' => 'news.edit', 'group' => 'Noticias'],
-            ['name' => 'Eliminar noticias', 'slug' => 'news.delete', 'group' => 'Noticias'],
-            // Categorías
-            ['name' => 'Ver categorías', 'slug' => 'categories.view', 'group' => 'Categorías'],
-            ['name' => 'Crear categorías', 'slug' => 'categories.create', 'group' => 'Categorías'],
-            ['name' => 'Editar categorías', 'slug' => 'categories.edit', 'group' => 'Categorías'],
-            ['name' => 'Eliminar categorías', 'slug' => 'categories.delete', 'group' => 'Categorías'],
-            // Usuarios
-            ['name' => 'Ver usuarios', 'slug' => 'users.view', 'group' => 'Usuarios'],
-            ['name' => 'Crear usuarios', 'slug' => 'users.create', 'group' => 'Usuarios'],
-            ['name' => 'Editar usuarios', 'slug' => 'users.edit', 'group' => 'Usuarios'],
-            ['name' => 'Eliminar usuarios', 'slug' => 'users.delete', 'group' => 'Usuarios'],
-            // Entes
-            ['name' => 'Ver entes', 'slug' => 'partners.view', 'group' => 'Entes'],
-            ['name' => 'Crear entes', 'slug' => 'partners.create', 'group' => 'Entes'],
-            ['name' => 'Editar entes', 'slug' => 'partners.edit', 'group' => 'Entes'],
-            ['name' => 'Eliminar entes', 'slug' => 'partners.delete', 'group' => 'Entes'],
-            // Medios
-            ['name' => 'Ver medios', 'slug' => 'media.view', 'group' => 'Medios'],
-            ['name' => 'Subir medios', 'slug' => 'media.upload', 'group' => 'Medios'],
-            ['name' => 'Eliminar medios', 'slug' => 'media.delete', 'group' => 'Medios'],
-            // Gacetas
-            ['name' => 'Ver gacetas', 'slug' => 'gacetas.view', 'group' => 'Gacetas'],
-            ['name' => 'Crear gacetas', 'slug' => 'gacetas.create', 'group' => 'Gacetas'],
-            ['name' => 'Editar gacetas', 'slug' => 'gacetas.edit', 'group' => 'Gacetas'],
-            ['name' => 'Eliminar gacetas', 'slug' => 'gacetas.delete', 'group' => 'Gacetas'],
-            // Sobre Nosotros
-            ['name' => 'Editar Sobre Nosotros', 'slug' => 'about.edit', 'group' => 'Sobre Nosotros'],
-            // Contacto
-            ['name' => 'Editar información de contacto', 'slug' => 'contact.edit', 'group' => 'Contacto'],
-            ['name' => 'Ver mensajes de contacto', 'slug' => 'contact.view', 'group' => 'Contacto'],
-            ['name' => 'Eliminar mensajes de contacto', 'slug' => 'contact.delete', 'group' => 'Contacto'],
-            // Estructura Org.
-            ['name' => 'Ver estructura', 'slug' => 'org.view', 'group' => 'Estructura Org.'],
-            ['name' => 'Crear estructura', 'slug' => 'org.create', 'group' => 'Estructura Org.'],
-            ['name' => 'Editar estructura', 'slug' => 'org.edit', 'group' => 'Estructura Org.'],
-            ['name' => 'Eliminar estructura', 'slug' => 'org.delete', 'group' => 'Estructura Org.'],
-            // Roles
-            ['name' => 'Gestionar roles', 'slug' => 'roles.manage', 'group' => 'Roles'],
-            // Redes Sociales
-            ['name' => 'Gestionar redes sociales', 'slug' => 'rrss.manage', 'group' => 'Redes Sociales'],
+            // --- Gestión Noticias ---
+            ['name' => 'Ver noticias', 'slug' => 'news.view', 'group' => 'Gestión Noticias', 'module' => 'Noticias'],
+            ['name' => 'Crear noticias', 'slug' => 'news.create', 'group' => 'Gestión Noticias', 'module' => 'Noticias'],
+            ['name' => 'Editar noticias', 'slug' => 'news.edit', 'group' => 'Gestión Noticias', 'module' => 'Noticias'],
+            ['name' => 'Eliminar noticias', 'slug' => 'news.delete', 'group' => 'Gestión Noticias', 'module' => 'Noticias'],
+            ['name' => 'Ver medios', 'slug' => 'media.view', 'group' => 'Gestión Noticias', 'module' => 'Medios'],
+            ['name' => 'Subir medios', 'slug' => 'media.upload', 'group' => 'Gestión Noticias', 'module' => 'Medios'],
+            ['name' => 'Eliminar medios', 'slug' => 'media.delete', 'group' => 'Gestión Noticias', 'module' => 'Medios'],
+            ['name' => 'Ver videos', 'slug' => 'videos.view', 'group' => 'Gestión Noticias', 'module' => 'Videos'],
+            ['name' => 'Cargar videos', 'slug' => 'videos.upload', 'group' => 'Gestión Noticias', 'module' => 'Videos'],
+            ['name' => 'Gestionar portada de videos', 'slug' => 'videos.manage', 'group' => 'Gestión Noticias', 'module' => 'Videos'],
+            ['name' => 'Eliminar videos', 'slug' => 'videos.delete', 'group' => 'Gestión Noticias', 'module' => 'Videos'],
+            ['name' => 'Ver gacetas', 'slug' => 'gacetas.view', 'group' => 'Gestión Noticias', 'module' => 'Gacetas'],
+            ['name' => 'Crear gacetas', 'slug' => 'gacetas.create', 'group' => 'Gestión Noticias', 'module' => 'Gacetas'],
+            ['name' => 'Editar gacetas', 'slug' => 'gacetas.edit', 'group' => 'Gestión Noticias', 'module' => 'Gacetas'],
+            ['name' => 'Eliminar gacetas', 'slug' => 'gacetas.delete', 'group' => 'Gestión Noticias', 'module' => 'Gacetas'],
+            // --- Gestión Portal ---
+            ['name' => 'Ver categorías', 'slug' => 'categories.view', 'group' => 'Gestión Portal', 'module' => 'Categorías'],
+            ['name' => 'Crear categorías', 'slug' => 'categories.create', 'group' => 'Gestión Portal', 'module' => 'Categorías'],
+            ['name' => 'Editar categorías', 'slug' => 'categories.edit', 'group' => 'Gestión Portal', 'module' => 'Categorías'],
+            ['name' => 'Eliminar categorías', 'slug' => 'categories.delete', 'group' => 'Gestión Portal', 'module' => 'Categorías'],
+            ['name' => 'Ver entes', 'slug' => 'partners.view', 'group' => 'Gestión Portal', 'module' => 'Entes Afiliados'],
+            ['name' => 'Crear entes', 'slug' => 'partners.create', 'group' => 'Gestión Portal', 'module' => 'Entes Afiliados'],
+            ['name' => 'Editar entes', 'slug' => 'partners.edit', 'group' => 'Gestión Portal', 'module' => 'Entes Afiliados'],
+            ['name' => 'Eliminar entes', 'slug' => 'partners.delete', 'group' => 'Gestión Portal', 'module' => 'Entes Afiliados'],
+            ['name' => 'Editar Sobre Nosotros', 'slug' => 'about.edit', 'group' => 'Gestión Portal', 'module' => 'Sobre Nosotros'],
+            ['name' => 'Editar información de contacto', 'slug' => 'contact.edit', 'group' => 'Gestión Portal', 'module' => 'Contacto'],
+            ['name' => 'Ver mensajes de contacto', 'slug' => 'contact.view', 'group' => 'Gestión Portal', 'module' => 'Mensajes'],
+            ['name' => 'Eliminar mensajes de contacto', 'slug' => 'contact.delete', 'group' => 'Gestión Portal', 'module' => 'Mensajes'],
+            ['name' => 'Ver estructura', 'slug' => 'org.view', 'group' => 'Gestión Portal', 'module' => 'Estructura Org.'],
+            ['name' => 'Crear estructura', 'slug' => 'org.create', 'group' => 'Gestión Portal', 'module' => 'Estructura Org.'],
+            ['name' => 'Editar estructura', 'slug' => 'org.edit', 'group' => 'Gestión Portal', 'module' => 'Estructura Org.'],
+            ['name' => 'Eliminar estructura', 'slug' => 'org.delete', 'group' => 'Gestión Portal', 'module' => 'Estructura Org.'],
+            ['name' => 'Gestionar redes sociales', 'slug' => 'rrss.manage', 'group' => 'Gestión Portal', 'module' => 'Redes Sociales'],
+            // --- Configuración Portal ---
+            ['name' => 'Editar identidad y enlaces', 'slug' => 'settings.manage', 'group' => 'Configuración Portal', 'module' => 'Identidad / Enlaces'],
+            ['name' => 'Ver usuarios', 'slug' => 'users.view', 'group' => 'Configuración Portal', 'module' => 'Usuarios'],
+            ['name' => 'Crear usuarios', 'slug' => 'users.create', 'group' => 'Configuración Portal', 'module' => 'Usuarios'],
+            ['name' => 'Editar usuarios', 'slug' => 'users.edit', 'group' => 'Configuración Portal', 'module' => 'Usuarios'],
+            ['name' => 'Eliminar usuarios', 'slug' => 'users.delete', 'group' => 'Configuración Portal', 'module' => 'Usuarios'],
+            ['name' => 'Gestionar roles', 'slug' => 'roles.manage', 'group' => 'Configuración Portal', 'module' => 'Roles y Permisos'],
         ];
 
-        // Renombre in-place idempotente (conserva permission_id y sus asignaciones)
-        Permission::where('slug', 'settings.manage')->update([
-            'slug' => 'rrss.manage',
-            'name' => 'Gestionar redes sociales',
-            'group' => 'Redes Sociales',
-        ]);
-
+        // updateOrCreate: además de crear faltantes, corrige group/module/name
+        // de filas existentes (migración de grupos y módulos al estado actual)
         foreach ($permissions as $perm) {
-            Permission::firstOrCreate(
+            Permission::updateOrCreate(
                 ['slug' => $perm['slug']],
                 $perm
             );

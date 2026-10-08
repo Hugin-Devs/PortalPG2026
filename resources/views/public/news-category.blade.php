@@ -1,6 +1,6 @@
 @extends('layouts.public')
 
-@section('title', $category->name . ' - Portal GDC')
+@section('title', $category->name)
 
 @section('content')
 <div class="container my-5">
@@ -28,7 +28,7 @@
                 <div class="col-md-4">
                     <div class="card h-100 shadow-sm">
                         @if($post->featured_image)
-                            <img src="{{ asset('storage/' . $post->featured_image) }}" class="card-img-top" alt="{{ $post->title }}" loading="lazy" decoding="async" style="height: 200px; object-fit: cover;">
+                            <x-img path="storage/{{ $post->featured_image }}" class="card-img-top" alt="{{ $post->title }}" loading="lazy" decoding="async" style="height: 200px; object-fit: cover;" />
                         @else
                             <div class="bg-light d-flex align-items-center justify-content-center" style="height: 200px;">
                                 <span class="text-muted">Sin imagen</span>

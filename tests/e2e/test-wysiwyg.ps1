@@ -161,6 +161,8 @@ $paths = (Sql "SELECT path FROM portal2026.media WHERE original_name LIKE 'wysiw
 foreach ($p in $paths) {
     $p = $p.Trim()
     if ($p -and (Test-Path "$pub\$p")) { Remove-Item "$pub\$p" -Force; Ok "borrado disco: $p" }
+    $wp = if ($p) { [System.IO.Path]::ChangeExtension("$pub\$p", 'webp') } else { $null }
+    if ($wp -and (Test-Path $wp)) { Remove-Item $wp -Force; Ok "borrado disco sidecar: $(Split-Path $wp -Leaf)" }
 }
 Sql "DELETE FROM portal2026.media WHERE original_name LIKE 'wysiwyg-%';" | Out-Null
 $cnt = Sql "SELECT COUNT(*) FROM portal2026.media WHERE original_name LIKE 'wysiwyg-%';"

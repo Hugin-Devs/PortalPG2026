@@ -182,6 +182,8 @@ $trashed = Sql "SELECT deleted_at IS NOT NULL FROM portal2026.posts WHERE id=$id
 Check ($trashed -eq '1') 'deleted_at seteado (soft delete ok)' "deleted_at no seteado: $trashed"
 foreach ($p in @($fi, $libPath, $m1, $m2)) {
     if ($p -and (Test-Path "$pub\$p")) { Remove-Item "$pub\$p" -Force; Ok "borrado disco: $p" }
+    $wp = if ($p) { [System.IO.Path]::ChangeExtension("$pub\$p", 'webp') } else { $null }
+    if ($wp -and (Test-Path $wp)) { Remove-Item $wp -Force; Ok "borrado disco sidecar: $(Split-Path $wp -Leaf)" }
 }
 Sql "DELETE FROM portal2026.media WHERE path IN ('$fi','$libPath','$m1','$m2');" | Out-Null
 $cnt = Sql "SELECT COUNT(*) FROM portal2026.media WHERE path IN ('$fi','$libPath','$m1','$m2');"

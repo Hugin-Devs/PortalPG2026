@@ -1,6 +1,6 @@
 @extends('layouts.public')
 
-@section('title', 'Inicio - Portal GDC')
+@section('title', 'Inicio')
 
 @section('content')
 <div class="container my-5">
@@ -11,7 +11,7 @@
             <div class="carousel-item {{ $index == 0 ? 'active' : '' }}">
                 @if($post->featured_image)
                 <div class="position-relative" style="height: 400px; background-color: #273376;">
-                    <img src="{{ asset('storage/' . $post->featured_image) }}" alt="{{ $post->title }}" class="position-absolute top-0 start-0 w-100 h-100" style="object-fit: cover;">
+                    <x-img path="storage/{{ $post->featured_image }}" alt="{{ $post->title }}" class="position-absolute top-0 start-0 w-100 h-100" style="object-fit: cover;" />
                     <div class="position-absolute top-0 start-0 w-100 h-100" style="background-color: rgba(15, 23, 42, 0.55);"></div>
                     <div class="position-relative h-100 d-flex align-items-center justify-content-center text-white">
                         <div class="text-center p-4">
@@ -75,27 +75,19 @@
         </div>
     </section>
 
-    {{-- YouTube Video Slider --}}
+    {{-- Videos institucionales (portada) --}}
     @if(isset($videos) && $videos->isNotEmpty())
     <section class="mb-5">
         <h3 class="border-bottom border-primary pb-2 mb-4 text-primary fw-bold">VIDEOS INSTITUCIONALES</h3>
-        <div id="videoSlider" class="carousel slide" data-bs-ride="carousel">
-            <div class="carousel-inner">
-                @foreach($videos as $index => $video)
-                <div class="carousel-item {{ $index == 0 ? 'active' : '' }}">
-                    <div class="ratio ratio-16x9">
-                        <iframe src="{{ $video }}" title="Video institucional" allowfullscreen></iframe>
-                    </div>
-                </div>
-                @endforeach
-            </div>
-            <button class="carousel-control-prev" type="button" data-bs-target="#videoSlider" data-bs-slide="prev">
-                <span class="carousel-control-prev-icon bg-dark rounded"></span>
-            </button>
-            <button class="carousel-control-next" type="button" data-bs-target="#videoSlider" data-bs-slide="next">
-                <span class="carousel-control-next-icon bg-dark rounded"></span>
-            </button>
+        @foreach($videos as $video)
+        <div class="ratio ratio-16x9">
+            @if($video->type === 'youtube' && $video->embed_url)
+                <iframe src="{{ $video->embed_url }}" title="{{ $video->title }}" allowfullscreen></iframe>
+            @elseif($video->source_url)
+                <video src="{{ $video->source_url }}" controls class="w-100 h-100 bg-dark" style="object-fit: contain;" title="{{ $video->title }}"></video>
+            @endif
         </div>
+        @endforeach
     </section>
     @endif
 
@@ -109,7 +101,7 @@
                     <div class="col-md-6">
                         <div class="card h-100 shadow-sm">
                             @if($post->featured_image)
-                                <img src="{{ asset('storage/' . $post->featured_image) }}" class="card-img-top" alt="{{ $post->title }}" loading="lazy" decoding="async" style="height: 200px; object-fit: cover;">
+                                <x-img path="storage/{{ $post->featured_image }}" class="card-img-top" alt="{{ $post->title }}" loading="lazy" decoding="async" style="height: 200px; object-fit: cover;" />
                             @else
                                 <div class="bg-light d-flex align-items-center justify-content-center" style="height: 200px;">
                                     <span class="text-muted">Sin imagen</span>

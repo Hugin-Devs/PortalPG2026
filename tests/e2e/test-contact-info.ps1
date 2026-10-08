@@ -32,7 +32,7 @@ Write-Output "settings contact_* previos: $($contactSnapshot.Count) claves prese
 Write-Output '--- 0b. Seeder idempotente (2a corrida) ---'
 & 'D:\laragon\bin\php\php-8.3.30-Win32-vs16-x64\php.exe' artisan db:seed --class=PermissionSeeder --no-interaction 2>&1 | Out-Null
 $cnt = Sql 'SELECT COUNT(*) FROM portal2026.permissions;'
-Check ($cnt -eq '33') "seeder x2: 33 permisos ($cnt)" "permisos != 33: $cnt"
+Check ($cnt -eq '38') "seeder x2: 38 permisos ($cnt)" "permisos != 38: $cnt"
 
 Write-Output '--- 1. Login superadmin + GET /admin/contacto ---'
 $sess = New-Object Microsoft.PowerShell.Commands.WebRequestSession

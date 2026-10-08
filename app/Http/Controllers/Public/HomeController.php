@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Public;
 use App\Http\Controllers\Controller;
 use App\Models\Post;
 use App\Models\Category;
+use App\Models\Video;
 
 class HomeController extends Controller
 {
@@ -32,7 +33,7 @@ class HomeController extends Controller
             ->take(5)
             ->get();
 
-        $videos = collect();
+        $videos = Video::where('is_featured', true)->get();
 
         return view('public.home', compact(
             'featuredPosts', 'latestPosts', 'categories', 'mostRead', 'videos'

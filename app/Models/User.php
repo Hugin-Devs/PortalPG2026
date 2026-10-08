@@ -65,4 +65,17 @@ class User extends Authenticatable
             ->where('permissions.slug', $permissionSlug)
             ->exists();
     }
+
+    public function hasAnyPermission(array $permissionSlugs): bool
+    {
+        if ($this->role === 'superadmin') {
+            return true;
+        }
+
+        return \DB::table('role_permission')
+            ->join('permissions', 'role_permission.permission_id', '=', 'permissions.id')
+            ->where('role_permission.role', $this->role)
+            ->whereIn('permissions.slug', $permissionSlugs)
+            ->exists();
+    }
 }

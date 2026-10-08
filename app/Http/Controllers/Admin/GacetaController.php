@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\Gaceta;
+use App\Services\Webp;
 use Illuminate\Http\Request;
 
 class GacetaController extends Controller
@@ -28,6 +29,7 @@ class GacetaController extends Controller
         $file = $request->file('file');
         $filename = time() . '_' . uniqid() . '.' . $file->getClientOriginalExtension();
         $path = $file->storeAs('gacetas', $filename, 'public');
+        Webp::convert($path);
 
         Gaceta::create([
             'numero' => $request->numero,
@@ -62,10 +64,12 @@ class GacetaController extends Controller
 
         if ($request->hasFile('file')) {
             \Storage::disk('public')->delete($gaceta->path);
+            Webp::delete($gaceta->path);
 
             $file = $request->file('file');
             $filename = time() . '_' . uniqid() . '.' . $file->getClientOriginalExtension();
             $data['path'] = $file->storeAs('gacetas', $filename, 'public');
+            Webp::convert($data['path']);
             $data['original_name'] = $file->getClientOriginalName();
             $data['mime_type'] = $file->getMimeType();
             $data['size'] = $file->getSize();
@@ -79,6 +83,7 @@ class GacetaController extends Controller
     public function destroy(Gaceta $gaceta)
     {
         \Storage::disk('public')->delete($gaceta->path);
+        Webp::delete($gaceta->path);
         $gaceta->delete();
 
         return redirect('/admin/gacetas')->with('success', 'Gaceta eliminada correctamente.');

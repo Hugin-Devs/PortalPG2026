@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\Partner;
+use App\Services\Webp;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
 
@@ -71,10 +72,12 @@ class PartnerController extends Controller
             $data['logo'] = $this->storeLogo($request->file('logo'));
             if ($old) {
                 \Storage::disk('public')->delete($old);
+                Webp::delete($old);
             }
         } elseif ($request->boolean('remove_logo')) {
             if ($partner->logo) {
                 \Storage::disk('public')->delete($partner->logo);
+                Webp::delete($partner->logo);
             }
             $data['logo'] = null;
         } else {
@@ -89,6 +92,7 @@ class PartnerController extends Controller
     {
         if ($partner->logo) {
             \Storage::disk('public')->delete($partner->logo);
+            Webp::delete($partner->logo);
         }
         $partner->delete();
         return redirect('/admin/entes')->with('success', 'Ente afiliado eliminado correctamente.');
@@ -97,7 +101,10 @@ class PartnerController extends Controller
     private function storeLogo($file): string
     {
         $filename = time() . '_' . uniqid() . '.' . $file->getClientOriginalExtension();
-        return $file->storeAs('partners', $filename, 'public');
+        $path = $file->storeAs('partners', $filename, 'public');
+        Webp::convert($path);
+
+        return $path;
     }
 
     private function uniqueSlug(string $name, ?int $ignoreId = null): string

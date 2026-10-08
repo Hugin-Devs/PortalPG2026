@@ -19,16 +19,25 @@
                 </tr>
             </thead>
             <tbody>
-                @php $currentGroup = ''; @endphp
+                @php $currentGroup = ''; $currentModule = ''; @endphp
                 @foreach($permissions as $permission)
                     @if($permission->group && $permission->group !== $currentGroup)
-                        @php $currentGroup = $permission->group; @endphp
+                        @php
+                            $currentGroup = $permission->group;
+                            $currentModule = '';
+                        @endphp
                         <tr class="table-secondary">
-                            <td colspan="{{ count($roles) + 1 }}" class="fw-bold">{{ $currentGroup }}</td>
+                            <td colspan="{{ count($roles) + 1 }}" class="fw-bold text-uppercase">{{ $currentGroup }}</td>
+                        </tr>
+                    @endif
+                    @if($permission->module && $permission->module !== $currentModule)
+                        @php $currentModule = $permission->module; @endphp
+                        <tr class="table-light">
+                            <td colspan="{{ count($roles) + 1 }}" class="fw-semibold ps-4 perm-module">{{ $currentModule }}</td>
                         </tr>
                     @endif
                     <tr>
-                        <td>{{ $permission->name }}</td>
+                        <td class="ps-5">{{ $permission->name }}</td>
                         @foreach($roles as $role)
                             <td class="text-center">
                                 <input type="checkbox" class="form-check-input perm-checkbox"

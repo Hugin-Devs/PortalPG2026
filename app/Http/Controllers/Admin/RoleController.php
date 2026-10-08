@@ -12,7 +12,21 @@ class RoleController extends Controller
     public function index()
     {
         $roles = ['superadmin', 'admin', 'editor'];
-        $permissions = Permission::orderBy('group')->orderBy('name')->get();
+        // Orden en 3 niveles, igual que el sidebar:
+        // 1) categoría (group) → 2) módulo (module) → 3) acción (slug: ver/crear/editar/gestionar/eliminar)
+        $modules = implode(',', array_map(
+            fn ($m) => "'" . str_replace("'", "''", $m) . "'",
+            [
+                'Noticias', 'Medios', 'Videos', 'Gacetas',
+                'Categorías', 'Entes Afiliados', 'Sobre Nosotros', 'Contacto',
+                'Mensajes', 'Estructura Org.', 'Redes Sociales',
+                'Identidad / Enlaces', 'Usuarios', 'Roles y Permisos',
+            ]
+        ));
+        $permissions = Permission::orderByRaw("FIELD(`group`, 'Gestión Noticias', 'Gestión Portal', 'Configuración Portal')")
+            ->orderByRaw("FIELD(`module`, $modules)")
+            ->orderByRaw("FIELD(SUBSTRING_INDEX(slug, '.', -1), 'view', 'create', 'upload', 'edit', 'manage', 'delete')")
+            ->get();
         $rolePermissions = [];
 
         foreach ($roles as $role) {

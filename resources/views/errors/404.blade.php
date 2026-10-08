@@ -1,6 +1,6 @@
 @extends('layouts.public')
 
-@section('title', 'Error 404 - Portal GDC')
+@section('title', 'Error 404')
 
 @section('content')
 @include('errors._box', [

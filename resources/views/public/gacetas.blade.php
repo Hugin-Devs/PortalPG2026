@@ -1,6 +1,6 @@
 @extends('layouts.public')
 
-@section('title', 'Gacetas Oficiales - Portal GDC')
+@section('title', 'Gacetas Oficiales')
 
 @section('content')
 <div class="container my-5">
@@ -23,7 +23,7 @@
             <a href="{{ asset('storage/' . $gaceta->path) }}" target="_blank" rel="noopener noreferrer" class="text-decoration-none">
                 <div class="card h-100 shadow-sm">
                     @if(str_starts_with($gaceta->mime_type, 'image/'))
-                        <img src="{{ asset('storage/' . $gaceta->path) }}" class="card-img-top" alt="Gaceta Oficial N° {{ $gaceta->numero }}" loading="lazy" decoding="async" style="height: 200px; object-fit: cover;">
+                        <x-img path="storage/{{ $gaceta->path }}" class="card-img-top" alt="Gaceta Oficial N° {{ $gaceta->numero }}" loading="lazy" decoding="async" style="height: 200px; object-fit: cover;" />
                     @else
                         <div class="bg-light d-flex align-items-center justify-content-center" style="height: 200px;">
                             <i class="fa-solid fa-file-pdf text-danger" style="font-size: 4rem;"></i>

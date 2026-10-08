@@ -69,6 +69,8 @@ foreach ($row in ($rows -split "`n")) {
     $rid = ($row -split "`t")[0]
     $rpath = ($row -split "`t")[1]
     if ($rpath -and (Test-Path "$pub\$rpath")) { Remove-Item "$pub\$rpath" -Force }
+    $rwp = if ($rpath) { [System.IO.Path]::ChangeExtension("$pub\$rpath", 'webp') } else { $null }
+    if ($rwp -and (Test-Path $rwp)) { Remove-Item $rwp -Force }
     & $mysql -uroot -N -e "DELETE FROM portal2026.gacetas WHERE id=$rid;" | Out-Null
 }
 Write-Output "pre-limpieza quirurgica: artefactos de la suite removidos (gacetas reales intactas)"
@@ -108,6 +110,7 @@ $row = Sql "SELECT id, path, mime_type FROM portal2026.gacetas WHERE numero='045
 Check ($row -match 'gacetas/') "BD fila PDF ($row)" 'no se creo la fila PDF'
 $path1 = ($row -split "`t")[1]
 Check (Test-Path "$pub\$path1") 'archivo PDF en disco' 'archivo PDF no existe'
+Check (-not (Test-Path ([System.IO.Path]::ChangeExtension("$pub\$path1", 'webp')))) 'PDF sin sidecar webp' 'PDF genero sidecar webp (mal)'
 
 Write-Output '--- 5. Cargar gaceta imagen (#050) ---'
 $token = Get-Token $r.Content
@@ -116,6 +119,7 @@ $row = Sql "SELECT path, mime_type FROM portal2026.gacetas WHERE numero='050';"
 Check ($row -like 'gacetas/*' + "`t" + 'image/*') "BD fila imagen ($row)" 'no se creo la fila imagen'
 $path2 = ($row -split "`t")[0]
 Check (Test-Path "$pub\$path2") 'archivo imagen en disco' 'archivo imagen no existe'
+Check (Test-Path ([System.IO.Path]::ChangeExtension("$pub\$path2", 'webp'))) 'webp generado para imagen' 'falta sidecar webp de la imagen'
 
 Write-Output '--- 6. Vista publica: cards, orden y enlaces ---'
 $r = Invoke-WebRequest "$base/gacetas" -UseBasicParsing
@@ -178,7 +182,7 @@ $r = Invoke-WebRequest "$base/admin/gacetas" -WebSession $admin2 -UseBasicParsin
 Check ($r.Content -match 'Nueva Gaceta') 'rol admin puede gestionar gacetas' 'rol admin no puede gestionar'
 Check ($r.Content -match 'Gacetas</a>') 'sidebar admin con Gacetas' 'falta Gacetas en sidebar'
 $pc = Sql 'SELECT COUNT(*) FROM portal2026.permissions;'
-Check ($pc -eq '33') "permisos totales 33 ($pc)" "permisos: $pc"
+Check ($pc -eq '38') "permisos totales 38 ($pc)" "permisos: $pc"
 $rc = Sql 'SELECT role, COUNT(*) FROM portal2026.role_permission GROUP BY role;'
 Check (($rc -match 'admin') -and ($rc -match '21')) "reparto admin 21 ($($rc -replace "`n",' | '))" "reparto admin inesperado: $rc"
 
@@ -193,6 +197,7 @@ $testCnt = (& $mysql -uroot -N -e "SELECT COUNT(*) FROM portal2026.gacetas WHERE
 Check (($testCnt -eq '0') -and ($cnt -eq $baseCount)) "gacetas de la suite eliminadas; preexistentes intactas (total $cnt)" "restos: suite=$testCnt total=$cnt (esperado $baseCount)"
 foreach ($p in @($path2, $path3)) {
     Check (-not (Test-Path "$pub\$p")) "archivo $p borrado del disco" "archivo $p quedo en disco"
+    Check (-not (Test-Path ([System.IO.Path]::ChangeExtension("$pub\$p", 'webp')))) "sidecar webp de $p borrado" "sidecar webp de $p quedo en disco"
 }
 
 Write-Output '--- 11. Smoke ---'

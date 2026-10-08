@@ -1,6 +1,6 @@
 @extends('layouts.public')
 
-@section('title', $page->title . ' - Portal GDC')
+@section('title', $page->title)
 
 @section('content')
 <div class="container my-5">
