@@ -16,8 +16,8 @@ class SearchController extends Controller
             ->where('status', 'published')
             ->where(function ($query) use ($q) {
                 $query->where('title', 'like', "%{$q}%")
-                      ->orWhere('content', 'like', "%{$q}%")
-                      ->orWhere('excerpt', 'like', "%{$q}%");
+                    ->orWhere('content', 'like', "%{$q}%")
+                    ->orWhere('excerpt', 'like', "%{$q}%");
             })
             ->latest()
             ->paginate(10);

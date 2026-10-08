@@ -10,7 +10,7 @@ class Media extends Model
     use HasFactory;
 
     protected $fillable = [
-        'filename', 'original_name', 'path', 'mime_type', 'size', 'user_id'
+        'filename', 'original_name', 'path', 'mime_type', 'size', 'user_id',
     ];
 
     public function user()

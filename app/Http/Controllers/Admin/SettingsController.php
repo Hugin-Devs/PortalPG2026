@@ -16,7 +16,7 @@ class SettingsController extends Controller
         return view('admin.settings.index', [
             'settings' => $settings,
             'hasCustomLogo' => $settings['site_logo'] !== '',
-            'logoUrl' => asset($settings['site_logo'] !== '' ? 'storage/' . $settings['site_logo'] : 'images/logo.png'),
+            'logoUrl' => asset($settings['site_logo'] !== '' ? 'storage/'.$settings['site_logo'] : 'images/logo.png'),
         ]);
     }
 
@@ -36,17 +36,19 @@ class SettingsController extends Controller
                 return;
             }
 
-            if (!str_starts_with($value, '/')) {
+            if (! str_starts_with($value, '/')) {
                 $fail('La ruta del servidor debe comenzar con "/" (ej.: /documentos/convocatorias.pdf).');
+
                 return;
             }
 
             if (str_contains($value, '..') || str_contains($value, '\\') || str_contains($value, "\0")) {
                 $fail('La ruta del servidor no puede contener ".." ni caracteres no permitidos.');
+
                 return;
             }
 
-            if (!file_exists(public_path(ltrim($value, '/')))) {
+            if (! file_exists(public_path(ltrim($value, '/')))) {
                 $fail('El archivo o directorio no existe dentro de la raíz pública (public/).');
             }
         };
@@ -67,7 +69,7 @@ class SettingsController extends Controller
             $this->deleteLogo();
             $file = $request->file('logo');
             $ext = strtolower($file->getClientOriginalExtension()) ?: 'png';
-            $logoPath = $file->storeAs('settings', 'logo.' . $ext, 'public');
+            $logoPath = $file->storeAs('settings', 'logo.'.$ext, 'public');
             Webp::convert($logoPath);
             Setting::updateOrCreate(['key' => 'site_logo'], ['value' => $logoPath]);
         } elseif ($request->boolean('remove_logo')) {

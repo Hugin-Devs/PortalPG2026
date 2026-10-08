@@ -4,7 +4,7 @@
 > Mantener sincronizado con `DOCUMENTACION.md` §12 (Estado del Desarrollo): al cerrar un ítem aquí, actualizar o eliminar su fila en §12.
 > Última actualización: 2026-10-08
 
-**Progreso:** 8 / 21 completados
+**Progreso:** 13 / 21 completados
 
 ---
 
@@ -24,25 +24,25 @@
 
 ## B. Comportamiento / configuración
 
-- [ ] **B1 — `locale='en'` y timezone `UTC`**  
-  `config/app.php:85` (locale → `es`) y `:72` (timezone → `America/Caracas`) · 2 líneas. Fechas/mes aparecen en inglés en la UI.
+- [x] **B1 — `locale='en'` y timezone `UTC`**  
+  Cerrado: `config/app.php` con `locale='es'` (validación en español) y `timezone='America/Caracas'`; `test-dashboard.ps1` calcula mes/ventana con TZ Caracas. 16/16 suites E2E en verde.
 
-- [ ] **B2 — `phpunit.xml` corre contra la BD MySQL de desarrollo**  
-  `phpunit.xml:24-25` · descomentar `DB_CONNECTION=sqlite` / `DB_DATABASE=:memory:` para aislar los tests.
+- [x] **B2 — `phpunit.xml` corre contra la BD MySQL de desarrollo**  
+  Cerrado (como parte de C3): `DB_CONNECTION=sqlite` / `DB_DATABASE=:memory:` activos + configuración migrada al esquema PHPUnit 10.5; `RefreshDatabase` migra en memoria y nunca toca la BD de desarrollo.
 
 ## C. Calidad / mantenimiento
 
-- [ ] **C2 — Pint/PHPStan configurados**  
-  `laravel/pint` está instalado pero sin `pint.json` ni script en `composer.json`. Añadir config + `composer lint`.
+- [x] **C2 — Pint/PHPStan configurados**  
+  Cerrado (solo Pint, decidido): `pint.json` (preset `laravel`) + scripts `composer lint` (`pint --test`) y `composer lint:fix`; aplicación inicial sobre 46 archivos y `composer lint` en verde. PHPStan no se incorpora.
 
-- [ ] **C3 — Tests PHPUnit reales**  
-  `tests/Unit`, `tests/Feature` solo tienen `ExampleTest` (cobertura ≈ 0). Escribir tests de flujos críticos (login, permisos, contact store).
+- [x] **C3 — Tests PHPUnit reales**  
+  Cerrado: 21 tests / 79 assertions en verde — `AuthTest` (login/logout/inactivo, `last_login_at`, mensaje genérico), `PermissionTest` (403/200 por rol, `hasPermission`, `PermissionSeeder`), `ContactStoreTest` (store válido/inválido, `read_at` no manipulable) y `Unit/WebpTest`; cierra B2 (BD sqlite en memoria); `UserFactory` con `Hash::make` para `BCRYPT_ROUNDS`.
 
 - [x] **C4 — Suites E2E solo Windows/Laragon**  
   Decidido: se **mantiene como suite local** Windows/Laragon (sin CI — C1 descartado). Las 16 suites corren en verde en desarrollo.
 
-- [ ] **C5 — Limpieza cosmética**  
-  Borrar `.DS_Store` de `public/images/Logos/`; valorar eliminar `routes/api.php` y `resources/views/welcome.blade.php` sin usar.
+- [x] **C5 — Limpieza cosmética**  
+  Cerrado: `.DS_Store`/`._.DS_Store` eliminados (+ `.gitignore`); `routes/api.php` y `welcome.blade.php` borrados junto con su código muerto (`RouteServiceProvider` bloque api/rate-limiter, grupo `api` de `Http\Kernel`); se eliminan también de DOCUMENTACION (§3/§5/§7/riesgos).
 
 ## D. Funcionales
 
@@ -113,4 +113,9 @@
 | — | 2026-10-08 | Jerarquía de permisos 2 niveles: nueva columna `permissions.module` (14 módulos = ítems del sidebar) con migración `2026_10_08_000001`; vista `/admin/roles` con doble cabecera (categoría → módulo → permiso, orden por `FIELD()` + acción); `settings.manage` renombrado a "Editar identidad y enlaces" |
 | — | 2026-10-08 | Fix dropdown Multimedia: `flex-nowrap` en `ul#mmMenu` — `.nav { flex-wrap: wrap }` con eje vertical + `height` animada por Bootstrap Collapse hacía aparecer "Medios"/"Videos" lado a lado durante la animación; aserción en `test-videos.ps1` |
 | D1 | 2026-10-08 | Dashboard real (SPECS §5.4): migración `daily_views` (`UNIQUE(day, post_id)`, `cascadeOnDelete`) + modelo `DailyView` + upsert en `NewsController@show`; `DashboardController` con agregados + 9 tarjetas por permiso (`data-stat`) + gráfico CSS 30 días + últimas noticias; suite `test-dashboard.ps1` — 16/16 E2E en verde |
+| B1 | 2026-10-08 | `config/app.php`: `locale='es'` + `timezone='America/Caracas'`; `test-dashboard.ps1` pasa a TZ Caracas (`TimeZoneInfo`) para mes/ventana |
+| B2 | 2026-10-08 | `phpunit.xml` con `sqlite/:memory:` activos + migración a esquema PHPUnit 10.5 — tests aislados de la BD de desarrollo |
+| C2 | 2026-10-08 | `pint.json` (preset laravel) + `composer lint`/`composer lint:fix`; aplicación inicial a 46 archivos; lint en verde (solo Pint, sin PHPStan) |
+| C3 | 2026-10-08 | 21 tests PHPUnit en verde (`AuthTest`, `PermissionTest`, `ContactStoreTest`, `Unit/WebpTest`); `UserFactory` con `Hash::make`; cierra B2 |
+| C5 | 2026-10-08 | `.DS_Store` + `.gitignore`; `routes/api.php`, `welcome.blade.php` y código muerto asociado (provider/Kernel) eliminados |
 | D9 | 2026-10-08 | WebP con fallback (SPECS §9.2): `App\Services\Webp` (sidecar `.webp` calidad 82, jpg/jpeg/png, degradado sin GD/ilegibles), componente `<x-img>` con `<picture>` + `<img src>` original (11 vistas públicas/admin/logo), hooks en Media/News/Gaceta/Partner/Settings (convert al subir, delete al borrar/reemplazar), `php artisan webp:generate` (backfill idempotente, contador `ilegibles`), CSS `picture{display:contents}` + build; suite `test-webp.ps1` y sidecars añadidos a las limpiezas de media/wysiwyg/gacetas/partners/settings — 15/15 E2E en verde |

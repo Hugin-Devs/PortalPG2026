@@ -5,7 +5,6 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\Permission;
 use Illuminate\Http\Request;
-use Illuminate\Support\Str;
 
 class RoleController extends Controller
 {
@@ -15,7 +14,7 @@ class RoleController extends Controller
         // Orden en 3 niveles, igual que el sidebar:
         // 1) categoría (group) → 2) módulo (module) → 3) acción (slug: ver/crear/editar/gestionar/eliminar)
         $modules = implode(',', array_map(
-            fn ($m) => "'" . str_replace("'", "''", $m) . "'",
+            fn ($m) => "'".str_replace("'", "''", $m)."'",
             [
                 'Noticias', 'Medios', 'Videos', 'Gacetas',
                 'Categorías', 'Entes Afiliados', 'Sobre Nosotros', 'Contacto',
@@ -58,7 +57,7 @@ class RoleController extends Controller
             ];
         }
 
-        if (!empty($data)) {
+        if (! empty($data)) {
             \DB::table('role_permission')->insert($data);
         }
 

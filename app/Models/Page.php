@@ -10,7 +10,7 @@ class Page extends Model
     use HasFactory;
 
     protected $fillable = [
-        'title', 'slug', 'content', 'is_active'
+        'title', 'slug', 'content', 'is_active',
     ];
 
     protected $casts = [

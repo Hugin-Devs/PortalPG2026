@@ -2,7 +2,9 @@
 
 namespace Database\Seeders;
 
-use Illuminate\Database\Console\Seeds\WithoutModelEvents;
+use App\Models\Category;
+use App\Models\Post;
+use App\Models\User;
 use Illuminate\Database\Seeder;
 
 class PostSeeder extends Seeder
@@ -12,8 +14,8 @@ class PostSeeder extends Seeder
      */
     public function run(): void
     {
-        $category = \App\Models\Category::first();
-        $user = \App\Models\User::first() ?? \App\Models\User::firstOrCreate([
+        $category = Category::first();
+        $user = User::first() ?? User::firstOrCreate([
             'email' => 'admin@gdc.gob.ve',
         ], [
             'name' => 'Admin',
@@ -21,7 +23,7 @@ class PostSeeder extends Seeder
         ]);
 
         for ($i = 1; $i <= 5; $i++) {
-            \App\Models\Post::updateOrCreate([
+            Post::updateOrCreate([
                 'slug' => "noticia-destacada-$i",
             ], [
                 'title' => "Noticia Destacada $i",

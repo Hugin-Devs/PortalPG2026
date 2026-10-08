@@ -22,8 +22,10 @@ function StatNum($html, $name) {
     $m = [regex]::Match($html, 'data-stat="' + $name + '"(?:(?!data-stat|data-chart)[\s\S]){0,800}?class="fs-2 fw-bold stat-number[^"]*">(\d+)<')
     if ($m.Success) { return [int]$m.Groups[1].Value } else { return $null }
 }
-$monthStartUtc = [DateTime]::UtcNow.ToString('yyyy-MM-01')
-$window30Utc = [DateTime]::UtcNow.AddDays(-29).ToString('yyyy-MM-dd')
+$tzCaracas = [System.TimeZoneInfo]::FindSystemTimeZoneById('Venezuela Standard Time')
+$nowCaracas = [System.TimeZoneInfo]::ConvertTimeFromUtc([DateTime]::UtcNow, $tzCaracas)
+$monthStart = $nowCaracas.ToString('yyyy-MM-01')
+$window30 = $nowCaracas.AddDays(-29).ToString('yyyy-MM-dd')
 
 Write-Output '--- 1. Sin sesion -> redirect a login ---'
 try {
@@ -48,7 +50,7 @@ $n = [int](Sql "SELECT COUNT(*) FROM portal2026.posts WHERE deleted_at IS NULL;"
 Check ((StatNum $html 'noticias') -eq $n) "noticias total=$n (tarjeta=$((StatNum $html 'noticias')))" 'conteo noticias no coincide'
 $u = [int](Sql "SELECT COUNT(*) FROM portal2026.users;")
 Check ((StatNum $html 'usuarios') -eq $u) "usuarios total=$u (tarjeta=$((StatNum $html 'usuarios')))" 'conteo usuarios no coincide'
-$m = [int](Sql "SELECT COALESCE(SUM(count),0) FROM portal2026.daily_views WHERE day >= '$monthStartUtc';")
+$m = [int](Sql "SELECT COALESCE(SUM(count),0) FROM portal2026.daily_views WHERE day >= '$monthStart';")
 $cardVisitas = StatNum $html 'visitas'
 Check (($null -ne $cardVisitas) -and ($cardVisitas -eq $m)) "visitas mes=$m (tarjeta=$cardVisitas)" "conteo visitas no coincide: tarjeta=$cardVisitas SQL=$m"
 $g = [int](Sql "SELECT COUNT(*) FROM portal2026.gacetas;")
@@ -78,12 +80,12 @@ $slug = "$slug".Trim()
 $pidT = [int](Sql "SELECT id FROM portal2026.posts WHERE slug='$slug';")
 $beforeV = [int](Sql "SELECT COALESCE(SUM(count),0) FROM portal2026.daily_views WHERE post_id=$pidT;")
 $beforeViews = [int](Sql "SELECT views FROM portal2026.posts WHERE id=$pidT;")
-$beforeMonth = [int](Sql "SELECT COALESCE(SUM(count),0) FROM portal2026.daily_views WHERE day >= '$monthStartUtc';")
+$beforeMonth = [int](Sql "SELECT COALESCE(SUM(count),0) FROM portal2026.daily_views WHERE day >= '$monthStart';")
 $r = Invoke-WebRequest "$base/noticias/$slug" -UseBasicParsing
 Check ($r.StatusCode -eq 200) 'GET articulo 200' "status $($r.StatusCode)"
 $afterV = [int](Sql "SELECT COALESCE(SUM(count),0) FROM portal2026.daily_views WHERE post_id=$pidT;")
 $afterViews = [int](Sql "SELECT views FROM portal2026.posts WHERE id=$pidT;")
-$afterMonth = [int](Sql "SELECT COALESCE(SUM(count),0) FROM portal2026.daily_views WHERE day >= '$monthStartUtc';")
+$afterMonth = [int](Sql "SELECT COALESCE(SUM(count),0) FROM portal2026.daily_views WHERE day >= '$monthStart';")
 Check ($afterV -eq ($beforeV + 1)) "daily_views del post +1 ($beforeV -> $afterV)" "no incremento: $beforeV -> $afterV"
 Check ($afterViews -eq ($beforeViews + 1)) "contador views lifetime +1 ($beforeViews -> $afterViews)" "views no incremento: $beforeViews -> $afterViews"
 Check ($afterMonth -eq ($beforeMonth + 1)) "visitas del mes +1 ($beforeMonth -> $afterMonth)" "mes no incremento"
@@ -97,7 +99,7 @@ $bars = ([regex]::Matches($html, 'class="dash-bar')).Count
 Check ($bars -eq 30) "30 barras (got $bars)" "barras: $bars"
 $m = [regex]::Match($html, 'data-chart="daily"(?:(?!data-stat)[\s\S]){0,600}?([\d.,]+) en el per')
 Check ($m.Success) 'total del periodo visible' 'sin total del periodo'
-$periodTotal = [int](Sql "SELECT COALESCE(SUM(count),0) FROM portal2026.daily_views WHERE day >= '$window30Utc';")
+$periodTotal = [int](Sql "SELECT COALESCE(SUM(count),0) FROM portal2026.daily_views WHERE day >= '$window30';")
 $shownTotal = 0
 if ($m.Success) { $shownTotal = [int]($m.Groups[1].Value -replace '[.,]', '') }
 Check ($shownTotal -eq $periodTotal) "total periodo=$periodTotal (visto=$shownTotal)" 'total del periodo no coincide'

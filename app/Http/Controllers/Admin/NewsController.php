@@ -3,9 +3,9 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Models\Category;
 use App\Models\Media;
 use App\Models\Post;
-use App\Models\Category;
 use App\Services\Webp;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
@@ -16,12 +16,14 @@ class NewsController extends Controller
     public function index()
     {
         $posts = Post::with('category')->latest()->paginate(10);
+
         return view('admin.news.index', compact('posts'));
     }
 
     public function create()
     {
         $categories = Category::all();
+
         return view('admin.news.create', compact('categories'));
     }
 
@@ -48,12 +50,14 @@ class NewsController extends Controller
         }
 
         Post::create($data);
+
         return redirect('/admin/noticias')->with('success', 'Noticia creada correctamente.');
     }
 
     public function edit(Post $post)
     {
         $categories = Category::all();
+
         return view('admin.news.edit', compact('post', 'categories'));
     }
 
@@ -74,7 +78,7 @@ class NewsController extends Controller
         $data['slug'] = Str::slug($request->title);
         $data['is_featured'] = $request->has('is_featured');
 
-        if (($data['status'] ?? 'draft') === 'published' && !$post->published_at) {
+        if (($data['status'] ?? 'draft') === 'published' && ! $post->published_at) {
             $data['published_at'] = now();
         }
 
@@ -90,12 +94,14 @@ class NewsController extends Controller
         unset($data['featured_image_file'], $data['remove_image']);
 
         $post->update($data);
+
         return redirect('/admin/noticias')->with('success', 'Noticia actualizada correctamente.');
     }
 
     public function destroy(Post $post)
     {
         $post->delete();
+
         return redirect('/admin/noticias')->with('success', 'Noticia eliminada correctamente.');
     }
 
@@ -117,7 +123,7 @@ class NewsController extends Controller
 
     private function storeFeaturedFile($file): string
     {
-        $filename = time() . '_' . uniqid() . '.' . $file->getClientOriginalExtension();
+        $filename = time().'_'.uniqid().'.'.$file->getClientOriginalExtension();
         $path = $file->storeAs('uploads', $filename, 'public');
         Webp::convert($path);
 

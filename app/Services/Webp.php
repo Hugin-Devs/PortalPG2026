@@ -22,7 +22,7 @@ class Webp
 
     public static function sidecarPath(string $path): ?string
     {
-        if (!self::convertible($path)) {
+        if (! self::convertible($path)) {
             return null;
         }
 
@@ -31,7 +31,7 @@ class Webp
 
     public static function decodable(string $path): bool
     {
-        if (!self::convertible($path)) {
+        if (! self::convertible($path)) {
             return false;
         }
 
@@ -61,18 +61,18 @@ class Webp
 
     public static function url(string $path): ?string
     {
-        if (!self::exists($path)) {
+        if (! self::exists($path)) {
             return null;
         }
 
-        return asset('storage/' . self::sidecarPath($path));
+        return asset('storage/'.self::sidecarPath($path));
     }
 
     public static function convert(string $path, ?int $quality = null): ?string
     {
         $sidecar = self::sidecarPath($path);
 
-        if ($sidecar === null || !self::supported()) {
+        if ($sidecar === null || ! self::supported()) {
             return null;
         }
 
@@ -94,7 +94,7 @@ class Webp
             return null;
         }
 
-        if (!imageistruecolor($source)) {
+        if (! imageistruecolor($source)) {
             imagepalettetotruecolor($source);
         }
 

@@ -2,7 +2,7 @@
 
 namespace Database\Seeders;
 
-use Illuminate\Database\Console\Seeds\WithoutModelEvents;
+use App\Models\Category;
 use Illuminate\Database\Seeder;
 
 class CategorySeeder extends Seeder
@@ -22,7 +22,7 @@ class CategorySeeder extends Seeder
         ];
 
         foreach ($categories as $cat) {
-            \App\Models\Category::updateOrCreate(['slug' => $cat['slug']], $cat);
+            Category::updateOrCreate(['slug' => $cat['slug']], $cat);
         }
     }
 }

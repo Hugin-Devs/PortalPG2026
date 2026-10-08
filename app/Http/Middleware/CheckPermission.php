@@ -9,7 +9,7 @@ class CheckPermission
 {
     public function handle(Request $request, Closure $next, $permission)
     {
-        if (!auth()->check()) {
+        if (! auth()->check()) {
             return redirect('/admin/login');
         }
 
@@ -26,7 +26,7 @@ class CheckPermission
             ->where('permissions.slug', $permission)
             ->exists();
 
-        if (!$hasPermission) {
+        if (! $hasPermission) {
             abort(403, 'No tienes permiso para realizar esta acción.');
         }
 

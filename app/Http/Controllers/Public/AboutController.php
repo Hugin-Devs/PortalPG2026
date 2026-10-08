@@ -3,8 +3,8 @@
 namespace App\Http\Controllers\Public;
 
 use App\Http\Controllers\Controller;
-use App\Models\Setting;
 use App\Models\OrgMember;
+use App\Models\Setting;
 
 class AboutController extends Controller
 {

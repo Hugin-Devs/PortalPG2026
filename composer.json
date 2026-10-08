@@ -45,7 +45,9 @@
         ],
         "post-create-project-cmd": [
             "@php artisan key:generate --ansi"
-        ]
+        ],
+        "lint": "pint --test",
+        "lint:fix": "pint"
     },
     "extra": {
         "branch-alias": {

@@ -14,7 +14,7 @@ class WebpGenerate extends Command
 
     public function handle(): int
     {
-        if (!Webp::supported()) {
+        if (! Webp::supported()) {
             $this->error('GD sin soporte WebP (funcion imagewebp no disponible).');
 
             return self::FAILURE;
@@ -29,24 +29,27 @@ class WebpGenerate extends Command
         $failed = 0;
 
         foreach (['uploads', 'partners', 'gacetas', 'settings'] as $dir) {
-            if (!$disk->exists($dir)) {
+            if (! $disk->exists($dir)) {
                 continue;
             }
 
             foreach ($disk->allFiles($dir) as $file) {
-                if (!Webp::convertible($file)) {
+                if (! Webp::convertible($file)) {
                     $skipped++;
+
                     continue;
                 }
 
                 if (Webp::exists($file)) {
                     $existing++;
+
                     continue;
                 }
 
-                if (!Webp::decodable($file)) {
+                if (! Webp::decodable($file)) {
                     $unreadable++;
-                    $this->warn('Ilegible: ' . $file);
+                    $this->warn('Ilegible: '.$file);
+
                     continue;
                 }
 
@@ -54,7 +57,7 @@ class WebpGenerate extends Command
                     $converted++;
                 } else {
                     $failed++;
-                    $this->warn('Fallo: ' . $file);
+                    $this->warn('Fallo: '.$file);
                 }
             }
         }

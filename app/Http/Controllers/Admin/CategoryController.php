@@ -12,12 +12,14 @@ class CategoryController extends Controller
     public function index()
     {
         $categories = Category::with('parent')->orderBy('order')->paginate(10);
+
         return view('admin.categories.index', compact('categories'));
     }
 
     public function create()
     {
         $categories = Category::whereNull('parent_id')->get();
+
         return view('admin.categories.create', compact('categories'));
     }
 
@@ -34,12 +36,14 @@ class CategoryController extends Controller
         $data['slug'] = Str::slug($request->name);
 
         Category::create($data);
+
         return redirect('/admin/categorias')->with('success', 'Categoría creada correctamente.');
     }
 
     public function edit(Category $category)
     {
         $categories = Category::whereNull('parent_id')->where('id', '!=', $category->id)->get();
+
         return view('admin.categories.edit', compact('category', 'categories'));
     }
 
@@ -58,6 +62,7 @@ class CategoryController extends Controller
         $data['is_active'] = $request->has('is_active');
 
         $category->update($data);
+
         return redirect('/admin/categorias')->with('success', 'Categoría actualizada correctamente.');
     }
 
@@ -67,6 +72,7 @@ class CategoryController extends Controller
             return back()->with('error', 'No se puede eliminar una categoría con noticias asociadas.');
         }
         $category->delete();
+
         return redirect('/admin/categorias')->with('success', 'Categoría eliminada correctamente.');
     }
 }

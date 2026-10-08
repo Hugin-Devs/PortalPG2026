@@ -41,7 +41,8 @@ php artisan serve
 ## Tests
 
 ```bash
-./vendor/bin/phpunit          # Unit + Feature (cobertura mínima, ver §16)
+./vendor/bin/phpunit          # Unit + Feature (21 tests, BD sqlite en memoria — ver §16)
+composer lint                 # estilo de código (pint --test); composer lint:fix lo aplica
 ```
 
 Suites E2E en `tests/e2e/` (PowerShell): solo Windows + Laragon, se ejecutan contra `http://portal2026.test` (ver §16).

@@ -27,7 +27,7 @@ class GacetaController extends Controller
         ]);
 
         $file = $request->file('file');
-        $filename = time() . '_' . uniqid() . '.' . $file->getClientOriginalExtension();
+        $filename = time().'_'.uniqid().'.'.$file->getClientOriginalExtension();
         $path = $file->storeAs('gacetas', $filename, 'public');
         Webp::convert($path);
 
@@ -67,7 +67,7 @@ class GacetaController extends Controller
             Webp::delete($gaceta->path);
 
             $file = $request->file('file');
-            $filename = time() . '_' . uniqid() . '.' . $file->getClientOriginalExtension();
+            $filename = time().'_'.uniqid().'.'.$file->getClientOriginalExtension();
             $data['path'] = $file->storeAs('gacetas', $filename, 'public');
             Webp::convert($data['path']);
             $data['original_name'] = $file->getClientOriginalName();

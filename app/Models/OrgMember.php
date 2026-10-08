@@ -10,7 +10,7 @@ class OrgMember extends Model
     use HasFactory;
 
     protected $fillable = [
-        'name', 'position', 'photo', 'description', 'order', 'is_active'
+        'name', 'position', 'photo', 'description', 'order', 'is_active',
     ];
 
     protected $casts = [

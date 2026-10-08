@@ -280,7 +280,7 @@ Todas las rutas de gestión llevan además `middleware('permission:...')` (ver s
 | GET/PUT | `/admin/rrss` | `rrss.manage` | `Admin\RrssController` |
 | GET/PUT | `/admin/configuracion` | `settings.manage` | `Admin\SettingsController` |
 
-> **Nota:** todas las rutas viven en `routes/web.php` (no existe `routes/admin.php`; el panel usa el prefijo `/admin` ahí mismo). `routes/api.php` solo conserva el boilerplate de Laravel (`GET /api/user` con `auth:sanctum`) y no se usa.
+> **Nota:** todas las rutas viven en `routes/web.php` (no existe `routes/admin.php`; el panel usa el prefijo `/admin` ahí mismo). El boilerplate `routes/api.php` de Laravel fue **eliminado** (C5): no hay API; el `RouteServiceProvider` solo carga `web.php`.
 
 ---
 
@@ -353,7 +353,7 @@ Todas las rutas de gestión llevan además `middleware('permission:...')` (ver s
 
 > **Componente de imágenes**: las vistas públicas + logos (header/footer público, sidebar admin y login) usan el componente Blade `<x-img path="storage/..." ...attrs>` (`resources/views/components/img.blade.php`) en lugar de `<img>`: si existe el sidecar `.webp` (mismo nombre con extensión `.webp`, ver `App\Services\Webp`) emite `<picture>` con `<source type="image/webp">` y el `<img src>` apuntando al **original como fallback**; si no existe, `<img>` idéntico al anterior (bitácora transparente para el navegador). Los atributos (`alt`, `class`, `loading`, etc.) se pasan tal cual y conservan su orden. La regla CSS `picture { display: contents; }` (en `app.scss`) evita que el `<picture>` altere layout, gap de línea base o posicionamiento.
 
-> También existe `resources/views/welcome.blade.php` (plantilla por defecto de Laravel, sin usar: la ruta `/` apunta a `HomeController`).
+> La plantilla por defecto `welcome.blade.php` fue eliminada (C5): la ruta `/` apunta a `HomeController`.
 
 ### 7.3 Admin (`resources/views/admin/`)
 
@@ -544,6 +544,10 @@ npm run build      # copia TinyMCE a public/vendor + vite build a public/build
 - [x] **Buscador en `/entes`**: filtro instantáneo client-side (vanilla JS inline en la vista, sin jQuery ni recarga) sobre nombre + descripción, normalización de mayúsculas/accentos (NFD), mensaje "sin resultados" y `aria-label`; cobertura en `test-entes.ps1` (sección BUSCADOR)
 - [x] **Imágenes WebP con fallback** (SPECS §9.2, D9): servicio `App\Services\Webp` (calidad 82, solo `jpg`/`jpeg`/`png` → sidecar `.webp` junto al original; GD nativo `imagewebp`, degrada a *sin conversión* si falta GD o el archivo es ilegible) + componente Blade `<x-img>` con `<picture>`/`<source type="image/webp">` y `<img src>` original como fallback; **conversión automática al subir** en los 5 puntos de carga (Medios, imagen destacada, Gacetas, logos de Entes, logo del sitio) y **borrado del sidecar** al borrar o reemplazar; backfill idempotente con `php artisan webp:generate`; CSS `picture { display: contents; }`; suite `test-webp.ps1` (comando, upload, render público, GIF/PNG-corrupto no convertibles, destroy, build CSS) — **15/15 suites E2E en verde**
 - [x] **Dashboard real** (SPECS §5.4, D1): tabla `daily_views` (día + artículo + contador, `UNIQUE(day, post_id)`) con tracking en `Public\NewsController@show` (upsert atómico `ON DUPLICATE KEY UPDATE`, fecha enlazada desde PHP) + `DailyView` (12º modelo); `DashboardController@index` con agregados (noticias total/publicadas/borradores, visitas del mes, usuarios, mensajes sin leer, gacetas/medios/entes/videos/categorías, últimas 5 publicadas) y **9 tarjetas** filtradas por permiso (editor 3, admin 7, superadmin 9) con atributos `data-stat` estables + **gráfico de barras CSS de 30 días** (sin librerías, tooltips por día, estado vacío) + bloque "Últimas noticias publicadas"; suite `test-dashboard.ps1` — **16/16 suites E2E en verde**
+- [x] **Idioma español + timezone Caracas** (B1): `config/app.php` con `locale='es'` (mensajes de validación en español — antes en inglés) y `timezone='America/Caracas'` (fechas y bucketing de `daily_views` en hora local, UTC-4); ajuste de `test-dashboard.ps1` a TZ Caracas (`TimeZoneInfo`)
+- [x] **Pint configurado** (C2): `pint.json` (preset `laravel`) + scripts `composer lint` (`pint --test`) y `composer lint:fix`; aplicación inicial sobre 46 archivos (estilo) — `composer lint` en verde
+- [x] **Tests PHPUnit reales** (C3, cierra B2): `phpunit.xml` migrado a esquema 10.5 con `sqlite/:memory:` (los tests **nunca** tocan la BD de desarrollo); 21 tests / 79 assertions en verde — `AuthTest` (login/logout/inactivo + `last_login_at` + mensaje genérico), `PermissionTest` (403/200 por rol + `hasPermission()` con reparto 38/21/5 + `PermissionSeeder`), `ContactStoreTest` (store válido/inválido + `read_at` no manipulable) y `Unit/WebpTest`; `UserFactory` con `Hash::make` (compat `BCRYPT_ROUNDS`); docs §16 actualizadas
+- [x] **Limpieza cosmética** (C5): eliminados `.DS_Store`/`._.DS_Store` de `public/images/Logos` (más entradas en `.gitignore`), boilerplate `routes/api.php` (+ bloque `api`/rate-limiter del `RouteServiceProvider` y grupo `api` del `Http\Kernel`) y plantilla `resources/views/welcome.blade.php` sin usar
 
 ### 🔴 Pendiente
 
@@ -565,21 +569,17 @@ Newsletter, API REST, comentarios, galería, eventos, versión en inglés.
 
 ### 🟠 Riesgos conocidos para producción (detectados, **sin corregir**)
 
-Pendientes de decisión antes o después del despliegue (ver §14 para el checklist). **Seguimiento en [PENDIENTES.md](PENDIENTES.md)** (ítems A1–A5, B1–B2, C1–C5):
+Pendientes de decisión antes o después del despliegue (ver §14 para el checklist). **Seguimiento en [PENDIENTES.md](PENDIENTES.md)** (ítems A1–A4):
 
 | # | Riesgo | Dónde | Impacto |
 |---|---|---|---|
 | 1 | `SESSION_SECURE_COOKIE` sin default `true` ni clave en `.env` | `config/session.php:171` | Cookies de sesión sin flag `Secure` tras HTTPS |
-| 2 | `locale='en'` y timezone `UTC` | `config/app.php:85` y `:72` | Fechas/mes en inglés en la UI (sitio es español) |
-| 3 | `phpunit.xml` usa la BD MySQL de `.env` (sqlite comentado) | `phpunit.xml:24-25` | Los tests tocan la BD de desarrollo (ver §16) |
-| 4 | Laravel 10 (10.50.2) — **EOL desde feb 2026** | `composer.json:10` | Sin parches de seguridad; **aceptado por decisión institucional** (la institución requiere Laravel 10 — PENDIENTES F/A5) |
-| 5 | Bloque `"audit": {"ignore": [17 IDs PKSA-*]}` | `composer.json:65-83` | Oculta advisories de seguridad de dependencias; revisar con `composer audit` |
-| 6 | Sin CI (GitHub Actions descartado) ni PHPStan/Pint configurados (Pint instalado sin config ni script) | repo | Nada valida calidad/seguridad automáticamente; decisiones en PENDIENTES F/C1 y C2 |
-| 7 | Cobertura de tests PHPUnit ≈ 0 (solo `ExampleTest`) | `tests/Unit`, `tests/Feature` | La validación real son las suites E2E de Windows |
-| 8 | Suites E2E solo Windows/Laragon | `tests/e2e/*.ps1` | No sirven para validar el servidor de producción |
-| 9 | Usuarios seed con password `password` (ver §14 paso post-deploy) | `UserSeeder` | Credenciales predecibles si no se cambian |
-| 10 | `.DS_Store` de macOS trackeados | `public/images/Logos/` | Basura en el repo (cosmético) |
-| 11 | `routes/api.php` y `welcome.blade.php` sin usar | boilerplate Laravel | Código muerto (cosmético) |
+| 2 | Laravel 10 (10.50.2) — **EOL desde feb 2026** | `composer.json:10` | Sin parches de seguridad; **aceptado por decisión institucional** (la institución requiere Laravel 10 — PENDIENTES F/A5) |
+| 3 | Bloque `"audit": {"ignore": [17 IDs PKSA-*]}` | `composer.json:65-83` | Oculta advisories de seguridad de dependencias; revisar con `composer audit` |
+| 4 | Sin CI (GitHub Actions descartado) ni PHPStan; Pint sí configurado (`pint.json` + `composer lint`, C2) | repo | No hay CI que ejecute lint/tests automáticamente; decisiones en PENDIENTES F/C1 |
+| 5 | Cobertura PHPUnit limitada (21 tests: auth, permisos, contacto y reglas WebP, con sqlite en memoria) | `tests/Unit`, `tests/Feature` | El detalle funcional fino vive en las 16 suites E2E de Windows |
+| 6 | Suites E2E solo Windows/Laragon | `tests/e2e/*.ps1` | No sirven para validar el servidor de producción |
+| 7 | Usuarios seed con password `password` (ver §14 paso post-deploy) | `UserSeeder` | Credenciales predecibles si no se cambian |
 
 ---
 
@@ -745,7 +745,7 @@ El proyecto **no tiene tareas programadas** (`app/Console/Kernel.php` sin schedu
 
 #### J. Qué NO funciona en el servidor de producción
 - Suites E2E (`tests/e2e/*.ps1`): solo Windows + Laragon (§16).
-- PHPUnit: requiere toolchain y toca la BD según `.env` (§16).
+- PHPUnit: no instalado en producción (`composer install --no-dev`); en desarrollo corre con su propia BD **sqlite en memoria** (`phpunit.xml`, sin tocar MySQL) — §16.
 
 ---
 
@@ -761,6 +761,13 @@ php artisan optimize:clear
 
 # Reconstruir assets
 npm run build
+
+# Calidad de código (Pint, preset laravel)
+composer lint        # verifica (pint --test) — debe pasar en verde
+composer lint:fix    # aplica la corrección de estilo
+
+# Tests Unit/Feature (sqlite en memoria; no toca la BD de desarrollo)
+./vendor/bin/phpunit
 
 # Backfill WebP: genera sidecars .webp de las imágenes JPG/PNG existentes
 # (idempotente; --quality=82 por defecto; requiere GD con imagewebp)
@@ -820,6 +827,8 @@ Garantías de las suites:
 
 ### PHPUnit (`tests/Unit`, `tests/Feature`)
 
-- Ejecución: `./vendor/bin/phpunit` (o `--testsuite Unit,Feature`).
-- Cobertura real ≈ 0: solo los `ExampleTest` por defecto de Laravel; toda la validación funcional está en las suites E2E de PowerShell.
-- ⚠️ `phpunit.xml` tiene `DB_CONNECTION=sqlite` / `DB_DATABASE=:memory:` **comentadas** (líneas 24–25): hoy hereda la BD MySQL de `.env`, es decir, corre contra la **base de desarrollo**. Descomentar esas dos líneas para aislarse (recomendado antes de automatizar nada).
+- Ejecución: `./vendor/bin/phpunit` (o `--testsuite Unit,Feature`) — **21 tests / 79 assertions**, en verde.
+- **BD aislada**: `phpunit.xml` define `DB_CONNECTION=sqlite` / `DB_DATABASE=:memory:` (B2 cerrado) — `RefreshDatabase` migra en memoria por test, **nunca toca la BD de desarrollo**.
+- Cobertura: flujos críticos — `AuthTest` (login correcto/incorrecto/inactivo, logout, `last_login_at`, mensaje genérico), `PermissionTest` (403 editor/admin en `/admin/usuarios`, superadmin OK, `hasPermission()` con el reparto canónico 38/21/5, seeder `PermissionSeeder`), `ContactStoreTest` (POST `/contacto` válido/inválido, `read_at` no manipulable) y `Unit/WebpTest` (reglas de conversión de D9). El detalle funcional fino sigue en las suites E2E de PowerShell.
+- Estilo: `composer lint` (`pint --test`) debe pasar; `composer lint:fix` aplica Pint (C2).
+- Nota: el `UserFactory` usa `Hash::make('password')` (no un hash hardcodeado) para respetar `BCRYPT_ROUNDS` de tests.

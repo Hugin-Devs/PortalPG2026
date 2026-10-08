@@ -11,6 +11,7 @@ class OrgMemberController extends Controller
     public function index()
     {
         $members = OrgMember::orderBy('order')->paginate(10);
+
         return view('admin.org-members.index', compact('members'));
     }
 
@@ -30,6 +31,7 @@ class OrgMemberController extends Controller
         ]);
 
         OrgMember::create($data);
+
         return redirect('/admin/estructura')->with('success', 'Miembro creado correctamente.');
     }
 
@@ -52,12 +54,14 @@ class OrgMemberController extends Controller
         $data['is_active'] = $request->has('is_active');
 
         $orgMember->update($data);
+
         return redirect('/admin/estructura')->with('success', 'Miembro actualizado correctamente.');
     }
 
     public function destroy(OrgMember $orgMember)
     {
         $orgMember->delete();
+
         return redirect('/admin/estructura')->with('success', 'Miembro eliminado correctamente.');
     }
 }

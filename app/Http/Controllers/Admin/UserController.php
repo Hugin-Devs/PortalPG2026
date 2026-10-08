@@ -12,6 +12,7 @@ class UserController extends Controller
     public function index()
     {
         $users = User::latest()->paginate(10);
+
         return view('admin.users.index', compact('users'));
     }
 
@@ -33,6 +34,7 @@ class UserController extends Controller
         $data['is_active'] = $request->has('is_active');
 
         User::create($data);
+
         return redirect('/admin/usuarios')->with('success', 'Usuario creado correctamente.');
     }
 
@@ -49,7 +51,7 @@ class UserController extends Controller
 
         $data = $request->validate([
             'name' => 'required|max:255',
-            'email' => 'required|email|unique:users,email,' . $user->id,
+            'email' => 'required|email|unique:users,email,'.$user->id,
             'password' => 'nullable|min:8|confirmed',
             'role' => 'required|in:superadmin,admin,editor',
         ]);
@@ -63,6 +65,7 @@ class UserController extends Controller
         $data['is_active'] = $request->has('is_active');
 
         $user->update($data);
+
         return redirect('/admin/usuarios')->with('success', 'Usuario actualizado correctamente.');
     }
 
@@ -75,6 +78,7 @@ class UserController extends Controller
             return back()->with('error', 'No se puede eliminar un usuario con noticias asociadas.');
         }
         $user->delete();
+
         return redirect('/admin/usuarios')->with('success', 'Usuario eliminado correctamente.');
     }
 }

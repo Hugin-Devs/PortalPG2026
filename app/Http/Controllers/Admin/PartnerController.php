@@ -13,6 +13,7 @@ class PartnerController extends Controller
     public function index()
     {
         $partners = Partner::orderBy('order')->paginate(10);
+
         return view('admin.partners.index', compact('partners'));
     }
 
@@ -40,6 +41,7 @@ class PartnerController extends Controller
         }
 
         Partner::create($data);
+
         return redirect('/admin/entes')->with('success', 'Ente afiliado creado correctamente.');
     }
 
@@ -85,6 +87,7 @@ class PartnerController extends Controller
         }
 
         $partner->update($data);
+
         return redirect('/admin/entes')->with('success', 'Ente afiliado actualizado correctamente.');
     }
 
@@ -95,12 +98,13 @@ class PartnerController extends Controller
             Webp::delete($partner->logo);
         }
         $partner->delete();
+
         return redirect('/admin/entes')->with('success', 'Ente afiliado eliminado correctamente.');
     }
 
     private function storeLogo($file): string
     {
-        $filename = time() . '_' . uniqid() . '.' . $file->getClientOriginalExtension();
+        $filename = time().'_'.uniqid().'.'.$file->getClientOriginalExtension();
         $path = $file->storeAs('partners', $filename, 'public');
         Webp::convert($path);
 
@@ -118,7 +122,7 @@ class PartnerController extends Controller
                 ->when($ignoreId, fn ($q) => $q->where('id', '!=', $ignoreId))
                 ->exists()
         ) {
-            $slug = $base . '-' . $i++;
+            $slug = $base.'-'.$i++;
         }
 
         return $slug;

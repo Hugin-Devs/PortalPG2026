@@ -32,6 +32,7 @@ class AuthController extends Controller
 
             $user->forceFill(['last_login_at' => now()])->save();
             $request->session()->regenerate();
+
             return redirect()->intended('/admin');
         }
 
@@ -43,6 +44,7 @@ class AuthController extends Controller
         auth()->logout();
         $request->session()->invalidate();
         $request->session()->regenerateToken();
+
         return redirect('/admin/login');
     }
 }

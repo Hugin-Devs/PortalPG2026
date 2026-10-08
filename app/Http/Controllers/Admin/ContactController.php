@@ -56,7 +56,7 @@ class ContactController extends Controller
 
     public function showMessage(Contact $contact)
     {
-        if (!$contact->read_at) {
+        if (! $contact->read_at) {
             $contact->update(['read_at' => now()]);
         }
 

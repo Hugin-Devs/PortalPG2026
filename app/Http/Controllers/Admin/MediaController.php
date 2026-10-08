@@ -12,6 +12,7 @@ class MediaController extends Controller
     public function index()
     {
         $media = Media::latest()->paginate(20);
+
         return view('admin.media.index', compact('media'));
     }
 
@@ -23,7 +24,7 @@ class MediaController extends Controller
         ]);
 
         foreach ($request->file('files') as $file) {
-            $filename = time() . '_' . uniqid() . '.' . $file->getClientOriginalExtension();
+            $filename = time().'_'.uniqid().'.'.$file->getClientOriginalExtension();
             $path = $file->storeAs('uploads', $filename, 'public');
             Webp::convert($path);
 
@@ -40,7 +41,7 @@ class MediaController extends Controller
         $count = count($request->file('files'));
 
         if ($request->expectsJson()) {
-            return response()->json(['location' => asset('storage/' . $path)]);
+            return response()->json(['location' => asset('storage/'.$path)]);
         }
 
         $msg = $count === 1 ? 'Archivo subido correctamente.' : "{$count} archivos subidos correctamente.";
@@ -53,6 +54,7 @@ class MediaController extends Controller
         \Storage::disk('public')->delete($media->path);
         Webp::delete($media->path);
         $media->delete();
+
         return redirect('/admin/medios')->with('success', 'Archivo eliminado correctamente.');
     }
 }

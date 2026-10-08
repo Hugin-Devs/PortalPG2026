@@ -4,6 +4,7 @@ namespace Database\Seeders;
 
 use App\Models\Partner;
 use Illuminate\Database\Seeder;
+use Illuminate\Support\Str;
 
 class PartnerSeeder extends Seeder
 {
@@ -23,7 +24,7 @@ class PartnerSeeder extends Seeder
         foreach ($partners as $attrs) {
             Partner::updateOrCreate(
                 ['name' => $attrs['name']],
-                $attrs + ['slug' => \Illuminate\Support\Str::slug($attrs['name'])]
+                $attrs + ['slug' => Str::slug($attrs['name'])]
             );
         }
     }

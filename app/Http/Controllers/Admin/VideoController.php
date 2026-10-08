@@ -13,6 +13,7 @@ class VideoController extends Controller
     public function index()
     {
         $videos = Video::latest()->get();
+
         return view('admin.videos.index', compact('videos'));
     }
 
@@ -41,7 +42,7 @@ class VideoController extends Controller
             $data['url'] = $request->url;
         } else {
             $file = $request->file('file');
-            $filename = time() . '_' . uniqid() . '.' . $file->getClientOriginalExtension();
+            $filename = time().'_'.uniqid().'.'.$file->getClientOriginalExtension();
             $data['path'] = $file->storeAs('videos', $filename, 'public');
         }
 
@@ -60,6 +61,7 @@ class VideoController extends Controller
 
         if ($request->filled('video_id')) {
             DB::table('videos')->where('id', $request->video_id)->update(['is_featured' => true]);
+
             return redirect('/admin/videos#tab-portada')->with('success', 'Video marcado para la portada.');
         }
 
@@ -72,6 +74,7 @@ class VideoController extends Controller
             \Storage::disk('public')->delete($video->path);
         }
         $video->delete();
+
         return redirect('/admin/videos#tab-cargar')->with('success', 'Video eliminado correctamente.');
     }
 }
