@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Public;
 
 use App\Http\Controllers\Controller;
 use App\Models\Page;
+use Illuminate\Support\Str;
 
 class PageController extends Controller
 {
@@ -11,6 +12,12 @@ class PageController extends Controller
     {
         $page = Page::where('slug', $slug)->where('is_active', true)->firstOrFail();
 
-        return view('public.page', compact('page'));
+        $seo = [
+            'title' => $page->title,
+            'description' => Str::limit(strip_tags($page->content), 160),
+            'url' => route('page.show', $page->slug),
+        ];
+
+        return view('public.page', compact('page', 'seo'));
     }
 }

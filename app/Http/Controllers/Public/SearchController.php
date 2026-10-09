@@ -22,6 +22,12 @@ class SearchController extends Controller
             ->latest()
             ->paginate(10);
 
-        return view('public.search', compact('posts', 'q'));
+        $seo = [
+            'title' => 'Buscar: '.$q,
+            'description' => 'Resultados de búsqueda en el portal del Gobierno de Distrito Capital.',
+            'url' => route('search', ['q' => $q]),
+        ];
+
+        return view('public.search', compact('posts', 'q', 'seo'));
     }
 }

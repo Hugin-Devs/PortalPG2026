@@ -2,6 +2,18 @@
 
 namespace App\Providers;
 
+use App\Models\Category;
+use App\Models\Gaceta;
+use App\Models\Page;
+use App\Models\Partner;
+use App\Models\Post;
+use App\Models\Video;
+use App\Observers\CategoryObserver;
+use App\Observers\GacetaObserver;
+use App\Observers\PageObserver;
+use App\Observers\PartnerObserver;
+use App\Observers\PostObserver;
+use App\Observers\VideoObserver;
 use Illuminate\Auth\Events\Registered;
 use Illuminate\Auth\Listeners\SendEmailVerificationNotification;
 use Illuminate\Foundation\Support\Providers\EventServiceProvider as ServiceProvider;
@@ -25,7 +37,12 @@ class EventServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
-        //
+        Post::observe(PostObserver::class);
+        Category::observe(CategoryObserver::class);
+        Video::observe(VideoObserver::class);
+        Partner::observe(PartnerObserver::class);
+        Gaceta::observe(GacetaObserver::class);
+        Page::observe(PageObserver::class);
     }
 
     /**

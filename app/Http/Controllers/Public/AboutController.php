@@ -15,6 +15,12 @@ class AboutController extends Controller
         $vision = Setting::where('key', 'about_vision')->first()?->value ?? '';
         $members = OrgMember::where('is_active', true)->orderBy('order')->get();
 
-        return view('public.about', compact('history', 'mission', 'vision', 'members'));
+        $seo = [
+            'title' => 'Sobre Nosotros',
+            'description' => 'Conozca la historia, misión, visión y estructura organizativa del Gobierno de Distrito Capital.',
+            'url' => route('about.index'),
+        ];
+
+        return view('public.about', compact('history', 'mission', 'vision', 'members', 'seo'));
     }
 }

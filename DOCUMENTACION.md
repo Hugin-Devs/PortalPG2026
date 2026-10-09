@@ -546,9 +546,12 @@ npm run build      # copia TinyMCE a public/vendor + vite build a public/build
 - [x] **Dashboard real** (SPECS §5.4, D1): tabla `daily_views` (día + artículo + contador, `UNIQUE(day, post_id)`) con tracking en `Public\NewsController@show` (upsert atómico `ON DUPLICATE KEY UPDATE`, fecha enlazada desde PHP) + `DailyView` (12º modelo); `DashboardController@index` con agregados (noticias total/publicadas/borradores, visitas del mes, usuarios, mensajes sin leer, gacetas/medios/entes/videos/categorías, últimas 5 publicadas) y **9 tarjetas** filtradas por permiso (editor 3, admin 7, superadmin 9) con atributos `data-stat` estables + **gráfico de barras CSS de 30 días** (sin librerías, tooltips por día, estado vacío) + bloque "Últimas noticias publicadas"; suite `test-dashboard.ps1` — **16/16 suites E2E en verde**
 - [x] **Idioma español + timezone Caracas** (B1): `config/app.php` con `locale='es'` (mensajes de validación en español — antes en inglés) y `timezone='America/Caracas'` (fechas y bucketing de `daily_views` en hora local, UTC-4); ajuste de `test-dashboard.ps1` a TZ Caracas (`TimeZoneInfo`)
 - [x] **Pint configurado** (C2): `pint.json` (preset `laravel`) + scripts `composer lint` (`pint --test`) y `composer lint:fix`; aplicación inicial sobre 46 archivos (estilo) — `composer lint` en verde
-- [x] **Tests PHPUnit reales** (C3, cierra B2): `phpunit.xml` migrado a esquema 10.5 con `sqlite/:memory:` (los tests **nunca** tocan la BD de desarrollo); **79 tests / 316 assertions** en verde (1 skipped cuando no existe `public/storage`) — cobertura crítica en `AuthTest`, `AuditLogTest`, `ContactStoreTest`, `CorsConfigurationTest`, `EditorCannotPublishTest`, `GacetaHashTest`, `HtmlSanitizationTest`, `OrgMemberPhotoTest`, `PasswordChangeTest`, `PermissionTest`, `PiiEncryptionTest`, `RateLimitTest`, `SearchXssTest`, `SecurityConfigTest`, `SecurityHeadersTest`, `StorageSymlinkTest`, `UploadExtensionTest`, `UserRoleRestrictionTest` y `Unit/WebpTest`; `UserFactory` con `Hash::make` (compat `BCRYPT_ROUNDS`); docs §16 actualizadas
+- [x] **Tests PHPUnit reales** (C3, cierra B2): `phpunit.xml` migrado a esquema 10.5 con `sqlite/:memory:` (los tests **nunca** tocan la BD de desarrollo); **85 tests / 347 assertions** en verde (1 skipped cuando no existe `public/storage`) — cobertura crítica en `AuthTest`, `AuditLogTest`, `CacheTest`, `ContactStoreTest`, `CorsConfigurationTest`, `EditorCannotPublishTest`, `GacetaHashTest`, `HtmlSanitizationTest`, `OrgMemberPhotoTest`, `PasswordChangeTest`, `PermissionTest`, `PiiEncryptionTest`, `RateLimitTest`, `SearchXssTest`, `SecurityConfigTest`, `SecurityHeadersTest`, `SeoTest`, `SitemapTest`, `StorageSymlinkTest`, `UploadExtensionTest`, `UserRoleRestrictionTest` y `Unit/WebpTest`; `UserFactory` con `Hash::make` (compat `BCRYPT_ROUNDS`); docs §16 actualizadas
 - [x] **Log de auditoría (G6)**: migración `activity_logs` (actor, acción, recurso, IP, UA, metadata JSON) + modelo `ActivityLog` + helper `App\Support\Audit` + hooks en `AuthController` (login success/failed/logout/password changed), `UserController`, `RoleController`, `NewsController`, `GacetaController`, `ContactController`; vista `/admin/auditoria` paginada, acceso solo superadmin vía permiso `audit.view`; 11 tests en `AuditLogTest`
 - [x] **CSP con nonce (G7)**: `AddSecurityHeaders` genera nonce por petición y CSP usa `script-src 'self' 'nonce-...'` (sin `'unsafe-inline'`); todos los scripts del proyecto incluyen el nonce; los ~14 handlers `onclick="return confirm(...)"` se migraron a `data-confirm` + listener global en `layouts/admin.blade.php` y `layouts/public.blade.php`; botones de error usan `data-action="reload"` / `data-action="back"`; `style-src` conserva `'unsafe-inline'` por TinyMCE; test en `SecurityHeadersTest`
+- [x] **SEO y sitemap (D8)**: meta tags dinámicos en `resources/views/layouts/public.blade.php` (title, description, canonical, og:image/url/type/locale, twitter:card) alimentados por `$seo` desde todos los controladores públicos; título home/404 usa `site_name`; `SitemapController` genera `/sitemap.xml` cacheado con home, noticias, categorías, entes, gacetas y páginas; tests `SeoTest` y `SitemapTest`
+- [x] **Cache de consultas públicas (D10)**: `config/portal.php` con TTLs, `App\Support\CacheKeys` con claves de home, nav de noticias, entes, gacetas y sitemap; `Cache::remember` en `HomeController`, `NewsController`, `EnteController`, `GacetaController`; observers para invalidar al crear/editar/borrar posts, categorías, videos, entes, gacetas y páginas; `Admin\VideoController@destacar` usa Eloquent para disparar observers; test `CacheTest`
+- [x] **Verificación residual de vulnerabilidades (G8)**: cerrado en el alcance posible con PHPUnit/E2E — `SearchXssTest` (INJ-03), trazabilidad PRIV-03 por auditoría G6, `UploadExtensionTest` (FILE-04), `CorsConfigurationTest` (CFG-07), `StorageSymlinkTest` (FILE-06); se añaden `SeoTest`, `SitemapTest` y `CacheTest` como cobertura funcional de D8/D10; los casos que requieren DAST/manual/infraestructura (FILE-07, FILE-09, INJ-05, INJ-06, SC-05, LOG-03) quedan en `INFORME-VULNERABILIDADES.md`/`PLAN-VULNERABILIDADES.md` para auditoría externa
 - [x] **Limpieza cosmética** (C5): eliminados `.DS_Store`/`._.DS_Store` de `public/images/Logos` (más entradas en `.gitignore`), boilerplate `routes/api.php` (+ bloque `api`/rate-limiter del `RouteServiceProvider` y grupo `api` del `Http\Kernel`) y plantilla `resources/views/welcome.blade.php` sin usar
 
 ### 🔴 Pendiente
@@ -556,8 +559,6 @@ npm run build      # copia TinyMCE a public/vendor + vite build a public/build
 > 📋 **Seguimiento vivo en [PENDIENTES.md](PENDIENTES.md)** (checklist D activos + A/B/C/E; D2/D5/E4 diferidos en su §F). Al cerrar un ítem, marcarlo ahí y actualizar esta sección.
 
 - [ ] **Contenido del `PartnerSeeder`** — borrador con array vacío, pendiente que se indique el listado de entes
-- [ ] SEO: sitemap.xml, meta tags dinámicos (og:image, description)
-- [ ] Cache de consultas pesadas
 
 ### 🌟 Mejoras futuras (SPECS §10, fuera de alcance)
 Newsletter, API REST, comentarios, galería, eventos, versión en inglés.
@@ -833,11 +834,12 @@ Garantías de las suites:
 
 ### PHPUnit (`tests/Unit`, `tests/Feature`)
 
-- Ejecución: `./vendor/bin/phpunit` (o `--testsuite Unit,Feature`) — **79 tests / 316 assertions**, en verde (1 skipped cuando no existe el symlink `public/storage`).
+- Ejecución: `./vendor/bin/phpunit` (o `--testsuite Unit,Feature`) — **85 tests / 347 assertions**, en verde (1 skipped cuando no existe el symlink `public/storage`).
 - **BD aislada**: `phpunit.xml` define `DB_CONNECTION=sqlite` / `DB_DATABASE=:memory:` (B2 cerrado) — `RefreshDatabase` migra en memoria por test, **nunca toca la BD de desarrollo**. El `APP_KEY` de `phpunit.xml` es una clave **exclusiva de tests**; no usar en producción.
 - Cobertura de flujos críticos:
   - `AuthTest` — login correcto/incorrecto/inactivo, logout, `last_login_at`, mensaje genérico.
   - `AuditLogTest` — login/logout/fallido, cambio de contraseña, CRUD de usuarios, roles, noticias, mensajes; acceso a `/admin/auditoria` solo superadmin.
+  - `CacheTest` — consultas de home/cacheadas y invalidación por observers al crear posts/entes.
   - `ContactStoreTest` — POST `/contacto` válido/inválido, `read_at` no manipulable.
   - `EditorCannotPublishTest` — editor no puede publicar.
   - `GacetaHashTest` — hash SHA-256 al subir/actualizar gacetas.
@@ -850,6 +852,8 @@ Garantías de las suites:
   - `SecurityConfigTest` — rate limits leídos desde `config/security.php` (respetan `config:cache`).
   - `SearchXssTest` — query de `/buscar` escapada en la respuesta (INJ-03).
   - `SecurityHeadersTest` — presencia de CSP, HSTS, X-Frame-Options, etc.; CSP usa nonce y no incluye `'unsafe-inline'` en `script-src`.
+  - `SeoTest` — meta tags dinámicos en home y detalle de noticia; título y canonical.
+  - `SitemapTest` — `/sitemap.xml` responde XML 200 con URLs de home y noticias publicadas.
   - `UploadExtensionTest` — la extensión guardada se adivina por contenido, no por nombre del cliente; `mimes` rechaza archivos de texto renombrados.
   - `UserRoleRestrictionTest` — solo superadmin asigna `superadmin`; último superadmin no se puede degradar.
   - `CorsConfigurationTest` — CORS limitado a rutas `api/*` inexistentes; páginas públicas no envían `Access-Control-Allow-Origin`.

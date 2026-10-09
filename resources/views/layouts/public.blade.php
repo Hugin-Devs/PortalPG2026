@@ -7,8 +7,24 @@
         $site = \App\Models\Setting::values();
         $siteTitle = $site['site_name'] !== '' ? $site['site_name'] : 'Portal GDC';
         $siteLogo = $site['site_logo'] !== '' ? 'storage/' . $site['site_logo'] : 'images/logo.png';
+        $sectionTitle = trim($__env->yieldContent('title'));
+        $pageTitle = $seo['title'] ?? ($sectionTitle !== '' ? $sectionTitle : '');
+        $metaDescription = $seo['description'] ?? 'Portal institucional del Gobierno de Distrito Capital. Noticias, gacetas oficiales, entes afiliados e información de contacto.';
+        $metaImage = $seo['image'] ?? $siteLogo;
+        $metaUrl = $seo['url'] ?? url()->current();
+        $metaType = $seo['type'] ?? 'website';
+        $metaTitle = $pageTitle !== '' ? $pageTitle . ' - ' . $siteTitle : $siteTitle;
     @endphp
-    <title>@hasSection('title')@yield('title') - {{ $siteTitle }}@else{{ $siteTitle }}@endif</title>
+    <title>{{ $metaTitle }}</title>
+    <meta name="description" content="{{ $metaDescription }}">
+    <link rel="canonical" href="{{ $metaUrl }}">
+    <meta property="og:title" content="{{ $metaTitle }}">
+    <meta property="og:description" content="{{ $metaDescription }}">
+    <meta property="og:image" content="{{ asset($metaImage) }}">
+    <meta property="og:url" content="{{ $metaUrl }}">
+    <meta property="og:type" content="{{ $metaType }}">
+    <meta property="og:locale" content="es_VE">
+    <meta name="twitter:card" content="summary_large_image">
     @vite(['resources/css/app.scss', 'resources/js/app.js'])
 </head>
 <body>

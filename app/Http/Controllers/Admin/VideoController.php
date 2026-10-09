@@ -6,7 +6,6 @@ use App\Http\Controllers\Controller;
 use App\Models\Video;
 use App\Support\Uploads;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\Rule;
 
 class VideoController extends Controller
@@ -58,10 +57,10 @@ class VideoController extends Controller
             'video_id' => ['nullable', 'integer', Rule::exists('videos', 'id')],
         ]);
 
-        DB::table('videos')->update(['is_featured' => false]);
+        Video::all()->each(fn (Video $video) => $video->update(['is_featured' => false]));
 
         if ($request->filled('video_id')) {
-            DB::table('videos')->where('id', $request->video_id)->update(['is_featured' => true]);
+            Video::findOrFail($request->video_id)->update(['is_featured' => true]);
 
             return redirect('/admin/videos#tab-portada')->with('success', 'Video marcado para la portada.');
         }

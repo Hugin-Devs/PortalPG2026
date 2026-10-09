@@ -10,7 +10,13 @@ class ContactController extends Controller
 {
     public function index()
     {
-        return view('public.contact');
+        $seo = [
+            'title' => 'Contacto',
+            'description' => 'Formulario de contacto del Gobierno de Distrito Capital. Envíenos sus consultas, sugerencias o solicitudes.',
+            'url' => route('contact.index'),
+        ];
+
+        return view('public.contact', compact('seo'));
     }
 
     public function store(Request $request)

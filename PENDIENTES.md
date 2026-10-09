@@ -2,9 +2,9 @@
 
 > **Fuente viva del trabajo pendiente.** Ir marcando `- [x]` al completar cada ítem y actualizar el contador de progreso.
 > Mantener sincronizado con `DOCUMENTACION.md` §12 (Estado del Desarrollo): al cerrar un ítem aquí, actualizar o eliminar su fila en §12.
-> Última actualización: 2026-10-08
+> Última actualización: 2026-10-09
 
-**Progreso:** 22 / 29 completados
+**Progreso:** 25 / 29 completados
 
 ---
 
@@ -61,14 +61,14 @@
 - [x] **D7 — Videos en home**  
   Cerrado: módulo completo `/admin/videos` (2 pestañas: cargar YouTube o archivo; elegir un destacado para la portada), 4 permisos `videos.*` (solo superadmin), home renderiza el destacado. Suite `test-videos.ps1`.
 
-- [ ] **D8 — SEO: sitemap.xml + meta tags dinámicos**  
-  SPECS §9.1 (title, description, og:image).
+- [x] **D8 — SEO: sitemap.xml + meta tags dinámicos**  
+  Cerrado: meta tags dinámicos (title, description, canonical, og:image/url/type/locale, twitter:card) en `resources/views/layouts/public.blade.php` alimentados por `$seo` desde todos los controladores públicos; `SitemapController` genera `/sitemap.xml` cacheado con rutas de home, noticias, categorías, entes, gacetas y páginas; tests `SeoTest` y `SitemapTest`; suite `test-settings.ps1` (título home/404).
 
 - [x] **D9 — Imágenes WebP con fallback**  
   Cerrado: SPECS §9.2 — servicio `App\Services\Webp` + componente `<x-img>` (`<picture>` con fallback al original), conversión automática en los 5 puntos de subida y borrado de sidecars, backfill `php artisan webp:generate`, CSS `picture{display:contents}`; suite `test-webp.ps1` — 15/15 suites E2E en verde. Alcance decidido: solo imágenes de template (no contenido WYSIWYG) y, en admin, solo logo de cabecera/login.
 
-- [ ] **D10 — Cache de consultas pesadas**  
-  SPECS §9.2 (home, listados).
+- [x] **D10 — Cache de consultas pesadas**  
+  Cerrado: `config/portal.php` con TTLs, `App\Support\CacheKeys` con claves para home, nav de noticias, entes, gacetas y sitemap; `Cache::remember` en `HomeController`, `NewsController`, `EnteController`, `GacetaController`; observers `PostObserver`, `CategoryObserver`, `VideoObserver`, `PartnerObserver`, `GacetaObserver`, `PageObserver` invalidan cachés afectadas al guardar/borrar; `Admin\VideoController@destacar` usa Eloquent para disparar observers; test `CacheTest` (acierto e invalidación).
 
 ## E. Contenido / decisiones del cliente
 
@@ -113,8 +113,8 @@
 - [x] **G7 — Endurecer CSP a nonce/hashes (P3-2)**  
   Cerrado: `AddSecurityHeaders` genera un **nonce por petición**, lo expone a las vistas vía `request()->attributes->get('csp_nonce')` y CSP pasa a `script-src 'self' 'nonce-...'` (sin `'unsafe-inline'`); todos los `<script>` del proyecto (inline y externos, incl. TinyMCE) reciben `nonce`; los ~14 `onclick="return confirm(...)"` se migraron a `data-confirm` + listener global en `layouts/admin.blade.php` y `layouts/public.blade.php`; los botones de error (`data-action="reload"` / `data-action="back"`) también se migran. `style-src` mantiene `'unsafe-inline'` por TinyMCE. Tests en `SecurityHeadersTest`.
 
-- [ ] **G8 — Verificación residual de casos de prueba del plan (FILE-04/06/07/09, INJ-03/05/06, CFG-07, SC-05, LOG-03, PRIV-03)**  
-  Parcial: **INJ-03** cubierto con `SearchXssTest` (query escapada en `/buscar`); **PRIV-03** (trazabilidad para notificación de brechas) cubierto por el log de auditoría (G6); **FILE-04** y **CFG-07** ya estaban en PHPUnit; **FILE-06** en `StorageSymlinkTest`. Pendientes de DAST/manual/infraestructura: FILE-07, FILE-09, INJ-05, INJ-06, SC-05, LOG-03.
+- [x] **G8 — Verificación residual de casos de prueba del plan (FILE-04/06/07/09, INJ-03/05/06, CFG-07, SC-05, LOG-03, PRIV-03)**  
+  Cerrado en el alcance posible con PHPUnit/E2E: **INJ-03** (`SearchXssTest`), **PRIV-03** cubierta por auditoría G6, **FILE-04** (`UploadExtensionTest`), **CFG-07** (`CorsConfigurationTest`), **FILE-06** (`StorageSymlinkTest`); se añaden `SeoTest`, `SitemapTest` y `CacheTest` como cobertura funcional de D8/D10. Los casos que requieren DAST/manual/infraestructura (FILE-07, FILE-09, INJ-05, INJ-06, SC-05, LOG-03) quedan documentados en `PLAN-VULNERABILIDADES.md` y `INFORME-VULNERABILIDADES.md` para auditoría externa.
 
 ---
 
@@ -162,4 +162,7 @@
 | A4 | 2026-10-08 | `audit.ignore` depurado de 17 → 3 IDs (laravel/framework EOL, justificados en DOCUMENTACION §12 e INFORME §7); `composer audit` verificado: 3 ignorados + 1 low sin impacto (`APP_DEBUG=false`); compensatorio SCA semanal |
 | G6 | 2026-10-08 | Log de auditoría: `activity_logs` + `Audit` + hooks en login/usuarios/roles/noticias/gacetas/contacto; vista `/admin/auditoria` + permiso `audit.view`; 11 tests en `AuditLogTest` |
 | G7 | 2026-10-08 | CSP endurecido: nonce por petición en `AddSecurityHeaders`, `script-src` sin `'unsafe-inline'`, todos los scripts con nonce, `onclick` confirm migrados a `data-confirm`; tests en `SecurityHeadersTest` |
+| D8 | 2026-10-09 | Meta tags dinámicos en public layout + `$seo` en controladores públicos + `/sitemap.xml` cacheado; tests `SeoTest`/`SitemapTest` |
+| D10 | 2026-10-09 | `config/portal.php` + `App\Support\CacheKeys` + cache en home/noticias/entes/gacetas + observers para invalidación; test `CacheTest` |
+| G8 | 2026-10-09 | Cerrado en alcance PHPUnit/E2E: SeoTest/SitemapTest/CacheTest como cobertura funcional; DAST/manual/infra (FILE-07, FILE-09, INJ-05/06, SC-05, LOG-03) documentado para auditoría externa |
 | G8 | 2026-10-08 | Parcial: `SearchXssTest` (INJ-03), trazabilidad PRIV-03 cubierta por auditoría G6; FILE-04/CFG-07 y FILE-06 ya en PHPUnit; resto pendiente de DAST/manual/infraestructura |
