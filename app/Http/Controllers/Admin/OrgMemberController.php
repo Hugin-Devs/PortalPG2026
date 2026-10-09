@@ -25,7 +25,7 @@ class OrgMemberController extends Controller
         $data = $request->validate([
             'name' => 'required|max:255',
             'position' => 'required|max:255',
-            'photo' => 'nullable|max:255',
+            'photo' => $this->photoRule(),
             'description' => 'nullable',
             'order' => 'nullable|integer|min:0',
         ]);
@@ -45,7 +45,7 @@ class OrgMemberController extends Controller
         $data = $request->validate([
             'name' => 'required|max:255',
             'position' => 'required|max:255',
-            'photo' => 'nullable|max:255',
+            'photo' => $this->photoRule(),
             'description' => 'nullable',
             'order' => 'nullable|integer|min:0',
             'is_active' => 'nullable|boolean',
@@ -63,5 +63,20 @@ class OrgMemberController extends Controller
         $orgMember->delete();
 
         return redirect('/admin/estructura')->with('success', 'Miembro eliminado correctamente.');
+    }
+
+    /**
+     * Ruta relativa segura: bajo `images/` o `storage/`, solo caracteres
+     * alfanuméricos y `- _ /` (sin puntos intermedios, evita dobles extensiones)
+     * y con extensión de imagen permitida.
+     */
+    private function photoRule(): array
+    {
+        return [
+            'nullable',
+            'string',
+            'max:255',
+            'regex:/^(images|storage)\/[A-Za-z0-9_\-\/]+\.(jpg|jpeg|png|webp)$/i',
+        ];
     }
 }

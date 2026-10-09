@@ -7,6 +7,8 @@ use App\Models\Category;
 use App\Models\Media;
 use App\Models\Post;
 use App\Services\Webp;
+use App\Support\Audit;
+use App\Support\Uploads;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
@@ -36,7 +38,7 @@ class NewsController extends Controller
             'content' => 'required',
             'status' => 'nullable|in:draft,published',
             'is_featured' => 'nullable|boolean',
-            'featured_image_file' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg,webp|max:10240',
+            'featured_image_file' => 'nullable|image|mimes:jpeg,png,jpg,gif,webp|max:10240',
             'featured_image' => ['nullable', 'string', $this->mediaImageRule()],
         ]);
 
@@ -45,11 +47,16 @@ class NewsController extends Controller
         $data['featured_image'] = $this->resolveFeaturedImage($request);
         unset($data['featured_image_file']);
 
-        if (($data['status'] ?? 'draft') === 'published') {
+        $data['status'] = $this->resolveStatus($data['status'] ?? 'draft');
+
+        if ($data['status'] === 'published') {
             $data['published_at'] = now();
         }
 
-        Post::create($data);
+        $post = Post::create($data);
+        Audit::log('news.created', Post::class, $post->id, "Noticia creada: {$post->title} ({$post->status})", [
+            'status' => $post->status,
+        ]);
 
         return redirect('/admin/noticias')->with('success', 'Noticia creada correctamente.');
     }
@@ -70,15 +77,16 @@ class NewsController extends Controller
             'content' => 'required',
             'status' => 'nullable|in:draft,published',
             'is_featured' => 'nullable|boolean',
-            'featured_image_file' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg,webp|max:10240',
+            'featured_image_file' => 'nullable|image|mimes:jpeg,png,jpg,gif,webp|max:10240',
             'featured_image' => ['nullable', 'string', $this->mediaImageRule()],
             'remove_image' => 'nullable|boolean',
         ]);
 
         $data['slug'] = Str::slug($request->title);
         $data['is_featured'] = $request->has('is_featured');
+        $data['status'] = $this->resolveStatus($data['status'] ?? 'draft');
 
-        if (($data['status'] ?? 'draft') === 'published' && ! $post->published_at) {
+        if ($data['status'] === 'published' && ! $post->published_at) {
             $data['published_at'] = now();
         }
 
@@ -93,13 +101,20 @@ class NewsController extends Controller
         }
         unset($data['featured_image_file'], $data['remove_image']);
 
+        $originalStatus = $post->status;
         $post->update($data);
+        Audit::log('news.updated', Post::class, $post->id, "Noticia actualizada: {$post->title} ({$post->status})", [
+            'status' => $post->status,
+            'previous_status' => $originalStatus,
+            'published_now' => $post->status === 'published' && $originalStatus !== 'published',
+        ]);
 
         return redirect('/admin/noticias')->with('success', 'Noticia actualizada correctamente.');
     }
 
     public function destroy(Post $post)
     {
+        Audit::log('news.deleted', Post::class, $post->id, "Noticia eliminada: {$post->title}");
         $post->delete();
 
         return redirect('/admin/noticias')->with('success', 'Noticia eliminada correctamente.');
@@ -110,6 +125,11 @@ class NewsController extends Controller
         return Rule::exists('media', 'path')->where(
             fn ($q) => $q->where('mime_type', 'like', 'image/%')
         );
+    }
+
+    private function resolveStatus(string $status): string
+    {
+        return auth()->user()->role === 'editor' ? 'draft' : $status;
     }
 
     private function resolveFeaturedImage(Request $request): ?string
@@ -123,7 +143,7 @@ class NewsController extends Controller
 
     private function storeFeaturedFile($file): string
     {
-        $filename = time().'_'.uniqid().'.'.$file->getClientOriginalExtension();
+        $filename = time().'_'.uniqid().'.'.Uploads::safeExtension($file, ['jpg', 'jpeg', 'png', 'gif', 'webp']);
         $path = $file->storeAs('uploads', $filename, 'public');
         Webp::convert($path);
 

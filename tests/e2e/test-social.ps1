@@ -41,11 +41,11 @@ Write-Output '--- 1. Seeders idempotentes ---'
 & $php artisan db:seed --class=PermissionSeeder --force 2>&1 | Out-Null
 & $php artisan db:seed --class=SocialSettingSeeder --force 2>&1 | Out-Null
 $c = (& $mysql -uroot -N -e 'SELECT COUNT(*) FROM portal2026.permissions;') -join ''
-Check ($c -eq '38') "38 permisos (got $c)" 'permisos != 38'
+Check ($c -eq '39') "39 permisos (got $c)" 'permisos != 39'
 $c = (& $mysql -uroot -N -e 'SELECT COUNT(*) FROM portal2026.settings WHERE `key` LIKE ''social_%'';') -join ''
 Check ($c -eq '7') "7 settings sociales (got $c)" 'settings != 7'
 $c = (& $mysql -uroot -N -e 'SELECT COUNT(*) FROM portal2026.role_permission;') -join ''
-Check ($c -eq '64') "64 asignaciones 38+21+5 (got $c)" 'asignaciones != 64'
+Check ($c -eq '65') "65 asignaciones 39+21+5 (got $c)" 'asignaciones != 65'
 $c = (& $mysql -uroot -N -e 'SELECT slug FROM portal2026.permissions WHERE slug=''rrss.manage'';') -join ''
 Check ($c -eq 'rrss.manage') 'slug rrss.manage existe' "falta rrss.manage (got $c)"
 $c = (& $mysql -uroot -N -e 'SELECT COUNT(*) FROM portal2026.permissions WHERE slug=''settings.manage'';') -join ''

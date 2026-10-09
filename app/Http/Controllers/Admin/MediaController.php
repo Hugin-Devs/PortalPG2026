@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\Media;
 use App\Services\Webp;
+use App\Support\Uploads;
 use Illuminate\Http\Request;
 
 class MediaController extends Controller
@@ -20,11 +21,11 @@ class MediaController extends Controller
     {
         $request->validate([
             'files' => 'required|array|min:1',
-            'files.*' => 'file|mimes:jpeg,png,jpg,gif,svg,webp,pdf,doc,docx|max:10240',
+            'files.*' => 'file|mimes:jpeg,png,jpg,gif,webp,pdf,doc,docx|max:10240',
         ]);
 
         foreach ($request->file('files') as $file) {
-            $filename = time().'_'.uniqid().'.'.$file->getClientOriginalExtension();
+            $filename = time().'_'.uniqid().'.'.Uploads::safeExtension($file, ['jpg', 'jpeg', 'png', 'gif', 'webp', 'pdf', 'doc', 'docx']);
             $path = $file->storeAs('uploads', $filename, 'public');
             Webp::convert($path);
 

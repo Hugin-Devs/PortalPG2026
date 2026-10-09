@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Admin\AuditController;
 use App\Http\Controllers\Admin\AuthController;
 use App\Http\Controllers\Admin\CategoryController;
 use App\Http\Controllers\Admin\DashboardController;
@@ -31,16 +32,18 @@ Route::get('/entes/{slug}', [EnteController::class, 'show'])->name('entes.show')
 Route::redirect('/servicios', '/entes');
 Route::get('/sobre-nosotros', [AboutController::class, 'index'])->name('about.index');
 Route::get('/contacto', [ContactController::class, 'index'])->name('contact.index');
-Route::post('/contacto', [ContactController::class, 'store'])->name('contact.store');
+Route::post('/contacto', [ContactController::class, 'store'])->name('contact.store')->middleware('throttle:contact');
 Route::get('/gacetas', [GacetaController::class, 'index'])->name('gacetas.index');
-Route::get('/buscar', [SearchController::class, 'index'])->name('search');
+Route::get('/buscar', [SearchController::class, 'index'])->name('search')->middleware('throttle:search');
 Route::get('/pagina/{slug}', [PageController::class, 'show'])->name('page.show');
 
 Route::prefix('admin')->group(function () {
     Route::get('/login', [AuthController::class, 'showLogin'])->name('login');
-    Route::post('/login', [AuthController::class, 'login']);
+    Route::post('/login', [AuthController::class, 'login'])->middleware('throttle:login');
 
-    Route::middleware('auth')->group(function () {
+    Route::middleware(['auth', 'password.changed'])->group(function () {
+        Route::get('/cambiar-contrasena', [AuthController::class, 'showChangePassword'])->name('password.change');
+        Route::post('/cambiar-contrasena', [AuthController::class, 'changePassword'])->name('password.change.update');
         Route::get('/', [DashboardController::class, 'index'])->name('admin.dashboard');
         Route::post('/logout', [AuthController::class, 'logout'])->name('admin.logout');
 
@@ -124,5 +127,8 @@ Route::prefix('admin')->group(function () {
         // Admin - Configuración General (solo superadmin)
         Route::get('/configuracion', [SettingsController::class, 'index'])->name('admin.settings.index')->middleware('permission:settings.manage');
         Route::put('/configuracion', [SettingsController::class, 'update'])->name('admin.settings.update')->middleware('permission:settings.manage');
+
+        // Admin - Auditoría (G6)
+        Route::get('/auditoria', [AuditController::class, 'index'])->name('admin.audit.index')->middleware('permission:audit.view');
     });
 });

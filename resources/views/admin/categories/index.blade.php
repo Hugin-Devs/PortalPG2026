@@ -49,7 +49,7 @@
                     <form action="{{ url('/admin/categorias/' . $category->id) }}" method="POST" style="display:inline">
                         @csrf
                         @method('DELETE')
-                        <button type="submit" class="btn btn-sm btn-danger" onclick="return confirm('Eliminar esta categoría?')">Eliminar</button>
+                        <button type="submit" class="btn btn-sm btn-danger" data-confirm="Eliminar esta categoría?">Eliminar</button>
                     </form>
                     @endif
                 </td>

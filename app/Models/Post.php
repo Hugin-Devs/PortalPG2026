@@ -2,13 +2,14 @@
 
 namespace App\Models;
 
+use App\Support\SanitizesHtml;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Post extends Model
 {
-    use HasFactory, SoftDeletes;
+    use HasFactory, SanitizesHtml, SoftDeletes;
 
     protected $fillable = [
         'title', 'slug', 'excerpt', 'content', 'featured_image',

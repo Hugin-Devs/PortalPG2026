@@ -28,12 +28,13 @@ class ContactStoreTest extends TestCase
 
         $response->assertRedirect('/');
         $response->assertSessionHas('success');
-        $this->assertDatabaseHas('contacts', [
-            'name' => $data['name'],
-            'email' => $data['email'],
-            'subject' => $data['subject'],
-            'message' => $data['message'],
-        ]);
+
+        $contact = Contact::first();
+        $this->assertNotNull($contact);
+        $this->assertSame($data['name'], $contact->name);
+        $this->assertSame($data['email'], $contact->email);
+        $this->assertSame($data['subject'], $contact->subject);
+        $this->assertSame($data['message'], $contact->message);
         $this->assertDatabaseCount('contacts', 1);
     }
 

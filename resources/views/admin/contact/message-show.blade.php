@@ -9,7 +9,7 @@
             <form action="{{ url('/admin/contacto/mensajes/' . $contact->id) }}" method="POST" class="d-inline">
                 @csrf
                 @method('DELETE')
-                <button type="submit" class="btn btn-outline-danger" onclick="return confirm('Eliminar este mensaje?')">Eliminar</button>
+                <button type="submit" class="btn btn-outline-danger" data-confirm="Eliminar este mensaje?">Eliminar</button>
             </form>
             @endif
             <a href="{{ url('/admin/contacto/mensajes') }}" class="btn btn-outline-secondary">Volver</a>

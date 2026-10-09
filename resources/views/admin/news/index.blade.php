@@ -47,7 +47,7 @@
                     <form action="{{ url('/admin/noticias/' . $post->id) }}" method="POST" style="display:inline">
                         @csrf
                         @method('DELETE')
-                        <button type="submit" class="btn btn-sm btn-danger" onclick="return confirm('Eliminar esta noticia?')">Eliminar</button>
+                        <button type="submit" class="btn btn-sm btn-danger" data-confirm="Eliminar esta noticia?">Eliminar</button>
                     </form>
                     @endif
                 </td>

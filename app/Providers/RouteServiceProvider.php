@@ -2,7 +2,10 @@
 
 namespace App\Providers;
 
+use Illuminate\Cache\RateLimiting\Limit;
 use Illuminate\Foundation\Support\Providers\RouteServiceProvider as ServiceProvider;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\Facades\Route;
 
 class RouteServiceProvider extends ServiceProvider
@@ -21,6 +24,23 @@ class RouteServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
+        RateLimiter::for('login', function (Request $request) {
+            // Tope duro por IP como respaldo frente a saturación (DoS/credential
+            // stuffing). La protección real de fuerza bruta es el lockout por
+            // intentos fallidos en AuthController (5 fallos -> 60 s).
+            // Configurable via config('security.rate_limits.login') para respetar
+            // `php artisan config:cache`.
+            return Limit::perMinute((int) config('security.rate_limits.login'))->by($request->ip());
+        });
+
+        RateLimiter::for('contact', function (Request $request) {
+            return Limit::perMinute((int) config('security.rate_limits.contact'))->by($request->ip());
+        });
+
+        RateLimiter::for('search', function (Request $request) {
+            return Limit::perMinute((int) config('security.rate_limits.search'))->by($request->ip());
+        });
+
         $this->routes(function () {
             Route::middleware('web')
                 ->group(base_path('routes/web.php'));

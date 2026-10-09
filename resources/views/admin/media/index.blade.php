@@ -34,7 +34,7 @@
             </form>
         </div>
     </div>
-    <script>
+    <script nonce="{{ request()->attributes->get('csp_nonce') }}">
         document.querySelector('input[name="files[]"]').addEventListener('change', function () {
             var list = document.getElementById('mediaSelectedList');
             list.innerHTML = '';
@@ -65,7 +65,7 @@
                     <form action="{{ url('/admin/medios/' . $item->id) }}" method="POST" style="display:inline">
                         @csrf
                         @method('DELETE')
-                        <button type="submit" class="btn btn-sm btn-danger" onclick="return confirm('Eliminar este archivo?')">Eliminar</button>
+                        <button type="submit" class="btn btn-sm btn-danger" data-confirm="Eliminar este archivo?">Eliminar</button>
                     </form>
                     @endif
                 </div>
@@ -77,7 +77,7 @@
         {{ $media->links() }}
     </div>
 </div>
-<script>
+<script nonce="{{ request()->attributes->get('csp_nonce') }}">
     function mediaCopyFeedback(btn, ok) {
         var previous = btn.textContent;
         btn.textContent = ok ? '¡Copiado!' : 'No se pudo copiar';

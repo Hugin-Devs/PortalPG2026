@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\Setting;
 use App\Services\Webp;
+use App\Support\Uploads;
 use Illuminate\Http\Request;
 
 class SettingsController extends Controller
@@ -57,7 +58,7 @@ class SettingsController extends Controller
             'site_name' => ['required', 'string', 'max:100'],
             'nav_funcionarios_url' => ['nullable', 'string', 'max:255', $validateLink],
             'nav_jubilados_url' => ['nullable', 'string', 'max:255', $validateLink],
-            'logo' => ['nullable', 'image', 'mimes:jpeg,png,jpg,gif,svg,webp', 'max:2048'],
+            'logo' => ['nullable', 'image', 'mimes:jpeg,png,jpg,gif,webp', 'max:2048'],
             'remove_logo' => ['nullable', 'boolean'],
         ]);
 
@@ -68,7 +69,7 @@ class SettingsController extends Controller
         if ($request->hasFile('logo')) {
             $this->deleteLogo();
             $file = $request->file('logo');
-            $ext = strtolower($file->getClientOriginalExtension()) ?: 'png';
+            $ext = Uploads::safeExtension($file, ['jpg', 'jpeg', 'png', 'gif', 'webp']);
             $logoPath = $file->storeAs('settings', 'logo.'.$ext, 'public');
             Webp::convert($logoPath);
             Setting::updateOrCreate(['key' => 'site_logo'], ['value' => $logoPath]);

@@ -51,7 +51,7 @@
                     <form action="{{ url('/admin/usuarios/' . $user->id) }}" method="POST" style="display:inline">
                         @csrf
                         @method('DELETE')
-                        <button type="submit" class="btn btn-sm btn-danger" onclick="return confirm('Eliminar este usuario?')">Eliminar</button>
+                        <button type="submit" class="btn btn-sm btn-danger" data-confirm="Eliminar este usuario?">Eliminar</button>
                     </form>
                     @endif
                 </td>

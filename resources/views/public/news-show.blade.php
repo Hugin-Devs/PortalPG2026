@@ -39,7 +39,7 @@
             <a class="btn btn-outline-primary btn-sm" href="https://t.me/share/url?url={{ rawurlencode($shareUrl) }}&text={{ $shareTitle }}" target="_blank" rel="noopener noreferrer" aria-label="Compartir en Telegram"><i class="fa-brands fa-telegram"></i></a>
             <button type="button" class="btn btn-outline-secondary btn-sm" id="copyLinkBtn" aria-label="Copiar enlace"><i class="fa-solid fa-link me-1"></i><span id="copyLinkText">Copiar enlace</span></button>
         </div>
-        <script>
+        <script nonce="{{ request()->attributes->get('csp_nonce') }}">
             function copyLinkFeedback(ok) {
                 var label = document.getElementById('copyLinkText');
                 var previous = label.textContent;
@@ -60,7 +60,7 @@
                 return ok;
             }
             document.getElementById('copyLinkBtn').addEventListener('click', function () {
-                var url = {!! json_encode($shareUrl) !!};
+                var url = {!! json_encode($shareUrl, JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP) !!};
                 if (navigator.clipboard && window.isSecureContext) {
                     navigator.clipboard.writeText(url).then(function () {
                         copyLinkFeedback(true);

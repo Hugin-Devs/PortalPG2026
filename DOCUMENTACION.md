@@ -546,7 +546,9 @@ npm run build      # copia TinyMCE a public/vendor + vite build a public/build
 - [x] **Dashboard real** (SPECS §5.4, D1): tabla `daily_views` (día + artículo + contador, `UNIQUE(day, post_id)`) con tracking en `Public\NewsController@show` (upsert atómico `ON DUPLICATE KEY UPDATE`, fecha enlazada desde PHP) + `DailyView` (12º modelo); `DashboardController@index` con agregados (noticias total/publicadas/borradores, visitas del mes, usuarios, mensajes sin leer, gacetas/medios/entes/videos/categorías, últimas 5 publicadas) y **9 tarjetas** filtradas por permiso (editor 3, admin 7, superadmin 9) con atributos `data-stat` estables + **gráfico de barras CSS de 30 días** (sin librerías, tooltips por día, estado vacío) + bloque "Últimas noticias publicadas"; suite `test-dashboard.ps1` — **16/16 suites E2E en verde**
 - [x] **Idioma español + timezone Caracas** (B1): `config/app.php` con `locale='es'` (mensajes de validación en español — antes en inglés) y `timezone='America/Caracas'` (fechas y bucketing de `daily_views` en hora local, UTC-4); ajuste de `test-dashboard.ps1` a TZ Caracas (`TimeZoneInfo`)
 - [x] **Pint configurado** (C2): `pint.json` (preset `laravel`) + scripts `composer lint` (`pint --test`) y `composer lint:fix`; aplicación inicial sobre 46 archivos (estilo) — `composer lint` en verde
-- [x] **Tests PHPUnit reales** (C3, cierra B2): `phpunit.xml` migrado a esquema 10.5 con `sqlite/:memory:` (los tests **nunca** tocan la BD de desarrollo); 21 tests / 79 assertions en verde — `AuthTest` (login/logout/inactivo + `last_login_at` + mensaje genérico), `PermissionTest` (403/200 por rol + `hasPermission()` con reparto 38/21/5 + `PermissionSeeder`), `ContactStoreTest` (store válido/inválido + `read_at` no manipulable) y `Unit/WebpTest`; `UserFactory` con `Hash::make` (compat `BCRYPT_ROUNDS`); docs §16 actualizadas
+- [x] **Tests PHPUnit reales** (C3, cierra B2): `phpunit.xml` migrado a esquema 10.5 con `sqlite/:memory:` (los tests **nunca** tocan la BD de desarrollo); **79 tests / 316 assertions** en verde (1 skipped cuando no existe `public/storage`) — cobertura crítica en `AuthTest`, `AuditLogTest`, `ContactStoreTest`, `CorsConfigurationTest`, `EditorCannotPublishTest`, `GacetaHashTest`, `HtmlSanitizationTest`, `OrgMemberPhotoTest`, `PasswordChangeTest`, `PermissionTest`, `PiiEncryptionTest`, `RateLimitTest`, `SearchXssTest`, `SecurityConfigTest`, `SecurityHeadersTest`, `StorageSymlinkTest`, `UploadExtensionTest`, `UserRoleRestrictionTest` y `Unit/WebpTest`; `UserFactory` con `Hash::make` (compat `BCRYPT_ROUNDS`); docs §16 actualizadas
+- [x] **Log de auditoría (G6)**: migración `activity_logs` (actor, acción, recurso, IP, UA, metadata JSON) + modelo `ActivityLog` + helper `App\Support\Audit` + hooks en `AuthController` (login success/failed/logout/password changed), `UserController`, `RoleController`, `NewsController`, `GacetaController`, `ContactController`; vista `/admin/auditoria` paginada, acceso solo superadmin vía permiso `audit.view`; 11 tests en `AuditLogTest`
+- [x] **CSP con nonce (G7)**: `AddSecurityHeaders` genera nonce por petición y CSP usa `script-src 'self' 'nonce-...'` (sin `'unsafe-inline'`); todos los scripts del proyecto incluyen el nonce; los ~14 handlers `onclick="return confirm(...)"` se migraron a `data-confirm` + listener global en `layouts/admin.blade.php` y `layouts/public.blade.php`; botones de error usan `data-action="reload"` / `data-action="back"`; `style-src` conserva `'unsafe-inline'` por TinyMCE; test en `SecurityHeadersTest`
 - [x] **Limpieza cosmética** (C5): eliminados `.DS_Store`/`._.DS_Store` de `public/images/Logos` (más entradas en `.gitignore`), boilerplate `routes/api.php` (+ bloque `api`/rate-limiter del `RouteServiceProvider` y grupo `api` del `Http\Kernel`) y plantilla `resources/views/welcome.blade.php` sin usar
 
 ### 🔴 Pendiente
@@ -567,19 +569,19 @@ Newsletter, API REST, comentarios, galería, eventos, versión en inglés.
 - **Front/rediseño del detalle de entes** (`/entes/{slug}`, PENDIENTES D5/E4) — archivado: la vista actual (skeleton funcional) se da por buena hasta nueva instrucción de diseño.
 - **Tags en noticias** (SPECS §5.4) — omitido por decisión; si se retoma, opción simple recomendada: columna `posts.tags` (varchar separado por comas) con chips en el detalle, sin página por tag.
 
-### 🟠 Riesgos conocidos para producción (detectados, **sin corregir**)
+### 🟠 Riesgos conocidos para producción (mitigaciones en curso, ver PENDIENTES.md)
 
 Pendientes de decisión antes o después del despliegue (ver §14 para el checklist). **Seguimiento en [PENDIENTES.md](PENDIENTES.md)** (ítems A1–A4):
 
 | # | Riesgo | Dónde | Impacto |
 |---|---|---|---|
-| 1 | `SESSION_SECURE_COOKIE` sin default `true` ni clave en `.env` | `config/session.php:171` | Cookies de sesión sin flag `Secure` tras HTTPS |
+| 1 | `SESSION_SECURE_COOKIE` corregido (default `true` + clave en `.env.example`) | `config/session.php:171` | Cookies de sesión con flag `Secure` en HTTPS |
 | 2 | Laravel 10 (10.50.2) — **EOL desde feb 2026** | `composer.json:10` | Sin parches de seguridad; **aceptado por decisión institucional** (la institución requiere Laravel 10 — PENDIENTES F/A5) |
-| 3 | Bloque `"audit": {"ignore": [17 IDs PKSA-*]}` | `composer.json:65-83` | Oculta advisories de seguridad de dependencias; revisar con `composer audit` |
+| 3 | Bloque `"audit": {"ignore": [3 IDs PKSA-*]}` depurado (antes 17) | `composer.json` | 3 advisories de `laravel/framework` aceptados por EOL; el high (CRLF) queda documentado y con controles compensatorios |
 | 4 | Sin CI (GitHub Actions descartado) ni PHPStan; Pint sí configurado (`pint.json` + `composer lint`, C2) | repo | No hay CI que ejecute lint/tests automáticamente; decisiones en PENDIENTES F/C1 |
-| 5 | Cobertura PHPUnit limitada (21 tests: auth, permisos, contacto y reglas WebP, con sqlite en memoria) | `tests/Unit`, `tests/Feature` | El detalle funcional fino vive en las 16 suites E2E de Windows |
+| 5 | Cobertura PHPUnit ampliada (**79 tests**: auth, permisos, contacto, WebP, cambio de contraseña, restricción de roles, sanitización HTML, headers, cifrado PII, rate limit, hash de gacetas, validación de fotos, **log de auditoría**, **CSP nonce**, XSS reflejado, etc.) | `tests/Unit`, `tests/Feature` | El detalle funcional fino vive en las 16 suites E2E de Windows |
 | 6 | Suites E2E solo Windows/Laragon | `tests/e2e/*.ps1` | No sirven para validar el servidor de producción |
-| 7 | Usuarios seed con password `password` (ver §14 paso post-deploy) | `UserSeeder` | Credenciales predecibles si no se cambian |
+| 7 | Usuarios seed con password `password` mitigado (cambio obligatorio en primer login) | `UserSeeder`, middleware `EnsurePasswordChanged` | Credenciales predecibles forzadas a rotación en primer acceso; en local/testing los fixtures seed no quedan bloqueados |
 
 ---
 
@@ -622,6 +624,8 @@ php artisan serve --port=8000   #  →  http://localhost:8000
 ```
 
 Tras un reinicio del equipo, solo hace falta: arrancar Laragon (*Inicio > Arrancar todo*) — los vhost, hosts y `storage:link` ya quedan configurados.
+
+> **Sesión segura por entorno:** con `APP_ENV=local` la cookie de sesión se envía sin el flag `Secure` (permite desarrollo sobre HTTP). Si `APP_ENV` no es `local`, `config/session.php` activa `secure=true` por defecto; en producción es **obligatorio HTTPS** y se puede forzar con `SESSION_SECURE_COOKIE=true` en `.env`.
 
 ---
 
@@ -718,10 +722,12 @@ php artisan optimize             # config:cache + route:cache + view:cache
 #### F. Pasos de seguridad post-despliegue (obligatorios)
 1. **Cambiar o eliminar los usuarios seed**: `admin@gdc.gob.ve`, `admin2@gdc.gob.ve`, `editor@gdc.gob.ve` tienen password **`password`** (§9/§10). Crear el usuario administrador real con contraseña fuerte y borrar o desactivar (`is_active`) los de prueba. Ver §15 para el comando.
 2. Confirmar `APP_DEBUG=false` y `APP_ENV=production`.
-3. Ejecutar `composer audit` y revisar los advisories ocultos por el bloque `audit.ignore` de `composer.json`.
-4. Permisos: `storage/` y `bootstrap/cache/` deben ser escribibles por el usuario de PHP-FPM/Apache, p. ej. `chown -R www-data:www-data storage bootstrap/cache`.
-5. `.env` con permisos restrictivos (`chmod 600 .env`) y fuera de la raíz web.
-6. Cargar contenido real: entes (`PartnerSeeder` está vacío), URLs de redes sociales desde `/admin/rrss` y enlaces de "Intranet GDC" (Funcionarios Activos / Jubilados) desde `/admin/configuracion` (vacío = ítem oculto); verificar `/admin/login`.
+3. **Cifrar PII heredado**: `php artisan pii:encrypt` (idempotente; `--dry-run` para previsualizar). Re-cifra `contacts.name/email/subject/message` y `users.name` que sigan en texto plano tras la migración `encrypt_pii_columns`.
+4. **HTTPS obligatorio** y HSTS fijado en el servidor web (`Strict-Transport-Security: max-age=31536000; includeSubDomains`). La app también lo emite en producción. Si hay proxy/CDN, configurar `TRUSTED_PROXIES` (CSV de IPs o `*`) y `TRUSTED_HOSTS` (CSV de dominios) en `.env`.
+5. Ejecutar `composer audit` y revisar los advisories ocultos por el bloque `audit.ignore` de `composer.json`.
+6. Permisos: `storage/` y `bootstrap/cache/` deben ser escribibles por el usuario de PHP-FPM/Apache, p. ej. `chown -R www-data:www-data storage bootstrap/cache`.
+7. `.env` con permisos restrictivos (`chmod 600 .env`) y fuera de la raíz web.
+8. Cargar contenido real: entes (`PartnerSeeder` está vacío), URLs de redes sociales desde `/admin/rrss` y enlaces de "Intranet GDC" (Funcionarios Activos / Jubilados) desde `/admin/configuracion` (vacío = ítem oculto); verificar `/admin/login`.
 
 #### G. Actualizaciones posteriores
 ```bash
@@ -800,14 +806,14 @@ Suites PowerShell (Windows + Laragon) contra `http://portal2026.test`. Requieren
 | `test-categorias.ps1` | Filtro por categoría en /noticias y /categoria/{slug}; orden y links del footer |
 | `test-gacetas.ps1` | CRUD de Gacetas Oficiales + vista pública + permisos |
 | `test-social.ps1` | Módulo Redes Sociales (permisos, `rrss.manage` en grupo "Gestión Portal") e iconos solo-footer |
-| `test-settings.ps1` | Identidad / Enlaces (`/admin/configuracion`): nombre del sitio (títulos), logo (upload/quitar), enlaces navbar (URL absoluta, ruta válida, `..`, ruta inexistente), ocultar ítem vacío, `site_name` obligatorio, permisos (38/64, `settings.manage` solo superadmin, 3 grupos + 14 módulos, doble cabecera en `/admin/roles`), snapshot/restauración |
+| `test-settings.ps1` | Identidad / Enlaces (`/admin/configuracion`): nombre del sitio (títulos), logo (upload/quitar), enlaces navbar (URL absoluta, ruta válida, `..`, ruta inexistente), ocultar ítem vacío, `site_name` obligatorio, permisos (39/65, `settings.manage` solo superadmin, 3 grupos + 15 módulos incl. Auditoría, doble cabecera en `/admin/roles`), snapshot/restauración |
 | `test-users.ps1` | `is_active`/`last_login_at`: bloqueo de login a inactivos, registro de último acceso, guard de auto-desactivación |
 | `test-wysiwyg.ps1` | Editor TinyMCE (assets offline), HTML crudo en detalle, compat texto plano, handler JSON de subida, "Copiar URL" en medios, permisos del editor |
 | `test-contact-info.ps1` | Info de contacto en settings + defaults + permisos |
 | `test-contact-messages.ps1` | Bandeja de mensajes (`contacts`) |
 | `test-entes.ps1` | CRUD de Entes afiliados + slugs + nav activo + buscador con filtro client-side |
 | `test-media.ps1` | Medios + imagen destacada de noticias + biblioteca |
-| `test-videos.ps1` | Módulo Videos: permisos `videos.*` (38/64, solo superadmin), sidebar (sección + dropdown por rol, 403 admin/editor), cargar YouTube (válida/inválida) + subir mp4, destacar/cambiar/"Ninguno" (siempre ≤1 `is_featured`), home refleja la portada, borrado + limpieza |
+| `test-videos.ps1` | Módulo Videos: permisos `videos.*` (39/65, solo superadmin), sidebar (sección + dropdown por rol, 403 admin/editor), cargar YouTube (válida/inválida) + subir mp4, destacar/cambiar/"Ninguno" (siempre ≤1 `is_featured`), home refleja la portada, borrado + limpieza |
 | `test-partners.ps1` | Upload/replace/quitar logo de entes (incl. sidecars `.webp`) |
 | `test-share.ps1` | Botones de compartir + lazy loading |
 | `test-webp.ps1` | WebP con fallback (D9): `webp:generate` (backfill + idempotencia), sidecar al subir, GET `.webp` 200 `image/webp`, GIF y PNG corrupto sin conversión (contador `ilegibles`, exit 0), `<picture>` con fallback en `/noticias`, destroy borra original + sidecar, `picture{display:contents}` en el build |
@@ -827,8 +833,28 @@ Garantías de las suites:
 
 ### PHPUnit (`tests/Unit`, `tests/Feature`)
 
-- Ejecución: `./vendor/bin/phpunit` (o `--testsuite Unit,Feature`) — **21 tests / 79 assertions**, en verde.
-- **BD aislada**: `phpunit.xml` define `DB_CONNECTION=sqlite` / `DB_DATABASE=:memory:` (B2 cerrado) — `RefreshDatabase` migra en memoria por test, **nunca toca la BD de desarrollo**.
-- Cobertura: flujos críticos — `AuthTest` (login correcto/incorrecto/inactivo, logout, `last_login_at`, mensaje genérico), `PermissionTest` (403 editor/admin en `/admin/usuarios`, superadmin OK, `hasPermission()` con el reparto canónico 38/21/5, seeder `PermissionSeeder`), `ContactStoreTest` (POST `/contacto` válido/inválido, `read_at` no manipulable) y `Unit/WebpTest` (reglas de conversión de D9). El detalle funcional fino sigue en las suites E2E de PowerShell.
+- Ejecución: `./vendor/bin/phpunit` (o `--testsuite Unit,Feature`) — **79 tests / 316 assertions**, en verde (1 skipped cuando no existe el symlink `public/storage`).
+- **BD aislada**: `phpunit.xml` define `DB_CONNECTION=sqlite` / `DB_DATABASE=:memory:` (B2 cerrado) — `RefreshDatabase` migra en memoria por test, **nunca toca la BD de desarrollo**. El `APP_KEY` de `phpunit.xml` es una clave **exclusiva de tests**; no usar en producción.
+- Cobertura de flujos críticos:
+  - `AuthTest` — login correcto/incorrecto/inactivo, logout, `last_login_at`, mensaje genérico.
+  - `AuditLogTest` — login/logout/fallido, cambio de contraseña, CRUD de usuarios, roles, noticias, mensajes; acceso a `/admin/auditoria` solo superadmin.
+  - `ContactStoreTest` — POST `/contacto` válido/inválido, `read_at` no manipulable.
+  - `EditorCannotPublishTest` — editor no puede publicar.
+  - `GacetaHashTest` — hash SHA-256 al subir/actualizar gacetas.
+  - `HtmlSanitizationTest` — sanitización HTML (XSS) y preservación de imágenes inline `data:`.
+  - `OrgMemberPhotoTest` — validación de rutas/extensiones en `org_members.photo`.
+  - `PasswordChangeTest` — cambio forzado de contraseña en primer login.
+  - `PermissionTest` — 403/200 por rol, `hasPermission()` con reparto canónico 38/21/5, `PermissionSeeder`.
+  - `PiiEncryptionTest` — cifrado de PII heredado via `php artisan pii:encrypt`.
+  - `RateLimitTest` — 429 y lockout en `/admin/login`.
+  - `SecurityConfigTest` — rate limits leídos desde `config/security.php` (respetan `config:cache`).
+  - `SearchXssTest` — query de `/buscar` escapada en la respuesta (INJ-03).
+  - `SecurityHeadersTest` — presencia de CSP, HSTS, X-Frame-Options, etc.; CSP usa nonce y no incluye `'unsafe-inline'` en `script-src`.
+  - `UploadExtensionTest` — la extensión guardada se adivina por contenido, no por nombre del cliente; `mimes` rechaza archivos de texto renombrados.
+  - `UserRoleRestrictionTest` — solo superadmin asigna `superadmin`; último superadmin no se puede degradar.
+  - `CorsConfigurationTest` — CORS limitado a rutas `api/*` inexistentes; páginas públicas no envían `Access-Control-Allow-Origin`.
+  - `StorageSymlinkTest` — el symlink `public/storage` apunta a `storage/app/public` (skipped si no existe).
+  - `Unit/WebpTest` — reglas de conversión de D9.
+- El detalle funcional fino sigue en las suites E2E de PowerShell.
 - Estilo: `composer lint` (`pint --test`) debe pasar; `composer lint:fix` aplica Pint (C2).
 - Nota: el `UserFactory` usa `Hash::make('password')` (no un hash hardcodeado) para respetar `BCRYPT_ROUNDS` de tests.

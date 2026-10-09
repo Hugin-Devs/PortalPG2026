@@ -6,10 +6,12 @@
     "license": "MIT",
     "require": {
         "php": "^8.1",
+        "doctrine/dbal": "^3.10",
         "guzzlehttp/guzzle": "^7.2",
         "laravel/framework": "^10.0",
         "laravel/sanctum": "^3.2",
-        "laravel/tinker": "^2.8"
+        "laravel/tinker": "^2.8",
+        "mews/purifier": "^3.4"
     },
     "require-dev": {
         "fakerphp/faker": "^1.9.1",
@@ -68,21 +70,7 @@
             "ignore": [
                 "PKSA-m5cs-t1y6-qpcs",
                 "PKSA-3r5d-mb8f-1qw9",
-                "PKSA-mdq4-51ck-6kdq",
-                "PKSA-8qx3-n5y5-vvnd",
-                "PKSA-w7xr-vk7n-rstm",
-                "PKSA-93qv-9n9h-6k6p",
-                "PKSA-k22t-f949-t9g6",
-                "PKSA-yfw5-9gnj-n2c7",
-                "PKSA-k1b4-kshy-xgbh",
-                "PKSA-2z36-j4q9-rsfy",
-                "PKSA-fvw5-9t6n-nwvr",
-                "PKSA-6d8m-6kgw-18zr",
-                "PKSA-z3gr-8qht-p93v",
-                "PKSA-21fb-n1x5-5nf7",
-                "PKSA-2cx9-ynrq-qdk3",
-                "PKSA-rqc2-tcc6-nc79",
-                "PKSA-fndg-qryc-dyc9"
+                "PKSA-mdq4-51ck-6kdq"
             ]
         }
     },

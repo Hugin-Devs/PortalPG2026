@@ -88,7 +88,7 @@
                             <form action="{{ url('/admin/videos/' . $video->id) }}" method="POST" style="display:inline">
                                 @csrf
                                 @method('DELETE')
-                                <button type="submit" class="btn btn-sm btn-danger mt-2" onclick="return confirm('Eliminar este video?')">Eliminar</button>
+                                <button type="submit" class="btn btn-sm btn-danger mt-2" data-confirm="Eliminar este video?">Eliminar</button>
                             </form>
                             @endif
                         </div>
@@ -135,7 +135,7 @@
         </div>
     </div>
 </div>
-<script>
+<script nonce="{{ request()->attributes->get('csp_nonce') }}">
     (function () {
         var typeYt = document.getElementById('typeYoutube');
         var typeFile = document.getElementById('typeFile');

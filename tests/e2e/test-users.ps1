@@ -16,6 +16,11 @@ function Post-Form($url, $fields, $sess) {
     $r
 }
 function Login($email) {
+    # Los usuarios creados por el panel quedan con password_changed_at = NULL y
+    # el middleware los redirige al cambio forzado de contraseña (AUTH-02). El
+    # flujo de cambio esta cubierto por PHPUnit (PasswordChangeTest); aqui se
+    # marca como ya cambiado para que el arnes valide CRUD/permisos/last_login_at.
+    Sql "UPDATE portal2026.users SET password_changed_at = NOW() WHERE email='$email' AND password_changed_at IS NULL;" | Out-Null
     $s = New-Object Microsoft.PowerShell.Commands.WebRequestSession
     $r = Invoke-WebRequest "$base/admin/login" -WebSession $s -UseBasicParsing
     $t = Get-Token $r.Content

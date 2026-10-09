@@ -36,7 +36,7 @@
                     ]);
                     $inConfig = $u->hasAnyPermission([
                         'settings.manage', 'users.view', 'users.create', 'users.edit', 'users.delete',
-                        'roles.manage',
+                        'roles.manage', 'audit.view',
                     ]);
                     $showNews = $u->hasPermission('news.view');
                     $showMedia = $u->hasPermission('media.view');
@@ -105,6 +105,9 @@
                 @if(auth()->user()->hasPermission('roles.manage'))
                 <li class="nav-item"><a class="nav-link text-white {{ request()->routeIs('admin.roles.*') ? 'active' : '' }}" href="{{ url('/admin/roles') }}">Roles y Permisos</a></li>
                 @endif
+                @if(auth()->user()->hasPermission('audit.view'))
+                <li class="nav-item"><a class="nav-link text-white {{ request()->routeIs('admin.audit.*') ? 'active' : '' }}" href="{{ url('/admin/auditoria') }}">Auditoría</a></li>
+                @endif
                 <li class="nav-item mt-3">
                     <form action="{{ url('/admin/logout') }}" method="POST">
                         @csrf
@@ -117,5 +120,26 @@
             @yield('content')
         </main>
     </div>
+    <script nonce="{{ request()->attributes->get('csp_nonce') }}">
+        document.querySelectorAll('[data-action="reload"]').forEach(function (btn) {
+            btn.addEventListener('click', function () { window.location.reload(); });
+        });
+        document.querySelectorAll('[data-action="back"]').forEach(function (btn) {
+            btn.addEventListener('click', function () {
+                if (history.length > 1) {
+                    history.back();
+                } else {
+                    window.location.href = btn.dataset.fallback || '/';
+                }
+            });
+        });
+        document.querySelectorAll('[data-confirm]').forEach(function (btn) {
+            btn.addEventListener('click', function (e) {
+                if (! confirm(btn.dataset.confirm)) {
+                    e.preventDefault();
+                }
+            });
+        });
+    </script>
 </body>
 </html>

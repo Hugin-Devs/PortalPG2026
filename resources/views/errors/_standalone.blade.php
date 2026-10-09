@@ -26,9 +26,9 @@
         <p class="error-message">{{ $message }}</p>
         <div class="error-actions">
             @if($reload ?? false)
-                <button type="button" class="btn btn-primary" onclick="window.location.reload()">Reintentar</button>
+                <button type="button" class="btn btn-primary" data-action="reload">Reintentar</button>
             @endif
-            <button type="button" class="btn btn-primary" onclick="if (history.length > 1) { history.back(); } else { window.location.href = '/'; }">Volver</button>
+            <button type="button" class="btn btn-primary" data-action="back" data-fallback="/">Volver</button>
             <a class="btn btn-outline" href="/">Ir al inicio</a>
         </div>
         <p class="brand">Gobierno de Distrito Capital</p>

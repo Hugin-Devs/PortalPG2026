@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\Permission;
+use App\Support\Audit;
 use Illuminate\Http\Request;
 
 class RoleController extends Controller
@@ -60,6 +61,11 @@ class RoleController extends Controller
         if (! empty($data)) {
             \DB::table('role_permission')->insert($data);
         }
+
+        Audit::log('role.updated', null, null, "Permisos actualizados para rol: {$role}", [
+            'role' => $role,
+            'permission_count' => count($ids),
+        ]);
 
         return back()->with('success', "Permisos actualizados para el rol \"$role\".");
     }

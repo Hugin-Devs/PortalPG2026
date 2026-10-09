@@ -64,9 +64,9 @@ Write-Output 'pre-limpieza: artefactos VidTest* removidos'
 Write-Output '--- 1. Permisos videos.* ---'
 & 'D:\laragon\bin\php\php-8.3.30-Win32-vs16-x64\php.exe' artisan db:seed --class=PermissionSeeder --force 2>&1 | Out-Null
 $pc = ((Sql 'SELECT COUNT(*) FROM portal2026.permissions;') -join '').Trim()
-Check ($pc -eq '38') "38 permisos tras videos (got $pc)" "permisos != 38 (got $pc)"
+Check ($pc -eq '39') "39 permisos tras videos (got $pc)" "permisos != 39 (got $pc)"
 $rc = ((Sql 'SELECT COUNT(*) FROM portal2026.role_permission;') -join '').Trim()
-Check ($rc -eq '64') "64 asignaciones 38+21+5 (got $rc)" "asignaciones != 64 (got $rc)"
+Check ($rc -eq '65') "65 asignaciones 39+21+5 (got $rc)" "asignaciones != 65 (got $rc)"
 $c = ((Sql 'SELECT COUNT(*) FROM portal2026.permissions WHERE slug=''videos.view'' AND `group` LIKE ''Gesti%Noticias'' AND `module`=''Videos'';') -join '').Trim()
 Check ($c -eq '1') 'videos.view en grupo Gestion Noticias, modulo Videos' "videos.view mal ubicado (got $c)"
 $c = ((Sql 'SELECT COUNT(*) FROM portal2026.permissions WHERE slug LIKE ''videos.%'';') -join '').Trim()

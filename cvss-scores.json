@@ -1,0 +1,92 @@
+{
+  "AUTH-01": {
+    "vector": "CVSS:4.0/AV:N/AC:L/AT:N/PR:N/UI:N/VC:L/VI:L/VA:N/SC:N/SI:N/SA:N",
+    "score": 6.9,
+    "severity": "M",
+    "status": "remediated"
+  },
+  "AUTH-02": {
+    "vector": "CVSS:4.0/AV:N/AC:L/AT:N/PR:N/UI:N/VC:H/VI:H/VA:H/SC:N/SI:N/SA:N",
+    "score": 9.3,
+    "severity": "C",
+    "status": "remediated"
+  },
+  "AUTHZ-01": {
+    "vector": "CVSS:4.0/AV:N/AC:L/AT:N/PR:L/UI:N/VC:H/VI:H/VA:N/SC:N/SI:N/SA:N",
+    "score": 8.6,
+    "severity": "H",
+    "status": "remediated"
+  },
+  "AUTHZ-02": {
+    "vector": "CVSS:4.0/AV:N/AC:L/AT:N/PR:L/UI:N/VC:N/VI:L/VA:N/SC:N/SI:N/SA:N",
+    "score": 5.3,
+    "severity": "M",
+    "status": "remediated"
+  },
+  "INJ-01": {
+    "vector": "CVSS:4.0/AV:N/AC:L/AT:N/PR:L/UI:P/VC:L/VI:L/VA:N/SC:N/SI:N/SA:N",
+    "score": 5.1,
+    "severity": "M",
+    "status": "remediated"
+  },
+  "INJ-02": {
+    "vector": "CVSS:4.0/AV:N/AC:L/AT:N/PR:L/UI:P/VC:L/VI:L/VA:N/SC:N/SI:N/SA:N",
+    "score": 5.1,
+    "severity": "M",
+    "status": "remediated"
+  },
+  "FILE-03": {
+    "vector": "CVSS:4.0/AV:N/AC:L/AT:N/PR:L/UI:N/VC:N/VI:H/VA:N/SC:N/SI:N/SA:N",
+    "score": 7.1,
+    "severity": "H",
+    "status": "remediated"
+  },
+  "CFG-01": {
+    "vector": "CVSS:4.0/AV:N/AC:L/AT:N/PR:N/UI:P/VC:N/VI:L/VA:N/SC:N/SI:N/SA:N",
+    "score": 5.3,
+    "severity": "M",
+    "status": "remediated"
+  },
+  "CFG-02": {
+    "vector": "CVSS:4.0/AV:N/AC:H/AT:N/PR:N/UI:N/VC:L/VI:N/VA:N/SC:N/SI:N/SA:N",
+    "score": 6.3,
+    "severity": "M",
+    "status": "remediated"
+  },
+  "CFG-03": {
+    "vector": "CVSS:4.0/AV:N/AC:L/AT:N/PR:N/UI:N/VC:H/VI:H/VA:H/SC:N/SI:N/SA:N",
+    "score": 9.3,
+    "severity": "C",
+    "status": "remediated"
+  },
+  "SC-01": {
+    "vector": "CVSS:4.0/AV:N/AC:L/AT:N/PR:N/UI:N/VC:L/VI:L/VA:L/SC:N/SI:N/SA:N",
+    "score": 6.9,
+    "severity": "M",
+    "status": "remediated"
+  },
+  "SC-02": {
+    "vector": "CVSS:4.0/AV:N/AC:L/AT:N/PR:N/UI:N/VC:L/VI:L/VA:L/SC:N/SI:N/SA:N",
+    "score": 6.9,
+    "severity": "M",
+    "status": "accepted_with_compensating_controls"
+  },
+  "LOG-01": {
+    "vector": "CVSS:4.0/AV:N/AC:L/AT:N/PR:N/UI:N/VC:N/VI:N/VA:L/SC:N/SI:N/SA:N",
+    "score": 6.9,
+    "severity": "M",
+    "status": "pending"
+  },
+  "ABUSE-01": {
+    "vector": "CVSS:4.0/AV:N/AC:L/AT:N/PR:N/UI:N/VC:N/VI:N/VA:L/SC:N/SI:N/SA:N",
+    "score": 6.9,
+    "severity": "M",
+    "status": "remediated"
+  },
+  "PRIV-01": {
+    "vector": "CVSS:4.0/AV:N/AC:L/AT:N/PR:L/UI:N/VC:H/VI:N/VA:N/SC:N/SI:N/SA:N",
+    "score": 7.1,
+    "severity": "H",
+    "status": "remediated"
+  }
+}

@@ -40,7 +40,7 @@
     <p id="entesNoResults" class="d-none text-secondary mt-3">No se encontraron entes que coincidan con tu búsqueda.</p>
     @endif
 </div>
-<script>
+<script nonce="{{ request()->attributes->get('csp_nonce') }}">
     (function () {
         var input = document.getElementById('enteSearch');
         var grid = document.getElementById('entesGrid');

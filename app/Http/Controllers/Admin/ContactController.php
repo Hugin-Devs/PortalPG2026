@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\Contact;
 use App\Models\Setting;
+use App\Support\Audit;
 use Illuminate\Http\Request;
 
 class ContactController extends Controller
@@ -59,12 +60,14 @@ class ContactController extends Controller
         if (! $contact->read_at) {
             $contact->update(['read_at' => now()]);
         }
+        Audit::log('contact.viewed', Contact::class, $contact->id, 'Mensaje de contacto leído');
 
         return view('admin.contact.message-show', compact('contact'));
     }
 
     public function destroyMessage(Contact $contact)
     {
+        Audit::log('contact.deleted', Contact::class, $contact->id, 'Mensaje de contacto eliminado');
         $contact->delete();
 
         return redirect('/admin/contacto/mensajes')->with('success', 'Mensaje eliminado correctamente.');

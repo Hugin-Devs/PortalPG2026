@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\Video;
+use App\Support\Uploads;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\Rule;
@@ -42,7 +43,7 @@ class VideoController extends Controller
             $data['url'] = $request->url;
         } else {
             $file = $request->file('file');
-            $filename = time().'_'.uniqid().'.'.$file->getClientOriginalExtension();
+            $filename = time().'_'.uniqid().'.'.Uploads::safeExtension($file, ['mp4', 'webm', 'ogg']);
             $data['path'] = $file->storeAs('videos', $filename, 'public');
         }
 

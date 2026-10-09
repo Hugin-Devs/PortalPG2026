@@ -67,7 +67,7 @@
                     <form action="{{ url('/admin/gacetas/' . $gaceta->id) }}" method="POST" style="display:inline">
                         @csrf
                         @method('DELETE')
-                        <button type="submit" class="btn btn-sm btn-danger" onclick="return confirm('Eliminar esta gaceta?')">Eliminar</button>
+                        <button type="submit" class="btn btn-sm btn-danger" data-confirm="Eliminar esta gaceta?">Eliminar</button>
                     </form>
                     @endif
                 </div>

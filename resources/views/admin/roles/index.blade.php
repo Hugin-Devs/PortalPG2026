@@ -65,7 +65,7 @@
     </p>
 </div>
 
-<script>
+<script nonce="{{ request()->attributes->get('csp_nonce') }}">
 document.querySelectorAll('.perm-checkbox').forEach(function(cb) {
     cb.addEventListener('change', function() {
         var role = this.dataset.role;

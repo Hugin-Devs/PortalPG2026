@@ -18,6 +18,8 @@
     <env name="QUEUE_CONNECTION" value="sync"/>
     <env name="SESSION_DRIVER" value="array"/>
     <env name="TELESCOPE_ENABLED" value="false"/>
+    <env name="APP_KEY" value="base64:W57UphoRqF8HmF8/XbHyviKZB1o61HlgYDTLjG54j9w="/>
+    <env name="LOGIN_RATE_LIMIT" value="5"/>
   </php>
   <source>
     <include>

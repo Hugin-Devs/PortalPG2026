@@ -206,15 +206,15 @@ foreach ($p in @('/', '/noticias', '/contacto', '/gacetas', '/entes')) {
 
 Write-Output '--- 12. Permisos en BD ---'
 $c = (Sql 'SELECT COUNT(*) FROM portal2026.permissions;') -join ''
-Check ($c -eq '38') "38 permisos (got $c)" "permisos != 38 (got $c)"
+Check ($c -eq '39') "39 permisos (got $c)" "permisos != 39 (got $c)"
 $c = (Sql 'SELECT COUNT(*) FROM portal2026.role_permission;') -join ''
-Check ($c -eq '64') "64 asignaciones 38+21+5 (got $c)" "asignaciones != 64 (got $c)"
+Check ($c -eq '65') "65 asignaciones 39+21+5 (got $c)" "asignaciones != 65 (got $c)"
 $c = (Sql 'SELECT COUNT(*) FROM portal2026.permissions WHERE slug=''settings.manage'' AND `group` LIKE ''Configuraci%Portal'';') -join ''
 Check ($c -eq '1') "settings.manage en grupo Configuracion Portal (got $c)" "settings.manage mal ubicado (got $c)"
 $c = (Sql 'SELECT COUNT(DISTINCT `group`) FROM portal2026.permissions;') -join ''
 Check ($c -eq '3') "3 grupos de permisos = secciones sidebar (got $c)" "grupos != 3 (got $c)"
 $c = (Sql 'SELECT COUNT(DISTINCT `module`) FROM portal2026.permissions;') -join ''
-Check ($c -eq '14') "14 modulos = items sidebar (got $c)" "modulos != 14 (got $c)"
+Check ($c -eq '15') "15 modulos = items sidebar (got $c)" "modulos != 15 (got $c)"
 $c = (Sql 'SELECT COUNT(*) FROM portal2026.permissions WHERE `module` IS NULL OR `module`='''';') -join ''
 Check ($c -eq '0') "0 permisos sin modulo (got $c)" "permisos sin modulo: $c"
 $c = (Sql 'SELECT COUNT(*) FROM portal2026.permissions WHERE slug=''settings.manage'' AND name=''Editar identidad y enlaces'';') -join ''
@@ -222,7 +222,7 @@ Check ($c -eq '1') "permiso settings.manage renombrado (got $c)" "settings.manag
 $r = Invoke-WebRequest "$base/admin/roles" -WebSession $super -UseBasicParsing
 Check ($r.StatusCode -eq 200) '/admin/roles 200' "roles $($r.StatusCode)"
 $n = ([regex]::Matches($r.Content, 'perm-module')).Count
-Check ($n -eq 14) "vista: 14 cabeceras de modulo (got $n)" "vista: cabeceras modulo = $n"
+Check ($n -eq 15) "vista: 15 cabeceras de modulo (got $n)" "vista: cabeceras modulo = $n"
 Check ($r.Content -match 'Editar identidad y enlaces') 'vista: permiso renombrado visible' 'vista sin permiso renombrado'
 $roles = (Sql 'SELECT rp.role FROM portal2026.role_permission rp JOIN portal2026.permissions p ON p.id = rp.permission_id WHERE p.slug=''settings.manage'';') -join ','
 Check ($roles -eq 'superadmin') "solo superadmin (got $roles)" "roles inesperados: $roles"

@@ -20,12 +20,17 @@ class UserSeeder extends Seeder
         ];
 
         foreach ($users as $attrs) {
+            // Los usuarios seed son fixtures de desarrollo/prueba: en local/testing
+            // se crean con password_changed_at ya establecido para que los arneses
+            // E2E y el login manual funcionen sin fricción. En producción sí se
+            // deja en null para forzar el cambio de contraseña en el primer login.
             $user = User::firstOrCreate(
                 ['email' => $attrs['email']],
                 [
                     'name' => $attrs['name'],
                     'password' => Hash::make('password'),
                     'role' => $attrs['role'],
+                    'password_changed_at' => app()->environment('production') ? null : now(),
                 ]
             );
 
@@ -34,6 +39,12 @@ class UserSeeder extends Seeder
                     'name' => $attrs['name'],
                     'role' => $attrs['role'],
                 ]);
+            }
+
+            // En entornos no productivos, alinear también password_changed_at de
+            // filas ya existentes (re-seed) para no bloquear los arneses E2E.
+            if (! app()->environment('production') && is_null($user->password_changed_at)) {
+                $user->update(['password_changed_at' => now()]);
             }
         }
     }

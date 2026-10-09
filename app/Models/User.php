@@ -24,6 +24,7 @@ class User extends Authenticatable
         'role',
         'is_active',
         'last_login_at',
+        'password_changed_at',
     ];
 
     /**
@@ -46,6 +47,8 @@ class User extends Authenticatable
         'password' => 'hashed',
         'is_active' => 'boolean',
         'last_login_at' => 'datetime',
+        'password_changed_at' => 'datetime',
+        'name' => 'encrypted',
     ];
 
     public function posts()

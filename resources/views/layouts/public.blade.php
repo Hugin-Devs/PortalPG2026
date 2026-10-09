@@ -99,5 +99,26 @@
             <p class="text-center small mb-0" style="color: #212529;">&copy; {{ date('Y') }} GDC. Todos los derechos reservados.</p>
         </div>
     </footer>
+    <script nonce="{{ request()->attributes->get('csp_nonce') }}">
+        document.querySelectorAll('[data-action="reload"]').forEach(function (btn) {
+            btn.addEventListener('click', function () { window.location.reload(); });
+        });
+        document.querySelectorAll('[data-action="back"]').forEach(function (btn) {
+            btn.addEventListener('click', function () {
+                if (history.length > 1) {
+                    history.back();
+                } else {
+                    window.location.href = btn.dataset.fallback || '/';
+                }
+            });
+        });
+        document.querySelectorAll('[data-confirm]').forEach(function (btn) {
+            btn.addEventListener('click', function (e) {
+                if (! confirm(btn.dataset.confirm)) {
+                    e.preventDefault();
+                }
+            });
+        });
+    </script>
 </body>
 </html>

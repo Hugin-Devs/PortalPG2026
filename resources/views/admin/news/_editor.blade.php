@@ -1,6 +1,6 @@
 <textarea name="content" id="content" class="form-control" rows="10">{{ $value ?? '' }}</textarea>
-<script src="{{ asset('vendor/tinymce/tinymce.min.js') }}"></script>
-<script>
+<script nonce="{{ request()->attributes->get('csp_nonce') }}" src="{{ asset('vendor/tinymce/tinymce.min.js') }}"></script>
+<script nonce="{{ request()->attributes->get('csp_nonce') }}">
     document.addEventListener('DOMContentLoaded', function () {
         tinymce.init({
             selector: '#content',

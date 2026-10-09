@@ -54,7 +54,7 @@
                     <form action="{{ url('/admin/entes/' . $partner->id) }}" method="POST" style="display:inline">
                         @csrf
                         @method('DELETE')
-                        <button type="submit" class="btn btn-sm btn-danger" onclick="return confirm('Eliminar este ente?')">Eliminar</button>
+                        <button type="submit" class="btn btn-sm btn-danger" data-confirm="Eliminar este ente?">Eliminar</button>
                     </form>
                     @endif
                 </td>

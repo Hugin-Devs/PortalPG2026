@@ -20,9 +20,12 @@ function Login($email, $sess) {
 function Sql($q) { & $mysql -uroot -N -e $q 2>&1 }
 
 Write-Output '--- 0. Estado inicial ---'
-Sql "DELETE FROM portal2026.contacts WHERE subject LIKE 'E2E%';" | Out-Null
+# PII cifrado (PRIV-01): name/email/subject/message se guardan cifrados en BD.
+# Las aserciones SQL se apoyan en `id`; el texto plano se valida por la interfaz
+# del panel, que descifra los atributos del modelo.
+$baseMaxId = ((Sql 'SELECT COALESCE(MAX(id),0) FROM portal2026.contacts;') -join '').Trim()
 $baseCount = ((Sql 'SELECT COUNT(*) FROM portal2026.contacts;') -join '').Trim()
-Check ((Sql "SELECT COUNT(*) FROM portal2026.contacts WHERE subject LIKE 'E2E%';") -eq '0') 'sin filas E2E al inicio (previas se preservan)' 'habia filas E2E previas'
+Check ($baseCount -ne '') "punto de partida registrado (max id=$baseMaxId, total=$baseCount)" 'sin estado inicial'
 
 Write-Output '--- 1. Enviar formulario publico (/contacto) ---'
 $sessPub = New-Object Microsoft.PowerShell.Commands.WebRequestSession
@@ -33,22 +36,24 @@ $r = Post-Form "$base/contacto" @{
     subject = 'E2E Primer Mensaje'; message = 'Hola, este es el mensaje de prueba 1.'
 } $sessPub
 Check ($r.Content -match 'Mensaje enviado correctamente') 'confirmacion de exito visible' 'sin confirmacion'
-Check ((Sql "SELECT COUNT(*) FROM portal2026.contacts WHERE subject = 'E2E Primer Mensaje';") -eq '1') 'fila persistida en contacts' 'no se guardo'
-Check ((Sql "SELECT COUNT(*) FROM portal2026.contacts WHERE subject = 'E2E Primer Mensaje' AND read_at IS NULL;") -eq '1') 'read_at NULL al llegar' 'read_at no NULL'
+$id1 = ((Sql 'SELECT MAX(id) FROM portal2026.contacts;') -join '').Trim()
+Check (($id1 -as [int]) -gt ($baseMaxId -as [int])) 'fila persistida en contacts' 'no se guardo'
+Check ((Sql "SELECT read_at IS NULL FROM portal2026.contacts WHERE id = $id1;") -eq '1') 'read_at NULL al llegar' 'read_at no NULL'
 
 Write-Output '--- 2. Segundo mensaje (para probar delete) ---'
 $r = Post-Form "$base/contacto" @{
     _token = $token; name = 'Maria E2E'; email = 'maria@ejemplo.com'
     subject = 'E2E Segundo Mensaje'; message = 'Mensaje de prueba 2.'
 } $sessPub
-Check ((Sql "SELECT COUNT(*) FROM portal2026.contacts WHERE subject = 'E2E Segundo Mensaje';") -eq '1') 'segunda fila persistida' 'no se guardo'
+$id2 = ((Sql 'SELECT MAX(id) FROM portal2026.contacts;') -join '').Trim()
+Check (($id2 -as [int]) -gt ($id1 -as [int])) 'segunda fila persistida' 'no se guardo'
 
 Write-Output '--- 3. Validacion: email invalido no persiste ---'
 $r = Post-Form "$base/contacto" @{
     _token = $token; name = 'Fake'; email = 'no-es-email'
     subject = 'E2E No Debe Guardarse'; message = 'x'
 } $sessPub
-Check ((Sql "SELECT COUNT(*) FROM portal2026.contacts WHERE subject = 'E2E No Debe Guardarse';") -eq '0') 'email invalido rechazado' 'se guardo igual'
+Check ((((Sql 'SELECT COUNT(*) FROM portal2026.contacts;') -join '').Trim()) -eq [string]([int]$baseCount + 2)) 'email invalido rechazado' 'se guardo igual'
 
 Write-Output '--- 4. Bandeja admin: lista ---'
 $sess = New-Object Microsoft.PowerShell.Commands.WebRequestSession
@@ -63,7 +68,7 @@ Check ($r.Content -match 'juan@ejemplo\.com') 'email visible' 'falta email'
 Check ($r.Content -match '>Mensajes</a>') 'item sidebar Mensajes visible' 'sidebar sin Mensajes'
 
 Write-Output '--- 5. Detalle marca leido ---'
-$id = Sql "SELECT id FROM portal2026.contacts WHERE subject = 'E2E Primer Mensaje';"
+$id = $id1
 $r = Invoke-WebRequest "$base/admin/contacto/mensajes/$id" -WebSession $sess -UseBasicParsing
 Check ($r.StatusCode -eq 200) "GET detalle -> 200 (id=$id)" "status $($r.StatusCode)"
 Check ($r.Content -match 'Hola, este es el mensaje de prueba 1\.') 'cuerpo del mensaje visible' 'falta cuerpo'
@@ -102,10 +107,9 @@ foreach ($p in @('/', '/contacto', '/sobre-nosotros')) {
 }
 
 Write-Output '--- 9. Cleanup ---'
-Sql "DELETE FROM portal2026.contacts WHERE subject LIKE 'E2E%';" | Out-Null
-$cnt = Sql "SELECT COUNT(*) FROM portal2026.contacts WHERE subject LIKE 'E2E%';"
+Sql "DELETE FROM portal2026.contacts WHERE id > $baseMaxId;" | Out-Null
 $tot = ((Sql 'SELECT COUNT(*) FROM portal2026.contacts;') -join '').Trim()
-Check (($cnt -eq '0') -and ($tot -eq $baseCount)) "filas E2E eliminadas; previas intactas (total $tot)" "restos: E2E=$cnt total=$tot (esperado $baseCount)"
+Check ($tot -eq $baseCount) "filas E2E eliminadas; previas intactas (total $tot)" "total=$tot (esperado $baseCount)"
 
 Write-Output ''
 if ($fail -eq 0) { Write-Output '=== CONTACTO MENSAJES: TODAS LAS PRUEBAS EN VERDE ===' }

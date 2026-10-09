@@ -38,10 +38,12 @@ php artisan serve
 - Sitio: `http://127.0.0.1:8000`
 - Panel: `http://127.0.0.1:8000/admin/login` — usuarios seed y roles en `DOCUMENTACION.md` §9 (password por defecto: `password`).
 
+> **Seguridad:** `SESSION_SECURE_COOKIE` se activa por defecto cuando `APP_ENV` no es `local` (`config/session.php`). En desarrollo HTTP la cookie se envía sin flag `Secure`. **En producción es obligatorio HTTPS**; la clave `SESSION_SECURE_COOKIE` en `.env` permite forzar `true`/`false` de forma explícita.
+
 ## Tests
 
 ```bash
-./vendor/bin/phpunit          # Unit + Feature (21 tests, BD sqlite en memoria — ver §16)
+./vendor/bin/phpunit          # Unit + Feature (68 tests, BD sqlite en memoria — ver §16)
 composer lint                 # estilo de código (pint --test); composer lint:fix lo aplica
 ```
 

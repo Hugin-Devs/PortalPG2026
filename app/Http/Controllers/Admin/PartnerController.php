@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\Partner;
 use App\Services\Webp;
+use App\Support\Uploads;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
 
@@ -27,7 +28,7 @@ class PartnerController extends Controller
         $data = $request->validate([
             'name' => 'required|max:255',
             'description' => 'nullable|string',
-            'logo' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg,webp|max:2048',
+            'logo' => 'nullable|image|mimes:jpeg,png,jpg,gif,webp|max:2048',
             'url' => 'nullable|url',
             'order' => 'nullable|integer|min:0',
         ]);
@@ -55,7 +56,7 @@ class PartnerController extends Controller
         $data = $request->validate([
             'name' => 'required|max:255',
             'description' => 'nullable|string',
-            'logo' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg,webp|max:2048',
+            'logo' => 'nullable|image|mimes:jpeg,png,jpg,gif,webp|max:2048',
             'url' => 'nullable|url',
             'order' => 'nullable|integer|min:0',
             'is_active' => 'nullable|boolean',
@@ -104,7 +105,7 @@ class PartnerController extends Controller
 
     private function storeLogo($file): string
     {
-        $filename = time().'_'.uniqid().'.'.$file->getClientOriginalExtension();
+        $filename = time().'_'.uniqid().'.'.Uploads::safeExtension($file, ['jpg', 'jpeg', 'png', 'gif', 'webp']);
         $path = $file->storeAs('partners', $filename, 'public');
         Webp::convert($path);
 

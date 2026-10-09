@@ -16,6 +16,7 @@ class Gaceta extends Model
         'original_name',
         'mime_type',
         'size',
+        'file_hash',
         'user_id',
     ];
 

@@ -51,7 +51,7 @@
                         <form action="{{ url('/admin/contacto/mensajes/' . $msg->id) }}" method="POST">
                             @csrf
                             @method('DELETE')
-                            <button type="submit" class="btn btn-sm btn-outline-danger" onclick="return confirm('Eliminar este mensaje?')">Eliminar</button>
+                            <button type="submit" class="btn btn-sm btn-outline-danger" data-confirm="Eliminar este mensaje?">Eliminar</button>
                         </form>
                         @endif
                     </td>

@@ -15,5 +15,9 @@ class Contact extends Model
 
     protected $casts = [
         'read_at' => 'datetime',
+        'name' => 'encrypted',
+        'email' => 'encrypted',
+        'subject' => 'encrypted',
+        'message' => 'encrypted',
     ];
 }
