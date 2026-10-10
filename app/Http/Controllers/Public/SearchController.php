@@ -13,7 +13,7 @@ class SearchController extends Controller
         $q = $request->get('q');
 
         $posts = Post::with('category')
-            ->where('status', 'published')
+            ->live()
             ->where(function ($query) use ($q) {
                 $query->where('title', 'like', "%{$q}%")
                     ->orWhere('content', 'like', "%{$q}%")

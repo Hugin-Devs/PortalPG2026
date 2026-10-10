@@ -64,11 +64,13 @@ class PermissionTest extends TestCase
 
         $this->assertTrue($admin->hasPermission('gacetas.view'));
         $this->assertTrue($admin->hasPermission('categories.view'));
+        $this->assertTrue($admin->hasPermission('news.approve'));
         $this->assertFalse($admin->hasPermission('users.view'));
         $this->assertFalse($admin->hasPermission('videos.view'));
 
         $this->assertTrue($editor->hasPermission('news.view'));
         $this->assertTrue($editor->hasPermission('media.upload'));
+        $this->assertFalse($editor->hasPermission('news.approve'));
         $this->assertFalse($editor->hasPermission('users.view'));
         $this->assertFalse($editor->hasPermission('gacetas.view'));
         $this->assertFalse($editor->hasPermission('categories.view'));

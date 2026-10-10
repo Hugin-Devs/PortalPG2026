@@ -16,7 +16,7 @@ class NewsController extends Controller
     public function index()
     {
         $posts = Post::with('category')
-            ->where('status', 'published')
+            ->live()
             ->latest()
             ->paginate(9);
 
@@ -35,7 +35,7 @@ class NewsController extends Controller
     {
         $post = Post::with('category')
             ->where('slug', $slug)
-            ->where('status', 'published')
+            ->live()
             ->firstOrFail();
 
         $post->increment('views');
@@ -63,7 +63,7 @@ class NewsController extends Controller
 
         $related = Post::where('category_id', $post->category_id)
             ->where('id', '!=', $post->id)
-            ->where('status', 'published')
+            ->live()
             ->latest()
             ->take(3)
             ->get();
@@ -85,7 +85,7 @@ class NewsController extends Controller
 
         $posts = Post::with('category')
             ->where('category_id', $category->id)
-            ->where('status', 'published')
+            ->live()
             ->latest()
             ->paginate(9);
 
@@ -105,9 +105,11 @@ class NewsController extends Controller
         return Cache::remember(CacheKeys::NEWS_CATEGORIES_NAV, CacheKeys::ttl(), function () {
             return Category::where('is_active', true)
                 ->withCount(['posts as published_count' => function ($q) {
-                    $q->where('status', 'published');
+                    $q->live();
                 }])
-                ->having('published_count', '>', 0)
+                ->whereHas('posts', function ($q) {
+                    $q->live();
+                })
                 ->orderBy('order')
                 ->orderBy('name')
                 ->get();

@@ -23,7 +23,7 @@ class PostSeeder extends Seeder
         ]);
 
         for ($i = 1; $i <= 5; $i++) {
-            Post::updateOrCreate([
+            $post = Post::updateOrCreate([
                 'slug' => "noticia-destacada-$i",
             ], [
                 'title' => "Noticia Destacada $i",
@@ -33,6 +33,10 @@ class PostSeeder extends Seeder
                 'status' => 'published',
                 'is_featured' => ($i <= 3),
             ]);
+
+            if ($post->published_at === null) {
+                $post->forceFill(['published_at' => $post->created_at ?? now()])->save();
+            }
         }
     }
 }

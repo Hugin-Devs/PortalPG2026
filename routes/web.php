@@ -53,6 +53,8 @@ Route::prefix('admin')->group(function () {
         Route::get('/noticias', [NewsController::class, 'index'])->name('admin.news.index')->middleware('permission:news.view');
         Route::get('/noticias/crear', [NewsController::class, 'create'])->name('admin.news.create')->middleware('permission:news.create');
         Route::post('/noticias', [NewsController::class, 'store'])->name('admin.news.store')->middleware('permission:news.create');
+        Route::post('/noticias/publicar', [NewsController::class, 'bulkPublish'])->name('admin.news.bulkPublish')->middleware('permission:news.approve');
+        Route::post('/noticias/{post}/aprobar', [NewsController::class, 'approve'])->name('admin.news.approve')->middleware('permission:news.approve');
         Route::get('/noticias/{post}/editar', [NewsController::class, 'edit'])->name('admin.news.edit')->middleware('permission:news.edit');
         Route::put('/noticias/{post}', [NewsController::class, 'update'])->name('admin.news.update')->middleware('permission:news.edit');
         Route::delete('/noticias/{post}', [NewsController::class, 'destroy'])->name('admin.news.destroy')->middleware('permission:news.delete');

@@ -2,9 +2,9 @@
 
 > **Fuente viva del trabajo pendiente.** Ir marcando `- [x]` al completar cada ítem y actualizar el contador de progreso.
 > Mantener sincronizado con `DOCUMENTACION.md` §12 (Estado del Desarrollo): al cerrar un ítem aquí, actualizar o eliminar su fila en §12.
-> Última actualización: 2026-10-09
+> Última actualización: 2026-10-10
 
-**Progreso:** 25 / 29 completados
+**Progreso:** 26 / 30 completados
 
 ---
 
@@ -69,6 +69,9 @@
 
 - [x] **D10 — Cache de consultas pesadas**  
   Cerrado: `config/portal.php` con TTLs, `App\Support\CacheKeys` con claves para home, nav de noticias, entes, gacetas y sitemap; `Cache::remember` en `HomeController`, `NewsController`, `EnteController`, `GacetaController`; observers `PostObserver`, `CategoryObserver`, `VideoObserver`, `PartnerObserver`, `GacetaObserver`, `PageObserver` invalidan cachés afectadas al guardar/borrar; `Admin\VideoController@destacar` usa Eloquent para disparar observers; test `CacheTest` (acierto e invalidación).
+
+- [x] **D12 — Flujo de aprobación de noticias (permiso, badge, masivo, programación)**  
+  Cerrado: permiso `news.approve` ("Aprobar noticias", por defecto superadmin+admin); `resolveStatus()` basado en permiso — sin él el estado no cambia (ni se sube ni se baja) y se emite flash `warning`; badges "Pendiente de aprobación" / "Programada · fecha" / "Publicado" en el listado admin; aprobación individual (botón "Aprobar" con confirmación) y masiva (`POST /admin/noticias/publicar` con checkboxes `form=`, solo borradores → publicar ya, omitidas las no-borrador); programación opcional vía `published_at` (campo `datetime-local` habilitado solo con `news.approve`, vacío = publicar ya, hora de Caracas) con scope `Post::live()` aplicado a las 11 consultas públicas + dashboard, migración backfill `published_at` y fix de `PostSeeder`; auditoría `news.approved`; tests `NewsApprovalTest` (13) + ampliaciones en `EditorCannotPublishTest` y `PermissionTest` (99 tests / 428 assertions); suite `test-noticias.ps1` (17ª) — 15/17 suites E2E en verde (fallos preexistentes en `test-entes`/`test-share`). Limitación documentada: al llegar la hora de una programada, los listados cacheados pueden tardar ≤ `PORTAL_CACHE_TTL` (1h) en reflejarla.
 
 ## E. Contenido / decisiones del cliente
 
@@ -164,5 +167,6 @@
 | G7 | 2026-10-08 | CSP endurecido: nonce por petición en `AddSecurityHeaders`, `script-src` sin `'unsafe-inline'`, todos los scripts con nonce, `onclick` confirm migrados a `data-confirm`; tests en `SecurityHeadersTest` |
 | D8 | 2026-10-09 | Meta tags dinámicos en public layout + `$seo` en controladores públicos + `/sitemap.xml` cacheado; tests `SeoTest`/`SitemapTest` |
 | D10 | 2026-10-09 | `config/portal.php` + `App\Support\CacheKeys` + cache en home/noticias/entes/gacetas + observers para invalidación; test `CacheTest` |
+| D12 | 2026-10-10 | Permiso `news.approve` (40 permisos, reparto 40/22/5 = 67 asignaciones) + `resolveStatus()` por permiso con flash `warning` + badges (Pendiente/Programada/Publicado) + aprobación individual y masiva + programación opcional vía `published_at` con scope `Post::live()` (11 consultas públicas + dashboard) y backfill; auditoría `news.approved`; `NewsApprovalTest` (13 tests) — 99 tests PHPUnit y 15/17 E2E en verde con la nueva suite `test-noticias.ps1` |
 | G8 | 2026-10-09 | Cerrado en alcance PHPUnit/E2E: SeoTest/SitemapTest/CacheTest como cobertura funcional; DAST/manual/infra (FILE-07, FILE-09, INJ-05/06, SC-05, LOG-03) documentado para auditoría externa |
 | G8 | 2026-10-08 | Parcial: `SearchXssTest` (INJ-03), trazabilidad PRIV-03 cubierta por auditoría G6; FILE-04/CFG-07 y FILE-06 ya en PHPUnit; resto pendiente de DAST/manual/infraestructura |

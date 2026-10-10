@@ -45,7 +45,7 @@ class SitemapController extends Controller
         $add(route('contact.index'), '0.6', 'monthly');
         $add(route('gacetas.index'), '0.8', 'weekly');
 
-        Post::where('status', 'published')
+        Post::live()
             ->select('id', 'slug', 'updated_at')
             ->latest('updated_at')
             ->chunkById(100, function ($posts) use ($add) {

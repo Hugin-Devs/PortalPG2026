@@ -182,9 +182,9 @@ $r = Invoke-WebRequest "$base/admin/gacetas" -WebSession $admin2 -UseBasicParsin
 Check ($r.Content -match 'Nueva Gaceta') 'rol admin puede gestionar gacetas' 'rol admin no puede gestionar'
 Check ($r.Content -match 'Gacetas</a>') 'sidebar admin con Gacetas' 'falta Gacetas en sidebar'
 $pc = Sql 'SELECT COUNT(*) FROM portal2026.permissions;'
-Check ($pc -eq '39') "permisos totales 39 ($pc)" "permisos: $pc"
+Check ($pc -eq '40') "permisos totales 40 ($pc)" "permisos: $pc"
 $rc = Sql 'SELECT role, COUNT(*) FROM portal2026.role_permission GROUP BY role;'
-Check (($rc -match 'admin') -and ($rc -match '21')) "reparto admin 21 ($($rc -replace "`n",' | '))" "reparto admin inesperado: $rc"
+Check (($rc -match 'admin') -and ($rc -match '22')) "reparto admin 22 ($($rc -replace "`n",' | '))" "reparto admin inesperado: $rc"
 
 Write-Output '--- 10. Eliminar ---'
 $r = Invoke-WebRequest "$base/admin/gacetas" -WebSession $sess -UseBasicParsing

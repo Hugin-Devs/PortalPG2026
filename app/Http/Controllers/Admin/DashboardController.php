@@ -34,7 +34,7 @@ class DashboardController extends Controller
         $newContacts = Contact::whereNull('read_at')->count();
 
         $latestPosts = Post::with('category')
-            ->where('status', 'published')
+            ->live()
             ->orderByDesc('published_at')
             ->orderByDesc('id')
             ->limit(5)

@@ -23,13 +23,13 @@ class HomeController extends Controller
 
         $featuredPosts = Cache::remember(CacheKeys::HOME_FEATURED, $ttl, fn () => Post::with('category')
             ->where('is_featured', true)
-            ->where('status', 'published')
+            ->live()
             ->latest()
             ->take(3)
             ->get());
 
         $latestPosts = Cache::remember(CacheKeys::HOME_LATEST, $ttl, fn () => Post::with('category')
-            ->where('status', 'published')
+            ->live()
             ->latest()
             ->take(4)
             ->get());
@@ -38,7 +38,7 @@ class HomeController extends Controller
             ->orderBy('order')
             ->get());
 
-        $mostRead = Cache::remember(CacheKeys::HOME_MOST_READ, $ttl, fn () => Post::where('status', 'published')
+        $mostRead = Cache::remember(CacheKeys::HOME_MOST_READ, $ttl, fn () => Post::live()
             ->orderBy('views', 'desc')
             ->take(5)
             ->get());

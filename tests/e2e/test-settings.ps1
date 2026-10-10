@@ -206,9 +206,9 @@ foreach ($p in @('/', '/noticias', '/contacto', '/gacetas', '/entes')) {
 
 Write-Output '--- 12. Permisos en BD ---'
 $c = (Sql 'SELECT COUNT(*) FROM portal2026.permissions;') -join ''
-Check ($c -eq '39') "39 permisos (got $c)" "permisos != 39 (got $c)"
+Check ($c -eq '40') "40 permisos (got $c)" "permisos != 40 (got $c)"
 $c = (Sql 'SELECT COUNT(*) FROM portal2026.role_permission;') -join ''
-Check ($c -eq '65') "65 asignaciones 39+21+5 (got $c)" "asignaciones != 65 (got $c)"
+Check ($c -eq '67') "67 asignaciones 40+22+5 (got $c)" "asignaciones != 67 (got $c)"
 $c = (Sql 'SELECT COUNT(*) FROM portal2026.permissions WHERE slug=''settings.manage'' AND `group` LIKE ''Configuraci%Portal'';') -join ''
 Check ($c -eq '1') "settings.manage en grupo Configuracion Portal (got $c)" "settings.manage mal ubicado (got $c)"
 $c = (Sql 'SELECT COUNT(DISTINCT `group`) FROM portal2026.permissions;') -join ''

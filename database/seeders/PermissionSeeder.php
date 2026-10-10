@@ -19,6 +19,7 @@ class PermissionSeeder extends Seeder
             ['name' => 'Crear noticias', 'slug' => 'news.create', 'group' => 'Gestión Noticias', 'module' => 'Noticias'],
             ['name' => 'Editar noticias', 'slug' => 'news.edit', 'group' => 'Gestión Noticias', 'module' => 'Noticias'],
             ['name' => 'Eliminar noticias', 'slug' => 'news.delete', 'group' => 'Gestión Noticias', 'module' => 'Noticias'],
+            ['name' => 'Aprobar noticias', 'slug' => 'news.approve', 'group' => 'Gestión Noticias', 'module' => 'Noticias'],
             ['name' => 'Ver medios', 'slug' => 'media.view', 'group' => 'Gestión Noticias', 'module' => 'Medios'],
             ['name' => 'Subir medios', 'slug' => 'media.upload', 'group' => 'Gestión Noticias', 'module' => 'Medios'],
             ['name' => 'Eliminar medios', 'slug' => 'media.delete', 'group' => 'Gestión Noticias', 'module' => 'Medios'],
@@ -90,7 +91,7 @@ class PermissionSeeder extends Seeder
         $assign('superadmin', Permission::pluck('id'));
 
         // Permisos básicos a admin
-        $adminSlugs = ['news.view', 'news.create', 'news.edit', 'categories.view', 'categories.create', 'categories.edit', 'categories.delete', 'partners.view', 'media.view', 'media.upload', 'gacetas.view', 'gacetas.create', 'gacetas.edit', 'gacetas.delete', 'about.edit', 'org.view', 'org.create', 'org.edit', 'contact.view', 'contact.edit', 'contact.delete'];
+        $adminSlugs = ['news.view', 'news.create', 'news.edit', 'news.approve', 'categories.view', 'categories.create', 'categories.edit', 'categories.delete', 'partners.view', 'media.view', 'media.upload', 'gacetas.view', 'gacetas.create', 'gacetas.edit', 'gacetas.delete', 'about.edit', 'org.view', 'org.create', 'org.edit', 'contact.view', 'contact.edit', 'contact.delete'];
         $assign('admin', Permission::whereIn('slug', $adminSlugs)->pluck('id'));
 
         // Permisos mínimos a editor

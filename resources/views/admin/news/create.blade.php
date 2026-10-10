@@ -26,6 +26,22 @@
             @include('admin.news._editor', ['value' => old('content')])
         </div>
         @include('admin.news._image-field')
+        <div class="mb-3">
+            <label>Estado</label>
+            <select name="status" class="form-control" @if(! auth()->user()->hasPermission('news.approve')) disabled @endif>
+                <option value="draft" selected>Borrador</option>
+                <option value="published">Publicado</option>
+            </select>
+            @if(! auth()->user()->hasPermission('news.approve'))
+            <small class="text-muted">Requiere aprobación (news.approve). Se guardará como borrador pendiente.</small>
+            @endif
+        </div>
+        <div class="mb-3">
+            <label>Fecha y hora de publicación</label>
+            <input type="datetime-local" name="published_at" class="form-control"
+                   @if(! auth()->user()->hasPermission('news.approve')) disabled @endif>
+            <small class="text-muted">Opcional. Vacío = publicar inmediatamente. Use una fecha futura para programar (hora de Caracas). Solo aplica si el estado es Publicado.</small>
+        </div>
         <button type="submit" class="btn btn-primary">Guardar</button>
     </form>
 </div>

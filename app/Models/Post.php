@@ -33,6 +33,12 @@ class Post extends Model
         return $this->belongsTo(Category::class);
     }
 
+    public function scopeLive($query)
+    {
+        return $query->where('status', 'published')
+            ->where(fn ($q) => $q->whereNull('published_at')->orWhere('published_at', '<=', now()));
+    }
+
     public function user()
     {
         return $this->belongsTo(User::class);
