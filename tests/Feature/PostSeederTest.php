@@ -2,9 +2,7 @@
 
 namespace Tests\Feature;
 
-use App\Models\Category;
 use App\Models\Post;
-use App\Models\User;
 use Database\Seeders\CategorySeeder;
 use Database\Seeders\PostSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -47,38 +45,6 @@ class PostSeederTest extends TestCase
         $this->assertTrue($programada->published_at->isFuture());
 
         $this->assertDatabaseCount('posts', 4);
-    }
-
-    public function test_purges_old_placeholders_including_trashed_rows(): void
-    {
-        $user = User::factory()->create();
-
-        $visible = Post::create([
-            'title' => 'Placeholder visible',
-            'slug' => 'noticia-destacada-1',
-            'excerpt' => 'Placeholder de prueba',
-            'content' => '<p>Placeholder de prueba</p>',
-            'category_id' => Category::first()->id,
-            'user_id' => $user->id,
-            'status' => 'published',
-        ]);
-
-        Post::create([
-            'title' => 'Placeholder borrada',
-            'slug' => 'noticia-destacada-2',
-            'excerpt' => 'Placeholder de prueba',
-            'content' => '<p>Placeholder de prueba</p>',
-            'category_id' => Category::first()->id,
-            'user_id' => $user->id,
-            'status' => 'published',
-        ])->delete();
-
-        $this->assertSoftDeleted('posts', ['slug' => 'noticia-destacada-2']);
-
-        $this->seed(PostSeeder::class);
-
-        $this->assertSame(0, Post::withTrashed()->where('slug', 'like', 'noticia-destacada-%')->count());
-        $this->assertNull(Post::withTrashed()->find($visible->id), 'Las placeholders se purgan con borrado físico, incluso la visible');
     }
 
     public function test_is_idempotent_when_run_twice(): void

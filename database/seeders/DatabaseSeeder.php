@@ -14,13 +14,12 @@ class DatabaseSeeder extends Seeder
     {
         $this->call([
             CategorySeeder::class,
-            PostSeeder::class,
+            NoticiasPrecargadasSeeder::class,
             UserSeeder::class,
             PermissionSeeder::class,
             PartnerSeeder::class,
             ContactSettingSeeder::class,
             SocialSettingSeeder::class,
-            NoticiasPrecargadasSeeder::class,
         ]);
     }
 }

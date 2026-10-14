@@ -23,6 +23,10 @@ class NoticiasPrecargadasSeeder extends Seeder
     /**
      * Lote de noticias reales (contenido de Instagram del GDC / autoridad).
      *
+     * Seeder POR DEFECTO de las noticias: es el único que invoca
+     * DatabaseSeeder para contenido de posts (PostSeeder quedó como
+     * plantilla manual, no corre en `php artisan db:seed`).
+     *
      * ── ESTRUCTURA ESPERADA DE CADA CARPETA ────────────────────────────────
      * public/Noticias Precargadas/Noticia N/
      *   ├── 001 <sello>.jpg    ← portada (featured_image)
@@ -45,6 +49,9 @@ class NoticiasPrecargadasSeeder extends Seeder
      * "Fecha:" del txt. Las imágenes se copian a uploads/YYYY/MM/ y se
      * registran en la tabla media. El texto del txt se conserva íntegro
      * (menciones, hashtags y emojis); solo se elimina la línea de Fecha.
+     *
+     * Al sembrar se purgan las noticias de prueba 'noticia-destacada-*'
+     * (borrado físico, incluidas filas soft-deleted: libera el slug).
      */
     private const NOTICIAS = [
         'Noticia 1' => [
@@ -81,6 +88,10 @@ class NoticiasPrecargadasSeeder extends Seeder
 
     public function run(): void
     {
+        Post::withTrashed()
+            ->where('slug', 'like', 'noticia-destacada-%')
+            ->forceDelete();
+
         $user = User::where('email', 'admin@gdc.gob.ve')->first()
             ?? User::firstOrCreate([
                 'email' => 'admin@gdc.gob.ve',

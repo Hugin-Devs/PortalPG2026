@@ -10,7 +10,10 @@ use Illuminate\Database\Seeder;
 class PostSeeder extends Seeder
 {
     /**
-     * Noticias de ejemplo — PLANTILLA DUPLICABLE para cargar contenido real.
+     * PLANTILLA de noticias de ejemplo — NO corre en `php artisan db:seed`
+     * (DatabaseSeeder invoca NoticiasPrecargadasSeeder, el seeder por
+     * defecto de las noticias). Ejecutar a mano solo cuando se necesite:
+     *   php artisan db:seed --class=PostSeeder
      *
      * ── CÓMO AGREGAR NOTICIAS ─────────────────────────────────────────────
      * 1. Copia un bloque completo del array $noticias y pégalo al final.
@@ -26,15 +29,9 @@ class PostSeeder extends Seeder
      * 5. 'content' va en nowdoc: pega el HTML tal cual, sin escapar nada.
      *    Si pegas texto plano se muestra como texto (el modelo no exige HTML).
      * 6. Re-ejecuta: php artisan db:seed --class=PostSeeder (idempotente).
-     *
-     * Al sembrar se purgan las noticias de prueba 'noticia-destacada-*'.
      */
     public function run(): void
     {
-        Post::withTrashed()
-            ->where('slug', 'like', 'noticia-destacada-%')
-            ->forceDelete();
-
         $user = User::first() ?? User::firstOrCreate([
             'email' => 'admin@gdc.gob.ve',
         ], [
