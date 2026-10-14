@@ -26,7 +26,7 @@ Desarrollar un portal web institucional para **GDC** que sirva como canal oficia
 | PHP | 8.2+ | |
 | Laravel | 10.x | Última versión estable de la rama 10 |
 | Bootstrap | 5.3+ | Solo componentes visuales, sin funcionalidad JS que interfiera con el backend |
-| Base de datos | MySQL 8 / MariaDB 10+ | |
+| Base de datos | PostgreSQL 14+ (antes MySQL 8 / MariaDB 10+; migrado a PG — ver DOCUMENTACION.md §13) | |
 | Motor de plantillas | Blade | No se usa Livewire bajo ninguna circunstancia |
 | JavaScript | Vanilla JS + Alpine.js (opcional) | Mínimo indispensable, nada de frameworks pesados |
 | Frontend Assets | Vite | Bundler nativo de Laravel 10 |

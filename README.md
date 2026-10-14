@@ -8,7 +8,7 @@ Portal web institucional del **Gobierno de Distrito Capital (GDC)**: sitio infor
 |---|---|
 | Backend | Laravel 10 (PHP 8.1+), Blade |
 | Frontend | Bootstrap 5.3 + Sass, Vite, JavaScript vanilla |
-| Base de datos | MySQL 8 / MariaDB 10+ |
+| Base de datos | PostgreSQL 14+ (probado con 18.6) |
 | Editor | TinyMCE 8 auto-hospedado (GPL), Font Awesome y fuentes locales (funciona offline) |
 
 Sin Livewire, Vue, React ni jQuery.
@@ -20,7 +20,7 @@ Sin Livewire, Vue, React ni jQuery.
 
 ## Requisitos de desarrollo
 
-PHP 8.1+ (probado con 8.3), Composer, Node.js 18+, MySQL 8 / MariaDB. En Windows se puede usar Laragon (guía completa en `DOCUMENTACION.md` §13).
+PHP 8.1+ (probado con 8.5), Composer, Node.js 18+, PostgreSQL 14+ con la extensión PHP `pdo_pgsql`. Guía completa en `DOCUMENTACION.md` §13.
 
 ## Inicio rápido
 
@@ -47,7 +47,7 @@ php artisan serve
 composer lint                 # estilo de código (pint --test); composer lint:fix lo aplica
 ```
 
-Suites E2E en `tests/e2e/` (PowerShell): solo Windows + Laragon, se ejecutan contra `http://portal2026.test` (ver §16).
+Suites E2E en `tests/e2e/` (bash + psql) contra un servidor de desarrollo local; se ejecutan con `bash tests/e2e/run-all.sh` (ver §16 de `DOCUMENTACION.md`).
 
 ## Despliegue
 

@@ -15,7 +15,7 @@ Inspirado en: https://mippci.gob.ve
 | PHP | 8.2+ (recomendado; `composer.json` admite `^8.1`) |
 | Laravel | 10.x |
 | Bootstrap | 5.3+ |
-| Base de datos | MySQL 8 / MariaDB 10+ |
+| Base de datos | PostgreSQL 14+ (probado con 18.6) |
 | Motor de plantillas | Blade |
 | Frontend Assets | Vite |
 | JavaScript | Vanilla JS + Bootstrap JS |
@@ -230,8 +230,8 @@ Claves: `social_*` (7), `contact_*` (5) y las generales `site_name`, `site_logo`
 | count | unsigned int | visitas del día a ese artículo (default 0) |
 | unique | (day, post_id) | **invariante**: el upsert depende de este índice |
 
-- **Registro**: `Public\NewsController@show` ejecuta `INSERT ... ON DUPLICATE KEY UPDATE count = count + 1` (una sentencia atómica) además del contador lifetime `posts.views`. La fecha **siempre se enlaza desde PHP** (`now()->toDateString()`), nunca `CURDATE()` de MySQL (relojes distintos).
-- ⚠️ **MySQL específico**: `ON DUPLICATE KEY UPDATE` es SQL de MySQL/MariaDB; no se planea migrar a otro SGBD (Postgres usaría `ON CONFLICT ... DO UPDATE`).
+- **Registro**: `Public\NewsController@show` ejecuta un upsert atómico `ON CONFLICT ("day","post_id") DO UPDATE SET count = daily_views.count + 1` (una sentencia) además del contador lifetime `posts.views`. La fecha **siempre se enlaza desde PHP** (`now()->toDateString()`), nunca `CURDATE()` de motor (relojes distintos).
+- **Nota histórica**: la versión MariaDB usaba `INSERT ... ON DUPLICATE KEY UPDATE`; al migrar a PostgreSQL (oct-2026) se sustituyó por `ON CONFLICT ... DO UPDATE` sobre el índice único `(day, post_id)`, conservando la atomicidad y eliminando la carrera insert/increment.
 - **Sin backfill**: el conteo diario comienza con la activación; no hay histórico anterior. Consumidores: tarjeta "Visitas del mes" y gráfico de 30 días del dashboard (D1).
 
 ---
@@ -565,6 +565,7 @@ npm run build      # copia TinyMCE a public/vendor + vite build a public/build
 - [x] **Carrusel de noticias sin recorte + fix "solo 1 imagen" (D17)**: el carrusel público de `news-show` ya no recorta las fotos verticales — slides de imagen con wrapper `d-flex` de **560px** centrado sobre blanco y la foto a su proporción natural (`max-height/max-width: 100%; width/height: auto`); fuera `object-fit: cover`, `shadow-sm` y `loading="lazy"` de las imágenes de galería (los slides ocultos no cargaban a tiempo y el usuario veía "solo una imagen"), con `decoding="async"`; flechas ‹ › con `aria-label` e iconos **oscuros** (CSS inline scoped a `#newsGallery` anula el `filter: invert` blanco de Bootstrap, ilegibles sobre el fondo blanco); iframe/video a 560px (video con `object-fit: contain`); fallback de sola portada = mismo wrapper 560px sin carrusel; verificado con **Edge headless** (screenshot antes/después) y curl de las 5 noticias precargadas (ítems 4·0·2·3·2, 0 `lazy`, 0 `cover`); assets `/build` verificados 200 con CSP vigente; test `test_single_cover_keeps_static_image_without_carousel` ajustado — `PostMediaTest` (11) + E2E `test-noticias` en verde — **124 tests / 611 assertions**
 - [x] **Verificación residual de vulnerabilidades (G8)**: cerrado en el alcance posible con PHPUnit/E2E — `SearchXssTest` (INJ-03), trazabilidad PRIV-03 por auditoría G6, `UploadExtensionTest` (FILE-04), `CorsConfigurationTest` (CFG-07), `StorageSymlinkTest` (FILE-06); se añaden `SeoTest`, `SitemapTest` y `CacheTest` como cobertura funcional de D8/D10; los casos que requieren DAST/manual/infraestructura (FILE-07, FILE-09, INJ-05, INJ-06, SC-05, LOG-03) quedan en `INFORME-VULNERABILIDADES.md`/`PLAN-VULNERABILIDADES.md` para auditoría externa
 - [x] **Limpieza cosmética** (C5): eliminados `.DS_Store`/`._.DS_Store` de `public/images/Logos` (más entradas en `.gitignore`), boilerplate `routes/api.php` (+ bloque `api`/rate-limiter del `RouteServiceProvider` y grupo `api` del `Http\Kernel`) y plantilla `resources/views/welcome.blade.php` sin usar
+- [x] **Migración MariaDB → PostgreSQL (PG1)**: motor por defecto `pgsql` (`config/database.php`, `.env.example`, plantilla de producción con `DB_SSLMODE=require`); SQL MySQL-only reemplazado por equivalentes portables — `FIELD()`/`SUBSTRING_INDEX()`/backticks → ordenación en PHP (`RoleController`), `CAST AS UNSIGNED` → `AS integer` (gacetas), `SUM(boolean)` → `SUM(CASE WHEN…)` (dashboard), `LIKE` → `ILIKE` en PG (búsqueda case-insensitive), upsert diario → `ON CONFLICT (day, post_id) DO UPDATE` (NewsController); 5 tests de contrato en `PgMigrationQueriesTest`; gate doble: PHPUnit 129/129 en SQLite **y** en PG 18 real; migraciones verificadas up y down en PG (`enum()` compila a varchar+CHECK, `->change()` vía dbal OK, `->after()` sin efecto funcional); 17 suites E2E reescritas de PowerShell+`mysql.exe` a **bash+`psql`** (`tests/e2e/*.sh` + `lib.sh` + `run-all.sh`), 663 checks en verde, `.ps1` eliminados; docs actualizadas (requisitos `pdo_pgsql`, PostgreSQL 14+, §13/§14/§16)
 
 ### 🔴 Pendiente
 
@@ -592,51 +593,48 @@ Pendientes de decisión antes o después del despliegue (ver §14 para el checkl
 | 2 | Laravel 10 (10.50.2) — **EOL desde feb 2026** | `composer.json:10` | Sin parches de seguridad; **aceptado por decisión institucional** (la institución requiere Laravel 10 — PENDIENTES F/A5) |
 | 3 | Bloque `"audit": {"ignore": [3 IDs PKSA-*]}` depurado (antes 17) | `composer.json` | 3 advisories de `laravel/framework` aceptados por EOL; el high (CRLF) queda documentado y con controles compensatorios |
 | 4 | Sin CI (GitHub Actions descartado) ni PHPStan; Pint sí configurado (`pint.json` + `composer lint`, C2) | repo | No hay CI que ejecute lint/tests automáticamente; decisiones en PENDIENTES F/C1 |
-| 5 | Cobertura PHPUnit ampliada (**124 tests**: auth, permisos, contacto, WebP, cambio de contraseña, restricción de roles, sanitización HTML, headers, cifrado PII, rate limit, hash de gacetas, validación de fotos, **log de auditoría**, **CSP nonce**, XSS reflejado, **flujo de aprobación de noticias**, **orden por fecha de publicación**, **seeders** (plantilla y noticias precargadas), **redes sociales multi-línea**, **galería/videos de noticias**, etc.) | `tests/Unit`, `tests/Feature` | El detalle funcional fino vive en las 17 suites E2E de Windows |
-| 6 | Suites E2E solo Windows/Laragon | `tests/e2e/*.ps1` | No sirven para validar el servidor de producción |
+| 5 | Cobertura PHPUnit ampliada (**129 tests**: auth, permisos, contacto, WebP, cambio de contraseña, restricción de roles, sanitización HTML, headers, cifrado PII, rate limit, hash de gacetas, validación de fotos, **log de auditoría**, **CSP nonce**, XSS reflejado, **flujo de aprobación de noticias**, **orden por fecha de publicación**, **seeders** (plantilla y noticias precargadas), **redes sociales multi-línea**, **galería/videos de noticias**, **contratos de portabilidad PG**, etc.) | `tests/Unit`, `tests/Feature` | El detalle funcional fino vive en las 17 suites E2E bash+psql; la suite corre en SQLite (rápida) y contra PostgreSQL real (gate de dialecto) |
+| 6 | Sin CI: los gates (lint + PHPUnit SQLite + PHPUnit PG + E2E) se ejecutan en local | `tests/e2e/run-all.sh` | Sin ejecución automática en cada push |
 | 7 | Usuarios seed con password `password` mitigado (cambio obligatorio en primer login) | `UserSeeder`, middleware `EnsurePasswordChanged` | Credenciales predecibles forzadas a rotación en primer acceso; en local/testing los fixtures seed no quedan bloqueados |
 
 ---
 
-## 13. Desarrollo Local (Windows / Laragon)
+## 13. Desarrollo Local (Linux / PostgreSQL)
 
 > Esta sección es para **desarrollo**. Para el servidor real, ve §14 (Despliegue en Producción).
 
-Requisitos: Laragon con Apache, MySQL y PHP 8.3; Node.js; Composer.
+Requisitos: PHP 8.1+ con extensiones `pdo_pgsql`, `mbstring`, `openssl`, `gd` (con WebP), `curl`, `bcmath`, `dom`; PostgreSQL 14+; Node.js 18+; Composer. (Entorno de referencia de la migración PG: Termux/Android con PostgreSQL 18.6 y PHP 8.5.)
 
-```powershell
+```bash
 # 1. Navegar al proyecto
-cd C:\Users\aegir\Documents\GitHub\Portal2026
+cd PortalPG2026
 
-# 2. Configurar PATH de sesión (ajustar versión de PHP si difiere)
-$env:Path = "D:\laragon\bin\php\php-8.3.30-Win32-vs16-x64;D:\laragon\bin\composer;D:\laragon\bin\mysql\mysql-8.4.3-winx64\bin;" + $env:Path
-
-# 3. Dependencias (solo la primera vez)
+# 2. Dependencias (solo la primera vez)
 composer install
 npm ci
 
-# 4. Compilar assets (cuando cambien Sass/JS)
+# 3. Compilar assets (cuando cambien Sass/JS) — necesario para que las
+#    vistas con @vite rendericen (si no, 500 "Vite manifest not found")
 npm run build
 
-# 5. Base de datos (primera vez / tras migrate:fresh)
-php artisan migrate --force
-php artisan db:seed
+# 4. Base de datos: crear rol y BD dedicados (una sola vez)
+createuser -P portalpg          # pedirá contraseña
+createdb -O portalpg portalpg2026
+
+# 5. Configurar .env (copiar la plantilla y completar)
+cp .env.example .env
+#    DB_CONNECTION=pgsql, DB_PORT=5432, DB_DATABASE=portalpg2026,
+#    DB_USERNAME=portalpg, DB_PASSWORD=..., DB_SSLMODE=prefer
+php artisan key:generate
+
+# 6. Migrar y sembrar (primera vez / tras migrate:fresh)
+php artisan migrate --seed
 php artisan storage:link   # enlace público -> storage/app/public (subidas de medios)
 
-# 6. Arrancar Apache y MySQL desde Laragon (Inicio > Arrancar todo)
-#    - Ojo: no correr XAMPP al mismo tiempo (puertos 80/3306 ocupados)
-#    - Vhost ya configurado: portal2026.test -> Portal2026/public
-#    - Entrada en C:\Windows\System32\drivers\etc\hosts: 127.0.0.1 portal2026.test
-
-# 7. Abrir navegador en:
-#    http://portal2026.test
-#    http://portal2026.test/admin/login   (admin@gdc.gob.ve / password)
-
-# Alternativa sin vhost:
+# 7. Arrancar el servidor de desarrollo
 php artisan serve --port=8000   #  →  http://localhost:8000
+#    Panel: http://localhost:8000/admin/login  (admin@gdc.gob.ve / password)
 ```
-
-Tras un reinicio del equipo, solo hace falta: arrancar Laragon (*Inicio > Arrancar todo*) — los vhost, hosts y `storage:link` ya quedan configurados.
 
 > **Sesión segura por entorno:** con `APP_ENV=local` la cookie de sesión se envía sin el flag `Secure` (permite desarrollo sobre HTTP). Si `APP_ENV` no es `local`, `config/session.php` activa `secure=true` por defecto; en producción es **obligatorio HTTPS** y se puede forzar con `SESSION_SECURE_COOKIE=true` en `.env`.
 
@@ -644,14 +642,14 @@ Tras un reinicio del equipo, solo hace falta: arrancar Laragon (*Inicio > Arranc
 
 ## 14. Despliegue en Producción
 
-**Destino:** servidor institucional Linux con salida a internet (Nginx o Apache + PHP + MySQL/MariaDB), con acceso por **FTP** y **SSH**.
+**Destino:** servidor institucional Linux con salida a internet (Nginx o Apache + PHP + PostgreSQL), con acceso por **FTP** y **SSH**.
 
 ### 14.1 Requisitos del servidor
 
 | Componente | Mínimo | Notas |
 |---|---|---|
-| PHP | 8.1+ (recomendado 8.2/8.3) | Extensiones: `pdo_mysql`, `mbstring`, `openssl`, `tokenizer`, `xml`, `ctype`, `json`, `fileinfo`, `curl`, `bcmath`, `dom`, **`gd` con soporte WebP** (`imagewebp()` — habilita D9 WebP con fallback; sin él el portal funciona igual pero sin convertir imágenes) |
-| MySQL / MariaDB | 8.0 / 10+ | BD y usuario dedicados (no `root`) |
+| PHP | 8.1+ (recomendado 8.3+) | Extensiones: `pdo_pgsql`, `mbstring`, `openssl`, `tokenizer`, `xml`, `ctype`, `json`, `fileinfo`, `curl`, `bcmath`, `dom`, **`gd` con soporte WebP** (`imagewebp()` — habilita D9 WebP con fallback; sin él el portal funciona igual pero sin convertir imágenes) |
+| PostgreSQL | 14+ | BD y usuario dedicados (no `postgres`); TLS activado (`DB_SSLMODE=require`) |
 | Node.js | 18+ | Solo si se compila en el servidor; si no, compilar localmente y subir los assets (14.3.C) |
 | Composer | 2.x | Solo si se instala en el servidor; si no, subir `vendor/` ya instalado en `--no-dev` |
 | HTTPS | obligatorio | Certificado institucional o Let's Encrypt |
@@ -766,8 +764,8 @@ El proyecto **no tiene tareas programadas** (`app/Console/Kernel.php` sin schedu
 | `max_execution_time` | ≥ `60` | Subidas múltiples de archivos |
 
 #### J. Qué NO funciona en el servidor de producción
-- Suites E2E (`tests/e2e/*.ps1`): solo Windows + Laragon (§16).
-- PHPUnit: no instalado en producción (`composer install --no-dev`); en desarrollo corre con su propia BD **sqlite en memoria** (`phpunit.xml`, sin tocar MySQL) — §16.
+- Suites E2E (`tests/e2e/*.sh`): requieren `psql` y un servidor de desarrollo corriendo (§16); no se ejecutan contra producción.
+- PHPUnit: no instalado en producción (`composer install --no-dev`); en desarrollo corre con su propia BD **sqlite en memoria** (`phpunit.xml`, sin tocar PostgreSQL) y el gate de dialecto con `DB_CONNECTION=pgsql` — §16.
 
 ---
 
@@ -804,6 +802,11 @@ php artisan webp:generate --quality=75
 php artisan tinker
 \App\Models\User::create(['name'=>'Nuevo','email'=>'nuevo@gdc.gob.ve','password'=>bcrypt('Contraseña-Fuerte-2026!'),'role'=>'admin']);
 
+# Backup de la BD (PostgreSQL): volcado con formato custom (restaurable con pg_restore)
+pg_dump -Fc -h 127.0.0.1 -U portalpg -d portalpg2026 -f portalpg2026.dump
+# Restauración (en una BD vacía):
+# pg_restore -Fc -h 127.0.0.1 -U portalpg -d portalpg2026 portalpg2026.dump
+
 # Refrescar BD
 php artisan migrate:fresh --seed
 
@@ -815,39 +818,41 @@ php artisan route:list
 
 ## 16. Tests (suites E2E + PHPUnit)
 
-Suites PowerShell (Windows + Laragon) contra `http://portal2026.test`. Requieren `mysql.exe` y `php.exe` de Laragon (rutas al inicio de cada script).
+Suites **bash + psql** (Linux) contra un servidor de desarrollo (`php artisan serve`). Usan `curl` para HTTP y `psql` para las aserciones SQL directas sobre PostgreSQL; las credenciales de BD y la base URL se configuran por variables de entorno (`E2E_BASE`, por defecto `http://127.0.0.1:8000`).
 
-> ⚠️ **Solo Windows**: los scripts asumen Laragon (rutas `D:\laragon\bin\...` y vhost `portal2026.test`). No corren en Linux/CI ni contra el servidor de producción.
+> **Gate de dialecto**: además de las suites E2E, PHPUnit se ejecuta en dos motores: SQLite en memoria (rápida, default de `phpunit.xml`) y PostgreSQL real (`DB_CONNECTION=pgsql DB_DATABASE=portalpg2026 ./vendor/bin/phpunit`). Ambas corridas deben estar en verde antes de merge.
 
 | Suite | Cubre |
 |---|---|
-| `test-categorias.ps1` | Filtro por categoría en /noticias y /categoria/{slug}; orden y links del footer |
-| `test-gacetas.ps1` | CRUD de Gacetas Oficiales + vista pública + permisos |
-| `test-social.ps1` | Módulo Redes Sociales (permisos, `rrss.manage` en grupo "Gestión Portal") + formulario multi-línea (7 textareas, validación URL por línea, «línea N»), iconos **solo-footer** con **1 icono por URL** (multi-cuenta: 2 FB = 2 iconos + tooltip `Red — URL`), seeder no pisa editados, snapshot/restauración `HEX`/`UNHEX` multi-línea segura (12 secciones) |
-| `test-settings.ps1` | Identidad / Enlaces (`/admin/configuracion`): nombre del sitio (títulos), logo (upload/quitar), enlaces navbar (URL absoluta, ruta válida, `..`, ruta inexistente), ocultar ítem vacío, `site_name` obligatorio, permisos (40/67, `settings.manage` solo superadmin, 3 grupos + 15 módulos incl. Auditoría, doble cabecera en `/admin/roles`), snapshot/restauración |
-| `test-users.ps1` | `is_active`/`last_login_at`: bloqueo de login a inactivos, registro de último acceso, guard de auto-desactivación |
-| `test-wysiwyg.ps1` | Editor TinyMCE (assets offline), HTML crudo en detalle, compat texto plano, **D15: sin plugin image ni handler de subida + imagen inline eliminada del texto con aviso visible**, endpoint JSON de la biblioteca Medios, "Copiar URL" en medios, permisos del editor |
-| `test-contact-info.ps1` | Info de contacto en settings + defaults + permisos |
-| `test-contact-messages.ps1` | Bandeja de mensajes (`contacts`) |
-| `test-entes.ps1` | CRUD de Entes afiliados + slugs + nav activo + buscador con filtro client-side |
-| `test-media.ps1` | Medios + imagen destacada de noticias + biblioteca |
-| `test-noticias.ps1` | Flujo de aprobación (D12): badges Pendiente/Programada/Publicado, botón Aprobar individual + auditoría `news.approved`, aprobación masiva (solo borradores, omitidas las no-borrador), editor sin UI de aprobación (sin checkboxes/masivo/Aprobar, 403 en rutas `news.approve`, selects deshabilitados, intento de publicar → draft + flash warning), programación (404 público hasta la fecha, badge Programada, vaciar fecha = publicar ya), editor no adelanta programadas; **D15 multimedia**: crear noticia con portada + 2 imágenes de galería + video YouTube + archivo mp4 → `post_media` con rutas `uploads/YYYY/MM/`, videos en el módulo sin `is_featured`, carrusel de 5 ítems con la portada primero, reorden ↑/↓, `remove_media[]` y tope de 3 videos; limpieza no destructiva |
-| `test-videos.ps1` | Módulo Videos: permisos `videos.*` (40/67, solo superadmin), sidebar (sección + dropdown por rol, 403 admin/editor), cargar YouTube (válida/inválida) + subir mp4, destacar/cambiar/"Ninguno" (siempre ≤1 `is_featured`), home refleja la portada, borrado + limpieza |
-| `test-partners.ps1` | Upload/replace/quitar logo de entes (incl. sidecars `.webp`) |
-| `test-share.ps1` | Botones de compartir + lazy loading |
-| `test-webp.ps1` | WebP con fallback (D9): `webp:generate` (backfill + idempotencia), sidecar al subir, GET `.webp` 200 `image/webp`, GIF y PNG corrupto sin conversión (contador `ilegibles`, exit 0), `<picture>` con fallback en `/noticias`, destroy borra original + sidecar, `picture{display:contents}` en el build |
-| `test-errors.ps1` | Páginas de error HTTP (incl. 503 real vía `artisan down`) |
-| `test-dashboard.ps1` | Dashboard (D1): redirect sin sesión, 9 tarjetas con conteos vs SQL dinámicos, tracking `daily_views` (+1 en `views` lifetime y en la tarjeta tras leer un artículo), gráfico de exactamente 30 barras + total del período, filtrado por rol (editor 3 tarjetas / admin 7 / superadmin 9), exactamente 1 form de logout, smoke de los 3 roles |
+| `test-categorias.sh` | Filtro por categoría en /noticias y /categoria/{slug}; orden y links del footer |
+| `test-gacetas.sh` | CRUD de Gacetas Oficiales + vista pública + permisos |
+| `test-social.sh` | Módulo Redes Sociales (permisos, `rrss.manage` en grupo "Gestión Portal") + formulario multi-línea (7 textareas, validación URL por línea, «línea N»), iconos **solo-footer** con **1 icono por URL** (multi-cuenta: 2 FB = 2 iconos + tooltip `Red — URL`), seeder no pisa editados, snapshot/restauración multi-línea segura vía tabla auxiliar (12 secciones) |
+| `test-settings.sh` | Identidad / Enlaces (`/admin/configuracion`): nombre del sitio (títulos), logo (upload/quitar), enlaces navbar (URL absoluta, ruta válida, `..`, ruta inexistente), ocultar ítem vacío, `site_name` obligatorio, permisos (40/67, `settings.manage` solo superadmin, 3 grupos + 15 módulos incl. Auditoría, doble cabecera en `/admin/roles`), snapshot/restauración |
+| `test-users.sh` | `is_active`/`last_login_at`: bloqueo de login a inactivos, registro de último acceso, guard de auto-desactivación |
+| `test-wysiwyg.sh` | Editor TinyMCE (assets offline), HTML crudo en detalle, compat texto plano, **D15: sin plugin image ni handler de subida + imagen inline eliminada del texto con aviso visible**, endpoint JSON de la biblioteca Medios, "Copiar URL" en medios, permisos del editor |
+| `test-contact-info.sh` | Info de contacto en settings + defaults + permisos |
+| `test-contact-messages.sh` | Bandeja de mensajes (`contacts`) |
+| `test-entes.sh` | CRUD de Entes afiliados + slugs + nav activo + buscador con filtro client-side |
+| `test-media.sh` | Medios + imagen destacada de noticias + biblioteca |
+| `test-noticias.sh` | Flujo de aprobación (D12): badges Pendiente/Programada/Publicado, botón Aprobar individual + auditoría `news.approved`, aprobación masiva (solo borradores, omitidas las no-borrador), editor sin UI de aprobación (sin checkboxes/masivo/Aprobar, 403 en rutas `news.approve`, selects deshabilitados, intento de publicar → draft + flash warning), programación (404 público hasta la fecha, badge Programada, vaciar fecha = publicar ya), editor no adelanta programadas; **D15 multimedia**: crear noticia con portada + 2 imágenes de galería + video YouTube + archivo mp4 → `post_media` con rutas `uploads/YYYY/MM/`, videos en el módulo sin `is_featured`, carrusel de 5 ítems con la portada primero, reorden ↑/↓, `remove_media[]` y tope de 3 videos; limpieza no destructiva |
+| `test-videos.sh` | Módulo Videos: permisos `videos.*` (40/67, solo superadmin), sidebar (sección + dropdown por rol, 403 admin/editor), cargar YouTube (válida/inválida) + subir mp4, destacar/cambiar/"Ninguno" (siempre ≤1 `is_featured`), home refleja la portada, borrado + limpieza |
+| `test-partners.sh` | Upload/replace/quitar logo de entes (incl. sidecars `.webp`) |
+| `test-share.sh` | Botones de compartir + lazy loading |
+| `test-webp.sh` | WebP con fallback (D9): `webp:generate` (backfill + idempotencia), sidecar al subir, GET `.webp` 200 `image/webp`, GIF y PNG corrupto sin conversión (contador `ilegibles`, exit 0), `<picture>` con fallback en `/noticias`, destroy borra original + sidecar, `picture{display:contents}` en el build |
+| `test-errors.sh` | Páginas de error HTTP (incl. 503 real vía `artisan down`) |
+| `test-dashboard.sh` | Dashboard (D1): redirect sin sesión, 9 tarjetas con conteos vs SQL dinámicos, tracking `daily_views` (+1 en `views` lifetime y en la tarjeta tras leer un artículo), gráfico de exactamente 30 barras + total del período, filtrado por rol (editor 3 tarjetas / admin 7 / superadmin 9), exactamente 1 form de logout, smoke de los 3 roles |
 
 Ejecución:
 
-```powershell
-powershell -NoProfile -ExecutionPolicy Bypass -File tests\e2e\test-categorias.ps1
+```bash
+bash tests/e2e/run-all.sh              # todo: migrate:fresh --seed + las 17 suites + resumen
+bash tests/e2e/test-noticias.sh        # suite individual
+bash tests/e2e/run-all.sh webp media   # suites seleccionadas
 ```
 
 Garantías de las suites:
 - **No destructivas**: solo borran las filas/archivos que ellas crean (incluidos los sidecars `.webp`); donde mutan settings (`social_*`, `contact_*`, `site_*`/`nav_*`) hacen **snapshot y restauración** de los valores previos (y del archivo de logo); los asserts no asumen BD vacía (usan conteo base).
-- `test-errors.ps1` garantiza `artisan up` con `try/finally`.
+- `test-errors.sh` garantiza `artisan up` con `try/finally`.
 - `render_errors.php` renderiza las 12 vistas de error por CLI (se ejecuta desde `tests/e2e/`).
 
 ### PHPUnit (`tests/Unit`, `tests/Feature`)
