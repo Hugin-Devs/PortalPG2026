@@ -699,7 +699,7 @@ composer install --no-dev --optimize-autoloader
 - **Opción 2** — compilar localmente y subir las carpetas `public/build/` y `public/vendor/` (generadas por `npm run build`)
 
 #### D. `.env` de producción
-Crear **in situ** desde `.env.example` (nunca copiar el `.env` de desarrollo). Claves críticas:
+Crear **in situ** desde la plantilla **`.env_example_produccion`** (versionada en la raíz; nunca copiar el `.env` de desarrollo) — trae ya configurados `APP_ENV=production`, `APP_DEBUG=false`, `LOG_LEVEL=warning`, `SESSION_SECURE_COOKIE=true`, rate limits **30/5/30** (`LOGIN/CONTACT/SEARCH_RATE_LIMIT`), `AUDIT_ENABLED=true` y placeholders comentados de `TRUSTED_PROXIES`/`TRUSTED_HOSTS`, BD y SMTP. Completar en el servidor los valores reales (`APP_URL`, BD, SMTP, `APP_KEY` vía `key:generate`). Claves críticas:
 
 | Clave | Valor en producción |
 |---|---|
@@ -716,7 +716,10 @@ Verificar: `php artisan config:show | grep APP_DEBUG` (debe ser `false`).
 #### E. Instalación
 ```bash
 php artisan migrate --force      # migraciones
-php artisan db:seed              # solo la primera vez (ver paso F.1)
+php artisan db:seed              # solo la primera vez (crea los usuarios seed de prueba)
+# Después, en el navegador: https://<dominio>/install.php — formulario one-shot
+# que da de alta el superadmin/admin reales, borra los usuarios seed y se
+# auto-elimina (ver F.1). ⚠️ Hacerlo ANTES de publicar el dominio.
 php artisan storage:link         # ⚠️ requiere SSH — FTP no puede crear el symlink
 php artisan webp:generate        # backfill WebP de las imágenes existentes (idempotente)
 php artisan optimize             # config:cache + route:cache + view:cache
@@ -728,7 +731,7 @@ php artisan optimize             # config:cache + route:cache + view:cache
 > Sin esto, las imágenes subidas (medios, destacadas, logos de entes) no se sirven.
 
 #### F. Pasos de seguridad post-despliegue (obligatorios)
-1. **Cambiar o eliminar los usuarios seed**: `admin@gdc.gob.ve`, `admin2@gdc.gob.ve`, `editor@gdc.gob.ve` tienen password **`password`** (§9/§10). Crear el usuario administrador real con contraseña fuerte y borrar o desactivar (`is_active`) los de prueba. Ver §15 para el comando.
+1. **Cambiar o eliminar los usuarios seed**: lo hace **`public/install.php`** (§14.E) en el primer arranque — formulario web que da de alta el superadmin/admin reales, **reasigna al superadmin real todo el contenido sembrado** (noticias y galerías `posts`/`media`, más `gacetas`/`videos` si los hubiera) que estuviera firmado por los usuarios seed, borra `admin@gdc.gob.ve`, `admin2@gdc.gob.ve` y `editor@gdc.gob.ve` (password `password`) y se **auto-elimina** (con guarda: si ya hay superadmin y no quedan seed, solo se retira sin tocar nada). El contenido de `NoticiasPrecargadasSeeder`/`PostSeeder` cargado con `db:seed` **no se ve afectado** por el borrado de usuarios. Si el instalador ya se borró o hay que repetirlo a mano: borrar los usuarios seed desde `/admin/usuarios` o con tinker (§15).
 2. Confirmar `APP_DEBUG=false` y `APP_ENV=production`.
 3. **Cifrar PII heredado**: `php artisan pii:encrypt` (idempotente; `--dry-run` para previsualizar). Re-cifra `contacts.name/email/subject/message` y `users.name` que sigan en texto plano tras la migración `encrypt_pii_columns`.
 4. **HTTPS obligatorio** y HSTS fijado en el servidor web (`Strict-Transport-Security: max-age=31536000; includeSubDomains`). La app también lo emite en producción. Si hay proxy/CDN, configurar `TRUSTED_PROXIES` (CSV de IPs o `*`) y `TRUSTED_HOSTS` (CSV de dominios) en `.env`.
@@ -789,10 +792,12 @@ php artisan webp:generate
 php artisan webp:generate --quality=75
 
 
-# Usuarios por defecto: ya los crea UserSeeder (password: "password")
+# Usuarios por defecto (desarrollo): ya los crea UserSeeder (password: "password")
+# En producción: usar public/install.php en el primer arranque (§14.E/§14.F.1) —
+# da de alta superadmin/admin reales, borra los usuarios seed y se auto-elimina.
 # Si necesitas uno adicional con tinker (en producción, contraseña fuerte):
 php artisan tinker
-\App\Models\User::create(['name'=>'Nuevo','email'=>'nuevo@gdc.gob.ve','password'=>bcrypt('password'),'role'=>'admin']);
+\App\Models\User::create(['name'=>'Nuevo','email'=>'nuevo@gdc.gob.ve','password'=>bcrypt('Contraseña-Fuerte-2026!'),'role'=>'admin']);
 
 # Refrescar BD
 php artisan migrate:fresh --seed

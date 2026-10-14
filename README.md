@@ -51,4 +51,4 @@ Suites E2E en `tests/e2e/` (PowerShell): solo Windows + Laragon, se ejecutan con
 
 ## Despliegue
 
-Checklist completo para el servidor institucional (Nginx/Apache, FTP + SSH) en **`DOCUMENTACION.md` §14**. Puntos clave: `.env` de producción con `APP_DEBUG=false`, `npm run build` (los assets no están en git), `php artisan storage:link` (requiere SSH) y cambiar las credenciales seed tras el primer arranque.
+Checklist completo para el servidor institucional (Nginx/Apache, FTP + SSH) en **`DOCUMENTACION.md` §14**. Puntos clave: copiar la plantilla **`.env_example_produccion`** a `.env` y completar valores reales (`APP_DEBUG=false`), `npm run build` (los assets no están en git), `php artisan storage:link` (requiere SSH) y abrir **`/install.php`** en el primer arranque (formulario one-shot que crea el superadmin/admin reales, borra los usuarios seed y se auto-elimina).

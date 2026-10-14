@@ -4,20 +4,20 @@
 > Mantener sincronizado con `DOCUMENTACION.md` §12 (Estado del Desarrollo): al cerrar un ítem aquí, actualizar o eliminar su fila en §12.
 > Última actualización: 2026-10-14
 
-**Progreso:** 31 / 33 completados
+**Progreso:** 33 / 33 completados
 
 ---
 
 ## A. Seguridad y producción (revisar antes del despliegue)
 
-- [ ] **A1 — Cambiar/eliminar usuarios seed en producción**  
-  `database/seeders/UserSeeder.php` · `DOCUMENTACION.md` §14.F.1 · password `password` en `admin@gdc.gob.ve`, `admin2@gdc.gob.ve`, `editor@gdc.gob.ve`. Paso manual post-deploy (sin código).
+- [x] **A1 — Cambiar/eliminar usuarios seed en producción**  
+  Cerrado (D18): nuevo **`public/install.php`** — instalador web one-shot (formulario tipo Nextcloud con superadmin + admin, validación server-side, borra definitivamente los 3 usuarios seed y se **auto-elimina**; guarda de re-ejecución si el portal ya está configurado). Corre tras `migrate --seed` en el primer arranque — `DOCUMENTACION.md` §14.E/§14.F.1.
 
 - [x] **A2 — `SESSION_SECURE_COOKIE` sin default `true`**  
   `config/session.php:171` · default `true` + clave `SESSION_SECURE_COOKIE=true` en `.env.example`.
 
-- [ ] **A3 — `.env` de producción real**  
-  `APP_ENV=production`, `APP_DEBUG=false`, `APP_URL` real, BD/SMTP dedicados · `DOCUMENTACION.md` §14.D · se configura al desplegar.
+- [x] **A3 — `.env` de producción real**  
+  Cerrado (D18): nueva plantilla **`.env_example_produccion`** (versionada) con `APP_ENV=production`, `APP_DEBUG=false`, `LOG_LEVEL=warning`, `SESSION_SECURE_COOKIE=true`, rate limits **30/5/30**, `AUDIT_ENABLED=true`, `TRUSTED_PROXIES`/`TRUSTED_HOSTS` y placeholders comentados de BD/SMTP reales — `DOCUMENTACION.md` §14.D. Los valores reales del servidor se completan al desplegar.
 
 - [x] **A4 — Revisar los 17 advisories en `audit.ignore`**  
   Cerrado: bloque depurado de 17 → **3 IDs** (todos `laravel/framework`, derivados de EOL — aceptados en F/A5, justificación en DOCUMENTACION §12 riesgos 2–3 e INFORME §7 controles compensatorios). Verificado con `composer audit`: 3 ignorados + 1 advisory **low** no ignorado (XSS en página de debug, `GHSA-jh5r-qr3c-85q8` — sin impacto con `APP_DEBUG=false`, G1). Compensatorio: SCA semanal (`composer audit` + `npm audit`).
@@ -188,5 +188,6 @@
 | D15 | 2026-10-13 | Multimedia en noticias: tabla `post_media` + `PostMedia` (galería con `position`, imágenes y videos enlazados) + reorden ↑/↓ (`move` con formaction/formmethod) + `remove_media[]` solo propios; `Uploads::storeDated()` → `uploads/YYYY/MM/` (biblioteca, portada, galería); límites 10 imágenes / 3 videos; videos nuevos → módulo Videos (`is_featured=false`); carrusel Bootstrap en `news-show` (portada primero) y `<img>` estático con solo portada; wysiwyg sin plugin image ni `<img>` en el sanitizador + aviso `warning`; `PostMediaTest` (11) + `HtmlSanitizationTest` invertido (3) + sección 9 de `test-noticias` — 122 tests PHPUnit y 545 assertions en verde |
 | D16 | 2026-10-14 | Noticias precargadas: carpeta `public/Noticias Precargadas/` (5 noticias IG con imágenes `001…NNN` + `.txt` con línea `Fecha:`) + `NoticiasPrecargadasSeeder` (fecha por sello de nombre con fallback a la línea Fecha; 001=portada, 002+=galería `post_media`; copia a `uploads/YYYY/MM/` + `media` + WebP; texto íntegro en `<p>`; idempotente; en `DatabaseSeeder`) + limpieza de BD (drafts `repro-d15*`, slug de plantilla); `NoticiasPrecargadasSeederTest` (2 tests) — 124 tests PHPUnit y 610 assertions en verde |
 | D17 | 2026-10-14 | Carrusel de noticias sin recorte: slides de imagen con wrapper 560px centrado sobre blanco (foto a proporción natural, sin `object-fit: cover` ni `loading="lazy"`, `decoding="async"`), fallback de sola portada igual, flechas con `aria-label` e iconos oscuros (CSS inline `#newsGallery`); fix "solo 1 imagen" (lazy en slides ocultos); verificación Edge headless + curl de las 5 noticias; `PostMediaTest` ajustado al nuevo fallback — 124 tests PHPUnit y 611 assertions en verde |
+| D18 | 2026-10-14 | Producción: plantilla `.env_example_produccion` (APP_ENV/DEBUG, rate limits 30/5/30, `SESSION_SECURE_COOKIE=true`, `LOG_LEVEL=warning`, `AUDIT_ENABLED`, trusted proxies/hosts + placeholders BD/SMTP) + instalador web one-shot `public/install.php` (alta superadmin/admin con formulario, borrado de los 3 usuarios seed, guard de re-ejecución y auto-eliminación; cierra A1 y A3 — checklist 33/33) |
 | G8 | 2026-10-09 | Cerrado en alcance PHPUnit/E2E: SeoTest/SitemapTest/CacheTest como cobertura funcional; DAST/manual/infra (FILE-07, FILE-09, INJ-05/06, SC-05, LOG-03) documentado para auditoría externa |
 | G8 | 2026-10-08 | Parcial: `SearchXssTest` (INJ-03), trazabilidad PRIV-03 cubierta por auditoría G6; FILE-04/CFG-07 y FILE-06 ya en PHPUnit; resto pendiente de DAST/manual/infraestructura |
