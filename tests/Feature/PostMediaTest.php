@@ -300,6 +300,7 @@ class PostMediaTest extends TestCase
         $html = $this->get('/noticias/'.$post->slug)->assertOk()->getContent();
 
         $this->assertStringNotContainsString('id="newsGallery"', $html);
-        $this->assertStringContainsString('img-fluid rounded mb-4 w-100', $html);
+        $this->assertStringContainsString('bg-white rounded mb-4', $html);
+        $this->assertStringContainsString('height: 560px', $html);
     }
 }
