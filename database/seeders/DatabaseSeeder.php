@@ -20,6 +20,7 @@ class DatabaseSeeder extends Seeder
             PartnerSeeder::class,
             ContactSettingSeeder::class,
             SocialSettingSeeder::class,
+            NoticiasPrecargadasSeeder::class,
         ]);
     }
 }
