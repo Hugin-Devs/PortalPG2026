@@ -60,7 +60,7 @@
                         <span class="badge bg-success">Publicado</span>
                     @endif
                 </td>
-                <td>{{ $post->created_at->format('d/m/Y') }}</td>
+                <td>{{ ($post->published_at ?? $post->created_at)->format('d/m/Y') }}</td>
                 <td>
                     @if(auth()->user()->hasPermission('news.approve') && $post->status == 'draft')
                     <form action="{{ url('/admin/noticias/' . $post->id . '/aprobar') }}" method="POST" style="display:inline">

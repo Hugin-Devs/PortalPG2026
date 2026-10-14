@@ -19,7 +19,7 @@ class SearchController extends Controller
                     ->orWhere('content', 'like', "%{$q}%")
                     ->orWhere('excerpt', 'like', "%{$q}%");
             })
-            ->latest()
+            ->recent()
             ->paginate(10);
 
         $seo = [

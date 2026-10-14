@@ -39,6 +39,11 @@ class Post extends Model
             ->where(fn ($q) => $q->whereNull('published_at')->orWhere('published_at', '<=', now()));
     }
 
+    public function scopeRecent($query)
+    {
+        return $query->orderByDesc('published_at')->orderByDesc('id');
+    }
+
     public function user()
     {
         return $this->belongsTo(User::class);

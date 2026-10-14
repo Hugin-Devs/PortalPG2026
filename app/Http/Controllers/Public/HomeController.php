@@ -24,13 +24,13 @@ class HomeController extends Controller
         $featuredPosts = Cache::remember(CacheKeys::HOME_FEATURED, $ttl, fn () => Post::with('category')
             ->where('is_featured', true)
             ->live()
-            ->latest()
+            ->recent()
             ->take(3)
             ->get());
 
         $latestPosts = Cache::remember(CacheKeys::HOME_LATEST, $ttl, fn () => Post::with('category')
             ->live()
-            ->latest()
+            ->recent()
             ->take(4)
             ->get());
 

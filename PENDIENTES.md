@@ -2,9 +2,9 @@
 
 > **Fuente viva del trabajo pendiente.** Ir marcando `- [x]` al completar cada ítem y actualizar el contador de progreso.
 > Mantener sincronizado con `DOCUMENTACION.md` §12 (Estado del Desarrollo): al cerrar un ítem aquí, actualizar o eliminar su fila en §12.
-> Última actualización: 2026-10-10
+> Última actualización: 2026-10-13
 
-**Progreso:** 26 / 30 completados
+**Progreso:** 27 / 31 completados
 
 ---
 
@@ -72,6 +72,9 @@
 
 - [x] **D12 — Flujo de aprobación de noticias (permiso, badge, masivo, programación)**  
   Cerrado: permiso `news.approve` ("Aprobar noticias", por defecto superadmin+admin); `resolveStatus()` basado en permiso — sin él el estado no cambia (ni se sube ni se baja) y se emite flash `warning`; badges "Pendiente de aprobación" / "Programada · fecha" / "Publicado" en el listado admin; aprobación individual (botón "Aprobar" con confirmación) y masiva (`POST /admin/noticias/publicar` con checkboxes `form=`, solo borradores → publicar ya, omitidas las no-borrador); programación opcional vía `published_at` (campo `datetime-local` habilitado solo con `news.approve`, vacío = publicar ya, hora de Caracas) con scope `Post::live()` aplicado a las 11 consultas públicas + dashboard, migración backfill `published_at` y fix de `PostSeeder`; auditoría `news.approved`; tests `NewsApprovalTest` (13) + ampliaciones en `EditorCannotPublishTest` y `PermissionTest` (99 tests / 428 assertions); suite `test-noticias.ps1` (17ª) — 15/17 suites E2E en verde (fallos preexistentes en `test-entes`/`test-share`). Limitación documentada: al llegar la hora de una programada, los listados cacheados pueden tardar ≤ `PORTAL_CACHE_TTL` (1h) en reflejarla.
+
+- [x] **D13 — Seeder de noticias reales + orden por fecha de publicación**  
+  Cerrado: `PostSeeder` reescrito como array declarativo duplicable con docblock de instrucciones — 4 bloques de ejemplo (plantilla publicada+destacada, **migrada de redes sociales con fecha histórica pasada**, borrador de prueba y programada de prueba), `content` en nowdoc para pegar HTML tal cual, resolución de categoría por slug y autor por email con fallbacks, purga `withTrashed()` de las placeholders `noticia-destacada-*` con `forceDelete()` (borrado físico: libera el slug y evita que consultas sin filtro de `deleted_at` tomen filas borradas) e idempotencia vía `updateOrCreate(['slug' => ...])`; nuevo scope `Post::recent()` (`published_at` DESC con desempate por `id`) aplicado en las 5 consultas públicas que ordenaban por creación (home destacadas y últimas, listado `/noticias`, categoría, relacionados y búsqueda) para que las noticias migradas queden en su lugar histórico en lugar de aparecer como recientes; columna "Fecha" del listado admin ahora muestra `published_at ?? created_at`; SQL de referencia de `test-categorias.ps1` y `test-dashboard.ps1` alineados al scope `live()` (filtros `deleted_at IS NULL` y `published_at <= NOW()`, exponían la programada como "publicada"); tests `PostSeederTest` (3) y `NewsOrderingTest` (3) — 105 tests / 458 assertions y 15/17 suites E2E (mismos 2 fallos preexistentes en `test-entes`/`test-share`).
 
 ## E. Contenido / decisiones del cliente
 
@@ -168,5 +171,6 @@
 | D8 | 2026-10-09 | Meta tags dinámicos en public layout + `$seo` en controladores públicos + `/sitemap.xml` cacheado; tests `SeoTest`/`SitemapTest` |
 | D10 | 2026-10-09 | `config/portal.php` + `App\Support\CacheKeys` + cache en home/noticias/entes/gacetas + observers para invalidación; test `CacheTest` |
 | D12 | 2026-10-10 | Permiso `news.approve` (40 permisos, reparto 40/22/5 = 67 asignaciones) + `resolveStatus()` por permiso con flash `warning` + badges (Pendiente/Programada/Publicado) + aprobación individual y masiva + programación opcional vía `published_at` con scope `Post::live()` (11 consultas públicas + dashboard) y backfill; auditoría `news.approved`; `NewsApprovalTest` (13 tests) — 99 tests PHPUnit y 15/17 E2E en verde con la nueva suite `test-noticias.ps1` |
+| D13 | 2026-10-13 | `PostSeeder` declarativo duplicable (4 noticias de ejemplo: plantilla, migrada con fecha histórica, borrador y programada; purga `withTrashed` de placeholders) + `Post::recent()` (orden por `published_at`) en home/listado/categoría/relacionados/búsqueda + columna Fecha del admin = `published_at ?? created_at`; SQL E2E de `test-categorias`/`test-dashboard` alineados al scope `live()`; `PostSeederTest`/`NewsOrderingTest` — 105 tests PHPUnit y 458 assertions + 15/17 suites E2E en verde |
 | G8 | 2026-10-09 | Cerrado en alcance PHPUnit/E2E: SeoTest/SitemapTest/CacheTest como cobertura funcional; DAST/manual/infra (FILE-07, FILE-09, INJ-05/06, SC-05, LOG-03) documentado para auditoría externa |
 | G8 | 2026-10-08 | Parcial: `SearchXssTest` (INJ-03), trazabilidad PRIV-03 cubierta por auditoría G6; FILE-04/CFG-07 y FILE-06 ya en PHPUnit; resto pendiente de DAST/manual/infraestructura |

@@ -10,11 +10,31 @@ use Illuminate\Database\Seeder;
 class PostSeeder extends Seeder
 {
     /**
-     * Run the database seeds.
+     * Noticias de ejemplo — PLANTILLA DUPLICABLE para cargar contenido real.
+     *
+     * ── CÓMO AGREGAR NOTICIAS ─────────────────────────────────────────────
+     * 1. Copia un bloque completo del array $noticias y pégalo al final.
+     * 2. Cambia 'title' y 'slug': el slug es obligatorio y ÚNICO — si repites
+     *    un slug, la noticia anterior se sobrescribe (updateOrCreate por slug).
+     * 3. 'category' => slug de CategorySeeder: nacionales, politica, comunal,
+     *    cultura, deporte o educacion (si no existe, toma la 1ª categoría).
+     * 4. Estado según 'status' + 'published_at':
+     *    - 'published' + fecha PASADA  → publicada de inmediato con esa fecha.
+     *      MIGRACIÓN desde redes sociales: usa la fecha original del post.
+     *    - 'published' + fecha FUTURA  → programada (invisible hasta esa fecha).
+     *    - 'draft' + null              → borrador pendiente de aprobación.
+     * 5. 'content' va en nowdoc: pega el HTML tal cual, sin escapar nada.
+     *    Si pegas texto plano se muestra como texto (el modelo no exige HTML).
+     * 6. Re-ejecuta: php artisan db:seed --class=PostSeeder (idempotente).
+     *
+     * Al sembrar se purgan las noticias de prueba 'noticia-destacada-*'.
      */
     public function run(): void
     {
-        $category = Category::first();
+        Post::withTrashed()
+            ->where('slug', 'like', 'noticia-destacada-%')
+            ->forceDelete();
+
         $user = User::first() ?? User::firstOrCreate([
             'email' => 'admin@gdc.gob.ve',
         ], [
@@ -22,21 +42,99 @@ class PostSeeder extends Seeder
             'password' => bcrypt('password'),
         ]);
 
-        for ($i = 1; $i <= 5; $i++) {
-            $post = Post::updateOrCreate([
-                'slug' => "noticia-destacada-$i",
-            ], [
-                'title' => "Noticia Destacada $i",
-                'content' => "Contenido de la noticia $i...",
-                'user_id' => $user->id,
-                'category_id' => $category->id,
+        $noticias = [
+            // ── 1) PLANTILLA — publicada + destacada (hero, tarjetas, más leídas) ──
+            [
+                'slug' => 'gdc-ejecuta-42-obras-viarias-en-las-parroquias-del-distrito',
+                'title' => 'GDC ejecuta 42 obras viarias en las parroquias del Distrito Capital',
+                'excerpt' => 'La administración continúa con el plan de pavimentación y rehabilitación de vías que beneficia a más de 120 mil familias.',
+                'content' => <<<'HTML'
+                    <p>El Gobierno de Distrito Capital informó que el plan de obras viarias de este trimestre ya suma <strong>42 frentes de obra activos</strong> en las distintas parroquias, con brigadas trabajando de forma simultánea en pavimentación, rehabilitación de banquetas y señalización vertical.</p>
+                    <h2>Obras en curso</h2>
+                    <ul>
+                        <li><strong>Pavimentación:</strong> 18 vías principales en la parroquia Libertador.</li>
+                        <li><strong>Banquetas:</strong> 14 tramos nuevos en zonas escolares.</li>
+                        <li><strong>Señalización:</strong> 10 pasos peatonales con señalética vertical.</li>
+                    </ul>
+                    <p>"Priorizamos las vías de mayor afluencia y los alrededores de las escuelas y centros de salud", señaló la máxima autoridad del distrito, quien recordó que las obras se ejecutan de forma escalonada para minimizar el impacto en el tránsito.</p>
+                    <p>Los vecinos pueden reportar el estado de las vías a través del canal de atención al ciudadano; cada reporte recibe seguimiento en un plazo máximo de 72 horas.</p>
+                    HTML,
+                'category' => 'nacionales',
                 'status' => 'published',
-                'is_featured' => ($i <= 3),
-            ]);
+                'published_at' => '2026-10-08 09:00:00',
+                'is_featured' => true,
+                'views' => 145,
+                'author' => 'admin@gdc.gob.ve',
+            ],
+            // ── 2) MIGRADA DE REDES SOCIALES — publicada con su fecha original ──
+            [
+                'slug' => 'festival-de-teatro-lleno-la-plaza-bolivar',
+                'title' => 'El Festival de Teatro llenó la Plaza Bolívar con más de 3.000 asistentes',
+                'excerpt' => 'Muestras, talleres y funciones gratuitas durante tres días enmarcaron la programación cultural del Distrito Capital.',
+                'content' => <<<'HTML'
+                    <p>Durante tres días, la Plaza Bolívar se convirtió en el epicentro del <strong>Festival de Teatro del Distrito Capital</strong>, que reunió a más de 3.000 asistentes en sus funciones gratuitas, talleres abiertos y muestras de agrupaciones locales e invitadas.</p>
+                    <p>La programación incluyó montajes para público infantil, obras de teatro popular y una muestra de dramaturgia venezolana contemporánea, todas con funciones al aire libre y con acceso libre e irrestricto.</p>
+                    <h2>Talleres y formación</h2>
+                    <p>Los talleres de interpretación, dirección y puesta en escena contaron con la participación de más de 120 personas, entre estudiantes y artistas de la región, quienes recibieron constancias al cierre del encuentro.</p>
+                    <p>La organización confirmó que la próxima edición se ampliará a otras parroquias del distrito con funciones itinerantes.</p>
+                    HTML,
+                'category' => 'cultura',
+                'status' => 'published',
+                'published_at' => '2026-07-15 18:30:00',
+                'is_featured' => false,
+                'views' => 89,
+            ],
+            // ── 3) BORRADOR (prueba) — pendiente de aprobación, invisible en público ──
+            [
+                'slug' => 'jornada-de-atencion-al-ciudadano-llegara-a-las-zonas-aledanas',
+                'title' => 'Nueva jornada de atención al ciudadano llegará a las zonas aledañas',
+                'excerpt' => 'Especialistas de distintas dependencias atenderán de forma itinerante a los habitantes de la parroquia.',
+                'content' => <<<'HTML'
+                    <p>La administración del distrito activará una jornada de atención itinerante que llevará a los habitantes de las zonas aledañas los trámites y orientaciones que habitualmente se realizan en las oficinas centrales.</p>
+                    <p>La jornada contemplará atención en materia de servicios municipales, programa de vivienda, trámites de identidad y orientación laboral, con especialistas de cada dependencia.</p>
+                    HTML,
+                'category' => 'comunal',
+                'status' => 'draft',
+                'published_at' => null,
+                'is_featured' => false,
+                'views' => 0,
+            ],
+            // ── 4) PROGRAMADA (prueba) — invisible hasta su fecha ──
+            [
+                'slug' => 'convenio-de-cooperacion-fortalecera-los-programas-culturales-del-distrito',
+                'title' => 'Convenio de cooperación fortalecerá los programas culturales del distrito',
+                'excerpt' => 'El acuerdo permitirá ampliar la oferta de talleres y espacios culturales durante todo el año 2027.',
+                'content' => <<<'HTML'
+                    <p>El Distrito Capital firmará un convenio de cooperación que permitirá ampliar la oferta de talleres gratuitos, espacios culturales y residencias artísticas durante todo el año 2027.</p>
+                    <p>El acuerdo prevé la apertura de nuevos puntos culturales en parroquias periurbanas y el intercambio de experiencias con programas culturales de otras regiones del país.</p>
+                    HTML,
+                'category' => 'politica',
+                'status' => 'published',
+                'published_at' => '2027-01-01 08:00:00',
+                'is_featured' => false,
+                'views' => 0,
+            ],
+        ];
 
-            if ($post->published_at === null) {
-                $post->forceFill(['published_at' => $post->created_at ?? now()])->save();
-            }
+        foreach ($noticias as $data) {
+            $categoria = Category::where('slug', $data['category'])->first()
+                ?? Category::first();
+
+            $autor = isset($data['author'])
+                ? (User::where('email', $data['author'])->first() ?? $user)
+                : $user;
+
+            Post::updateOrCreate(['slug' => $data['slug']], [
+                'title' => $data['title'],
+                'excerpt' => $data['excerpt'],
+                'content' => $data['content'],
+                'category_id' => $categoria->id,
+                'user_id' => $autor->id,
+                'status' => $data['status'],
+                'published_at' => $data['published_at'],
+                'is_featured' => $data['is_featured'],
+                'views' => $data['views'],
+            ]);
         }
     }
 }

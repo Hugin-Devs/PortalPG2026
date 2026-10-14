@@ -67,7 +67,7 @@ $logoutForms = ([regex]::Matches($html, 'action="[^"]*admin/logout"')).Count
 Check ($logoutForms -eq 1) "exactamente 1 form logout (got $logoutForms)" "forms logout: $logoutForms (stub duplicado?)"
 
 Write-Output '--- 3. Ultimas noticias publicadas ---'
-$row = (Sql "SELECT id, title FROM portal2026.posts WHERE status='published' AND deleted_at IS NULL ORDER BY published_at DESC, id DESC LIMIT 1;")
+$row = (Sql "SELECT id, title FROM portal2026.posts WHERE status='published' AND deleted_at IS NULL AND (published_at IS NULL OR published_at <= NOW()) ORDER BY published_at DESC, id DESC LIMIT 1;")
 $pidU, $titleU = $row -split "`t", 2
 Check ($titleU) "ultima publicada: $titleU" 'sin posts publicados'
 $m = [regex]::Match($html, 'data-stat="ultimas"(?:(?!data-stat)[\s\S]){0,4000}?' + [regex]::Escape($titleU))
@@ -75,7 +75,7 @@ Check ($m.Success) 'titulo de la ultima aparece en bloque ultimas' 'titulo no es
 Check ($html -match ('href="[^"]*admin/noticias/' + $pidU + '/editar"')) 'link Editar a la ultima noticia' 'sin link de edicion'
 
 Write-Output '--- 4. Tracking: lectura de articulo registra daily_views ---'
-$slug = (Sql "SELECT slug FROM portal2026.posts WHERE status='published' AND deleted_at IS NULL ORDER BY id LIMIT 1;")
+$slug = (Sql "SELECT slug FROM portal2026.posts WHERE status='published' AND deleted_at IS NULL AND (published_at IS NULL OR published_at <= NOW()) ORDER BY id LIMIT 1;")
 $slug = "$slug".Trim()
 $pidT = [int](Sql "SELECT id FROM portal2026.posts WHERE slug='$slug';")
 $beforeV = [int](Sql "SELECT COALESCE(SUM(count),0) FROM portal2026.daily_views WHERE post_id=$pidT;")

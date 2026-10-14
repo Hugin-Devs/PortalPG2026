@@ -17,7 +17,7 @@ class NewsController extends Controller
     {
         $posts = Post::with('category')
             ->live()
-            ->latest()
+            ->recent()
             ->paginate(9);
 
         $categories = $this->categoriesForNav();
@@ -64,7 +64,7 @@ class NewsController extends Controller
         $related = Post::where('category_id', $post->category_id)
             ->where('id', '!=', $post->id)
             ->live()
-            ->latest()
+            ->recent()
             ->take(3)
             ->get();
 
@@ -86,7 +86,7 @@ class NewsController extends Controller
         $posts = Post::with('category')
             ->where('category_id', $category->id)
             ->live()
-            ->latest()
+            ->recent()
             ->paginate(9);
 
         $categories = $this->categoriesForNav();

@@ -18,7 +18,7 @@ Check ($r.Content -match 'class="badge bg-light text-dark border"') 'contadores 
 Check ($r.Content -match 'rounded-pill') 'pills con rounded-pill' 'pills mal formadas'
 
 Write-Output '--- 2. Categorias activas con publicaciones aparecen ---'
-$slugs = (Sql "SELECT c.slug FROM portal2026.categories c WHERE c.is_active = 1 AND EXISTS (SELECT 1 FROM portal2026.posts p WHERE p.category_id = c.id AND p.status = 'published') ORDER BY c.`order`, c.name;") -split "`n"
+$slugs = (Sql "SELECT c.slug FROM portal2026.categories c WHERE c.is_active = 1 AND EXISTS (SELECT 1 FROM portal2026.posts p WHERE p.category_id = c.id AND p.status = 'published' AND p.deleted_at IS NULL AND (p.published_at IS NULL OR p.published_at <= NOW())) ORDER BY c.`order`, c.name;") -split "`n"
 $found = 0
 foreach ($s in $slugs) {
     if (-not $s) { continue }
