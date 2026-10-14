@@ -99,6 +99,7 @@ class NewsApprovalTest extends TestCase
         $draftA = $this->makePost(['title' => 'Borrador A']);
         $draftB = $this->makePost(['title' => 'Borrador B']);
         $live = $this->makePost(['status' => 'published', 'published_at' => now()]);
+        $livePublishedAt = $live->published_at->toDateTimeString();
 
         $this->actingAs($this->superadmin)->post('/admin/noticias/publicar', [
             'posts' => [$draftA->id, $draftB->id, $live->id],
@@ -112,7 +113,9 @@ class NewsApprovalTest extends TestCase
         }
 
         $this->assertSame('published', $live->fresh()->status);
-        $this->assertEquals(now()->toDateTimeString(), $live->fresh()->published_at->toDateTimeString());
+        // bulkPublish solo toca borradores: la noticia ya publicada conserva
+        // su published_at original (comparar con now() era un flake de segundo).
+        $this->assertEquals($livePublishedAt, $live->fresh()->published_at->toDateTimeString());
         $this->assertSame(2, \DB::table('activity_logs')->where('action', 'news.approved')->count());
     }
 

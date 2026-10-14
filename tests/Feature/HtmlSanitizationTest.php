@@ -32,12 +32,14 @@ class HtmlSanitizationTest extends TestCase
 
         $response->assertSessionHasErrors('category_id');
 
-        // Creamos la categoría y reintentamos para validar sanitización real
-        Category::factory()->create();
+        // Creamos la categoría y reintentamos para validar sanitización real.
+        // Se usa el id real: en PostgreSQL las secuencias no se rebobinan con
+        // RefreshDatabase, así que un id fijo no es portable.
+        $category = Category::factory()->create();
 
         $response = $this->actingAs($user)->post('/admin/noticias', [
             'title' => 'Noticia con HTML',
-            'category_id' => 1,
+            'category_id' => $category->id,
             'excerpt' => 'Resumen',
             'content' => $dirty,
             'status' => 'draft',

@@ -163,7 +163,9 @@ class AuditLogTest extends TestCase
             'action' => 'news.created',
             'entity_type' => Post::class,
             'entity_id' => $post->id,
-            'metadata' => json_encode(['status' => 'published']),
+            // Búsqueda por ruta JSON: la comparación directa de una columna
+            // json con un string no es válida en PostgreSQL.
+            'metadata->status' => 'published',
         ]);
     }
 
