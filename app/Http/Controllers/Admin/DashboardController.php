@@ -20,16 +20,18 @@ class DashboardController extends Controller
     {
         $user = Auth::user();
 
+        // SUM(col = valor) es aritmética booleana de MySQL; PostgreSQL no
+        // acepta SUM(boolean). SUM(CASE WHEN ...) es portable y equivalente.
         $postStats = Post::selectRaw("
                 COUNT(*) AS total,
-                COALESCE(SUM(status = 'published'), 0) AS published,
-                COALESCE(SUM(status = 'draft'), 0) AS drafts,
+                COALESCE(SUM(CASE WHEN status = 'published' THEN 1 ELSE 0 END), 0) AS published,
+                COALESCE(SUM(CASE WHEN status = 'draft' THEN 1 ELSE 0 END), 0) AS drafts,
                 COALESCE(SUM(views), 0) AS views_total
             ")->first();
 
         $monthViews = (int) DailyView::where('day', '>=', now()->startOfMonth()->toDateString())->sum('count');
 
-        $userStats = User::selectRaw('COUNT(*) AS total, COALESCE(SUM(is_active), 0) AS active')->first();
+        $userStats = User::selectRaw('COUNT(*) AS total, COALESCE(SUM(CASE WHEN is_active THEN 1 ELSE 0 END), 0) AS active')->first();
 
         $newContacts = Contact::whereNull('read_at')->count();
 

@@ -13,7 +13,9 @@ class GacetaController extends Controller
     {
         $gacetas = Cache::remember(CacheKeys::GACETAS_INDEX, CacheKeys::ttl(), function () {
             return Gaceta::orderBy('fecha', 'desc')
-                ->orderByRaw('CAST(numero AS UNSIGNED) DESC, id DESC')
+                // numero es NOT NULL y se valida como dígitos (1-6) al crear;
+                // CAST ... AS integer es portable (UNSIGNED es exclusivo de MySQL).
+                ->orderByRaw('CAST(numero AS integer) DESC, id DESC')
                 ->paginate(12);
         });
 

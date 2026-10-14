@@ -6,7 +6,6 @@ use App\Http\Controllers\Controller;
 use App\Models\Category;
 use App\Models\Post;
 use App\Support\CacheKeys;
-use Illuminate\Database\QueryException;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
@@ -41,25 +40,14 @@ class NewsController extends Controller
         $post->increment('views');
 
         $day = now()->toDateString();
-        $updated = DB::table('daily_views')
-            ->where('day', $day)
-            ->where('post_id', $post->id)
-            ->increment('count');
-
-        if (! $updated) {
-            try {
-                DB::table('daily_views')->insert([
-                    'day' => $day,
-                    'post_id' => $post->id,
-                    'count' => 1,
-                ]);
-            } catch (QueryException $e) {
-                DB::table('daily_views')
-                    ->where('day', $day)
-                    ->where('post_id', $post->id)
-                    ->increment('count');
-            }
-        }
+        // Upsert atómico sobre el índice único (day, post_id): en PostgreSQL
+        // compila a ON CONFLICT ... DO UPDATE y elimina la carrera
+        // insert/increment del enfoque anterior.
+        DB::table('daily_views')->upsert(
+            [['day' => $day, 'post_id' => $post->id, 'count' => 1]],
+            ['day', 'post_id'],
+            ['count' => DB::raw('daily_views.count + 1')]
+        );
 
         $related = Post::where('category_id', $post->category_id)
             ->where('id', '!=', $post->id)

@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Permission;
 use App\Support\Audit;
 use Illuminate\Http\Request;
+use Illuminate\Support\Str;
 
 class RoleController extends Controller
 {
@@ -14,19 +15,33 @@ class RoleController extends Controller
         $roles = ['superadmin', 'admin', 'editor'];
         // Orden en 3 niveles, igual que el sidebar:
         // 1) categoría (group) → 2) módulo (module) → 3) acción (slug: ver/crear/editar/gestionar/eliminar)
-        $modules = implode(',', array_map(
-            fn ($m) => "'".str_replace("'", "''", $m)."'",
-            [
-                'Noticias', 'Medios', 'Videos', 'Gacetas',
-                'Categorías', 'Entes Afiliados', 'Sobre Nosotros', 'Contacto',
-                'Mensajes', 'Estructura Org.', 'Redes Sociales',
-                'Identidad / Enlaces', 'Usuarios', 'Roles y Permisos',
-            ]
-        ));
-        $permissions = Permission::orderByRaw("FIELD(`group`, 'Gestión Noticias', 'Gestión Portal', 'Configuración Portal')")
-            ->orderByRaw("FIELD(`module`, $modules)")
-            ->orderByRaw("FIELD(SUBSTRING_INDEX(slug, '.', -1), 'view', 'create', 'upload', 'edit', 'manage', 'delete')")
-            ->get();
+        // La ordenación se hace en PHP (portable entre motores) en lugar de
+        // FIELD()/SUBSTRING_INDEX(), que son exclusivos de MySQL/MariaDB.
+        $groupOrder = ['Gestión Noticias', 'Gestión Portal', 'Configuración Portal'];
+        $moduleOrder = [
+            'Noticias', 'Medios', 'Videos', 'Gacetas',
+            'Categorías', 'Entes Afiliados', 'Sobre Nosotros', 'Contacto',
+            'Mensajes', 'Estructura Org.', 'Redes Sociales',
+            'Identidad / Enlaces', 'Usuarios', 'Roles y Permisos',
+        ];
+        $actionOrder = ['view', 'create', 'upload', 'edit', 'manage', 'delete'];
+
+        $rankOf = function (string $value, array $list): int {
+            $index = array_search($value, $list, true);
+
+            return $index === false ? PHP_INT_MAX : $index;
+        };
+
+        $permissions = Permission::query()
+            ->get()
+            ->sortBy([
+                fn ($a, $b) => $rankOf($a->group, $groupOrder) <=> $rankOf($b->group, $groupOrder),
+                fn ($a, $b) => $rankOf($a->module, $moduleOrder) <=> $rankOf($b->module, $moduleOrder),
+                fn ($a, $b) => $rankOf(Str::afterLast($a->slug, '.'), $actionOrder)
+                    <=> $rankOf(Str::afterLast($b->slug, '.'), $actionOrder),
+                fn ($a, $b) => $a->id <=> $b->id,
+            ], SORT_REGULAR)
+            ->values();
         $rolePermissions = [];
 
         foreach ($roles as $role) {
