@@ -28,14 +28,16 @@ function Put-Social($session, $fields) {
 }
 
 # --- Snapshot: preservar valores sociales preexistentes del usuario ---
+# HEX(value) en lugar del valor crudo: los valores multi-línea (una URL por
+# línea) romperían la lectura por líneas de mysql -N y corromperían la restauración.
 $socialSnapshot = @{}
-foreach ($line in ((Sql 'SELECT `key`, `value` FROM portal2026.settings WHERE `key` LIKE ''social_%'';') -split "`n")) {
+foreach ($line in ((Sql 'SELECT `key`, IFNULL(HEX(`value`), '''') FROM portal2026.settings WHERE `key` LIKE ''social_%'';') -split "`n")) {
     if ($line) {
         $parts = $line -split "`t", 2
-        $socialSnapshot[$parts[0]] = $parts[1]
+        $socialSnapshot[$parts[0]] = if ($parts.Count -gt 1 -and $null -ne $parts[1]) { $parts[1] } else { '' }
     }
 }
-Write-Output "snapshot social: $($socialSnapshot.Count) claves preservadas"
+Write-Output "snapshot social: $($socialSnapshot.Count) claves preservadas (HEX)"
 
 Write-Output '--- 1. Seeders idempotentes ---'
 & $php artisan db:seed --class=PermissionSeeder --force 2>&1 | Out-Null
@@ -115,7 +117,41 @@ Check ($before -eq $after) 'BD no cambió' "BD cambio ($before -> $after)"
 $v = (& $mysql -uroot -N -e 'SELECT value FROM portal2026.settings WHERE `key`=''social_facebook'';') -join ''
 Check ($v -eq 'https://www.facebook.com/gdc') 'facebook conservado' "facebook alterado (got $v)"
 
-Write-Output '--- 8. Permisos y sidebar ---'
+Write-Output '--- 8. Varias URLs de la misma red (una por línea) ---'
+$multi = @{
+    facebook  = "https://www.facebook.com/gdc`nhttps://www.facebook.com/distrito"
+    instagram = $urls.instagram
+    youtube   = $urls.youtube
+    threads   = $urls.threads
+    whatsapp  = $urls.whatsapp
+}
+$r = Put-Social $super $multi
+Check ($r.StatusCode -eq 200) 'PUT multi-linea 200' "PUT $($r.StatusCode)"
+Check ($r.Content -match 'actualizadas correctamente') 'alerta de exito multi' 'sin alerta'
+# Conteo de lineas via SQL: el cliente mysql escapa \n en su salida, no sirve partir por lineas
+$newlines = (& $mysql -uroot -N -e 'SELECT CHAR_LENGTH(`value`) - CHAR_LENGTH(REPLACE(`value`, CHAR(10), '''')) FROM portal2026.settings WHERE `key`=''social_facebook'';') -join ''
+Check ($newlines -eq '1') "facebook guardado con 2 lineas / 1 salto (got $newlines)" "saltos != 1 (got $newlines)"
+$r = Invoke-WebRequest "$base/" -UseBasicParsing
+$nFb = ([regex]::Matches($r.Content, 'fa-brands fa-facebook-f')).Count
+Check ($nFb -eq 2) "2 iconos de Facebook (got $nFb)" "iconos FB != 2 (got $nFb)"
+$nTotal = ([regex]::Matches($r.Content, 'fa-brands fa-')).Count
+Check ($nTotal -eq 6) "6 iconos totales: FB x2 + 4 redes (got $nTotal)" "total != 6 (got $nTotal)"
+# El guion largo se construye en runtime ([char]0x2014): el archivo .ps1 se lee como ANSI sin BOM
+Check ($r.Content -match ('title="Facebook ' + [char]0x2014 + ' https://www.facebook.com/gdc"')) 'tooltip distingue cada cuenta' 'sin tooltip con URL'
+
+Write-Output '--- 9. Linea invalida en medio de varias (BD intacta) ---'
+$before = (& $mysql -uroot -N -e 'SELECT COUNT(*) FROM portal2026.settings WHERE `key` LIKE ''social_%'' AND value != '''';') -join ''
+$r = Put-Social $super @{ facebook = "https://www.facebook.com/gdc`nno-es-url" }
+Check ($r.StatusCode -eq 200) 'redirige con errores (200)' "status $($r.StatusCode)"
+Check ($r.Content -match 'is-invalid' -or $r.Content -match 'invalid-feedback') 'campo en error' 'sin validacion visible'
+# 'línea' se construye en runtime: el .ps1 sin BOM se lee como ANSI
+Check ($r.Content -match ('l' + [char]0xED + 'nea 2')) 'mensaje indica la linea 2' 'sin numero de linea'
+$after = (& $mysql -uroot -N -e 'SELECT COUNT(*) FROM portal2026.settings WHERE `key` LIKE ''social_%'' AND value != '''';') -join ''
+Check ($before -eq $after) 'BD no cambió' "BD cambio ($before -> $after)"
+$newlines = (& $mysql -uroot -N -e 'SELECT CHAR_LENGTH(`value`) - CHAR_LENGTH(REPLACE(`value`, CHAR(10), '''')) FROM portal2026.settings WHERE `key`=''social_facebook'';') -join ''
+Check ($newlines -eq '1') "facebook multi-linea conservado (got $newlines)" "saltos != 1 (got $newlines)"
+
+Write-Output '--- 10. Permisos y sidebar ---'
 $admin = Login 'admin2@gdc.gob.ve'
 try {
     $r = Invoke-WebRequest "$base/admin/rrss" -WebSession $admin -UseBasicParsing -ErrorAction Stop
@@ -137,28 +173,32 @@ try {
 $r = Invoke-WebRequest "$base/admin" -WebSession $super -UseBasicParsing
 Check ($r.Content -match '/admin/rrss') 'superadmin ve item sidebar' 'superadmin sin item'
 
-Write-Output '--- 9. Smoke ---'
+Write-Output '--- 11. Smoke ---'
 foreach ($p in @('/', '/noticias', '/contacto')) {
     try { $r2 = Invoke-WebRequest "$base$p" -UseBasicParsing -TimeoutSec 10; Check ($r2.StatusCode -eq 200) "$p 200" "$p $($r2.StatusCode)" }
     catch { Bad "$p ERROR" }
 }
 
-Write-Output '--- 10. Restaurar valores previos del usuario ---'
+Write-Output '--- 12. Restaurar valores previos del usuario ---'
 # Borrar claves creadas por la suite que no existian antes
 foreach ($line in ((Sql 'SELECT `key` FROM portal2026.settings WHERE `key` LIKE ''social_%'';') -split "`n")) {
     if ($line -and -not $socialSnapshot.ContainsKey($line)) {
         Sql ('DELETE FROM portal2026.settings WHERE `key`=''' + $line + ''';') | Out-Null
     }
 }
-# Restaurar los valores originales
+# Restaurar los valores originales (snapshot en HEX: multi-línea seguro)
 foreach ($k in $socialSnapshot.Keys) {
-    $v = $socialSnapshot[$k] -replace "'", "''"
-    Sql ('UPDATE portal2026.settings SET value=''' + $v + ''' WHERE `key`=''' + $k + ''';') | Out-Null
+    $hex = [string]$socialSnapshot[$k]
+    if ($hex -eq '') {
+        Sql ('UPDATE portal2026.settings SET `value`='''' WHERE `key`=''' + $k + ''';') | Out-Null
+    } else {
+        Sql ('UPDATE portal2026.settings SET `value`=UNHEX(''' + $hex + ''') WHERE `key`=''' + $k + ''';') | Out-Null
+    }
 }
 $restored = $true
 foreach ($k in $socialSnapshot.Keys) {
-    $v = (Sql ('SELECT value FROM portal2026.settings WHERE `key`=''' + $k + ''';') -join '')
-    if ($v -ne $socialSnapshot[$k]) { $restored = $false }
+    $v = (Sql ('SELECT IFNULL(HEX(`value`), '''') FROM portal2026.settings WHERE `key`=''' + $k + ''';') -join '')
+    if ($v -ne [string]$socialSnapshot[$k]) { $restored = $false }
 }
 Check $restored 'valores sociales previos restaurados' 'NO se restauraron los valores previos'
 

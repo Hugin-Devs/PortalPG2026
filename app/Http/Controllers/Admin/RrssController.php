@@ -32,17 +32,42 @@ class RrssController extends Controller
     {
         $rules = [];
         foreach (array_keys(self::SOCIAL_FIELDS) as $field) {
-            $rules[$field] = 'nullable|string|url|max:255';
+            $rules[$field] = [
+                'nullable',
+                'string',
+                'max:4000',
+                function (string $attribute, mixed $value, \Closure $fail): void {
+                    foreach (self::splitLines((string) $value) as $i => $line) {
+                        if (! filter_var($line, FILTER_VALIDATE_URL) || ! preg_match('#^https?://#i', $line)) {
+                            $fail('La línea '.($i + 1).' no es una URL válida (debe empezar por https://).');
+
+                            return;
+                        }
+                    }
+                },
+            ];
         }
         $data = $request->validate($rules);
 
         foreach (self::SOCIAL_FIELDS as $field => $key) {
             Setting::updateOrCreate(
                 ['key' => $key],
-                ['value' => trim($data[$field] ?? '')]
+                ['value' => implode("\n", self::splitLines($data[$field] ?? ''))]
             );
         }
 
         return redirect('/admin/rrss')->with('success', 'Redes sociales actualizadas correctamente.');
+    }
+
+    /**
+     * Una URL por línea: acepta saltos CRLF/LF/CR, recorta y descarta vacías.
+     *
+     * @return array<int, string>
+     */
+    private static function splitLines(string $value): array
+    {
+        $lines = preg_split('/\r\n|\r|\n/', trim($value)) ?: [];
+
+        return array_values(array_filter(array_map('trim', $lines), fn ($l) => $l !== ''));
     }
 }

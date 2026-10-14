@@ -4,7 +4,7 @@
 > Mantener sincronizado con `DOCUMENTACION.md` §12 (Estado del Desarrollo): al cerrar un ítem aquí, actualizar o eliminar su fila en §12.
 > Última actualización: 2026-10-13
 
-**Progreso:** 27 / 31 completados
+**Progreso:** 28 / 32 completados
 
 ---
 
@@ -75,6 +75,9 @@
 
 - [x] **D13 — Seeder de noticias reales + orden por fecha de publicación**  
   Cerrado: `PostSeeder` reescrito como array declarativo duplicable con docblock de instrucciones — 4 bloques de ejemplo (plantilla publicada+destacada, **migrada de redes sociales con fecha histórica pasada**, borrador de prueba y programada de prueba), `content` en nowdoc para pegar HTML tal cual, resolución de categoría por slug y autor por email con fallbacks, purga `withTrashed()` de las placeholders `noticia-destacada-*` con `forceDelete()` (borrado físico: libera el slug y evita que consultas sin filtro de `deleted_at` tomen filas borradas) e idempotencia vía `updateOrCreate(['slug' => ...])`; nuevo scope `Post::recent()` (`published_at` DESC con desempate por `id`) aplicado en las 5 consultas públicas que ordenaban por creación (home destacadas y últimas, listado `/noticias`, categoría, relacionados y búsqueda) para que las noticias migradas queden en su lugar histórico en lugar de aparecer como recientes; columna "Fecha" del listado admin ahora muestra `published_at ?? created_at`; SQL de referencia de `test-categorias.ps1` y `test-dashboard.ps1` alineados al scope `live()` (filtros `deleted_at IS NULL` y `published_at <= NOW()`, exponían la programada como "publicada"); tests `PostSeederTest` (3) y `NewsOrderingTest` (3) — 105 tests / 458 assertions y 15/17 suites E2E (mismos 2 fallos preexistentes en `test-entes`/`test-share`).
+
+- [x] **D14 — Redes sociales: múltiples cuentas por red (una URL por línea)**  
+  Cerrado: `SocialSettingSeeder` expone `REDES` con las 7 claves como **espacio para pegar las URLs reales del portal** (una por línea; varias líneas = varias cuentas del mismo tipo) y ahora rellena **solo los valores vacíos** (nunca pisa lo editado desde `/admin/rrss`); `RrssController@update` valida **cada línea** como URL http(s) (`filter_var(FILTER_VALIDATE_URL)` + `^https?://`, mensaje «La línea N no es una URL válida», `max:4000`) y guarda normalizado (CRLF→LF, sin líneas vacías); los 7 campos de `/admin/rrss` pasan de `input url` a **textarea** multi-línea con ayuda; el footer `_social-links` dibuja **un icono por línea** y `title`/`aria-label` distingue cuentas (`Facebook — https://…` cuando la red tiene 2+); snapshot/restauración de `test-social.ps1` endurecido con `HEX`/`UNHEX` (el cliente mysql escapa `\n` y rompía los valores multi-línea) + 2 secciones nuevas (multi-cuenta e inválida en medio) — 12/12 secciones; tests `SocialLinksTest` (6) — 111 tests / 486 assertions.
 
 ## E. Contenido / decisiones del cliente
 
@@ -172,5 +175,6 @@
 | D10 | 2026-10-09 | `config/portal.php` + `App\Support\CacheKeys` + cache en home/noticias/entes/gacetas + observers para invalidación; test `CacheTest` |
 | D12 | 2026-10-10 | Permiso `news.approve` (40 permisos, reparto 40/22/5 = 67 asignaciones) + `resolveStatus()` por permiso con flash `warning` + badges (Pendiente/Programada/Publicado) + aprobación individual y masiva + programación opcional vía `published_at` con scope `Post::live()` (11 consultas públicas + dashboard) y backfill; auditoría `news.approved`; `NewsApprovalTest` (13 tests) — 99 tests PHPUnit y 15/17 E2E en verde con la nueva suite `test-noticias.ps1` |
 | D13 | 2026-10-13 | `PostSeeder` declarativo duplicable (4 noticias de ejemplo: plantilla, migrada con fecha histórica, borrador y programada; purga `withTrashed` de placeholders) + `Post::recent()` (orden por `published_at`) en home/listado/categoría/relacionados/búsqueda + columna Fecha del admin = `published_at ?? created_at`; SQL E2E de `test-categorias`/`test-dashboard` alineados al scope `live()`; `PostSeederTest`/`NewsOrderingTest` — 105 tests PHPUnit y 458 assertions + 15/17 suites E2E en verde |
+| D14 | 2026-10-13 | Redes sociales multi-cuenta: `SocialSettingSeeder::REDES` (espacio para pegar las URLs reales, una por línea; rellena solo vacíos) + validación URL por línea en `RrssController` + textarea en `/admin/rrss` + un icono por URL en el footer con tooltip `Red — URL`; `test-social.ps1` con snapshot/restauración HEX multi-línea segura y 2 secciones nuevas (12/12); `SocialLinksTest` (6 tests) — 111 tests PHPUnit y 486 assertions en verde |
 | G8 | 2026-10-09 | Cerrado en alcance PHPUnit/E2E: SeoTest/SitemapTest/CacheTest como cobertura funcional; DAST/manual/infra (FILE-07, FILE-09, INJ-05/06, SC-05, LOG-03) documentado para auditoría externa |
 | G8 | 2026-10-08 | Parcial: `SearchXssTest` (INJ-03), trazabilidad PRIV-03 cubierta por auditoría G6; FILE-04/CFG-07 y FILE-06 ya en PHPUnit; resto pendiente de DAST/manual/infraestructura |

@@ -43,7 +43,7 @@ php artisan serve
 ## Tests
 
 ```bash
-./vendor/bin/phpunit          # Unit + Feature (105 tests, BD sqlite en memoria — ver §16)
+./vendor/bin/phpunit          # Unit + Feature (111 tests, BD sqlite en memoria — ver §16)
 composer lint                 # estilo de código (pint --test); composer lint:fix lo aplica
 ```
 
