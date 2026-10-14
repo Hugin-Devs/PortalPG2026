@@ -51,7 +51,9 @@ class HtmlSanitizationTest extends TestCase
         $this->assertStringNotContainsString('onerror', $post->content);
         $this->assertStringContainsString('<p>Párrafo válido</p>', $post->content);
         $this->assertStringContainsString('enlace', $post->content);
-        $this->assertStringContainsString('<img', $post->content);
+        // D15: las imágenes ya no se admiten dentro del texto (portada/galería).
+        $this->assertStringNotContainsString('<img', $post->content);
+        $response->assertSessionHas('warning', fn ($m) => str_contains($m, 'imagen'));
     }
 
     public function test_script_tags_are_stripped_from_page_content(): void
@@ -68,23 +70,25 @@ class HtmlSanitizationTest extends TestCase
         $this->assertStringContainsString('<p>Válida</p>', $page->fresh()->content);
     }
 
-    public function test_inline_data_uri_image_is_preserved(): void
+    public function test_inline_data_uri_image_is_stripped(): void
     {
         $b64 = 'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8BQDwAEhQGAhKmMIQAAAABJRU5ErkJggg==';
         $user = User::factory()->create(['role' => 'superadmin']);
 
-        $this->actingAs($user)->post('/admin/noticias', [
+        $response = $this->actingAs($user)->post('/admin/noticias', [
             'title' => 'Imagen inline',
             'category_id' => Category::factory()->create()->id,
             'excerpt' => 'Resumen',
             'content' => '<p>Texto con imagen:</p><img src="data:image/png;base64,'.$b64.'" alt="x">',
             'status' => 'draft',
-        ])->assertRedirect('/admin/noticias');
+        ]);
 
-        $this->assertStringContainsString('data:image/png;base64', Post::latest()->first()->content);
+        $response->assertRedirect('/admin/noticias');
+        $this->assertStringNotContainsString('data:image/png;base64', Post::latest()->first()->content);
+        $response->assertSessionHas('warning', fn ($m) => str_contains($m, 'imagen'));
     }
 
-    public function test_data_uri_in_anchor_is_removed_while_image_inline_is_kept(): void
+    public function test_data_uri_in_anchor_is_removed_while_images_are_also_stripped(): void
     {
         $user = User::factory()->create(['role' => 'superadmin']);
 
@@ -108,6 +112,6 @@ class HtmlSanitizationTest extends TestCase
         $this->assertStringNotContainsString('<a', $stored);
         $this->assertStringContainsString('Antes', $stored);
         $this->assertStringContainsString('Después', $stored);
-        $this->assertStringContainsString('data:image/png;base64', $stored);
+        $this->assertStringNotContainsString('data:image/png;base64', $stored);
     }
 }

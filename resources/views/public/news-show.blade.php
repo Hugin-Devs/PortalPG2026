@@ -73,7 +73,41 @@
             });
         </script>
 
-        @if($post->featured_image)
+        @php
+            $galleryItems = $post->postMedia->sortBy('position')->values();
+            $carouselCount = ($post->featured_image ? 1 : 0) + $galleryItems->count();
+        @endphp
+
+        @if($carouselCount > 1)
+            <div id="newsGallery" class="carousel slide rounded mb-4 shadow-sm" data-bs-interval="false">
+                <div class="carousel-inner">
+                    @if($post->featured_image)
+                        <div class="carousel-item active">
+                            <x-img path="storage/{{ $post->featured_image }}" alt="{{ $post->title }}" class="d-block w-100" style="height: 400px; object-fit: cover;" />
+                        </div>
+                    @endif
+                    @foreach($galleryItems as $media)
+                        <div class="carousel-item">
+                            @if($media->type === 'image')
+                                <x-img path="storage/{{ $media->path }}" alt="{{ $post->title }}" class="d-block w-100" style="height: 400px; object-fit: cover;" loading="lazy" />
+                            @elseif($media->video && $media->video->type === 'youtube' && $media->video->embed_url)
+                                <div class="bg-dark d-flex align-items-center justify-content-center" style="height: 400px;">
+                                    <iframe src="{{ $media->video->embed_url }}" title="{{ $media->video->title }}" class="w-100 h-100" frameborder="0" allowfullscreen loading="lazy"></iframe>
+                                </div>
+                            @elseif($media->video?->source_url)
+                                <video src="{{ $media->video->source_url }}" controls class="d-block w-100 bg-dark" style="height: 400px; object-fit: contain;" title="{{ $media->video->title }}" preload="metadata"></video>
+                            @endif
+                        </div>
+                    @endforeach
+                </div>
+                <button class="carousel-control-prev" type="button" data-bs-target="#newsGallery" data-bs-slide="prev">
+                    <span class="carousel-control-prev-icon"></span>
+                </button>
+                <button class="carousel-control-next" type="button" data-bs-target="#newsGallery" data-bs-slide="next">
+                    <span class="carousel-control-next-icon"></span>
+                </button>
+            </div>
+        @elseif($post->featured_image)
             <x-img path="storage/{{ $post->featured_image }}" alt="{{ $post->title }}" class="img-fluid rounded mb-4 w-100" style="max-height: 400px; object-fit: cover;" />
         @endif
 

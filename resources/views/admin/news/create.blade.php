@@ -24,8 +24,10 @@
         <div class="mb-3">
             <label>Contenido</label>
             @include('admin.news._editor', ['value' => old('content')])
+            <div class="form-text">Las imágenes no se admiten dentro del texto (se eliminan al guardar); usa la imagen de portada y la galería.</div>
         </div>
         @include('admin.news._image-field')
+        @include('admin.news._gallery-field')
         <div class="mb-3">
             <label>Estado</label>
             <select name="status" class="form-control" @if(! auth()->user()->hasPermission('news.approve')) disabled @endif>

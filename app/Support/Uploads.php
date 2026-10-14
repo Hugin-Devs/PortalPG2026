@@ -25,4 +25,13 @@ final class Uploads
 
         return in_array($ext, $allowed, true) ? $ext : 'bin';
     }
+
+    /**
+     * Guarda el archivo en `uploads/YYYY/MM/` (carpeta por año/mes, como el
+     * archivo histórico del portal). Devuelve la ruta relativa al disco given.
+     */
+    public static function storeDated(UploadedFile $file, string $filename, string $disk = 'public'): string
+    {
+        return $file->storeAs('uploads/'.date('Y/m'), $filename, $disk);
+    }
 }

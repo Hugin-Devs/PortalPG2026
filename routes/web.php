@@ -57,6 +57,9 @@ Route::prefix('admin')->group(function () {
         Route::post('/noticias/{post}/aprobar', [NewsController::class, 'approve'])->name('admin.news.approve')->middleware('permission:news.approve');
         Route::get('/noticias/{post}/editar', [NewsController::class, 'edit'])->name('admin.news.edit')->middleware('permission:news.edit');
         Route::put('/noticias/{post}', [NewsController::class, 'update'])->name('admin.news.update')->middleware('permission:news.edit');
+        // PUT también: los botones ↑/↓ usan formaction+formmethod sobre el form de
+        // edición (que lleva _method=PUT, spoofing a PUT en el navegador).
+        Route::match(['post', 'put'], '/noticias/{post}/media/{media}/move', [NewsController::class, 'move'])->name('admin.news.media.move')->middleware('permission:news.edit');
         Route::delete('/noticias/{post}', [NewsController::class, 'destroy'])->name('admin.news.destroy')->middleware('permission:news.delete');
 
         // Admin - Categorías

@@ -26,7 +26,7 @@ class MediaController extends Controller
 
         foreach ($request->file('files') as $file) {
             $filename = time().'_'.uniqid().'.'.Uploads::safeExtension($file, ['jpg', 'jpeg', 'png', 'gif', 'webp', 'pdf', 'doc', 'docx']);
-            $path = $file->storeAs('uploads', $filename, 'public');
+            $path = Uploads::storeDated($file, $filename);
             Webp::convert($path);
 
             Media::create([

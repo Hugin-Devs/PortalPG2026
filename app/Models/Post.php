@@ -48,4 +48,9 @@ class Post extends Model
     {
         return $this->belongsTo(User::class);
     }
+
+    public function postMedia()
+    {
+        return $this->hasMany(PostMedia::class)->orderBy('position')->orderBy('id');
+    }
 }

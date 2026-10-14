@@ -33,7 +33,7 @@ class NewsController extends Controller
 
     public function show($slug)
     {
-        $post = Post::with('category')
+        $post = Post::with('category', 'postMedia.video')
             ->where('slug', $slug)
             ->live()
             ->firstOrFail();

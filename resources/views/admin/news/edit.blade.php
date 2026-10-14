@@ -25,8 +25,10 @@
         <div class="mb-3">
             <label>Contenido</label>
             @include('admin.news._editor', ['value' => old('content', $post->content)])
+            <div class="form-text">Las imágenes no se admiten dentro del texto (se eliminan al guardar); usa la imagen de portada y la galería.</div>
         </div>
         @include('admin.news._image-field')
+        @include('admin.news._gallery-field')
         <div class="mb-3 form-check">
             <input type="checkbox" name="is_featured" class="form-check-input" value="1" id="isFeatured" {{ $post->is_featured ? 'checked' : '' }}>
             <label class="form-check-label" for="isFeatured">Destacado</label>

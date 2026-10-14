@@ -3,7 +3,7 @@
     $initialImage = old('featured_image') ?: $currentImage;
 @endphp
 <div class="mb-3">
-    <label>Imagen destacada</label>
+    <label>Imagen de portada (hero)</label>
 
     <div id="featuredImagePreview" class="mb-2" style="{{ $initialImage ? '' : 'display:none;' }}">
         <img id="featuredImageImg" src="{{ $initialImage ? asset('storage/' . $initialImage) : '' }}" alt="Imagen destacada" height="80" class="bg-white rounded p-1 border">
@@ -15,7 +15,7 @@
         <input type="file" name="featured_image_file" id="featuredImageFile" class="form-control" accept="image/png,image/jpeg,image/gif,image/svg+xml,image/webp">
         <button type="button" class="btn btn-outline-primary" data-bs-toggle="modal" data-bs-target="#mediaLibraryModal">Elegir de la biblioteca</button>
     </div>
-    <div class="form-text">JPG, PNG, GIF, SVG o WebP · máx. 10 MB — si la imagen ya está en Medios, usa "Elegir de la biblioteca"</div>
+    <div class="form-text">JPG, PNG, GIF o WebP · máx. 10 MB — es el primer ítem del carrusel y la imagen del home/SEO. Si ya está en Medios, usa "Elegir de la biblioteca"</div>
     @error('featured_image_file') <div class="text-danger">{{ $message }}</div> @enderror
     @error('featured_image') <div class="text-danger">{{ $message }}</div> @enderror
 
