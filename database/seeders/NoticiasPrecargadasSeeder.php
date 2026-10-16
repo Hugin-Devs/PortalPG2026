@@ -48,7 +48,9 @@ class NoticiasPrecargadasSeeder extends Seeder
      * (ddmmyyyyhhmm o ddmmyyhhmm, validada) y, si no parsea, de la línea
      * "Fecha:" del txt. Las imágenes se copian a uploads/YYYY/MM/ y se
      * registran en la tabla media. El texto del txt se conserva íntegro
-     * (menciones, hashtags y emojis); solo se elimina la línea de Fecha.
+     * (menciones y hashtags); solo se elimina la línea de Fecha. Los
+     * emojis se eliminan al guardar: la BD de producción es LATIN9 y no
+     * puede representarlos (DOCUMENTACION.md §14.K).
      *
      * Al sembrar se purgan las noticias de prueba 'noticia-destacada-*'
      * (borrado físico, incluidas filas soft-deleted: libera el slug).

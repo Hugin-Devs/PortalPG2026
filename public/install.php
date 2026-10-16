@@ -91,8 +91,20 @@ function pagina(string $titulo, string $cuerpoHtml): never
 try {
     $seedRestantes = User::whereIn('email', $seedEmails)->count();
     $superadmins = User::where('role', 'superadmin')->count();
+    // Aviso de codificación: la BD de producción debe ser LATIN9 (§14.K).
+    $serverEncoding = '';
+    if (DB::connection()->getDriverName() === 'pgsql') {
+        $row = DB::selectOne('SHOW server_encoding');
+        $serverEncoding = strtolower((string) ($row->server_encoding ?? ''));
+    }
+    $latin9Ok = $serverEncoding === '' || str_starts_with($serverEncoding, 'latin');
 } catch (Throwable $e) {
     pagina('No disponible', '<p class="error">No se pudo conectar con la base de datos. Ejecuta primero <code>php artisan migrate --seed</code> y revisa la configuración de <code>.env</code>.</p>');
+}
+
+$avisoEncoding = '';
+if (! $latin9Ok) {
+    $avisoEncoding = '<p class="error">La base de datos usa la codificación <code>'.h($serverEncoding ?: 'desconocida').'</code>; la BD de producción debe ser <strong>LATIN9</strong> (ISO-8859-15). Ver DOCUMENTACION.md §14.K.</p>';
 }
 
 // El portal ya está configurado: no tocar nada, solo retirar el instalador.
@@ -216,6 +228,7 @@ echo '<!DOCTYPE html>
 <div class="card">
 <h1>Portal GDC — Instalación de usuarios</h1>
 <p>Crea las cuentas reales de <strong>superadministrador</strong> y <strong>administrador</strong>. Los usuarios de prueba se eliminarán. Este script se borrará solo al terminar (ejecución única).</p>
+'.$avisoEncoding.'
 '.$bloqueErrores.'
 <form method="post" action="">
     <h2>Superadministrador</h2>

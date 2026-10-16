@@ -17,6 +17,11 @@ mkdir -p "$E2E_TMP"
 BODY_FILE="$E2E_TMP/e2e-body-${E2E_SUITE}.html"
 COOKIE_JAR=""
 
+# La BD de producción es LATIN9 y psql debe hablar UTF8 con ella (si no,
+# con locale C hereda SQL_ASCII y los acentos se guardan rotos o fallan).
+# PGOPTIONS se envía al servidor con sintaxis -c nombre=valor.
+export PGOPTIONS="${PGOPTIONS:+$PGOPTIONS }-c client_encoding=UTF8"
+
 sql() {
   PGPASSWORD="$(cat "$PGPASSWORD_FILE")" psql -h "$DB_HOST" -U "$DB_USER" -d "$DB_NAME" -At -c "$1" 2>&1
 }

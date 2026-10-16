@@ -73,7 +73,12 @@ return [
             'database' => env('DB_DATABASE', 'forge'),
             'username' => env('DB_USERNAME', 'forge'),
             'password' => env('DB_PASSWORD', ''),
-            'charset' => 'utf8',
+            // La BD de producción es PostgreSQL LATIN9 (ISO-8859-15); el
+            // charset de la CONEXIÓN debe ser siempre UTF8: PostgreSQL
+            // convierte LATIN9 <-> UTF-8 en el cable. Poner 'latin9' aquí
+            // haría que la app recibiera/enviara bytes LATIN9 sin convertir
+            // (mojibake). El texto se translitera en la app (§14.K).
+            'charset' => env('DB_CHARSET', 'utf8'),
             'prefix' => '',
             'prefix_indexes' => true,
             'search_path' => 'public',

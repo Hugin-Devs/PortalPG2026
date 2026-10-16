@@ -566,6 +566,7 @@ npm run build      # copia TinyMCE a public/vendor + vite build a public/build
 - [x] **Verificación residual de vulnerabilidades (G8)**: cerrado en el alcance posible con PHPUnit/E2E — `SearchXssTest` (INJ-03), trazabilidad PRIV-03 por auditoría G6, `UploadExtensionTest` (FILE-04), `CorsConfigurationTest` (CFG-07), `StorageSymlinkTest` (FILE-06); se añaden `SeoTest`, `SitemapTest` y `CacheTest` como cobertura funcional de D8/D10; los casos que requieren DAST/manual/infraestructura (FILE-07, FILE-09, INJ-05, INJ-06, SC-05, LOG-03) quedan en `INFORME-VULNERABILIDADES.md`/`PLAN-VULNERABILIDADES.md` para auditoría externa
 - [x] **Limpieza cosmética** (C5): eliminados `.DS_Store`/`._.DS_Store` de `public/images/Logos` (más entradas en `.gitignore`), boilerplate `routes/api.php` (+ bloque `api`/rate-limiter del `RouteServiceProvider` y grupo `api` del `Http\Kernel`) y plantilla `resources/views/welcome.blade.php` sin usar
 - [x] **Migración MariaDB → PostgreSQL (PG1)**: motor por defecto `pgsql` (`config/database.php`, `.env.example`, plantilla de producción con `DB_SSLMODE=require`); SQL MySQL-only reemplazado por equivalentes portables — `FIELD()`/`SUBSTRING_INDEX()`/backticks → ordenación en PHP (`RoleController`), `CAST AS UNSIGNED` → `AS integer` (gacetas), `SUM(boolean)` → `SUM(CASE WHEN…)` (dashboard), `LIKE` → `ILIKE` en PG (búsqueda case-insensitive), upsert diario → `ON CONFLICT (day, post_id) DO UPDATE` (NewsController); 5 tests de contrato en `PgMigrationQueriesTest`; gate doble: PHPUnit 129/129 en SQLite **y** en PG 18 real; migraciones verificadas up y down en PG (`enum()` compila a varchar+CHECK, `->change()` vía dbal OK, `->after()` sin efecto funcional); 17 suites E2E reescritas de PowerShell+`mysql.exe` a **bash+`psql`** (`tests/e2e/*.sh` + `lib.sh` + `run-all.sh`), 663 checks en verde, `.ps1` eliminados; docs actualizadas (requisitos `pdo_pgsql`, PostgreSQL 14+, §13/§14/§16)
+- [x] **Adaptación a BD de producción LATIN9 (PG2)**: la BD de producción es PostgreSQL **ISO-8859-15** (fija, sin conversión a UTF-8 disponible); la app permanece UTF-8 y PostgreSQL convierte en el cable (`client_encoding=UTF8` en el DSN — `DB_CHARSET=utf8` envolvible, nunca `latin9`). Transliteración automática en dos capas: helper `App\Support\Latin9` (iconv ISO-8859-15//TRANSLIT//IGNORE + eliminación de emojis/símbolos astrales; acentos/`€`/`Œ`/`Š` intactos; `…`→`...`, `“ ”`→`"`, `—`→`-`), trait `StoresLatin9` en la base `App\Models\Model` (los 14 modelos) y en `User` (antes de HTMLPurifier y de los casts `encrypted`), y middleware global `SanitizeLatin9Input` (query/body/JSON — cubre parámetros que van directos a SQL como `?q=` de `/buscar`, evitando el error 22021 también en SELECT); `Audit`/`ActivityLog` sin literales fuera de latin9; `install.php` avisa si `server_encoding` no es `latin*`; `lib.sh` E2E fuerza `-c client_encoding=UTF8`; gates: **PHPUnit 144/144 en SQLite, 144/144 en PG UTF-8 y 144/144 en PG LATIN9 local** (`createdb -E LATIN9 -l C -T template0`) + E2E `test-noticias`/`test-contact-messages`/`test-users` en verde contra LATIN9; tests nuevos `Latin9Test` (7) y `Latin9EncodingTest` (8, gate pgsql); docs §14.D/§14.K/§16
 
 ### 🔴 Pendiente
 
@@ -710,7 +711,8 @@ Crear **in situ** desde la plantilla **`.env_example_produccion`** (versionada e
 | `APP_DEBUG` | **`false`** (con `true`, los errores 500 filtran trazas y datos sensibles) |
 | `APP_KEY` | la misma de desarrollo, o nueva vía `php artisan key:generate` (una clave nueva invalida sesiones/tokens existentes) |
 | `APP_URL` | `https://portal.gdc.gob.ve` (dominio real) |
-| `DB_HOST` / `DB_DATABASE` / `DB_USERNAME` / `DB_PASSWORD` | BD dedicada de producción |
+| `DB_HOST` / `DB_DATABASE` / `DB_USERNAME` / `DB_PASSWORD` | BD dedicada de producción (**LATIN9**, ver §14.K) |
+| `DB_CHARSET` | No cambiar: la conexión va en `utf8` aunque la BD sea LATIN9 (§14.K) |
 | `MAIL_*` | SMTP real (el default de `.env.example` es un host de ejemplo que no existe) |
 | `SESSION_SECURE_COOKIE` | `true` |
 
@@ -767,6 +769,18 @@ El proyecto **no tiene tareas programadas** (`app/Console/Kernel.php` sin schedu
 - Suites E2E (`tests/e2e/*.sh`): requieren `psql` y un servidor de desarrollo corriendo (§16); no se ejecutan contra producción.
 - PHPUnit: no instalado en producción (`composer install --no-dev`); en desarrollo corre con su propia BD **sqlite en memoria** (`phpunit.xml`, sin tocar PostgreSQL) y el gate de dialecto con `DB_CONNECTION=pgsql` — §16.
 
+#### K. Codificación de la BD: LATIN9 (ISO-8859-15)
+La BD de producción es **PostgreSQL con encoding LATIN9** (no UTF-8). El proyecto está adaptado (PG2) y la app permanece 100% UTF-8: la conversión LATIN9 ↔ UTF-8 la hace PostgreSQL en el cable (`client_encoding=UTF8`, configurado en `config/database.php` — **nunca** poner `DB_CHARSET=latin9`, causaría mojibake).
+
+- **Creación de la BD**: `createdb -E LATIN9 -l C -T template0 <nombre>` (con `template0` porque LATIN9 ≠ encoding del template).
+- **Verificación** (en el servidor): `SHOW server_encoding;` → `LATIN9` y `SHOW client_encoding;` → `UTF8`. `public/install.php` muestra un aviso si `server_encoding` no es `latin*`.
+- **Transliteración automática**: los caracteres sin equivalente en LATIN9 (emoji, comillas tipográficas `“ ” ‘ ’`, puntos suspensivos `…`, rayas `— –`, `¤ § ¨ ´ ¸`…) provocarían el error **22021** de PostgreSQL. El proyecto los translitera antes de que crucen el cable, en dos capas:
+  - **Middleware de entrada** `SanitizeLatin9Input` (global, tras `TrimStrings`): sanea query/body/JSON — cubre también parámetros que van directos a SQL (p. ej. `?q=` de `/buscar` con ILIKE).
+  - **Modelos** (trait `StoresLatin9` en la base `App\Models\Model` y en `User`): sanea todo texto en `setAttribute`, antes de los mutadores (HTMLPurifier) y de los casts `encrypted`.
+  - Helper único `App\Support\Latin9`: acentos español/`€`/`Œ`/`Š`/`ž` se conservan **tal cual**; lo aproximable pasa a ASCII (`…` → `...`, `“ ”` → `"`, `—` → `-`); emojis/símbolos astrales se **eliminan** (el cuerpo de las noticias precargadas pierde los emojis de los txt de Instagram).
+- **Escrituras fuera de la app**: INSERT/UPDATE crudos (`DB::table`, `psql`, dumps) con caracteres no representables **fallan con 22021** — pasar siempre por los modelos o transliterar antes. Las suites E2E fuerzan `PGOPTIONS='-c client_encoding=UTF8'` en `lib.sh`.
+- **Gate de verificación**: `createdb -E LATIN9 -l C -T template0 portalpg2026_latin9` y `DB_CONNECTION=pgsql DB_DATABASE=portalpg2026_latin9 ./vendor/bin/phpunit` — `Latin9EncodingTest` verifica round-trip y que el INSERT crudo con `…` falla (§16).
+
 ---
 
 ## 15. Comandos Útiles
@@ -821,6 +835,8 @@ php artisan route:list
 Suites **bash + psql** (Linux) contra un servidor de desarrollo (`php artisan serve`). Usan `curl` para HTTP y `psql` para las aserciones SQL directas sobre PostgreSQL; las credenciales de BD y la base URL se configuran por variables de entorno (`E2E_BASE`, por defecto `http://127.0.0.1:8000`).
 
 > **Gate de dialecto**: además de las suites E2E, PHPUnit se ejecuta en dos motores: SQLite en memoria (rápida, default de `phpunit.xml`) y PostgreSQL real (`DB_CONNECTION=pgsql DB_DATABASE=portalpg2026 ./vendor/bin/phpunit`). Ambas corridas deben estar en verde antes de merge.
+>
+> **Gate LATIN9** (BD de producción, §14.K): crear la BD `createdb -E LATIN9 -l C -T template0 portalpg2026_latin9` (owner el usuario de la app) y correr `DB_CONNECTION=pgsql DB_DATABASE=portalpg2026_latin9 ./vendor/bin/phpunit` — las 144 deben estar en verde (`Latin9EncodingTest` verifica round-trip y que un INSERT crudo con `…` falla con 22021). Las suites E2E también pueden correr contra ella: apuntar `DB_DATABASE` del `.env` a la BD LATIN9 y usar `DB_NAME=portalpg2026_latin9 bash tests/e2e/test-noticias.sh` (el `php artisan serve` hereda el `.env`; las variables de entorno por CLI no llegan al hijo `php -S`).
 
 | Suite | Cubre |
 |---|---|
