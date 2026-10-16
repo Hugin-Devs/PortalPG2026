@@ -567,6 +567,7 @@ npm run build      # copia TinyMCE a public/vendor + vite build a public/build
 - [x] **Limpieza cosmética** (C5): eliminados `.DS_Store`/`._.DS_Store` de `public/images/Logos` (más entradas en `.gitignore`), boilerplate `routes/api.php` (+ bloque `api`/rate-limiter del `RouteServiceProvider` y grupo `api` del `Http\Kernel`) y plantilla `resources/views/welcome.blade.php` sin usar
 - [x] **Migración MariaDB → PostgreSQL (PG1)**: motor por defecto `pgsql` (`config/database.php`, `.env.example`, plantilla de producción con `DB_SSLMODE=require`); SQL MySQL-only reemplazado por equivalentes portables — `FIELD()`/`SUBSTRING_INDEX()`/backticks → ordenación en PHP (`RoleController`), `CAST AS UNSIGNED` → `AS integer` (gacetas), `SUM(boolean)` → `SUM(CASE WHEN…)` (dashboard), `LIKE` → `ILIKE` en PG (búsqueda case-insensitive), upsert diario → `ON CONFLICT (day, post_id) DO UPDATE` (NewsController); 5 tests de contrato en `PgMigrationQueriesTest`; gate doble: PHPUnit 129/129 en SQLite **y** en PG 18 real; migraciones verificadas up y down en PG (`enum()` compila a varchar+CHECK, `->change()` vía dbal OK, `->after()` sin efecto funcional); 17 suites E2E reescritas de PowerShell+`mysql.exe` a **bash+`psql`** (`tests/e2e/*.sh` + `lib.sh` + `run-all.sh`), 663 checks en verde, `.ps1` eliminados; docs actualizadas (requisitos `pdo_pgsql`, PostgreSQL 14+, §13/§14/§16)
 - [x] **Adaptación a BD de producción LATIN9 (PG2)**: la BD de producción es PostgreSQL **ISO-8859-15** (fija, sin conversión a UTF-8 disponible); la app permanece UTF-8 y PostgreSQL convierte en el cable (`client_encoding=UTF8` en el DSN — `DB_CHARSET=utf8` envolvible, nunca `latin9`). Transliteración automática en dos capas: helper `App\Support\Latin9` (iconv ISO-8859-15//TRANSLIT//IGNORE + eliminación de emojis/símbolos astrales; acentos/`€`/`Œ`/`Š` intactos; `…`→`...`, `“ ”`→`"`, `—`→`-`), trait `StoresLatin9` en la base `App\Models\Model` (los 14 modelos) y en `User` (antes de HTMLPurifier y de los casts `encrypted`), y middleware global `SanitizeLatin9Input` (query/body/JSON — cubre parámetros que van directos a SQL como `?q=` de `/buscar`, evitando el error 22021 también en SELECT); `Audit`/`ActivityLog` sin literales fuera de latin9; `install.php` avisa si `server_encoding` no es `latin*`; `lib.sh` E2E fuerza `-c client_encoding=UTF8`; gates: **PHPUnit 144/144 en SQLite, 144/144 en PG UTF-8 y 144/144 en PG LATIN9 local** (`createdb -E LATIN9 -l C -T template0`) + E2E `test-noticias`/`test-contact-messages`/`test-users` en verde contra LATIN9; tests nuevos `Latin9Test` (7) y `Latin9EncodingTest` (8, gate pgsql); docs §14.D/§14.K/§16
+- [x] **Blindaje de UserSeeder ante APP_KEY cambiado (PG3)**: incidente real en la instalación de producción — si el `APP_KEY` cambia tras haberse creado una fila seed de `users` (su `name` lleva cast `encrypted`), un re-`db:seed` revienta con `DecryptException: The MAC is invalid` al comparar el nombre canónico. `UserSeeder` ahora captura ese `DecryptException`, imprime con `$this->command->error` una guía accionable (restaurar la clave original, o `migrate:fresh --seed --force` si la BD es descartable, o borrar SOLO la fila afectada con SQL crudo vía `psql`/`DB::table` — no descifra, seguro con clave perdida — y re-sembrar) y re-lanza para detener el seed visible; sin auto-borrado (tras `install.php` el superadmin real puede ocupar un email seed). §14.D: APP_KEY se genera UNA sola vez antes del primer seed y no se vuelve a tocar; §14.E: orden `key:generate` → `migrate --seed` → `install.php` con la advertencia; test `UserSeederKeyMismatchTest` (2 — idempotencia con clave correcta y guía ante clave cambiada, con `withoutMockingConsoleOutput()` porque Laravel mockea la consola en tests); gates **146/146 en SQLite, PG UTF-8 y PG LATIN9** + simulación end-to-end del incidente (cambiar `APP_KEY` → guía + exit 1 → `migrate:fresh --seed` recupera)
 
 ### 🔴 Pendiente
 
@@ -709,7 +710,7 @@ Crear **in situ** desde la plantilla **`.env_example_produccion`** (versionada e
 |---|---|
 | `APP_ENV` | `production` |
 | `APP_DEBUG` | **`false`** (con `true`, los errores 500 filtran trazas y datos sensibles) |
-| `APP_KEY` | la misma de desarrollo, o nueva vía `php artisan key:generate` (una clave nueva invalida sesiones/tokens existentes) |
+| `APP_KEY` | generarla UNA sola vez con `php artisan key:generate` **antes del primer `db:seed`** y no volver a tocarla: si se regenera con filas ya creadas, todo lo cifrado con la clave anterior (`users.name`, `contacts.name/email/subject/message`) queda ilegible y cualquier lectura revienta con `DecryptException: The MAC is invalid` (p. ej. un re-`db:seed`). Recuperación: restaurar la clave original, o si la BD es descartable `php artisan migrate:fresh --seed --force`, o borrar las filas afectadas con SQL crudo (`psql`/`DB::table`, que no descifran) y re-sembrar — `UserSeeder` imprime exactamente esta guía al detectarlo (§14.E) |
 | `APP_URL` | `https://portal.gdc.gob.ve` (dominio real) |
 | `DB_HOST` / `DB_DATABASE` / `DB_USERNAME` / `DB_PASSWORD` | BD dedicada de producción (**LATIN9**, ver §14.K) |
 | `DB_CHARSET` | No cambiar: la conexión va en `utf8` aunque la BD sea LATIN9 (§14.K) |
@@ -719,7 +720,9 @@ Crear **in situ** desde la plantilla **`.env_example_produccion`** (versionada e
 Verificar: `php artisan config:show | grep APP_DEBUG` (debe ser `false`).
 
 #### E. Instalación
+Orden correcto (§14.D): el `APP_KEY` se genera **una sola vez, antes** del primer seed, y no se vuelve a tocar.
 ```bash
+php artisan key:generate         # una sola vez, ANTES de migrar/sembrar (§14.D)
 php artisan migrate --force      # migraciones
 php artisan db:seed              # solo la primera vez (crea los usuarios seed de prueba)
 # Después, en el navegador: https://<dominio>/install.php — formulario one-shot
@@ -729,6 +732,12 @@ php artisan storage:link         # ⚠️ requiere SSH — FTP no puede crear el
 php artisan webp:generate        # backfill WebP de las imágenes existentes (idempotente)
 php artisan optimize             # config:cache + route:cache + view:cache
 ```
+
+> ⚠️ **Nunca re-ejecutar `key:generate` tras haber sembrado** (§14.D): si el `APP_KEY` cambia,
+> las filas cifradas con la clave anterior (`users.name`, `contacts.*`) quedan ilegibles y un
+> re-`db:seed` revienta con `The MAC is invalid` — `UserSeeder` lo detecta y detiene el seed
+> imprimiendo las opciones de recuperación (clave original / `migrate:fresh --seed --force` si la
+> BD es descartable / `DELETE` crudo de la fila afectada).
 
 > **Si solo hay FTP (sin SSH)** para `storage:link`: pedir al administrador del servidor que cree el enlace
 > `ln -s /var/www/portal2026/storage/app/public /var/www/portal2026/public/storage`,
