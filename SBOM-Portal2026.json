@@ -1,3119 +1,2341 @@
 {
-  "bomFormat": "CycloneDX",
-  "specVersion": "1.5",
-  "serialNumber": "urn:uuid:6cfb2fb3-27dc-4809-bbc4-3a2814a01f18",
-  "version": 1,
-  "metadata": {
-    "timestamp": "2026-10-08T23:54:23.407400Z",
-    "tools": [
-      {
-        "vendor": "Portal2026",
-        "name": "custom-sbom-generator",
-        "version": "1.0"
-      }
-    ],
-    "component": {
-      "type": "application",
-      "name": "Portal2026",
-      "version": "1.0.0"
-    }
-  },
-  "components": [
-    {
-      "type": "library",
-      "name": "brick/math",
-      "version": "0.12.3",
-      "purl": "pkg:composer/brick/math@0.12.3",
-      "bom-ref": "pkg:composer/brick/math@0.12.3",
-      "externalReferences": [
-        {
-          "type": "vcs",
-          "url": "https://github.com/brick/math.git"
-        }
-      ]
-    },
-    {
-      "type": "library",
-      "name": "carbonphp/carbon-doctrine-types",
-      "version": "2.1.0",
-      "purl": "pkg:composer/carbonphp/carbon-doctrine-types@2.1.0",
-      "bom-ref": "pkg:composer/carbonphp/carbon-doctrine-types@2.1.0",
-      "supplier": {
-        "name": "KyleKatarn"
-      },
-      "externalReferences": [
-        {
-          "type": "vcs",
-          "url": "https://github.com/CarbonPHP/carbon-doctrine-types.git"
-        }
-      ]
-    },
-    {
-      "type": "library",
-      "name": "dflydev/dot-access-data",
-      "version": "3.0.3",
-      "purl": "pkg:composer/dflydev/dot-access-data@3.0.3",
-      "bom-ref": "pkg:composer/dflydev/dot-access-data@3.0.3",
-      "supplier": {
-        "name": "Dragonfly Development Inc."
-      },
-      "externalReferences": [
-        {
-          "type": "vcs",
-          "url": "https://github.com/dflydev/dflydev-dot-access-data.git"
-        }
-      ]
-    },
-    {
-      "type": "library",
-      "name": "doctrine/dbal",
-      "version": "3.10.6",
-      "purl": "pkg:composer/doctrine/dbal@3.10.6",
-      "bom-ref": "pkg:composer/doctrine/dbal@3.10.6",
-      "supplier": {
-        "name": "Guilherme Blanco"
-      },
-      "externalReferences": [
-        {
-          "type": "vcs",
-          "url": "https://github.com/doctrine/dbal.git"
-        }
-      ]
-    },
-    {
-      "type": "library",
-      "name": "doctrine/deprecations",
-      "version": "1.1.6",
-      "purl": "pkg:composer/doctrine/deprecations@1.1.6",
-      "bom-ref": "pkg:composer/doctrine/deprecations@1.1.6",
-      "externalReferences": [
-        {
-          "type": "vcs",
-          "url": "https://github.com/doctrine/deprecations.git"
-        }
-      ]
-    },
-    {
-      "type": "library",
-      "name": "doctrine/event-manager",
-      "version": "2.1.1",
-      "purl": "pkg:composer/doctrine/event-manager@2.1.1",
-      "bom-ref": "pkg:composer/doctrine/event-manager@2.1.1",
-      "supplier": {
-        "name": "Guilherme Blanco"
-      },
-      "externalReferences": [
-        {
-          "type": "vcs",
-          "url": "https://github.com/doctrine/event-manager.git"
-        }
-      ]
-    },
-    {
-      "type": "library",
-      "name": "doctrine/inflector",
-      "version": "2.1.0",
-      "purl": "pkg:composer/doctrine/inflector@2.1.0",
-      "bom-ref": "pkg:composer/doctrine/inflector@2.1.0",
-      "supplier": {
-        "name": "Guilherme Blanco"
-      },
-      "externalReferences": [
-        {
-          "type": "vcs",
-          "url": "https://github.com/doctrine/inflector.git"
-        }
-      ]
-    },
-    {
-      "type": "library",
-      "name": "doctrine/lexer",
-      "version": "3.0.1",
-      "purl": "pkg:composer/doctrine/lexer@3.0.1",
-      "bom-ref": "pkg:composer/doctrine/lexer@3.0.1",
-      "supplier": {
-        "name": "Guilherme Blanco"
-      },
-      "externalReferences": [
-        {
-          "type": "vcs",
-          "url": "https://github.com/doctrine/lexer.git"
-        }
-      ]
-    },
-    {
-      "type": "library",
-      "name": "dragonmantank/cron-expression",
-      "version": "3.6.0",
-      "purl": "pkg:composer/dragonmantank/cron-expression@3.6.0",
-      "bom-ref": "pkg:composer/dragonmantank/cron-expression@3.6.0",
-      "supplier": {
-        "name": "Chris Tankersley"
-      },
-      "externalReferences": [
-        {
-          "type": "vcs",
-          "url": "https://github.com/dragonmantank/cron-expression.git"
-        }
-      ]
-    },
-    {
-      "type": "library",
-      "name": "egulias/email-validator",
-      "version": "4.0.4",
-      "purl": "pkg:composer/egulias/email-validator@4.0.4",
-      "bom-ref": "pkg:composer/egulias/email-validator@4.0.4",
-      "supplier": {
-        "name": "Eduardo Gulias Davis"
-      },
-      "externalReferences": [
-        {
-          "type": "vcs",
-          "url": "https://github.com/egulias/EmailValidator.git"
-        }
-      ]
-    },
-    {
-      "type": "library",
-      "name": "ezyang/htmlpurifier",
-      "version": "4.19.1",
-      "purl": "pkg:composer/ezyang/htmlpurifier@4.19.1",
-      "bom-ref": "pkg:composer/ezyang/htmlpurifier@4.19.1",
-      "supplier": {
-        "name": "Edward Z. Yang"
-      },
-      "externalReferences": [
-        {
-          "type": "vcs",
-          "url": "https://github.com/ezyang/htmlpurifier.git"
-        }
-      ]
-    },
-    {
-      "type": "library",
-      "name": "fruitcake/php-cors",
-      "version": "1.4.0",
-      "purl": "pkg:composer/fruitcake/php-cors@1.4.0",
-      "bom-ref": "pkg:composer/fruitcake/php-cors@1.4.0",
-      "supplier": {
-        "name": "Fruitcake"
-      },
-      "externalReferences": [
-        {
-          "type": "vcs",
-          "url": "https://github.com/fruitcake/php-cors.git"
-        }
-      ]
-    },
-    {
-      "type": "library",
-      "name": "graham-campbell/result-type",
-      "version": "1.1.4",
-      "purl": "pkg:composer/graham-campbell/result-type@1.1.4",
-      "bom-ref": "pkg:composer/graham-campbell/result-type@1.1.4",
-      "supplier": {
-        "name": "Graham Campbell"
-      },
-      "externalReferences": [
-        {
-          "type": "vcs",
-          "url": "https://github.com/GrahamCampbell/Result-Type.git"
-        }
-      ]
-    },
-    {
-      "type": "library",
-      "name": "guzzlehttp/guzzle",
-      "version": "7.15.5",
-      "purl": "pkg:composer/guzzlehttp/guzzle@7.15.5",
-      "bom-ref": "pkg:composer/guzzlehttp/guzzle@7.15.5",
-      "supplier": {
-        "name": "Graham Campbell"
-      },
-      "externalReferences": [
-        {
-          "type": "vcs",
-          "url": "https://github.com/guzzle/guzzle.git"
-        }
-      ]
-    },
-    {
-      "type": "library",
-      "name": "guzzlehttp/promises",
-      "version": "2.5.3",
-      "purl": "pkg:composer/guzzlehttp/promises@2.5.3",
-      "bom-ref": "pkg:composer/guzzlehttp/promises@2.5.3",
-      "supplier": {
-        "name": "Graham Campbell"
-      },
-      "externalReferences": [
-        {
-          "type": "vcs",
-          "url": "https://github.com/guzzle/promises.git"
-        }
-      ]
-    },
-    {
-      "type": "library",
-      "name": "guzzlehttp/psr7",
-      "version": "2.13.1",
-      "purl": "pkg:composer/guzzlehttp/psr7@2.13.1",
-      "bom-ref": "pkg:composer/guzzlehttp/psr7@2.13.1",
-      "supplier": {
-        "name": "Graham Campbell"
-      },
-      "externalReferences": [
-        {
-          "type": "vcs",
-          "url": "https://github.com/guzzle/psr7.git"
-        }
-      ]
-    },
-    {
-      "type": "library",
-      "name": "guzzlehttp/uri-template",
-      "version": "1.0.8",
-      "purl": "pkg:composer/guzzlehttp/uri-template@1.0.8",
-      "bom-ref": "pkg:composer/guzzlehttp/uri-template@1.0.8",
-      "supplier": {
-        "name": "Graham Campbell"
-      },
-      "externalReferences": [
-        {
-          "type": "vcs",
-          "url": "https://github.com/guzzle/uri-template.git"
-        }
-      ]
-    },
-    {
-      "type": "library",
-      "name": "laravel/framework",
-      "version": "10.50.2",
-      "purl": "pkg:composer/laravel/framework@10.50.2",
-      "bom-ref": "pkg:composer/laravel/framework@10.50.2",
-      "supplier": {
-        "name": "Taylor Otwell"
-      },
-      "externalReferences": [
-        {
-          "type": "vcs",
-          "url": "https://github.com/laravel/framework.git"
-        }
-      ]
-    },
-    {
-      "type": "library",
-      "name": "laravel/prompts",
-      "version": "0.1.25",
-      "purl": "pkg:composer/laravel/prompts@0.1.25",
-      "bom-ref": "pkg:composer/laravel/prompts@0.1.25",
-      "externalReferences": [
-        {
-          "type": "vcs",
-          "url": "https://github.com/laravel/prompts.git"
-        }
-      ]
-    },
-    {
-      "type": "library",
-      "name": "laravel/sanctum",
-      "version": "3.3.3",
-      "purl": "pkg:composer/laravel/sanctum@3.3.3",
-      "bom-ref": "pkg:composer/laravel/sanctum@3.3.3",
-      "supplier": {
-        "name": "Taylor Otwell"
-      },
-      "externalReferences": [
-        {
-          "type": "vcs",
-          "url": "https://github.com/laravel/sanctum.git"
-        }
-      ]
-    },
-    {
-      "type": "library",
-      "name": "laravel/serializable-closure",
-      "version": "1.3.7",
-      "purl": "pkg:composer/laravel/serializable-closure@1.3.7",
-      "bom-ref": "pkg:composer/laravel/serializable-closure@1.3.7",
-      "supplier": {
-        "name": "Taylor Otwell"
-      },
-      "externalReferences": [
-        {
-          "type": "vcs",
-          "url": "https://github.com/laravel/serializable-closure.git"
-        }
-      ]
-    },
-    {
-      "type": "library",
-      "name": "laravel/tinker",
-      "version": "2.11.1",
-      "purl": "pkg:composer/laravel/tinker@2.11.1",
-      "bom-ref": "pkg:composer/laravel/tinker@2.11.1",
-      "supplier": {
-        "name": "Taylor Otwell"
-      },
-      "externalReferences": [
-        {
-          "type": "vcs",
-          "url": "https://github.com/laravel/tinker.git"
-        }
-      ]
-    },
-    {
-      "type": "library",
-      "name": "league/commonmark",
-      "version": "2.10.3",
-      "purl": "pkg:composer/league/commonmark@2.10.3",
-      "bom-ref": "pkg:composer/league/commonmark@2.10.3",
-      "supplier": {
-        "name": "Colin O'Dell"
-      },
-      "externalReferences": [
-        {
-          "type": "vcs",
-          "url": "https://github.com/thephpleague/commonmark.git"
-        }
-      ]
-    },
-    {
-      "type": "library",
-      "name": "league/config",
-      "version": "1.2.0",
-      "purl": "pkg:composer/league/config@1.2.0",
-      "bom-ref": "pkg:composer/league/config@1.2.0",
-      "supplier": {
-        "name": "Colin O'Dell"
-      },
-      "externalReferences": [
-        {
-          "type": "vcs",
-          "url": "https://github.com/thephpleague/config.git"
-        }
-      ]
-    },
-    {
-      "type": "library",
-      "name": "league/flysystem",
-      "version": "3.36.0",
-      "purl": "pkg:composer/league/flysystem@3.36.0",
-      "bom-ref": "pkg:composer/league/flysystem@3.36.0",
-      "supplier": {
-        "name": "Frank de Jonge"
-      },
-      "externalReferences": [
-        {
-          "type": "vcs",
-          "url": "https://github.com/thephpleague/flysystem.git"
-        }
-      ]
-    },
-    {
-      "type": "library",
-      "name": "league/flysystem-local",
-      "version": "3.35.3",
-      "purl": "pkg:composer/league/flysystem-local@3.35.3",
-      "bom-ref": "pkg:composer/league/flysystem-local@3.35.3",
-      "supplier": {
-        "name": "Frank de Jonge"
-      },
-      "externalReferences": [
-        {
-          "type": "vcs",
-          "url": "https://github.com/thephpleague/flysystem-local.git"
-        }
-      ]
-    },
-    {
-      "type": "library",
-      "name": "league/mime-type-detection",
-      "version": "1.17.0",
-      "purl": "pkg:composer/league/mime-type-detection@1.17.0",
-      "bom-ref": "pkg:composer/league/mime-type-detection@1.17.0",
-      "supplier": {
-        "name": "Frank de Jonge"
-      },
-      "externalReferences": [
-        {
-          "type": "vcs",
-          "url": "https://github.com/thephpleague/mime-type-detection.git"
-        }
-      ]
-    },
-    {
-      "type": "library",
-      "name": "mews/purifier",
-      "version": "3.4.4",
-      "purl": "pkg:composer/mews/purifier@3.4.4",
-      "bom-ref": "pkg:composer/mews/purifier@3.4.4",
-      "supplier": {
-        "name": "Muharrem ER\u0130N"
-      },
-      "externalReferences": [
-        {
-          "type": "vcs",
-          "url": "https://github.com/mewebstudio/Purifier.git"
-        }
-      ]
-    },
-    {
-      "type": "library",
-      "name": "monolog/monolog",
-      "version": "3.10.0",
-      "purl": "pkg:composer/monolog/monolog@3.10.0",
-      "bom-ref": "pkg:composer/monolog/monolog@3.10.0",
-      "supplier": {
-        "name": "Jordi Boggiano"
-      },
-      "externalReferences": [
-        {
-          "type": "vcs",
-          "url": "https://github.com/Seldaek/monolog.git"
-        }
-      ]
-    },
-    {
-      "type": "library",
-      "name": "nesbot/carbon",
-      "version": "2.73.0",
-      "purl": "pkg:composer/nesbot/carbon@2.73.0",
-      "bom-ref": "pkg:composer/nesbot/carbon@2.73.0",
-      "supplier": {
-        "name": "Brian Nesbitt"
-      },
-      "externalReferences": [
-        {
-          "type": "vcs",
-          "url": "https://github.com/CarbonPHP/carbon.git"
-        }
-      ]
-    },
-    {
-      "type": "library",
-      "name": "nette/schema",
-      "version": "1.3.6",
-      "purl": "pkg:composer/nette/schema@1.3.6",
-      "bom-ref": "pkg:composer/nette/schema@1.3.6",
-      "supplier": {
-        "name": "David Grudl"
-      },
-      "externalReferences": [
-        {
-          "type": "vcs",
-          "url": "https://github.com/nette/schema.git"
-        }
-      ]
-    },
-    {
-      "type": "library",
-      "name": "nette/utils",
-      "version": "4.1.5",
-      "purl": "pkg:composer/nette/utils@4.1.5",
-      "bom-ref": "pkg:composer/nette/utils@4.1.5",
-      "supplier": {
-        "name": "David Grudl"
-      },
-      "externalReferences": [
-        {
-          "type": "vcs",
-          "url": "https://github.com/nette/utils.git"
-        }
-      ]
-    },
-    {
-      "type": "library",
-      "name": "nikic/php-parser",
-      "version": "5.8.0",
-      "purl": "pkg:composer/nikic/php-parser@5.8.0",
-      "bom-ref": "pkg:composer/nikic/php-parser@5.8.0",
-      "supplier": {
-        "name": "Nikita Popov"
-      },
-      "externalReferences": [
-        {
-          "type": "vcs",
-          "url": "https://github.com/nikic/PHP-Parser.git"
-        }
-      ]
-    },
-    {
-      "type": "library",
-      "name": "nunomaduro/termwind",
-      "version": "1.17.0",
-      "purl": "pkg:composer/nunomaduro/termwind@1.17.0",
-      "bom-ref": "pkg:composer/nunomaduro/termwind@1.17.0",
-      "supplier": {
-        "name": "Nuno Maduro"
-      },
-      "externalReferences": [
-        {
-          "type": "vcs",
-          "url": "https://github.com/nunomaduro/termwind.git"
-        }
-      ]
-    },
-    {
-      "type": "library",
-      "name": "phpoption/phpoption",
-      "version": "1.9.5",
-      "purl": "pkg:composer/phpoption/phpoption@1.9.5",
-      "bom-ref": "pkg:composer/phpoption/phpoption@1.9.5",
-      "supplier": {
-        "name": "Johannes M. Schmitt"
-      },
-      "externalReferences": [
-        {
-          "type": "vcs",
-          "url": "https://github.com/schmittjoh/php-option.git"
-        }
-      ]
-    },
-    {
-      "type": "library",
-      "name": "psr/cache",
-      "version": "3.0.0",
-      "purl": "pkg:composer/psr/cache@3.0.0",
-      "bom-ref": "pkg:composer/psr/cache@3.0.0",
-      "supplier": {
-        "name": "PHP-FIG"
-      },
-      "externalReferences": [
-        {
-          "type": "vcs",
-          "url": "https://github.com/php-fig/cache.git"
-        }
-      ]
-    },
-    {
-      "type": "library",
-      "name": "psr/clock",
-      "version": "1.0.0",
-      "purl": "pkg:composer/psr/clock@1.0.0",
-      "bom-ref": "pkg:composer/psr/clock@1.0.0",
-      "supplier": {
-        "name": "PHP-FIG"
-      },
-      "externalReferences": [
-        {
-          "type": "vcs",
-          "url": "https://github.com/php-fig/clock.git"
-        }
-      ]
-    },
-    {
-      "type": "library",
-      "name": "psr/container",
-      "version": "2.0.2",
-      "purl": "pkg:composer/psr/container@2.0.2",
-      "bom-ref": "pkg:composer/psr/container@2.0.2",
-      "supplier": {
-        "name": "PHP-FIG"
-      },
-      "externalReferences": [
-        {
-          "type": "vcs",
-          "url": "https://github.com/php-fig/container.git"
-        }
-      ]
-    },
-    {
-      "type": "library",
-      "name": "psr/event-dispatcher",
-      "version": "1.0.0",
-      "purl": "pkg:composer/psr/event-dispatcher@1.0.0",
-      "bom-ref": "pkg:composer/psr/event-dispatcher@1.0.0",
-      "supplier": {
-        "name": "PHP-FIG"
-      },
-      "externalReferences": [
-        {
-          "type": "vcs",
-          "url": "https://github.com/php-fig/event-dispatcher.git"
-        }
-      ]
-    },
-    {
-      "type": "library",
-      "name": "psr/http-client",
-      "version": "1.0.3",
-      "purl": "pkg:composer/psr/http-client@1.0.3",
-      "bom-ref": "pkg:composer/psr/http-client@1.0.3",
-      "supplier": {
-        "name": "PHP-FIG"
-      },
-      "externalReferences": [
-        {
-          "type": "vcs",
-          "url": "https://github.com/php-fig/http-client.git"
-        }
-      ]
-    },
-    {
-      "type": "library",
-      "name": "psr/http-factory",
-      "version": "1.1.0",
-      "purl": "pkg:composer/psr/http-factory@1.1.0",
-      "bom-ref": "pkg:composer/psr/http-factory@1.1.0",
-      "supplier": {
-        "name": "PHP-FIG"
-      },
-      "externalReferences": [
-        {
-          "type": "vcs",
-          "url": "https://github.com/php-fig/http-factory.git"
-        }
-      ]
-    },
-    {
-      "type": "library",
-      "name": "psr/http-message",
-      "version": "2.0",
-      "purl": "pkg:composer/psr/http-message@2.0",
-      "bom-ref": "pkg:composer/psr/http-message@2.0",
-      "supplier": {
-        "name": "PHP-FIG"
-      },
-      "externalReferences": [
-        {
-          "type": "vcs",
-          "url": "https://github.com/php-fig/http-message.git"
-        }
-      ]
-    },
-    {
-      "type": "library",
-      "name": "psr/log",
-      "version": "3.0.2",
-      "purl": "pkg:composer/psr/log@3.0.2",
-      "bom-ref": "pkg:composer/psr/log@3.0.2",
-      "supplier": {
-        "name": "PHP-FIG"
-      },
-      "externalReferences": [
-        {
-          "type": "vcs",
-          "url": "https://github.com/php-fig/log.git"
-        }
-      ]
-    },
-    {
-      "type": "library",
-      "name": "psr/simple-cache",
-      "version": "3.0.0",
-      "purl": "pkg:composer/psr/simple-cache@3.0.0",
-      "bom-ref": "pkg:composer/psr/simple-cache@3.0.0",
-      "supplier": {
-        "name": "PHP-FIG"
-      },
-      "externalReferences": [
-        {
-          "type": "vcs",
-          "url": "https://github.com/php-fig/simple-cache.git"
-        }
-      ]
-    },
-    {
-      "type": "library",
-      "name": "psy/psysh",
-      "version": "0.12.24",
-      "purl": "pkg:composer/psy/psysh@0.12.24",
-      "bom-ref": "pkg:composer/psy/psysh@0.12.24",
-      "supplier": {
-        "name": "Justin Hileman"
-      },
-      "externalReferences": [
-        {
-          "type": "vcs",
-          "url": "https://github.com/bobthecow/psysh.git"
-        }
-      ]
-    },
-    {
-      "type": "library",
-      "name": "ralouphie/getallheaders",
-      "version": "3.0.3",
-      "purl": "pkg:composer/ralouphie/getallheaders@3.0.3",
-      "bom-ref": "pkg:composer/ralouphie/getallheaders@3.0.3",
-      "supplier": {
-        "name": "Ralph Khattar"
-      },
-      "externalReferences": [
-        {
-          "type": "vcs",
-          "url": "https://github.com/ralouphie/getallheaders.git"
-        }
-      ]
-    },
-    {
-      "type": "library",
-      "name": "ramsey/collection",
-      "version": "2.1.1",
-      "purl": "pkg:composer/ramsey/collection@2.1.1",
-      "bom-ref": "pkg:composer/ramsey/collection@2.1.1",
-      "supplier": {
-        "name": "Ben Ramsey"
-      },
-      "externalReferences": [
-        {
-          "type": "vcs",
-          "url": "https://github.com/ramsey/collection.git"
-        }
-      ]
-    },
-    {
-      "type": "library",
-      "name": "ramsey/uuid",
-      "version": "4.9.3",
-      "purl": "pkg:composer/ramsey/uuid@4.9.3",
-      "bom-ref": "pkg:composer/ramsey/uuid@4.9.3",
-      "externalReferences": [
-        {
-          "type": "vcs",
-          "url": "https://github.com/ramsey/uuid.git"
-        }
-      ]
-    },
-    {
-      "type": "library",
-      "name": "symfony/console",
-      "version": "6.4.42",
-      "purl": "pkg:composer/symfony/console@6.4.42",
-      "bom-ref": "pkg:composer/symfony/console@6.4.42",
-      "supplier": {
-        "name": "Fabien Potencier"
-      },
-      "externalReferences": [
-        {
-          "type": "vcs",
-          "url": "https://github.com/symfony/console.git"
-        }
-      ]
-    },
-    {
-      "type": "library",
-      "name": "symfony/css-selector",
-      "version": "7.4.9",
-      "purl": "pkg:composer/symfony/css-selector@7.4.9",
-      "bom-ref": "pkg:composer/symfony/css-selector@7.4.9",
-      "supplier": {
-        "name": "Fabien Potencier"
-      },
-      "externalReferences": [
-        {
-          "type": "vcs",
-          "url": "https://github.com/symfony/css-selector.git"
-        }
-      ]
-    },
-    {
-      "type": "library",
-      "name": "symfony/deprecation-contracts",
-      "version": "3.7.1",
-      "purl": "pkg:composer/symfony/deprecation-contracts@3.7.1",
-      "bom-ref": "pkg:composer/symfony/deprecation-contracts@3.7.1",
-      "supplier": {
-        "name": "Nicolas Grekas"
-      },
-      "externalReferences": [
-        {
-          "type": "vcs",
-          "url": "https://github.com/symfony/deprecation-contracts.git"
-        }
-      ]
-    },
-    {
-      "type": "library",
-      "name": "symfony/error-handler",
-      "version": "6.4.36",
-      "purl": "pkg:composer/symfony/error-handler@6.4.36",
-      "bom-ref": "pkg:composer/symfony/error-handler@6.4.36",
-      "supplier": {
-        "name": "Fabien Potencier"
-      },
-      "externalReferences": [
-        {
-          "type": "vcs",
-          "url": "https://github.com/symfony/error-handler.git"
-        }
-      ]
-    },
-    {
-      "type": "library",
-      "name": "symfony/event-dispatcher",
-      "version": "7.4.14",
-      "purl": "pkg:composer/symfony/event-dispatcher@7.4.14",
-      "bom-ref": "pkg:composer/symfony/event-dispatcher@7.4.14",
-      "supplier": {
-        "name": "Fabien Potencier"
-      },
-      "externalReferences": [
-        {
-          "type": "vcs",
-          "url": "https://github.com/symfony/event-dispatcher.git"
-        }
-      ]
-    },
-    {
-      "type": "library",
-      "name": "symfony/event-dispatcher-contracts",
-      "version": "3.7.1",
-      "purl": "pkg:composer/symfony/event-dispatcher-contracts@3.7.1",
-      "bom-ref": "pkg:composer/symfony/event-dispatcher-contracts@3.7.1",
-      "supplier": {
-        "name": "Nicolas Grekas"
-      },
-      "externalReferences": [
-        {
-          "type": "vcs",
-          "url": "https://github.com/symfony/event-dispatcher-contracts.git"
-        }
-      ]
-    },
-    {
-      "type": "library",
-      "name": "symfony/finder",
-      "version": "6.4.42",
-      "purl": "pkg:composer/symfony/finder@6.4.42",
-      "bom-ref": "pkg:composer/symfony/finder@6.4.42",
-      "supplier": {
-        "name": "Fabien Potencier"
-      },
-      "externalReferences": [
-        {
-          "type": "vcs",
-          "url": "https://github.com/symfony/finder.git"
-        }
-      ]
-    },
-    {
-      "type": "library",
-      "name": "symfony/http-foundation",
-      "version": "6.4.42",
-      "purl": "pkg:composer/symfony/http-foundation@6.4.42",
-      "bom-ref": "pkg:composer/symfony/http-foundation@6.4.42",
-      "supplier": {
-        "name": "Fabien Potencier"
-      },
-      "externalReferences": [
-        {
-          "type": "vcs",
-          "url": "https://github.com/symfony/http-foundation.git"
-        }
-      ]
-    },
-    {
-      "type": "library",
-      "name": "symfony/http-kernel",
-      "version": "6.4.42",
-      "purl": "pkg:composer/symfony/http-kernel@6.4.42",
-      "bom-ref": "pkg:composer/symfony/http-kernel@6.4.42",
-      "supplier": {
-        "name": "Fabien Potencier"
-      },
-      "externalReferences": [
-        {
-          "type": "vcs",
-          "url": "https://github.com/symfony/http-kernel.git"
-        }
-      ]
-    },
-    {
-      "type": "library",
-      "name": "symfony/mailer",
-      "version": "6.4.40",
-      "purl": "pkg:composer/symfony/mailer@6.4.40",
-      "bom-ref": "pkg:composer/symfony/mailer@6.4.40",
-      "supplier": {
-        "name": "Fabien Potencier"
-      },
-      "externalReferences": [
-        {
-          "type": "vcs",
-          "url": "https://github.com/symfony/mailer.git"
-        }
-      ]
-    },
-    {
-      "type": "library",
-      "name": "symfony/mime",
-      "version": "6.4.41",
-      "purl": "pkg:composer/symfony/mime@6.4.41",
-      "bom-ref": "pkg:composer/symfony/mime@6.4.41",
-      "supplier": {
-        "name": "Fabien Potencier"
-      },
-      "externalReferences": [
-        {
-          "type": "vcs",
-          "url": "https://github.com/symfony/mime.git"
-        }
-      ]
-    },
-    {
-      "type": "library",
-      "name": "symfony/polyfill-ctype",
-      "version": "1.37.0",
-      "purl": "pkg:composer/symfony/polyfill-ctype@1.37.0",
-      "bom-ref": "pkg:composer/symfony/polyfill-ctype@1.37.0",
-      "supplier": {
-        "name": "Gert de Pagter"
-      },
-      "externalReferences": [
-        {
-          "type": "vcs",
-          "url": "https://github.com/symfony/polyfill-ctype.git"
-        }
-      ]
-    },
-    {
-      "type": "library",
-      "name": "symfony/polyfill-intl-grapheme",
-      "version": "1.38.1",
-      "purl": "pkg:composer/symfony/polyfill-intl-grapheme@1.38.1",
-      "bom-ref": "pkg:composer/symfony/polyfill-intl-grapheme@1.38.1",
-      "supplier": {
-        "name": "Nicolas Grekas"
-      },
-      "externalReferences": [
-        {
-          "type": "vcs",
-          "url": "https://github.com/symfony/polyfill-intl-grapheme.git"
-        }
-      ]
-    },
-    {
-      "type": "library",
-      "name": "symfony/polyfill-intl-idn",
-      "version": "1.38.1",
-      "purl": "pkg:composer/symfony/polyfill-intl-idn@1.38.1",
-      "bom-ref": "pkg:composer/symfony/polyfill-intl-idn@1.38.1",
-      "supplier": {
-        "name": "Laurent Bassin"
-      },
-      "externalReferences": [
-        {
-          "type": "vcs",
-          "url": "https://github.com/symfony/polyfill-intl-idn.git"
-        }
-      ]
-    },
-    {
-      "type": "library",
-      "name": "symfony/polyfill-intl-normalizer",
-      "version": "1.38.0",
-      "purl": "pkg:composer/symfony/polyfill-intl-normalizer@1.38.0",
-      "bom-ref": "pkg:composer/symfony/polyfill-intl-normalizer@1.38.0",
-      "supplier": {
-        "name": "Nicolas Grekas"
-      },
-      "externalReferences": [
-        {
-          "type": "vcs",
-          "url": "https://github.com/symfony/polyfill-intl-normalizer.git"
-        }
-      ]
-    },
-    {
-      "type": "library",
-      "name": "symfony/polyfill-mbstring",
-      "version": "1.38.2",
-      "purl": "pkg:composer/symfony/polyfill-mbstring@1.38.2",
-      "bom-ref": "pkg:composer/symfony/polyfill-mbstring@1.38.2",
-      "supplier": {
-        "name": "Nicolas Grekas"
-      },
-      "externalReferences": [
-        {
-          "type": "vcs",
-          "url": "https://github.com/symfony/polyfill-mbstring.git"
-        }
-      ]
-    },
-    {
-      "type": "library",
-      "name": "symfony/polyfill-php80",
-      "version": "1.43.0",
-      "purl": "pkg:composer/symfony/polyfill-php80@1.43.0",
-      "bom-ref": "pkg:composer/symfony/polyfill-php80@1.43.0",
-      "supplier": {
-        "name": "Ion Bazan"
-      },
-      "externalReferences": [
-        {
-          "type": "vcs",
-          "url": "https://github.com/symfony/polyfill-php80.git"
-        }
-      ]
-    },
-    {
-      "type": "library",
-      "name": "symfony/polyfill-php83",
-      "version": "1.38.2",
-      "purl": "pkg:composer/symfony/polyfill-php83@1.38.2",
-      "bom-ref": "pkg:composer/symfony/polyfill-php83@1.38.2",
-      "supplier": {
-        "name": "Nicolas Grekas"
-      },
-      "externalReferences": [
-        {
-          "type": "vcs",
-          "url": "https://github.com/symfony/polyfill-php83.git"
-        }
-      ]
-    },
-    {
-      "type": "library",
-      "name": "symfony/polyfill-uuid",
-      "version": "1.37.0",
-      "purl": "pkg:composer/symfony/polyfill-uuid@1.37.0",
-      "bom-ref": "pkg:composer/symfony/polyfill-uuid@1.37.0",
-      "supplier": {
-        "name": "Gr\u00e9goire Pineau"
-      },
-      "externalReferences": [
-        {
-          "type": "vcs",
-          "url": "https://github.com/symfony/polyfill-uuid.git"
-        }
-      ]
-    },
-    {
-      "type": "library",
-      "name": "symfony/process",
-      "version": "6.4.41",
-      "purl": "pkg:composer/symfony/process@6.4.41",
-      "bom-ref": "pkg:composer/symfony/process@6.4.41",
-      "supplier": {
-        "name": "Fabien Potencier"
-      },
-      "externalReferences": [
-        {
-          "type": "vcs",
-          "url": "https://github.com/symfony/process.git"
-        }
-      ]
-    },
-    {
-      "type": "library",
-      "name": "symfony/routing",
-      "version": "6.4.41",
-      "purl": "pkg:composer/symfony/routing@6.4.41",
-      "bom-ref": "pkg:composer/symfony/routing@6.4.41",
-      "supplier": {
-        "name": "Fabien Potencier"
-      },
-      "externalReferences": [
-        {
-          "type": "vcs",
-          "url": "https://github.com/symfony/routing.git"
-        }
-      ]
-    },
-    {
-      "type": "library",
-      "name": "symfony/service-contracts",
-      "version": "3.7.1",
-      "purl": "pkg:composer/symfony/service-contracts@3.7.1",
-      "bom-ref": "pkg:composer/symfony/service-contracts@3.7.1",
-      "supplier": {
-        "name": "Nicolas Grekas"
-      },
-      "externalReferences": [
-        {
-          "type": "vcs",
-          "url": "https://github.com/symfony/service-contracts.git"
-        }
-      ]
-    },
-    {
-      "type": "library",
-      "name": "symfony/string",
-      "version": "7.4.13",
-      "purl": "pkg:composer/symfony/string@7.4.13",
-      "bom-ref": "pkg:composer/symfony/string@7.4.13",
-      "supplier": {
-        "name": "Nicolas Grekas"
-      },
-      "externalReferences": [
-        {
-          "type": "vcs",
-          "url": "https://github.com/symfony/string.git"
-        }
-      ]
-    },
-    {
-      "type": "library",
-      "name": "symfony/translation",
-      "version": "6.4.42",
-      "purl": "pkg:composer/symfony/translation@6.4.42",
-      "bom-ref": "pkg:composer/symfony/translation@6.4.42",
-      "supplier": {
-        "name": "Fabien Potencier"
-      },
-      "externalReferences": [
-        {
-          "type": "vcs",
-          "url": "https://github.com/symfony/translation.git"
-        }
-      ]
-    },
-    {
-      "type": "library",
-      "name": "symfony/translation-contracts",
-      "version": "3.7.1",
-      "purl": "pkg:composer/symfony/translation-contracts@3.7.1",
-      "bom-ref": "pkg:composer/symfony/translation-contracts@3.7.1",
-      "supplier": {
-        "name": "Nicolas Grekas"
-      },
-      "externalReferences": [
-        {
-          "type": "vcs",
-          "url": "https://github.com/symfony/translation-contracts.git"
-        }
-      ]
-    },
-    {
-      "type": "library",
-      "name": "symfony/uid",
-      "version": "6.4.32",
-      "purl": "pkg:composer/symfony/uid@6.4.32",
-      "bom-ref": "pkg:composer/symfony/uid@6.4.32",
-      "supplier": {
-        "name": "Gr\u00e9goire Pineau"
-      },
-      "externalReferences": [
-        {
-          "type": "vcs",
-          "url": "https://github.com/symfony/uid.git"
-        }
-      ]
-    },
-    {
-      "type": "library",
-      "name": "symfony/var-dumper",
-      "version": "6.4.42",
-      "purl": "pkg:composer/symfony/var-dumper@6.4.42",
-      "bom-ref": "pkg:composer/symfony/var-dumper@6.4.42",
-      "supplier": {
-        "name": "Nicolas Grekas"
-      },
-      "externalReferences": [
-        {
-          "type": "vcs",
-          "url": "https://github.com/symfony/var-dumper.git"
-        }
-      ]
-    },
-    {
-      "type": "library",
-      "name": "tijsverkoyen/css-to-inline-styles",
-      "version": "2.4.0",
-      "purl": "pkg:composer/tijsverkoyen/css-to-inline-styles@2.4.0",
-      "bom-ref": "pkg:composer/tijsverkoyen/css-to-inline-styles@2.4.0",
-      "supplier": {
-        "name": "Tijs Verkoyen"
-      },
-      "externalReferences": [
-        {
-          "type": "vcs",
-          "url": "https://github.com/tijsverkoyen/CssToInlineStyles.git"
-        }
-      ]
-    },
-    {
-      "type": "library",
-      "name": "vlucas/phpdotenv",
-      "version": "5.6.4",
-      "purl": "pkg:composer/vlucas/phpdotenv@5.6.4",
-      "bom-ref": "pkg:composer/vlucas/phpdotenv@5.6.4",
-      "supplier": {
-        "name": "Graham Campbell"
-      },
-      "externalReferences": [
-        {
-          "type": "vcs",
-          "url": "https://github.com/vlucas/phpdotenv.git"
-        }
-      ]
-    },
-    {
-      "type": "library",
-      "name": "voku/portable-ascii",
-      "version": "2.1.1",
-      "purl": "pkg:composer/voku/portable-ascii@2.1.1",
-      "bom-ref": "pkg:composer/voku/portable-ascii@2.1.1",
-      "supplier": {
-        "name": "Lars Moelleken"
-      },
-      "externalReferences": [
-        {
-          "type": "vcs",
-          "url": "https://github.com/voku/portable-ascii.git"
-        }
-      ]
-    },
-    {
-      "type": "library",
-      "name": "fakerphp/faker",
-      "version": "1.24.1",
-      "purl": "pkg:composer/fakerphp/faker@1.24.1",
-      "bom-ref": "pkg:composer/fakerphp/faker@1.24.1",
-      "supplier": {
-        "name": "Fran\u00e7ois Zaninotto"
-      },
-      "externalReferences": [
-        {
-          "type": "vcs",
-          "url": "https://github.com/FakerPHP/Faker.git"
-        }
-      ]
-    },
-    {
-      "type": "library",
-      "name": "filp/whoops",
-      "version": "2.18.4",
-      "purl": "pkg:composer/filp/whoops@2.18.4",
-      "bom-ref": "pkg:composer/filp/whoops@2.18.4",
-      "supplier": {
-        "name": "Filipe Dobreira"
-      },
-      "externalReferences": [
-        {
-          "type": "vcs",
-          "url": "https://github.com/filp/whoops.git"
-        }
-      ]
-    },
-    {
-      "type": "library",
-      "name": "hamcrest/hamcrest-php",
-      "version": "2.1.1",
-      "purl": "pkg:composer/hamcrest/hamcrest-php@2.1.1",
-      "bom-ref": "pkg:composer/hamcrest/hamcrest-php@2.1.1",
-      "externalReferences": [
-        {
-          "type": "vcs",
-          "url": "https://github.com/hamcrest/hamcrest-php.git"
-        }
-      ]
-    },
-    {
-      "type": "library",
-      "name": "laravel/pint",
-      "version": "1.29.3",
-      "purl": "pkg:composer/laravel/pint@1.29.3",
-      "bom-ref": "pkg:composer/laravel/pint@1.29.3",
-      "supplier": {
-        "name": "Nuno Maduro"
-      },
-      "externalReferences": [
-        {
-          "type": "vcs",
-          "url": "https://github.com/laravel/pint.git"
-        }
-      ]
-    },
-    {
-      "type": "library",
-      "name": "laravel/sail",
-      "version": "1.63.0",
-      "purl": "pkg:composer/laravel/sail@1.63.0",
-      "bom-ref": "pkg:composer/laravel/sail@1.63.0",
-      "supplier": {
-        "name": "Taylor Otwell"
-      },
-      "externalReferences": [
-        {
-          "type": "vcs",
-          "url": "https://github.com/laravel/sail.git"
-        }
-      ]
-    },
-    {
-      "type": "library",
-      "name": "mockery/mockery",
-      "version": "1.6.12",
-      "purl": "pkg:composer/mockery/mockery@1.6.12",
-      "bom-ref": "pkg:composer/mockery/mockery@1.6.12",
-      "supplier": {
-        "name": "P\u00e1draic Brady"
-      },
-      "externalReferences": [
-        {
-          "type": "vcs",
-          "url": "https://github.com/mockery/mockery.git"
-        }
-      ]
-    },
-    {
-      "type": "library",
-      "name": "myclabs/deep-copy",
-      "version": "1.13.4",
-      "purl": "pkg:composer/myclabs/deep-copy@1.13.4",
-      "bom-ref": "pkg:composer/myclabs/deep-copy@1.13.4",
-      "externalReferences": [
-        {
-          "type": "vcs",
-          "url": "https://github.com/myclabs/DeepCopy.git"
-        }
-      ]
-    },
-    {
-      "type": "library",
-      "name": "nunomaduro/collision",
-      "version": "7.12.0",
-      "purl": "pkg:composer/nunomaduro/collision@7.12.0",
-      "bom-ref": "pkg:composer/nunomaduro/collision@7.12.0",
-      "supplier": {
-        "name": "Nuno Maduro"
-      },
-      "externalReferences": [
-        {
-          "type": "vcs",
-          "url": "https://github.com/nunomaduro/collision.git"
-        }
-      ]
-    },
-    {
-      "type": "library",
-      "name": "phar-io/manifest",
-      "version": "2.0.4",
-      "purl": "pkg:composer/phar-io/manifest@2.0.4",
-      "bom-ref": "pkg:composer/phar-io/manifest@2.0.4",
-      "supplier": {
-        "name": "Arne Blankerts"
-      },
-      "externalReferences": [
-        {
-          "type": "vcs",
-          "url": "https://github.com/phar-io/manifest.git"
-        }
-      ]
-    },
-    {
-      "type": "library",
-      "name": "phar-io/version",
-      "version": "3.2.1",
-      "purl": "pkg:composer/phar-io/version@3.2.1",
-      "bom-ref": "pkg:composer/phar-io/version@3.2.1",
-      "supplier": {
-        "name": "Arne Blankerts"
-      },
-      "externalReferences": [
-        {
-          "type": "vcs",
-          "url": "https://github.com/phar-io/version.git"
-        }
-      ]
-    },
-    {
-      "type": "library",
-      "name": "phpunit/php-code-coverage",
-      "version": "10.1.16",
-      "purl": "pkg:composer/phpunit/php-code-coverage@10.1.16",
-      "bom-ref": "pkg:composer/phpunit/php-code-coverage@10.1.16",
-      "supplier": {
-        "name": "Sebastian Bergmann"
-      },
-      "externalReferences": [
-        {
-          "type": "vcs",
-          "url": "https://github.com/sebastianbergmann/php-code-coverage.git"
-        }
-      ]
-    },
-    {
-      "type": "library",
-      "name": "phpunit/php-file-iterator",
-      "version": "4.1.0",
-      "purl": "pkg:composer/phpunit/php-file-iterator@4.1.0",
-      "bom-ref": "pkg:composer/phpunit/php-file-iterator@4.1.0",
-      "supplier": {
-        "name": "Sebastian Bergmann"
-      },
-      "externalReferences": [
-        {
-          "type": "vcs",
-          "url": "https://github.com/sebastianbergmann/php-file-iterator.git"
-        }
-      ]
-    },
-    {
-      "type": "library",
-      "name": "phpunit/php-invoker",
-      "version": "4.0.0",
-      "purl": "pkg:composer/phpunit/php-invoker@4.0.0",
-      "bom-ref": "pkg:composer/phpunit/php-invoker@4.0.0",
-      "supplier": {
-        "name": "Sebastian Bergmann"
-      },
-      "externalReferences": [
-        {
-          "type": "vcs",
-          "url": "https://github.com/sebastianbergmann/php-invoker.git"
-        }
-      ]
-    },
-    {
-      "type": "library",
-      "name": "phpunit/php-text-template",
-      "version": "3.0.1",
-      "purl": "pkg:composer/phpunit/php-text-template@3.0.1",
-      "bom-ref": "pkg:composer/phpunit/php-text-template@3.0.1",
-      "supplier": {
-        "name": "Sebastian Bergmann"
-      },
-      "externalReferences": [
-        {
-          "type": "vcs",
-          "url": "https://github.com/sebastianbergmann/php-text-template.git"
-        }
-      ]
-    },
-    {
-      "type": "library",
-      "name": "phpunit/php-timer",
-      "version": "6.0.0",
-      "purl": "pkg:composer/phpunit/php-timer@6.0.0",
-      "bom-ref": "pkg:composer/phpunit/php-timer@6.0.0",
-      "supplier": {
-        "name": "Sebastian Bergmann"
-      },
-      "externalReferences": [
-        {
-          "type": "vcs",
-          "url": "https://github.com/sebastianbergmann/php-timer.git"
-        }
-      ]
-    },
-    {
-      "type": "library",
-      "name": "phpunit/phpunit",
-      "version": "10.5.64",
-      "purl": "pkg:composer/phpunit/phpunit@10.5.64",
-      "bom-ref": "pkg:composer/phpunit/phpunit@10.5.64",
-      "supplier": {
-        "name": "Sebastian Bergmann"
-      },
-      "externalReferences": [
-        {
-          "type": "vcs",
-          "url": "https://github.com/sebastianbergmann/phpunit.git"
-        }
-      ]
-    },
-    {
-      "type": "library",
-      "name": "sebastian/cli-parser",
-      "version": "2.0.1",
-      "purl": "pkg:composer/sebastian/cli-parser@2.0.1",
-      "bom-ref": "pkg:composer/sebastian/cli-parser@2.0.1",
-      "supplier": {
-        "name": "Sebastian Bergmann"
-      },
-      "externalReferences": [
-        {
-          "type": "vcs",
-          "url": "https://github.com/sebastianbergmann/cli-parser.git"
-        }
-      ]
-    },
-    {
-      "type": "library",
-      "name": "sebastian/code-unit",
-      "version": "2.0.0",
-      "purl": "pkg:composer/sebastian/code-unit@2.0.0",
-      "bom-ref": "pkg:composer/sebastian/code-unit@2.0.0",
-      "supplier": {
-        "name": "Sebastian Bergmann"
-      },
-      "externalReferences": [
-        {
-          "type": "vcs",
-          "url": "https://github.com/sebastianbergmann/code-unit.git"
-        }
-      ]
-    },
-    {
-      "type": "library",
-      "name": "sebastian/code-unit-reverse-lookup",
-      "version": "3.0.0",
-      "purl": "pkg:composer/sebastian/code-unit-reverse-lookup@3.0.0",
-      "bom-ref": "pkg:composer/sebastian/code-unit-reverse-lookup@3.0.0",
-      "supplier": {
-        "name": "Sebastian Bergmann"
-      },
-      "externalReferences": [
-        {
-          "type": "vcs",
-          "url": "https://github.com/sebastianbergmann/code-unit-reverse-lookup.git"
-        }
-      ]
-    },
-    {
-      "type": "library",
-      "name": "sebastian/comparator",
-      "version": "5.0.5",
-      "purl": "pkg:composer/sebastian/comparator@5.0.5",
-      "bom-ref": "pkg:composer/sebastian/comparator@5.0.5",
-      "supplier": {
-        "name": "Sebastian Bergmann"
-      },
-      "externalReferences": [
-        {
-          "type": "vcs",
-          "url": "https://github.com/sebastianbergmann/comparator.git"
-        }
-      ]
-    },
-    {
-      "type": "library",
-      "name": "sebastian/complexity",
-      "version": "3.2.0",
-      "purl": "pkg:composer/sebastian/complexity@3.2.0",
-      "bom-ref": "pkg:composer/sebastian/complexity@3.2.0",
-      "supplier": {
-        "name": "Sebastian Bergmann"
-      },
-      "externalReferences": [
-        {
-          "type": "vcs",
-          "url": "https://github.com/sebastianbergmann/complexity.git"
-        }
-      ]
-    },
-    {
-      "type": "library",
-      "name": "sebastian/diff",
-      "version": "5.1.1",
-      "purl": "pkg:composer/sebastian/diff@5.1.1",
-      "bom-ref": "pkg:composer/sebastian/diff@5.1.1",
-      "supplier": {
-        "name": "Sebastian Bergmann"
-      },
-      "externalReferences": [
-        {
-          "type": "vcs",
-          "url": "https://github.com/sebastianbergmann/diff.git"
-        }
-      ]
-    },
-    {
-      "type": "library",
-      "name": "sebastian/environment",
-      "version": "6.1.0",
-      "purl": "pkg:composer/sebastian/environment@6.1.0",
-      "bom-ref": "pkg:composer/sebastian/environment@6.1.0",
-      "supplier": {
-        "name": "Sebastian Bergmann"
-      },
-      "externalReferences": [
-        {
-          "type": "vcs",
-          "url": "https://github.com/sebastianbergmann/environment.git"
-        }
-      ]
-    },
-    {
-      "type": "library",
-      "name": "sebastian/exporter",
-      "version": "5.1.4",
-      "purl": "pkg:composer/sebastian/exporter@5.1.4",
-      "bom-ref": "pkg:composer/sebastian/exporter@5.1.4",
-      "supplier": {
-        "name": "Sebastian Bergmann"
-      },
-      "externalReferences": [
-        {
-          "type": "vcs",
-          "url": "https://github.com/sebastianbergmann/exporter.git"
-        }
-      ]
-    },
-    {
-      "type": "library",
-      "name": "sebastian/global-state",
-      "version": "6.0.2",
-      "purl": "pkg:composer/sebastian/global-state@6.0.2",
-      "bom-ref": "pkg:composer/sebastian/global-state@6.0.2",
-      "supplier": {
-        "name": "Sebastian Bergmann"
-      },
-      "externalReferences": [
-        {
-          "type": "vcs",
-          "url": "https://github.com/sebastianbergmann/global-state.git"
-        }
-      ]
-    },
-    {
-      "type": "library",
-      "name": "sebastian/lines-of-code",
-      "version": "2.0.2",
-      "purl": "pkg:composer/sebastian/lines-of-code@2.0.2",
-      "bom-ref": "pkg:composer/sebastian/lines-of-code@2.0.2",
-      "supplier": {
-        "name": "Sebastian Bergmann"
-      },
-      "externalReferences": [
-        {
-          "type": "vcs",
-          "url": "https://github.com/sebastianbergmann/lines-of-code.git"
-        }
-      ]
-    },
-    {
-      "type": "library",
-      "name": "sebastian/object-enumerator",
-      "version": "5.0.0",
-      "purl": "pkg:composer/sebastian/object-enumerator@5.0.0",
-      "bom-ref": "pkg:composer/sebastian/object-enumerator@5.0.0",
-      "supplier": {
-        "name": "Sebastian Bergmann"
-      },
-      "externalReferences": [
-        {
-          "type": "vcs",
-          "url": "https://github.com/sebastianbergmann/object-enumerator.git"
-        }
-      ]
-    },
-    {
-      "type": "library",
-      "name": "sebastian/object-reflector",
-      "version": "3.0.0",
-      "purl": "pkg:composer/sebastian/object-reflector@3.0.0",
-      "bom-ref": "pkg:composer/sebastian/object-reflector@3.0.0",
-      "supplier": {
-        "name": "Sebastian Bergmann"
-      },
-      "externalReferences": [
-        {
-          "type": "vcs",
-          "url": "https://github.com/sebastianbergmann/object-reflector.git"
-        }
-      ]
-    },
-    {
-      "type": "library",
-      "name": "sebastian/recursion-context",
-      "version": "5.0.1",
-      "purl": "pkg:composer/sebastian/recursion-context@5.0.1",
-      "bom-ref": "pkg:composer/sebastian/recursion-context@5.0.1",
-      "supplier": {
-        "name": "Sebastian Bergmann"
-      },
-      "externalReferences": [
-        {
-          "type": "vcs",
-          "url": "https://github.com/sebastianbergmann/recursion-context.git"
-        }
-      ]
-    },
-    {
-      "type": "library",
-      "name": "sebastian/type",
-      "version": "4.0.0",
-      "purl": "pkg:composer/sebastian/type@4.0.0",
-      "bom-ref": "pkg:composer/sebastian/type@4.0.0",
-      "supplier": {
-        "name": "Sebastian Bergmann"
-      },
-      "externalReferences": [
-        {
-          "type": "vcs",
-          "url": "https://github.com/sebastianbergmann/type.git"
-        }
-      ]
-    },
-    {
-      "type": "library",
-      "name": "sebastian/version",
-      "version": "4.0.1",
-      "purl": "pkg:composer/sebastian/version@4.0.1",
-      "bom-ref": "pkg:composer/sebastian/version@4.0.1",
-      "supplier": {
-        "name": "Sebastian Bergmann"
-      },
-      "externalReferences": [
-        {
-          "type": "vcs",
-          "url": "https://github.com/sebastianbergmann/version.git"
-        }
-      ]
-    },
-    {
-      "type": "library",
-      "name": "spatie/backtrace",
-      "version": "1.8.2",
-      "purl": "pkg:composer/spatie/backtrace@1.8.2",
-      "bom-ref": "pkg:composer/spatie/backtrace@1.8.2",
-      "supplier": {
-        "name": "Freek Van de Herten"
-      },
-      "externalReferences": [
-        {
-          "type": "vcs",
-          "url": "https://github.com/spatie/backtrace.git"
-        }
-      ]
-    },
-    {
-      "type": "library",
-      "name": "spatie/error-solutions",
-      "version": "1.1.3",
-      "purl": "pkg:composer/spatie/error-solutions@1.1.3",
-      "bom-ref": "pkg:composer/spatie/error-solutions@1.1.3",
-      "supplier": {
-        "name": "Ruben Van Assche"
-      },
-      "externalReferences": [
-        {
-          "type": "vcs",
-          "url": "https://github.com/spatie/error-solutions.git"
-        }
-      ]
-    },
-    {
-      "type": "library",
-      "name": "spatie/flare-client-php",
-      "version": "1.11.1",
-      "purl": "pkg:composer/spatie/flare-client-php@1.11.1",
-      "bom-ref": "pkg:composer/spatie/flare-client-php@1.11.1",
-      "externalReferences": [
-        {
-          "type": "vcs",
-          "url": "https://github.com/spatie/flare-client-php.git"
-        }
-      ]
-    },
-    {
-      "type": "library",
-      "name": "spatie/ignition",
-      "version": "1.16.0",
-      "purl": "pkg:composer/spatie/ignition@1.16.0",
-      "bom-ref": "pkg:composer/spatie/ignition@1.16.0",
-      "supplier": {
-        "name": "Spatie"
-      },
-      "externalReferences": [
-        {
-          "type": "vcs",
-          "url": "https://github.com/spatie/ignition.git"
-        }
-      ]
-    },
-    {
-      "type": "library",
-      "name": "spatie/laravel-ignition",
-      "version": "2.9.1",
-      "purl": "pkg:composer/spatie/laravel-ignition@2.9.1",
-      "bom-ref": "pkg:composer/spatie/laravel-ignition@2.9.1",
-      "supplier": {
-        "name": "Spatie"
-      },
-      "externalReferences": [
-        {
-          "type": "vcs",
-          "url": "https://github.com/spatie/laravel-ignition.git"
-        }
-      ]
-    },
-    {
-      "type": "library",
-      "name": "symfony/yaml",
-      "version": "7.4.14",
-      "purl": "pkg:composer/symfony/yaml@7.4.14",
-      "bom-ref": "pkg:composer/symfony/yaml@7.4.14",
-      "supplier": {
-        "name": "Fabien Potencier"
-      },
-      "externalReferences": [
-        {
-          "type": "vcs",
-          "url": "https://github.com/symfony/yaml.git"
-        }
-      ]
-    },
-    {
-      "type": "library",
-      "name": "theseer/tokenizer",
-      "version": "1.3.1",
-      "purl": "pkg:composer/theseer/tokenizer@1.3.1",
-      "bom-ref": "pkg:composer/theseer/tokenizer@1.3.1",
-      "supplier": {
-        "name": "Arne Blankerts"
-      },
-      "externalReferences": [
-        {
-          "type": "vcs",
-          "url": "https://github.com/theseer/tokenizer.git"
-        }
-      ]
-    },
-    {
-      "type": "library",
-      "name": "@fontsource/georama",
-      "version": "5.3.0",
-      "purl": "pkg:npm/@fontsource/georama@5.3.0",
-      "bom-ref": "pkg:npm/@fontsource/georama@5.3.0",
-      "externalReferences": [
-        {
-          "type": "distribution",
-          "url": "https://registry.npmjs.org/@fontsource/georama/-/georama-5.3.0.tgz"
-        }
-      ]
-    },
-    {
-      "type": "library",
-      "name": "@fontsource/instrument-sans",
-      "version": "5.3.0",
-      "purl": "pkg:npm/@fontsource/instrument-sans@5.3.0",
-      "bom-ref": "pkg:npm/@fontsource/instrument-sans@5.3.0",
-      "externalReferences": [
-        {
-          "type": "distribution",
-          "url": "https://registry.npmjs.org/@fontsource/instrument-sans/-/instrument-sans-5.3.0.tgz"
-        }
-      ]
-    },
-    {
-      "type": "library",
-      "name": "@fortawesome/fontawesome-free",
-      "version": "7.3.1",
-      "purl": "pkg:npm/@fortawesome/fontawesome-free@7.3.1",
-      "bom-ref": "pkg:npm/@fortawesome/fontawesome-free@7.3.1",
-      "externalReferences": [
-        {
-          "type": "distribution",
-          "url": "https://registry.npmjs.org/@fortawesome/fontawesome-free/-/fontawesome-free-7.3.1.tgz"
-        }
-      ]
-    },
-    {
-      "type": "library",
-      "name": "@oxc-project/types",
-      "version": "0.153.0",
-      "purl": "pkg:npm/@oxc-project/types@0.153.0",
-      "bom-ref": "pkg:npm/@oxc-project/types@0.153.0",
-      "externalReferences": [
-        {
-          "type": "distribution",
-          "url": "https://registry.npmjs.org/@oxc-project/types/-/types-0.153.0.tgz"
-        }
-      ]
-    },
-    {
-      "type": "library",
-      "name": "@parcel/watcher",
-      "version": "2.5.6",
-      "purl": "pkg:npm/@parcel/watcher@2.5.6",
-      "bom-ref": "pkg:npm/@parcel/watcher@2.5.6",
-      "externalReferences": [
-        {
-          "type": "distribution",
-          "url": "https://registry.npmjs.org/@parcel/watcher/-/watcher-2.5.6.tgz"
-        }
-      ]
-    },
-    {
-      "type": "library",
-      "name": "@parcel/watcher-android-arm64",
-      "version": "2.5.6",
-      "purl": "pkg:npm/@parcel/watcher-android-arm64@2.5.6",
-      "bom-ref": "pkg:npm/@parcel/watcher-android-arm64@2.5.6",
-      "externalReferences": [
-        {
-          "type": "distribution",
-          "url": "https://registry.npmjs.org/@parcel/watcher-android-arm64/-/watcher-android-arm64-2.5.6.tgz"
-        }
-      ]
-    },
-    {
-      "type": "library",
-      "name": "@parcel/watcher-darwin-arm64",
-      "version": "2.5.6",
-      "purl": "pkg:npm/@parcel/watcher-darwin-arm64@2.5.6",
-      "bom-ref": "pkg:npm/@parcel/watcher-darwin-arm64@2.5.6",
-      "externalReferences": [
-        {
-          "type": "distribution",
-          "url": "https://registry.npmjs.org/@parcel/watcher-darwin-arm64/-/watcher-darwin-arm64-2.5.6.tgz"
-        }
-      ]
-    },
-    {
-      "type": "library",
-      "name": "@parcel/watcher-darwin-x64",
-      "version": "2.5.6",
-      "purl": "pkg:npm/@parcel/watcher-darwin-x64@2.5.6",
-      "bom-ref": "pkg:npm/@parcel/watcher-darwin-x64@2.5.6",
-      "externalReferences": [
-        {
-          "type": "distribution",
-          "url": "https://registry.npmjs.org/@parcel/watcher-darwin-x64/-/watcher-darwin-x64-2.5.6.tgz"
-        }
-      ]
-    },
-    {
-      "type": "library",
-      "name": "@parcel/watcher-freebsd-x64",
-      "version": "2.5.6",
-      "purl": "pkg:npm/@parcel/watcher-freebsd-x64@2.5.6",
-      "bom-ref": "pkg:npm/@parcel/watcher-freebsd-x64@2.5.6",
-      "externalReferences": [
-        {
-          "type": "distribution",
-          "url": "https://registry.npmjs.org/@parcel/watcher-freebsd-x64/-/watcher-freebsd-x64-2.5.6.tgz"
-        }
-      ]
-    },
-    {
-      "type": "library",
-      "name": "@parcel/watcher-linux-arm-glibc",
-      "version": "2.5.6",
-      "purl": "pkg:npm/@parcel/watcher-linux-arm-glibc@2.5.6",
-      "bom-ref": "pkg:npm/@parcel/watcher-linux-arm-glibc@2.5.6",
-      "externalReferences": [
-        {
-          "type": "distribution",
-          "url": "https://registry.npmjs.org/@parcel/watcher-linux-arm-glibc/-/watcher-linux-arm-glibc-2.5.6.tgz"
-        }
-      ]
-    },
-    {
-      "type": "library",
-      "name": "@parcel/watcher-linux-arm-musl",
-      "version": "2.5.6",
-      "purl": "pkg:npm/@parcel/watcher-linux-arm-musl@2.5.6",
-      "bom-ref": "pkg:npm/@parcel/watcher-linux-arm-musl@2.5.6",
-      "externalReferences": [
-        {
-          "type": "distribution",
-          "url": "https://registry.npmjs.org/@parcel/watcher-linux-arm-musl/-/watcher-linux-arm-musl-2.5.6.tgz"
-        }
-      ]
-    },
-    {
-      "type": "library",
-      "name": "@parcel/watcher-linux-arm64-glibc",
-      "version": "2.5.6",
-      "purl": "pkg:npm/@parcel/watcher-linux-arm64-glibc@2.5.6",
-      "bom-ref": "pkg:npm/@parcel/watcher-linux-arm64-glibc@2.5.6",
-      "externalReferences": [
-        {
-          "type": "distribution",
-          "url": "https://registry.npmjs.org/@parcel/watcher-linux-arm64-glibc/-/watcher-linux-arm64-glibc-2.5.6.tgz"
-        }
-      ]
-    },
-    {
-      "type": "library",
-      "name": "@parcel/watcher-linux-arm64-musl",
-      "version": "2.5.6",
-      "purl": "pkg:npm/@parcel/watcher-linux-arm64-musl@2.5.6",
-      "bom-ref": "pkg:npm/@parcel/watcher-linux-arm64-musl@2.5.6",
-      "externalReferences": [
-        {
-          "type": "distribution",
-          "url": "https://registry.npmjs.org/@parcel/watcher-linux-arm64-musl/-/watcher-linux-arm64-musl-2.5.6.tgz"
-        }
-      ]
-    },
-    {
-      "type": "library",
-      "name": "@parcel/watcher-linux-x64-glibc",
-      "version": "2.5.6",
-      "purl": "pkg:npm/@parcel/watcher-linux-x64-glibc@2.5.6",
-      "bom-ref": "pkg:npm/@parcel/watcher-linux-x64-glibc@2.5.6",
-      "externalReferences": [
-        {
-          "type": "distribution",
-          "url": "https://registry.npmjs.org/@parcel/watcher-linux-x64-glibc/-/watcher-linux-x64-glibc-2.5.6.tgz"
-        }
-      ]
-    },
-    {
-      "type": "library",
-      "name": "@parcel/watcher-linux-x64-musl",
-      "version": "2.5.6",
-      "purl": "pkg:npm/@parcel/watcher-linux-x64-musl@2.5.6",
-      "bom-ref": "pkg:npm/@parcel/watcher-linux-x64-musl@2.5.6",
-      "externalReferences": [
-        {
-          "type": "distribution",
-          "url": "https://registry.npmjs.org/@parcel/watcher-linux-x64-musl/-/watcher-linux-x64-musl-2.5.6.tgz"
-        }
-      ]
-    },
-    {
-      "type": "library",
-      "name": "@parcel/watcher-win32-arm64",
-      "version": "2.5.6",
-      "purl": "pkg:npm/@parcel/watcher-win32-arm64@2.5.6",
-      "bom-ref": "pkg:npm/@parcel/watcher-win32-arm64@2.5.6",
-      "externalReferences": [
-        {
-          "type": "distribution",
-          "url": "https://registry.npmjs.org/@parcel/watcher-win32-arm64/-/watcher-win32-arm64-2.5.6.tgz"
-        }
-      ]
-    },
-    {
-      "type": "library",
-      "name": "@parcel/watcher-win32-ia32",
-      "version": "2.5.6",
-      "purl": "pkg:npm/@parcel/watcher-win32-ia32@2.5.6",
-      "bom-ref": "pkg:npm/@parcel/watcher-win32-ia32@2.5.6",
-      "externalReferences": [
-        {
-          "type": "distribution",
-          "url": "https://registry.npmjs.org/@parcel/watcher-win32-ia32/-/watcher-win32-ia32-2.5.6.tgz"
-        }
-      ]
-    },
-    {
-      "type": "library",
-      "name": "@parcel/watcher-win32-x64",
-      "version": "2.5.6",
-      "purl": "pkg:npm/@parcel/watcher-win32-x64@2.5.6",
-      "bom-ref": "pkg:npm/@parcel/watcher-win32-x64@2.5.6",
-      "externalReferences": [
-        {
-          "type": "distribution",
-          "url": "https://registry.npmjs.org/@parcel/watcher-win32-x64/-/watcher-win32-x64-2.5.6.tgz"
-        }
-      ]
-    },
-    {
-      "type": "library",
-      "name": "@popperjs/core",
-      "version": "2.11.8",
-      "purl": "pkg:npm/@popperjs/core@2.11.8",
-      "bom-ref": "pkg:npm/@popperjs/core@2.11.8",
-      "externalReferences": [
-        {
-          "type": "distribution",
-          "url": "https://registry.npmjs.org/@popperjs/core/-/core-2.11.8.tgz"
-        }
-      ]
-    },
-    {
-      "type": "library",
-      "name": "@rolldown/binding-android-arm-eabi",
-      "version": "1.2.13",
-      "purl": "pkg:npm/@rolldown/binding-android-arm-eabi@1.2.13",
-      "bom-ref": "pkg:npm/@rolldown/binding-android-arm-eabi@1.2.13",
-      "externalReferences": [
-        {
-          "type": "distribution",
-          "url": "https://registry.npmjs.org/@rolldown/binding-android-arm-eabi/-/binding-android-arm-eabi-1.2.13.tgz"
-        }
-      ]
-    },
-    {
-      "type": "library",
-      "name": "@rolldown/binding-android-arm64",
-      "version": "1.2.13",
-      "purl": "pkg:npm/@rolldown/binding-android-arm64@1.2.13",
-      "bom-ref": "pkg:npm/@rolldown/binding-android-arm64@1.2.13",
-      "externalReferences": [
-        {
-          "type": "distribution",
-          "url": "https://registry.npmjs.org/@rolldown/binding-android-arm64/-/binding-android-arm64-1.2.13.tgz"
-        }
-      ]
-    },
-    {
-      "type": "library",
-      "name": "@rolldown/binding-darwin-arm64",
-      "version": "1.2.13",
-      "purl": "pkg:npm/@rolldown/binding-darwin-arm64@1.2.13",
-      "bom-ref": "pkg:npm/@rolldown/binding-darwin-arm64@1.2.13",
-      "externalReferences": [
-        {
-          "type": "distribution",
-          "url": "https://registry.npmjs.org/@rolldown/binding-darwin-arm64/-/binding-darwin-arm64-1.2.13.tgz"
-        }
-      ]
-    },
-    {
-      "type": "library",
-      "name": "@rolldown/binding-darwin-x64",
-      "version": "1.2.13",
-      "purl": "pkg:npm/@rolldown/binding-darwin-x64@1.2.13",
-      "bom-ref": "pkg:npm/@rolldown/binding-darwin-x64@1.2.13",
-      "externalReferences": [
-        {
-          "type": "distribution",
-          "url": "https://registry.npmjs.org/@rolldown/binding-darwin-x64/-/binding-darwin-x64-1.2.13.tgz"
-        }
-      ]
-    },
-    {
-      "type": "library",
-      "name": "@rolldown/binding-freebsd-x64",
-      "version": "1.2.13",
-      "purl": "pkg:npm/@rolldown/binding-freebsd-x64@1.2.13",
-      "bom-ref": "pkg:npm/@rolldown/binding-freebsd-x64@1.2.13",
-      "externalReferences": [
-        {
-          "type": "distribution",
-          "url": "https://registry.npmjs.org/@rolldown/binding-freebsd-x64/-/binding-freebsd-x64-1.2.13.tgz"
-        }
-      ]
-    },
-    {
-      "type": "library",
-      "name": "@rolldown/binding-linux-arm-gnueabihf",
-      "version": "1.2.13",
-      "purl": "pkg:npm/@rolldown/binding-linux-arm-gnueabihf@1.2.13",
-      "bom-ref": "pkg:npm/@rolldown/binding-linux-arm-gnueabihf@1.2.13",
-      "externalReferences": [
-        {
-          "type": "distribution",
-          "url": "https://registry.npmjs.org/@rolldown/binding-linux-arm-gnueabihf/-/binding-linux-arm-gnueabihf-1.2.13.tgz"
-        }
-      ]
-    },
-    {
-      "type": "library",
-      "name": "@rolldown/binding-linux-arm64-gnu",
-      "version": "1.2.13",
-      "purl": "pkg:npm/@rolldown/binding-linux-arm64-gnu@1.2.13",
-      "bom-ref": "pkg:npm/@rolldown/binding-linux-arm64-gnu@1.2.13",
-      "externalReferences": [
-        {
-          "type": "distribution",
-          "url": "https://registry.npmjs.org/@rolldown/binding-linux-arm64-gnu/-/binding-linux-arm64-gnu-1.2.13.tgz"
-        }
-      ]
-    },
-    {
-      "type": "library",
-      "name": "@rolldown/binding-linux-arm64-musl",
-      "version": "1.2.13",
-      "purl": "pkg:npm/@rolldown/binding-linux-arm64-musl@1.2.13",
-      "bom-ref": "pkg:npm/@rolldown/binding-linux-arm64-musl@1.2.13",
-      "externalReferences": [
-        {
-          "type": "distribution",
-          "url": "https://registry.npmjs.org/@rolldown/binding-linux-arm64-musl/-/binding-linux-arm64-musl-1.2.13.tgz"
-        }
-      ]
-    },
-    {
-      "type": "library",
-      "name": "@rolldown/binding-linux-ppc64-gnu",
-      "version": "1.2.13",
-      "purl": "pkg:npm/@rolldown/binding-linux-ppc64-gnu@1.2.13",
-      "bom-ref": "pkg:npm/@rolldown/binding-linux-ppc64-gnu@1.2.13",
-      "externalReferences": [
-        {
-          "type": "distribution",
-          "url": "https://registry.npmjs.org/@rolldown/binding-linux-ppc64-gnu/-/binding-linux-ppc64-gnu-1.2.13.tgz"
-        }
-      ]
-    },
-    {
-      "type": "library",
-      "name": "@rolldown/binding-linux-s390x-gnu",
-      "version": "1.2.13",
-      "purl": "pkg:npm/@rolldown/binding-linux-s390x-gnu@1.2.13",
-      "bom-ref": "pkg:npm/@rolldown/binding-linux-s390x-gnu@1.2.13",
-      "externalReferences": [
-        {
-          "type": "distribution",
-          "url": "https://registry.npmjs.org/@rolldown/binding-linux-s390x-gnu/-/binding-linux-s390x-gnu-1.2.13.tgz"
-        }
-      ]
-    },
-    {
-      "type": "library",
-      "name": "@rolldown/binding-linux-x64-gnu",
-      "version": "1.2.13",
-      "purl": "pkg:npm/@rolldown/binding-linux-x64-gnu@1.2.13",
-      "bom-ref": "pkg:npm/@rolldown/binding-linux-x64-gnu@1.2.13",
-      "externalReferences": [
-        {
-          "type": "distribution",
-          "url": "https://registry.npmjs.org/@rolldown/binding-linux-x64-gnu/-/binding-linux-x64-gnu-1.2.13.tgz"
-        }
-      ]
-    },
-    {
-      "type": "library",
-      "name": "@rolldown/binding-linux-x64-musl",
-      "version": "1.2.13",
-      "purl": "pkg:npm/@rolldown/binding-linux-x64-musl@1.2.13",
-      "bom-ref": "pkg:npm/@rolldown/binding-linux-x64-musl@1.2.13",
-      "externalReferences": [
-        {
-          "type": "distribution",
-          "url": "https://registry.npmjs.org/@rolldown/binding-linux-x64-musl/-/binding-linux-x64-musl-1.2.13.tgz"
-        }
-      ]
-    },
-    {
-      "type": "library",
-      "name": "@rolldown/binding-openharmony-arm64",
-      "version": "1.2.13",
-      "purl": "pkg:npm/@rolldown/binding-openharmony-arm64@1.2.13",
-      "bom-ref": "pkg:npm/@rolldown/binding-openharmony-arm64@1.2.13",
-      "externalReferences": [
-        {
-          "type": "distribution",
-          "url": "https://registry.npmjs.org/@rolldown/binding-openharmony-arm64/-/binding-openharmony-arm64-1.2.13.tgz"
-        }
-      ]
-    },
-    {
-      "type": "library",
-      "name": "@rolldown/binding-win32-arm64-msvc",
-      "version": "1.2.13",
-      "purl": "pkg:npm/@rolldown/binding-win32-arm64-msvc@1.2.13",
-      "bom-ref": "pkg:npm/@rolldown/binding-win32-arm64-msvc@1.2.13",
-      "externalReferences": [
-        {
-          "type": "distribution",
-          "url": "https://registry.npmjs.org/@rolldown/binding-win32-arm64-msvc/-/binding-win32-arm64-msvc-1.2.13.tgz"
-        }
-      ]
-    },
-    {
-      "type": "library",
-      "name": "@rolldown/binding-win32-x64-msvc",
-      "version": "1.2.13",
-      "purl": "pkg:npm/@rolldown/binding-win32-x64-msvc@1.2.13",
-      "bom-ref": "pkg:npm/@rolldown/binding-win32-x64-msvc@1.2.13",
-      "externalReferences": [
-        {
-          "type": "distribution",
-          "url": "https://registry.npmjs.org/@rolldown/binding-win32-x64-msvc/-/binding-win32-x64-msvc-1.2.13.tgz"
-        }
-      ]
-    },
-    {
-      "type": "library",
-      "name": "@rolldown/pluginutils",
-      "version": "1.0.1",
-      "purl": "pkg:npm/@rolldown/pluginutils@1.0.1",
-      "bom-ref": "pkg:npm/@rolldown/pluginutils@1.0.1",
-      "externalReferences": [
-        {
-          "type": "distribution",
-          "url": "https://registry.npmjs.org/@rolldown/pluginutils/-/pluginutils-1.0.1.tgz"
-        }
-      ]
-    },
-    {
-      "type": "library",
-      "name": "agent-base",
-      "version": "6.0.2",
-      "purl": "pkg:npm/agent-base@6.0.2",
-      "bom-ref": "pkg:npm/agent-base@6.0.2",
-      "externalReferences": [
-        {
-          "type": "distribution",
-          "url": "https://registry.npmjs.org/agent-base/-/agent-base-6.0.2.tgz"
-        }
-      ]
-    },
-    {
-      "type": "library",
-      "name": "asynckit",
-      "version": "0.4.0",
-      "purl": "pkg:npm/asynckit@0.4.0",
-      "bom-ref": "pkg:npm/asynckit@0.4.0",
-      "externalReferences": [
-        {
-          "type": "distribution",
-          "url": "https://registry.npmjs.org/asynckit/-/asynckit-0.4.0.tgz"
-        }
-      ]
-    },
-    {
-      "type": "library",
-      "name": "axios",
-      "version": "1.20.0",
-      "purl": "pkg:npm/axios@1.20.0",
-      "bom-ref": "pkg:npm/axios@1.20.0",
-      "externalReferences": [
-        {
-          "type": "distribution",
-          "url": "https://registry.npmjs.org/axios/-/axios-1.20.0.tgz"
-        }
-      ]
-    },
-    {
-      "type": "library",
-      "name": "bootstrap",
-      "version": "5.3.8",
-      "purl": "pkg:npm/bootstrap@5.3.8",
-      "bom-ref": "pkg:npm/bootstrap@5.3.8",
-      "externalReferences": [
-        {
-          "type": "distribution",
-          "url": "https://registry.npmjs.org/bootstrap/-/bootstrap-5.3.8.tgz"
-        }
-      ]
-    },
-    {
-      "type": "library",
-      "name": "call-bind-apply-helpers",
-      "version": "1.0.2",
-      "purl": "pkg:npm/call-bind-apply-helpers@1.0.2",
-      "bom-ref": "pkg:npm/call-bind-apply-helpers@1.0.2",
-      "externalReferences": [
-        {
-          "type": "distribution",
-          "url": "https://registry.npmjs.org/call-bind-apply-helpers/-/call-bind-apply-helpers-1.0.2.tgz"
-        }
-      ]
-    },
-    {
-      "type": "library",
-      "name": "chokidar",
-      "version": "5.0.0",
-      "purl": "pkg:npm/chokidar@5.0.0",
-      "bom-ref": "pkg:npm/chokidar@5.0.0",
-      "externalReferences": [
-        {
-          "type": "distribution",
-          "url": "https://registry.npmjs.org/chokidar/-/chokidar-5.0.0.tgz"
-        }
-      ]
-    },
-    {
-      "type": "library",
-      "name": "combined-stream",
-      "version": "1.0.8",
-      "purl": "pkg:npm/combined-stream@1.0.8",
-      "bom-ref": "pkg:npm/combined-stream@1.0.8",
-      "externalReferences": [
-        {
-          "type": "distribution",
-          "url": "https://registry.npmjs.org/combined-stream/-/combined-stream-1.0.8.tgz"
-        }
-      ]
-    },
-    {
-      "type": "library",
-      "name": "debug",
-      "version": "4.4.3",
-      "purl": "pkg:npm/debug@4.4.3",
-      "bom-ref": "pkg:npm/debug@4.4.3",
-      "externalReferences": [
-        {
-          "type": "distribution",
-          "url": "https://registry.npmjs.org/debug/-/debug-4.4.3.tgz"
-        }
-      ]
-    },
-    {
-      "type": "library",
-      "name": "delayed-stream",
-      "version": "1.0.0",
-      "purl": "pkg:npm/delayed-stream@1.0.0",
-      "bom-ref": "pkg:npm/delayed-stream@1.0.0",
-      "externalReferences": [
-        {
-          "type": "distribution",
-          "url": "https://registry.npmjs.org/delayed-stream/-/delayed-stream-1.0.0.tgz"
-        }
-      ]
-    },
-    {
-      "type": "library",
-      "name": "detect-libc",
-      "version": "2.1.2",
-      "purl": "pkg:npm/detect-libc@2.1.2",
-      "bom-ref": "pkg:npm/detect-libc@2.1.2",
-      "externalReferences": [
-        {
-          "type": "distribution",
-          "url": "https://registry.npmjs.org/detect-libc/-/detect-libc-2.1.2.tgz"
-        }
-      ]
-    },
-    {
-      "type": "library",
-      "name": "dunder-proto",
-      "version": "1.0.1",
-      "purl": "pkg:npm/dunder-proto@1.0.1",
-      "bom-ref": "pkg:npm/dunder-proto@1.0.1",
-      "externalReferences": [
-        {
-          "type": "distribution",
-          "url": "https://registry.npmjs.org/dunder-proto/-/dunder-proto-1.0.1.tgz"
-        }
-      ]
-    },
-    {
-      "type": "library",
-      "name": "es-define-property",
-      "version": "1.0.1",
-      "purl": "pkg:npm/es-define-property@1.0.1",
-      "bom-ref": "pkg:npm/es-define-property@1.0.1",
-      "externalReferences": [
-        {
-          "type": "distribution",
-          "url": "https://registry.npmjs.org/es-define-property/-/es-define-property-1.0.1.tgz"
-        }
-      ]
-    },
-    {
-      "type": "library",
-      "name": "es-errors",
-      "version": "1.3.0",
-      "purl": "pkg:npm/es-errors@1.3.0",
-      "bom-ref": "pkg:npm/es-errors@1.3.0",
-      "externalReferences": [
-        {
-          "type": "distribution",
-          "url": "https://registry.npmjs.org/es-errors/-/es-errors-1.3.0.tgz"
-        }
-      ]
-    },
-    {
-      "type": "library",
-      "name": "es-object-atoms",
-      "version": "1.1.2",
-      "purl": "pkg:npm/es-object-atoms@1.1.2",
-      "bom-ref": "pkg:npm/es-object-atoms@1.1.2",
-      "externalReferences": [
-        {
-          "type": "distribution",
-          "url": "https://registry.npmjs.org/es-object-atoms/-/es-object-atoms-1.1.2.tgz"
-        }
-      ]
-    },
-    {
-      "type": "library",
-      "name": "es-set-tostringtag",
-      "version": "2.1.0",
-      "purl": "pkg:npm/es-set-tostringtag@2.1.0",
-      "bom-ref": "pkg:npm/es-set-tostringtag@2.1.0",
-      "externalReferences": [
-        {
-          "type": "distribution",
-          "url": "https://registry.npmjs.org/es-set-tostringtag/-/es-set-tostringtag-2.1.0.tgz"
-        }
-      ]
-    },
-    {
-      "type": "library",
-      "name": "fdir",
-      "version": "6.5.0",
-      "purl": "pkg:npm/fdir@6.5.0",
-      "bom-ref": "pkg:npm/fdir@6.5.0",
-      "externalReferences": [
-        {
-          "type": "distribution",
-          "url": "https://registry.npmjs.org/fdir/-/fdir-6.5.0.tgz"
-        }
-      ]
-    },
-    {
-      "type": "library",
-      "name": "follow-redirects",
-      "version": "1.16.0",
-      "purl": "pkg:npm/follow-redirects@1.16.0",
-      "bom-ref": "pkg:npm/follow-redirects@1.16.0",
-      "externalReferences": [
-        {
-          "type": "distribution",
-          "url": "https://registry.npmjs.org/follow-redirects/-/follow-redirects-1.16.0.tgz"
-        }
-      ]
-    },
-    {
-      "type": "library",
-      "name": "form-data",
-      "version": "4.0.6",
-      "purl": "pkg:npm/form-data@4.0.6",
-      "bom-ref": "pkg:npm/form-data@4.0.6",
-      "externalReferences": [
-        {
-          "type": "distribution",
-          "url": "https://registry.npmjs.org/form-data/-/form-data-4.0.6.tgz"
-        }
-      ]
-    },
-    {
-      "type": "library",
-      "name": "fsevents",
-      "version": "2.3.3",
-      "purl": "pkg:npm/fsevents@2.3.3",
-      "bom-ref": "pkg:npm/fsevents@2.3.3",
-      "externalReferences": [
-        {
-          "type": "distribution",
-          "url": "https://registry.npmjs.org/fsevents/-/fsevents-2.3.3.tgz"
-        }
-      ]
-    },
-    {
-      "type": "library",
-      "name": "function-bind",
-      "version": "1.1.2",
-      "purl": "pkg:npm/function-bind@1.1.2",
-      "bom-ref": "pkg:npm/function-bind@1.1.2",
-      "externalReferences": [
-        {
-          "type": "distribution",
-          "url": "https://registry.npmjs.org/function-bind/-/function-bind-1.1.2.tgz"
-        }
-      ]
-    },
-    {
-      "type": "library",
-      "name": "get-intrinsic",
-      "version": "1.3.0",
-      "purl": "pkg:npm/get-intrinsic@1.3.0",
-      "bom-ref": "pkg:npm/get-intrinsic@1.3.0",
-      "externalReferences": [
-        {
-          "type": "distribution",
-          "url": "https://registry.npmjs.org/get-intrinsic/-/get-intrinsic-1.3.0.tgz"
-        }
-      ]
-    },
-    {
-      "type": "library",
-      "name": "get-proto",
-      "version": "1.0.1",
-      "purl": "pkg:npm/get-proto@1.0.1",
-      "bom-ref": "pkg:npm/get-proto@1.0.1",
-      "externalReferences": [
-        {
-          "type": "distribution",
-          "url": "https://registry.npmjs.org/get-proto/-/get-proto-1.0.1.tgz"
-        }
-      ]
-    },
-    {
-      "type": "library",
-      "name": "gopd",
-      "version": "1.2.0",
-      "purl": "pkg:npm/gopd@1.2.0",
-      "bom-ref": "pkg:npm/gopd@1.2.0",
-      "externalReferences": [
-        {
-          "type": "distribution",
-          "url": "https://registry.npmjs.org/gopd/-/gopd-1.2.0.tgz"
-        }
-      ]
-    },
-    {
-      "type": "library",
-      "name": "has-symbols",
-      "version": "1.1.0",
-      "purl": "pkg:npm/has-symbols@1.1.0",
-      "bom-ref": "pkg:npm/has-symbols@1.1.0",
-      "externalReferences": [
-        {
-          "type": "distribution",
-          "url": "https://registry.npmjs.org/has-symbols/-/has-symbols-1.1.0.tgz"
-        }
-      ]
-    },
-    {
-      "type": "library",
-      "name": "has-tostringtag",
-      "version": "1.0.2",
-      "purl": "pkg:npm/has-tostringtag@1.0.2",
-      "bom-ref": "pkg:npm/has-tostringtag@1.0.2",
-      "externalReferences": [
-        {
-          "type": "distribution",
-          "url": "https://registry.npmjs.org/has-tostringtag/-/has-tostringtag-1.0.2.tgz"
-        }
-      ]
-    },
-    {
-      "type": "library",
-      "name": "hasown",
-      "version": "2.0.4",
-      "purl": "pkg:npm/hasown@2.0.4",
-      "bom-ref": "pkg:npm/hasown@2.0.4",
-      "externalReferences": [
-        {
-          "type": "distribution",
-          "url": "https://registry.npmjs.org/hasown/-/hasown-2.0.4.tgz"
-        }
-      ]
-    },
-    {
-      "type": "library",
-      "name": "https-proxy-agent",
-      "version": "5.0.1",
-      "purl": "pkg:npm/https-proxy-agent@5.0.1",
-      "bom-ref": "pkg:npm/https-proxy-agent@5.0.1",
-      "externalReferences": [
-        {
-          "type": "distribution",
-          "url": "https://registry.npmjs.org/https-proxy-agent/-/https-proxy-agent-5.0.1.tgz"
-        }
-      ]
-    },
-    {
-      "type": "library",
-      "name": "immutable",
-      "version": "5.1.9",
-      "purl": "pkg:npm/immutable@5.1.9",
-      "bom-ref": "pkg:npm/immutable@5.1.9",
-      "externalReferences": [
-        {
-          "type": "distribution",
-          "url": "https://registry.npmjs.org/immutable/-/immutable-5.1.9.tgz"
-        }
-      ]
-    },
-    {
-      "type": "library",
-      "name": "is-extglob",
-      "version": "2.1.1",
-      "purl": "pkg:npm/is-extglob@2.1.1",
-      "bom-ref": "pkg:npm/is-extglob@2.1.1",
-      "externalReferences": [
-        {
-          "type": "distribution",
-          "url": "https://registry.npmjs.org/is-extglob/-/is-extglob-2.1.1.tgz"
-        }
-      ]
-    },
-    {
-      "type": "library",
-      "name": "is-glob",
-      "version": "4.0.3",
-      "purl": "pkg:npm/is-glob@4.0.3",
-      "bom-ref": "pkg:npm/is-glob@4.0.3",
-      "externalReferences": [
-        {
-          "type": "distribution",
-          "url": "https://registry.npmjs.org/is-glob/-/is-glob-4.0.3.tgz"
-        }
-      ]
-    },
-    {
-      "type": "library",
-      "name": "laravel-vite-plugin",
-      "version": "3.2.0",
-      "purl": "pkg:npm/laravel-vite-plugin@3.2.0",
-      "bom-ref": "pkg:npm/laravel-vite-plugin@3.2.0",
-      "externalReferences": [
-        {
-          "type": "distribution",
-          "url": "https://registry.npmjs.org/laravel-vite-plugin/-/laravel-vite-plugin-3.2.0.tgz"
-        }
-      ]
-    },
-    {
-      "type": "library",
-      "name": "lightningcss",
-      "version": "1.33.0",
-      "purl": "pkg:npm/lightningcss@1.33.0",
-      "bom-ref": "pkg:npm/lightningcss@1.33.0",
-      "externalReferences": [
-        {
-          "type": "distribution",
-          "url": "https://registry.npmjs.org/lightningcss/-/lightningcss-1.33.0.tgz"
-        }
-      ]
-    },
-    {
-      "type": "library",
-      "name": "lightningcss-android-arm64",
-      "version": "1.33.0",
-      "purl": "pkg:npm/lightningcss-android-arm64@1.33.0",
-      "bom-ref": "pkg:npm/lightningcss-android-arm64@1.33.0",
-      "externalReferences": [
-        {
-          "type": "distribution",
-          "url": "https://registry.npmjs.org/lightningcss-android-arm64/-/lightningcss-android-arm64-1.33.0.tgz"
-        }
-      ]
-    },
-    {
-      "type": "library",
-      "name": "lightningcss-darwin-arm64",
-      "version": "1.33.0",
-      "purl": "pkg:npm/lightningcss-darwin-arm64@1.33.0",
-      "bom-ref": "pkg:npm/lightningcss-darwin-arm64@1.33.0",
-      "externalReferences": [
-        {
-          "type": "distribution",
-          "url": "https://registry.npmjs.org/lightningcss-darwin-arm64/-/lightningcss-darwin-arm64-1.33.0.tgz"
-        }
-      ]
-    },
-    {
-      "type": "library",
-      "name": "lightningcss-darwin-x64",
-      "version": "1.33.0",
-      "purl": "pkg:npm/lightningcss-darwin-x64@1.33.0",
-      "bom-ref": "pkg:npm/lightningcss-darwin-x64@1.33.0",
-      "externalReferences": [
-        {
-          "type": "distribution",
-          "url": "https://registry.npmjs.org/lightningcss-darwin-x64/-/lightningcss-darwin-x64-1.33.0.tgz"
-        }
-      ]
-    },
-    {
-      "type": "library",
-      "name": "lightningcss-freebsd-x64",
-      "version": "1.33.0",
-      "purl": "pkg:npm/lightningcss-freebsd-x64@1.33.0",
-      "bom-ref": "pkg:npm/lightningcss-freebsd-x64@1.33.0",
-      "externalReferences": [
-        {
-          "type": "distribution",
-          "url": "https://registry.npmjs.org/lightningcss-freebsd-x64/-/lightningcss-freebsd-x64-1.33.0.tgz"
-        }
-      ]
-    },
-    {
-      "type": "library",
-      "name": "lightningcss-linux-arm-gnueabihf",
-      "version": "1.33.0",
-      "purl": "pkg:npm/lightningcss-linux-arm-gnueabihf@1.33.0",
-      "bom-ref": "pkg:npm/lightningcss-linux-arm-gnueabihf@1.33.0",
-      "externalReferences": [
-        {
-          "type": "distribution",
-          "url": "https://registry.npmjs.org/lightningcss-linux-arm-gnueabihf/-/lightningcss-linux-arm-gnueabihf-1.33.0.tgz"
-        }
-      ]
-    },
-    {
-      "type": "library",
-      "name": "lightningcss-linux-arm64-gnu",
-      "version": "1.33.0",
-      "purl": "pkg:npm/lightningcss-linux-arm64-gnu@1.33.0",
-      "bom-ref": "pkg:npm/lightningcss-linux-arm64-gnu@1.33.0",
-      "externalReferences": [
-        {
-          "type": "distribution",
-          "url": "https://registry.npmjs.org/lightningcss-linux-arm64-gnu/-/lightningcss-linux-arm64-gnu-1.33.0.tgz"
-        }
-      ]
-    },
-    {
-      "type": "library",
-      "name": "lightningcss-linux-arm64-musl",
-      "version": "1.33.0",
-      "purl": "pkg:npm/lightningcss-linux-arm64-musl@1.33.0",
-      "bom-ref": "pkg:npm/lightningcss-linux-arm64-musl@1.33.0",
-      "externalReferences": [
-        {
-          "type": "distribution",
-          "url": "https://registry.npmjs.org/lightningcss-linux-arm64-musl/-/lightningcss-linux-arm64-musl-1.33.0.tgz"
-        }
-      ]
-    },
-    {
-      "type": "library",
-      "name": "lightningcss-linux-x64-gnu",
-      "version": "1.33.0",
-      "purl": "pkg:npm/lightningcss-linux-x64-gnu@1.33.0",
-      "bom-ref": "pkg:npm/lightningcss-linux-x64-gnu@1.33.0",
-      "externalReferences": [
-        {
-          "type": "distribution",
-          "url": "https://registry.npmjs.org/lightningcss-linux-x64-gnu/-/lightningcss-linux-x64-gnu-1.33.0.tgz"
-        }
-      ]
-    },
-    {
-      "type": "library",
-      "name": "lightningcss-linux-x64-musl",
-      "version": "1.33.0",
-      "purl": "pkg:npm/lightningcss-linux-x64-musl@1.33.0",
-      "bom-ref": "pkg:npm/lightningcss-linux-x64-musl@1.33.0",
-      "externalReferences": [
-        {
-          "type": "distribution",
-          "url": "https://registry.npmjs.org/lightningcss-linux-x64-musl/-/lightningcss-linux-x64-musl-1.33.0.tgz"
-        }
-      ]
-    },
-    {
-      "type": "library",
-      "name": "lightningcss-win32-arm64-msvc",
-      "version": "1.33.0",
-      "purl": "pkg:npm/lightningcss-win32-arm64-msvc@1.33.0",
-      "bom-ref": "pkg:npm/lightningcss-win32-arm64-msvc@1.33.0",
-      "externalReferences": [
-        {
-          "type": "distribution",
-          "url": "https://registry.npmjs.org/lightningcss-win32-arm64-msvc/-/lightningcss-win32-arm64-msvc-1.33.0.tgz"
-        }
-      ]
-    },
-    {
-      "type": "library",
-      "name": "lightningcss-win32-x64-msvc",
-      "version": "1.33.0",
-      "purl": "pkg:npm/lightningcss-win32-x64-msvc@1.33.0",
-      "bom-ref": "pkg:npm/lightningcss-win32-x64-msvc@1.33.0",
-      "externalReferences": [
-        {
-          "type": "distribution",
-          "url": "https://registry.npmjs.org/lightningcss-win32-x64-msvc/-/lightningcss-win32-x64-msvc-1.33.0.tgz"
-        }
-      ]
-    },
-    {
-      "type": "library",
-      "name": "math-intrinsics",
-      "version": "1.1.0",
-      "purl": "pkg:npm/math-intrinsics@1.1.0",
-      "bom-ref": "pkg:npm/math-intrinsics@1.1.0",
-      "externalReferences": [
-        {
-          "type": "distribution",
-          "url": "https://registry.npmjs.org/math-intrinsics/-/math-intrinsics-1.1.0.tgz"
-        }
-      ]
-    },
-    {
-      "type": "library",
-      "name": "mime-db",
-      "version": "1.52.0",
-      "purl": "pkg:npm/mime-db@1.52.0",
-      "bom-ref": "pkg:npm/mime-db@1.52.0",
-      "externalReferences": [
-        {
-          "type": "distribution",
-          "url": "https://registry.npmjs.org/mime-db/-/mime-db-1.52.0.tgz"
-        }
-      ]
-    },
-    {
-      "type": "library",
-      "name": "mime-types",
-      "version": "2.1.35",
-      "purl": "pkg:npm/mime-types@2.1.35",
-      "bom-ref": "pkg:npm/mime-types@2.1.35",
-      "externalReferences": [
-        {
-          "type": "distribution",
-          "url": "https://registry.npmjs.org/mime-types/-/mime-types-2.1.35.tgz"
-        }
-      ]
-    },
-    {
-      "type": "library",
-      "name": "ms",
-      "version": "2.1.3",
-      "purl": "pkg:npm/ms@2.1.3",
-      "bom-ref": "pkg:npm/ms@2.1.3",
-      "externalReferences": [
-        {
-          "type": "distribution",
-          "url": "https://registry.npmjs.org/ms/-/ms-2.1.3.tgz"
-        }
-      ]
-    },
-    {
-      "type": "library",
-      "name": "nanoid",
-      "version": "3.3.20",
-      "purl": "pkg:npm/nanoid@3.3.20",
-      "bom-ref": "pkg:npm/nanoid@3.3.20",
-      "externalReferences": [
-        {
-          "type": "distribution",
-          "url": "https://registry.npmjs.org/nanoid/-/nanoid-3.3.20.tgz"
-        }
-      ]
-    },
-    {
-      "type": "library",
-      "name": "node-addon-api",
-      "version": "7.1.1",
-      "purl": "pkg:npm/node-addon-api@7.1.1",
-      "bom-ref": "pkg:npm/node-addon-api@7.1.1",
-      "externalReferences": [
-        {
-          "type": "distribution",
-          "url": "https://registry.npmjs.org/node-addon-api/-/node-addon-api-7.1.1.tgz"
-        }
-      ]
-    },
-    {
-      "type": "library",
-      "name": "picocolors",
-      "version": "1.1.1",
-      "purl": "pkg:npm/picocolors@1.1.1",
-      "bom-ref": "pkg:npm/picocolors@1.1.1",
-      "externalReferences": [
-        {
-          "type": "distribution",
-          "url": "https://registry.npmjs.org/picocolors/-/picocolors-1.1.1.tgz"
-        }
-      ]
-    },
-    {
-      "type": "library",
-      "name": "picomatch",
-      "version": "4.0.7",
-      "purl": "pkg:npm/picomatch@4.0.7",
-      "bom-ref": "pkg:npm/picomatch@4.0.7",
-      "externalReferences": [
-        {
-          "type": "distribution",
-          "url": "https://registry.npmjs.org/picomatch/-/picomatch-4.0.7.tgz"
-        }
-      ]
-    },
-    {
-      "type": "library",
-      "name": "postcss",
-      "version": "8.5.29",
-      "purl": "pkg:npm/postcss@8.5.29",
-      "bom-ref": "pkg:npm/postcss@8.5.29",
-      "externalReferences": [
-        {
-          "type": "distribution",
-          "url": "https://registry.npmjs.org/postcss/-/postcss-8.5.29.tgz"
-        }
-      ]
-    },
-    {
-      "type": "library",
-      "name": "proxy-from-env",
-      "version": "2.1.0",
-      "purl": "pkg:npm/proxy-from-env@2.1.0",
-      "bom-ref": "pkg:npm/proxy-from-env@2.1.0",
-      "externalReferences": [
-        {
-          "type": "distribution",
-          "url": "https://registry.npmjs.org/proxy-from-env/-/proxy-from-env-2.1.0.tgz"
-        }
-      ]
-    },
-    {
-      "type": "library",
-      "name": "readdirp",
-      "version": "5.0.0",
-      "purl": "pkg:npm/readdirp@5.0.0",
-      "bom-ref": "pkg:npm/readdirp@5.0.0",
-      "externalReferences": [
-        {
-          "type": "distribution",
-          "url": "https://registry.npmjs.org/readdirp/-/readdirp-5.0.0.tgz"
-        }
-      ]
-    },
-    {
-      "type": "library",
-      "name": "rolldown",
-      "version": "1.2.13",
-      "purl": "pkg:npm/rolldown@1.2.13",
-      "bom-ref": "pkg:npm/rolldown@1.2.13",
-      "externalReferences": [
-        {
-          "type": "distribution",
-          "url": "https://registry.npmjs.org/rolldown/-/rolldown-1.2.13.tgz"
-        }
-      ]
-    },
-    {
-      "type": "library",
-      "name": "sass",
-      "version": "1.101.0",
-      "purl": "pkg:npm/sass@1.101.0",
-      "bom-ref": "pkg:npm/sass@1.101.0",
-      "externalReferences": [
-        {
-          "type": "distribution",
-          "url": "https://registry.npmjs.org/sass/-/sass-1.101.0.tgz"
-        }
-      ]
-    },
-    {
-      "type": "library",
-      "name": "source-map-js",
-      "version": "1.2.2",
-      "purl": "pkg:npm/source-map-js@1.2.2",
-      "bom-ref": "pkg:npm/source-map-js@1.2.2",
-      "externalReferences": [
-        {
-          "type": "distribution",
-          "url": "https://registry.npmjs.org/source-map-js/-/source-map-js-1.2.2.tgz"
-        }
-      ]
-    },
-    {
-      "type": "library",
-      "name": "tinyglobby",
-      "version": "0.2.17",
-      "purl": "pkg:npm/tinyglobby@0.2.17",
-      "bom-ref": "pkg:npm/tinyglobby@0.2.17",
-      "externalReferences": [
-        {
-          "type": "distribution",
-          "url": "https://registry.npmjs.org/tinyglobby/-/tinyglobby-0.2.17.tgz"
-        }
-      ]
-    },
-    {
-      "type": "library",
-      "name": "tinymce",
-      "version": "8.9.2",
-      "purl": "pkg:npm/tinymce@8.9.2",
-      "bom-ref": "pkg:npm/tinymce@8.9.2",
-      "externalReferences": [
-        {
-          "type": "distribution",
-          "url": "https://registry.npmjs.org/tinymce/-/tinymce-8.9.2.tgz"
-        }
-      ]
-    },
-    {
-      "type": "library",
-      "name": "tinymce-i18n",
-      "version": "26.9.28",
-      "purl": "pkg:npm/tinymce-i18n@26.9.28",
-      "bom-ref": "pkg:npm/tinymce-i18n@26.9.28",
-      "externalReferences": [
-        {
-          "type": "distribution",
-          "url": "https://registry.npmjs.org/tinymce-i18n/-/tinymce-i18n-26.9.28.tgz"
-        }
-      ]
-    },
-    {
-      "type": "library",
-      "name": "vite",
-      "version": "8.3.4",
-      "purl": "pkg:npm/vite@8.3.4",
-      "bom-ref": "pkg:npm/vite@8.3.4",
-      "externalReferences": [
-        {
-          "type": "distribution",
-          "url": "https://registry.npmjs.org/vite/-/vite-8.3.4.tgz"
-        }
-      ]
-    },
-    {
-      "type": "library",
-      "name": "vite-plugin-full-reload",
-      "version": "1.2.0",
-      "purl": "pkg:npm/vite-plugin-full-reload@1.2.0",
-      "bom-ref": "pkg:npm/vite-plugin-full-reload@1.2.0",
-      "externalReferences": [
-        {
-          "type": "distribution",
-          "url": "https://registry.npmjs.org/vite-plugin-full-reload/-/vite-plugin-full-reload-1.2.0.tgz"
-        }
-      ]
-    }
-  ]
+    "bomFormat": "CycloneDX",
+    "specVersion": "1.5",
+    "serialNumber": "urn:uuid:b3ec5c9e-a873-f35d-4f59-a937bb61946d",
+    "version": 1,
+    "metadata": {
+        "timestamp": "2026-10-21T23:17:01.000000Z",
+        "tools": [
+            {
+                "vendor": "Portal2026",
+                "name": "custom-sbom-generator",
+                "version": "1.1"
+            }
+        ],
+        "component": {
+            "type": "application",
+            "bom-ref": "pkg:composer/laravel/laravel@10.x",
+            "name": "PortalPG2026",
+            "version": "1.0.0",
+            "licenses": [
+                {
+                    "license": {
+                        "id": "MIT"
+                    }
+                }
+            ]
+        }
+    },
+    "components": [
+        {
+            "type": "library",
+            "bom-ref": "pkg:composer/brick/math@0.12.3",
+            "name": "brick/math",
+            "version": "0.12.3",
+            "purl": "pkg:composer/brick/math@0.12.3",
+            "licenses": [
+                {
+                    "license": {
+                        "id": "MIT"
+                    }
+                }
+            ]
+        },
+        {
+            "type": "library",
+            "bom-ref": "pkg:composer/carbonphp/carbon-doctrine-types@2.1.0",
+            "name": "carbonphp/carbon-doctrine-types",
+            "version": "2.1.0",
+            "purl": "pkg:composer/carbonphp/carbon-doctrine-types@2.1.0",
+            "licenses": [
+                {
+                    "license": {
+                        "id": "MIT"
+                    }
+                }
+            ]
+        },
+        {
+            "type": "library",
+            "bom-ref": "pkg:composer/dflydev/dot-access-data@v3.0.3",
+            "name": "dflydev/dot-access-data",
+            "version": "v3.0.3",
+            "purl": "pkg:composer/dflydev/dot-access-data@v3.0.3",
+            "licenses": [
+                {
+                    "license": {
+                        "id": "MIT"
+                    }
+                }
+            ]
+        },
+        {
+            "type": "library",
+            "bom-ref": "pkg:composer/doctrine/dbal@3.10.6",
+            "name": "doctrine/dbal",
+            "version": "3.10.6",
+            "purl": "pkg:composer/doctrine/dbal@3.10.6",
+            "licenses": [
+                {
+                    "license": {
+                        "id": "MIT"
+                    }
+                }
+            ]
+        },
+        {
+            "type": "library",
+            "bom-ref": "pkg:composer/doctrine/deprecations@1.1.6",
+            "name": "doctrine/deprecations",
+            "version": "1.1.6",
+            "purl": "pkg:composer/doctrine/deprecations@1.1.6",
+            "licenses": [
+                {
+                    "license": {
+                        "id": "MIT"
+                    }
+                }
+            ]
+        },
+        {
+            "type": "library",
+            "bom-ref": "pkg:composer/doctrine/event-manager@2.1.1",
+            "name": "doctrine/event-manager",
+            "version": "2.1.1",
+            "purl": "pkg:composer/doctrine/event-manager@2.1.1",
+            "licenses": [
+                {
+                    "license": {
+                        "id": "MIT"
+                    }
+                }
+            ]
+        },
+        {
+            "type": "library",
+            "bom-ref": "pkg:composer/doctrine/inflector@2.1.0",
+            "name": "doctrine/inflector",
+            "version": "2.1.0",
+            "purl": "pkg:composer/doctrine/inflector@2.1.0",
+            "licenses": [
+                {
+                    "license": {
+                        "id": "MIT"
+                    }
+                }
+            ]
+        },
+        {
+            "type": "library",
+            "bom-ref": "pkg:composer/doctrine/lexer@3.0.1",
+            "name": "doctrine/lexer",
+            "version": "3.0.1",
+            "purl": "pkg:composer/doctrine/lexer@3.0.1",
+            "licenses": [
+                {
+                    "license": {
+                        "id": "MIT"
+                    }
+                }
+            ]
+        },
+        {
+            "type": "library",
+            "bom-ref": "pkg:composer/dragonmantank/cron-expression@v3.6.0",
+            "name": "dragonmantank/cron-expression",
+            "version": "v3.6.0",
+            "purl": "pkg:composer/dragonmantank/cron-expression@v3.6.0",
+            "licenses": [
+                {
+                    "license": {
+                        "id": "MIT"
+                    }
+                }
+            ]
+        },
+        {
+            "type": "library",
+            "bom-ref": "pkg:composer/egulias/email-validator@4.0.4",
+            "name": "egulias/email-validator",
+            "version": "4.0.4",
+            "purl": "pkg:composer/egulias/email-validator@4.0.4",
+            "licenses": [
+                {
+                    "license": {
+                        "id": "MIT"
+                    }
+                }
+            ]
+        },
+        {
+            "type": "library",
+            "bom-ref": "pkg:composer/ezyang/htmlpurifier@v4.19.1",
+            "name": "ezyang/htmlpurifier",
+            "version": "v4.19.1",
+            "purl": "pkg:composer/ezyang/htmlpurifier@v4.19.1",
+            "licenses": [
+                {
+                    "license": {
+                        "id": "LGPL-2.1-or-later"
+                    }
+                }
+            ]
+        },
+        {
+            "type": "library",
+            "bom-ref": "pkg:composer/fakerphp/faker@v1.24.1",
+            "name": "fakerphp/faker",
+            "version": "v1.24.1",
+            "purl": "pkg:composer/fakerphp/faker@v1.24.1",
+            "licenses": [
+                {
+                    "license": {
+                        "id": "MIT"
+                    }
+                }
+            ]
+        },
+        {
+            "type": "library",
+            "bom-ref": "pkg:composer/filp/whoops@2.18.4",
+            "name": "filp/whoops",
+            "version": "2.18.4",
+            "purl": "pkg:composer/filp/whoops@2.18.4",
+            "licenses": [
+                {
+                    "license": {
+                        "id": "MIT"
+                    }
+                }
+            ]
+        },
+        {
+            "type": "library",
+            "bom-ref": "pkg:composer/fruitcake/php-cors@v1.4.0",
+            "name": "fruitcake/php-cors",
+            "version": "v1.4.0",
+            "purl": "pkg:composer/fruitcake/php-cors@v1.4.0",
+            "licenses": [
+                {
+                    "license": {
+                        "id": "MIT"
+                    }
+                }
+            ]
+        },
+        {
+            "type": "library",
+            "bom-ref": "pkg:composer/graham-campbell/result-type@v1.1.4",
+            "name": "graham-campbell/result-type",
+            "version": "v1.1.4",
+            "purl": "pkg:composer/graham-campbell/result-type@v1.1.4",
+            "licenses": [
+                {
+                    "license": {
+                        "id": "MIT"
+                    }
+                }
+            ]
+        },
+        {
+            "type": "library",
+            "bom-ref": "pkg:composer/guzzlehttp/guzzle@7.15.5",
+            "name": "guzzlehttp/guzzle",
+            "version": "7.15.5",
+            "purl": "pkg:composer/guzzlehttp/guzzle@7.15.5",
+            "licenses": [
+                {
+                    "license": {
+                        "id": "MIT"
+                    }
+                }
+            ]
+        },
+        {
+            "type": "library",
+            "bom-ref": "pkg:composer/guzzlehttp/promises@2.5.3",
+            "name": "guzzlehttp/promises",
+            "version": "2.5.3",
+            "purl": "pkg:composer/guzzlehttp/promises@2.5.3",
+            "licenses": [
+                {
+                    "license": {
+                        "id": "MIT"
+                    }
+                }
+            ]
+        },
+        {
+            "type": "library",
+            "bom-ref": "pkg:composer/guzzlehttp/psr7@2.13.1",
+            "name": "guzzlehttp/psr7",
+            "version": "2.13.1",
+            "purl": "pkg:composer/guzzlehttp/psr7@2.13.1",
+            "licenses": [
+                {
+                    "license": {
+                        "id": "MIT"
+                    }
+                }
+            ]
+        },
+        {
+            "type": "library",
+            "bom-ref": "pkg:composer/guzzlehttp/uri-template@v1.0.8",
+            "name": "guzzlehttp/uri-template",
+            "version": "v1.0.8",
+            "purl": "pkg:composer/guzzlehttp/uri-template@v1.0.8",
+            "licenses": [
+                {
+                    "license": {
+                        "id": "MIT"
+                    }
+                }
+            ]
+        },
+        {
+            "type": "library",
+            "bom-ref": "pkg:composer/hamcrest/hamcrest-php@v2.1.1",
+            "name": "hamcrest/hamcrest-php",
+            "version": "v2.1.1",
+            "purl": "pkg:composer/hamcrest/hamcrest-php@v2.1.1",
+            "licenses": [
+                {
+                    "license": {
+                        "id": "BSD-3-Clause"
+                    }
+                }
+            ]
+        },
+        {
+            "type": "library",
+            "bom-ref": "pkg:composer/laravel/framework@10.50.2",
+            "name": "laravel/framework",
+            "version": "10.50.2",
+            "purl": "pkg:composer/laravel/framework@10.50.2",
+            "licenses": [
+                {
+                    "license": {
+                        "id": "MIT"
+                    }
+                }
+            ]
+        },
+        {
+            "type": "library",
+            "bom-ref": "pkg:composer/laravel/pint@v1.29.3",
+            "name": "laravel/pint",
+            "version": "v1.29.3",
+            "purl": "pkg:composer/laravel/pint@v1.29.3",
+            "licenses": [
+                {
+                    "license": {
+                        "id": "MIT"
+                    }
+                }
+            ]
+        },
+        {
+            "type": "library",
+            "bom-ref": "pkg:composer/laravel/prompts@v0.1.25",
+            "name": "laravel/prompts",
+            "version": "v0.1.25",
+            "purl": "pkg:composer/laravel/prompts@v0.1.25",
+            "licenses": [
+                {
+                    "license": {
+                        "id": "MIT"
+                    }
+                }
+            ]
+        },
+        {
+            "type": "library",
+            "bom-ref": "pkg:composer/laravel/sail@v1.63.0",
+            "name": "laravel/sail",
+            "version": "v1.63.0",
+            "purl": "pkg:composer/laravel/sail@v1.63.0",
+            "licenses": [
+                {
+                    "license": {
+                        "id": "MIT"
+                    }
+                }
+            ]
+        },
+        {
+            "type": "library",
+            "bom-ref": "pkg:composer/laravel/sanctum@v3.3.3",
+            "name": "laravel/sanctum",
+            "version": "v3.3.3",
+            "purl": "pkg:composer/laravel/sanctum@v3.3.3",
+            "licenses": [
+                {
+                    "license": {
+                        "id": "MIT"
+                    }
+                }
+            ]
+        },
+        {
+            "type": "library",
+            "bom-ref": "pkg:composer/laravel/serializable-closure@v1.3.7",
+            "name": "laravel/serializable-closure",
+            "version": "v1.3.7",
+            "purl": "pkg:composer/laravel/serializable-closure@v1.3.7",
+            "licenses": [
+                {
+                    "license": {
+                        "id": "MIT"
+                    }
+                }
+            ]
+        },
+        {
+            "type": "library",
+            "bom-ref": "pkg:composer/laravel/tinker@v2.11.1",
+            "name": "laravel/tinker",
+            "version": "v2.11.1",
+            "purl": "pkg:composer/laravel/tinker@v2.11.1",
+            "licenses": [
+                {
+                    "license": {
+                        "id": "MIT"
+                    }
+                }
+            ]
+        },
+        {
+            "type": "library",
+            "bom-ref": "pkg:composer/league/commonmark@2.10.3",
+            "name": "league/commonmark",
+            "version": "2.10.3",
+            "purl": "pkg:composer/league/commonmark@2.10.3",
+            "licenses": [
+                {
+                    "license": {
+                        "id": "BSD-3-Clause"
+                    }
+                }
+            ]
+        },
+        {
+            "type": "library",
+            "bom-ref": "pkg:composer/league/config@v1.2.0",
+            "name": "league/config",
+            "version": "v1.2.0",
+            "purl": "pkg:composer/league/config@v1.2.0",
+            "licenses": [
+                {
+                    "license": {
+                        "id": "BSD-3-Clause"
+                    }
+                }
+            ]
+        },
+        {
+            "type": "library",
+            "bom-ref": "pkg:composer/league/flysystem-local@3.35.3",
+            "name": "league/flysystem-local",
+            "version": "3.35.3",
+            "purl": "pkg:composer/league/flysystem-local@3.35.3",
+            "licenses": [
+                {
+                    "license": {
+                        "id": "MIT"
+                    }
+                }
+            ]
+        },
+        {
+            "type": "library",
+            "bom-ref": "pkg:composer/league/flysystem@3.36.0",
+            "name": "league/flysystem",
+            "version": "3.36.0",
+            "purl": "pkg:composer/league/flysystem@3.36.0",
+            "licenses": [
+                {
+                    "license": {
+                        "id": "MIT"
+                    }
+                }
+            ]
+        },
+        {
+            "type": "library",
+            "bom-ref": "pkg:composer/league/mime-type-detection@1.17.0",
+            "name": "league/mime-type-detection",
+            "version": "1.17.0",
+            "purl": "pkg:composer/league/mime-type-detection@1.17.0",
+            "licenses": [
+                {
+                    "license": {
+                        "id": "MIT"
+                    }
+                }
+            ]
+        },
+        {
+            "type": "library",
+            "bom-ref": "pkg:composer/mews/purifier@3.4.4",
+            "name": "mews/purifier",
+            "version": "3.4.4",
+            "purl": "pkg:composer/mews/purifier@3.4.4",
+            "licenses": [
+                {
+                    "license": {
+                        "id": "MIT"
+                    }
+                }
+            ]
+        },
+        {
+            "type": "library",
+            "bom-ref": "pkg:composer/mockery/mockery@1.6.12",
+            "name": "mockery/mockery",
+            "version": "1.6.12",
+            "purl": "pkg:composer/mockery/mockery@1.6.12",
+            "licenses": [
+                {
+                    "license": {
+                        "id": "BSD-3-Clause"
+                    }
+                }
+            ]
+        },
+        {
+            "type": "library",
+            "bom-ref": "pkg:composer/monolog/monolog@3.10.0",
+            "name": "monolog/monolog",
+            "version": "3.10.0",
+            "purl": "pkg:composer/monolog/monolog@3.10.0",
+            "licenses": [
+                {
+                    "license": {
+                        "id": "MIT"
+                    }
+                }
+            ]
+        },
+        {
+            "type": "library",
+            "bom-ref": "pkg:composer/myclabs/deep-copy@1.13.4",
+            "name": "myclabs/deep-copy",
+            "version": "1.13.4",
+            "purl": "pkg:composer/myclabs/deep-copy@1.13.4",
+            "licenses": [
+                {
+                    "license": {
+                        "id": "MIT"
+                    }
+                }
+            ]
+        },
+        {
+            "type": "library",
+            "bom-ref": "pkg:composer/nesbot/carbon@2.73.0",
+            "name": "nesbot/carbon",
+            "version": "2.73.0",
+            "purl": "pkg:composer/nesbot/carbon@2.73.0",
+            "licenses": [
+                {
+                    "license": {
+                        "id": "MIT"
+                    }
+                }
+            ]
+        },
+        {
+            "type": "library",
+            "bom-ref": "pkg:composer/nette/schema@v1.3.6",
+            "name": "nette/schema",
+            "version": "v1.3.6",
+            "purl": "pkg:composer/nette/schema@v1.3.6",
+            "licenses": [
+                {
+                    "license": {
+                        "id": "BSD-3-Clause"
+                    }
+                }
+            ]
+        },
+        {
+            "type": "library",
+            "bom-ref": "pkg:composer/nette/utils@v4.1.5",
+            "name": "nette/utils",
+            "version": "v4.1.5",
+            "purl": "pkg:composer/nette/utils@v4.1.5",
+            "licenses": [
+                {
+                    "license": {
+                        "id": "BSD-3-Clause"
+                    }
+                }
+            ]
+        },
+        {
+            "type": "library",
+            "bom-ref": "pkg:composer/nikic/php-parser@v5.8.0",
+            "name": "nikic/php-parser",
+            "version": "v5.8.0",
+            "purl": "pkg:composer/nikic/php-parser@v5.8.0",
+            "licenses": [
+                {
+                    "license": {
+                        "id": "BSD-3-Clause"
+                    }
+                }
+            ]
+        },
+        {
+            "type": "library",
+            "bom-ref": "pkg:composer/nunomaduro/collision@v7.12.0",
+            "name": "nunomaduro/collision",
+            "version": "v7.12.0",
+            "purl": "pkg:composer/nunomaduro/collision@v7.12.0",
+            "licenses": [
+                {
+                    "license": {
+                        "id": "MIT"
+                    }
+                }
+            ]
+        },
+        {
+            "type": "library",
+            "bom-ref": "pkg:composer/nunomaduro/termwind@v1.17.0",
+            "name": "nunomaduro/termwind",
+            "version": "v1.17.0",
+            "purl": "pkg:composer/nunomaduro/termwind@v1.17.0",
+            "licenses": [
+                {
+                    "license": {
+                        "id": "MIT"
+                    }
+                }
+            ]
+        },
+        {
+            "type": "library",
+            "bom-ref": "pkg:composer/phar-io/manifest@2.0.4",
+            "name": "phar-io/manifest",
+            "version": "2.0.4",
+            "purl": "pkg:composer/phar-io/manifest@2.0.4",
+            "licenses": [
+                {
+                    "license": {
+                        "id": "BSD-3-Clause"
+                    }
+                }
+            ]
+        },
+        {
+            "type": "library",
+            "bom-ref": "pkg:composer/phar-io/version@3.2.1",
+            "name": "phar-io/version",
+            "version": "3.2.1",
+            "purl": "pkg:composer/phar-io/version@3.2.1",
+            "licenses": [
+                {
+                    "license": {
+                        "id": "BSD-3-Clause"
+                    }
+                }
+            ]
+        },
+        {
+            "type": "library",
+            "bom-ref": "pkg:composer/phpoption/phpoption@1.9.5",
+            "name": "phpoption/phpoption",
+            "version": "1.9.5",
+            "purl": "pkg:composer/phpoption/phpoption@1.9.5",
+            "licenses": [
+                {
+                    "license": {
+                        "id": "Apache-2.0"
+                    }
+                }
+            ]
+        },
+        {
+            "type": "library",
+            "bom-ref": "pkg:composer/phpunit/php-code-coverage@10.1.16",
+            "name": "phpunit/php-code-coverage",
+            "version": "10.1.16",
+            "purl": "pkg:composer/phpunit/php-code-coverage@10.1.16",
+            "licenses": [
+                {
+                    "license": {
+                        "id": "BSD-3-Clause"
+                    }
+                }
+            ]
+        },
+        {
+            "type": "library",
+            "bom-ref": "pkg:composer/phpunit/php-file-iterator@4.1.0",
+            "name": "phpunit/php-file-iterator",
+            "version": "4.1.0",
+            "purl": "pkg:composer/phpunit/php-file-iterator@4.1.0",
+            "licenses": [
+                {
+                    "license": {
+                        "id": "BSD-3-Clause"
+                    }
+                }
+            ]
+        },
+        {
+            "type": "library",
+            "bom-ref": "pkg:composer/phpunit/php-invoker@4.0.0",
+            "name": "phpunit/php-invoker",
+            "version": "4.0.0",
+            "purl": "pkg:composer/phpunit/php-invoker@4.0.0",
+            "licenses": [
+                {
+                    "license": {
+                        "id": "BSD-3-Clause"
+                    }
+                }
+            ]
+        },
+        {
+            "type": "library",
+            "bom-ref": "pkg:composer/phpunit/php-text-template@3.0.1",
+            "name": "phpunit/php-text-template",
+            "version": "3.0.1",
+            "purl": "pkg:composer/phpunit/php-text-template@3.0.1",
+            "licenses": [
+                {
+                    "license": {
+                        "id": "BSD-3-Clause"
+                    }
+                }
+            ]
+        },
+        {
+            "type": "library",
+            "bom-ref": "pkg:composer/phpunit/php-timer@6.0.0",
+            "name": "phpunit/php-timer",
+            "version": "6.0.0",
+            "purl": "pkg:composer/phpunit/php-timer@6.0.0",
+            "licenses": [
+                {
+                    "license": {
+                        "id": "BSD-3-Clause"
+                    }
+                }
+            ]
+        },
+        {
+            "type": "library",
+            "bom-ref": "pkg:composer/phpunit/phpunit@10.5.64",
+            "name": "phpunit/phpunit",
+            "version": "10.5.64",
+            "purl": "pkg:composer/phpunit/phpunit@10.5.64",
+            "licenses": [
+                {
+                    "license": {
+                        "id": "BSD-3-Clause"
+                    }
+                }
+            ]
+        },
+        {
+            "type": "library",
+            "bom-ref": "pkg:composer/psr/cache@3.0.0",
+            "name": "psr/cache",
+            "version": "3.0.0",
+            "purl": "pkg:composer/psr/cache@3.0.0",
+            "licenses": [
+                {
+                    "license": {
+                        "id": "MIT"
+                    }
+                }
+            ]
+        },
+        {
+            "type": "library",
+            "bom-ref": "pkg:composer/psr/clock@1.0.0",
+            "name": "psr/clock",
+            "version": "1.0.0",
+            "purl": "pkg:composer/psr/clock@1.0.0",
+            "licenses": [
+                {
+                    "license": {
+                        "id": "MIT"
+                    }
+                }
+            ]
+        },
+        {
+            "type": "library",
+            "bom-ref": "pkg:composer/psr/container@2.0.2",
+            "name": "psr/container",
+            "version": "2.0.2",
+            "purl": "pkg:composer/psr/container@2.0.2",
+            "licenses": [
+                {
+                    "license": {
+                        "id": "MIT"
+                    }
+                }
+            ]
+        },
+        {
+            "type": "library",
+            "bom-ref": "pkg:composer/psr/event-dispatcher@1.0.0",
+            "name": "psr/event-dispatcher",
+            "version": "1.0.0",
+            "purl": "pkg:composer/psr/event-dispatcher@1.0.0",
+            "licenses": [
+                {
+                    "license": {
+                        "id": "MIT"
+                    }
+                }
+            ]
+        },
+        {
+            "type": "library",
+            "bom-ref": "pkg:composer/psr/http-client@1.0.3",
+            "name": "psr/http-client",
+            "version": "1.0.3",
+            "purl": "pkg:composer/psr/http-client@1.0.3",
+            "licenses": [
+                {
+                    "license": {
+                        "id": "MIT"
+                    }
+                }
+            ]
+        },
+        {
+            "type": "library",
+            "bom-ref": "pkg:composer/psr/http-factory@1.1.0",
+            "name": "psr/http-factory",
+            "version": "1.1.0",
+            "purl": "pkg:composer/psr/http-factory@1.1.0",
+            "licenses": [
+                {
+                    "license": {
+                        "id": "MIT"
+                    }
+                }
+            ]
+        },
+        {
+            "type": "library",
+            "bom-ref": "pkg:composer/psr/http-message@2.0",
+            "name": "psr/http-message",
+            "version": "2.0",
+            "purl": "pkg:composer/psr/http-message@2.0",
+            "licenses": [
+                {
+                    "license": {
+                        "id": "MIT"
+                    }
+                }
+            ]
+        },
+        {
+            "type": "library",
+            "bom-ref": "pkg:composer/psr/log@3.0.2",
+            "name": "psr/log",
+            "version": "3.0.2",
+            "purl": "pkg:composer/psr/log@3.0.2",
+            "licenses": [
+                {
+                    "license": {
+                        "id": "MIT"
+                    }
+                }
+            ]
+        },
+        {
+            "type": "library",
+            "bom-ref": "pkg:composer/psr/simple-cache@3.0.0",
+            "name": "psr/simple-cache",
+            "version": "3.0.0",
+            "purl": "pkg:composer/psr/simple-cache@3.0.0",
+            "licenses": [
+                {
+                    "license": {
+                        "id": "MIT"
+                    }
+                }
+            ]
+        },
+        {
+            "type": "library",
+            "bom-ref": "pkg:composer/psy/psysh@v0.12.24",
+            "name": "psy/psysh",
+            "version": "v0.12.24",
+            "purl": "pkg:composer/psy/psysh@v0.12.24",
+            "licenses": [
+                {
+                    "license": {
+                        "id": "MIT"
+                    }
+                }
+            ]
+        },
+        {
+            "type": "library",
+            "bom-ref": "pkg:composer/ralouphie/getallheaders@3.0.3",
+            "name": "ralouphie/getallheaders",
+            "version": "3.0.3",
+            "purl": "pkg:composer/ralouphie/getallheaders@3.0.3",
+            "licenses": [
+                {
+                    "license": {
+                        "id": "MIT"
+                    }
+                }
+            ]
+        },
+        {
+            "type": "library",
+            "bom-ref": "pkg:composer/ramsey/collection@2.1.1",
+            "name": "ramsey/collection",
+            "version": "2.1.1",
+            "purl": "pkg:composer/ramsey/collection@2.1.1",
+            "licenses": [
+                {
+                    "license": {
+                        "id": "MIT"
+                    }
+                }
+            ]
+        },
+        {
+            "type": "library",
+            "bom-ref": "pkg:composer/ramsey/uuid@4.9.3",
+            "name": "ramsey/uuid",
+            "version": "4.9.3",
+            "purl": "pkg:composer/ramsey/uuid@4.9.3",
+            "licenses": [
+                {
+                    "license": {
+                        "id": "MIT"
+                    }
+                }
+            ]
+        },
+        {
+            "type": "library",
+            "bom-ref": "pkg:composer/sebastian/cli-parser@2.0.1",
+            "name": "sebastian/cli-parser",
+            "version": "2.0.1",
+            "purl": "pkg:composer/sebastian/cli-parser@2.0.1",
+            "licenses": [
+                {
+                    "license": {
+                        "id": "BSD-3-Clause"
+                    }
+                }
+            ]
+        },
+        {
+            "type": "library",
+            "bom-ref": "pkg:composer/sebastian/code-unit-reverse-lookup@3.0.0",
+            "name": "sebastian/code-unit-reverse-lookup",
+            "version": "3.0.0",
+            "purl": "pkg:composer/sebastian/code-unit-reverse-lookup@3.0.0",
+            "licenses": [
+                {
+                    "license": {
+                        "id": "BSD-3-Clause"
+                    }
+                }
+            ]
+        },
+        {
+            "type": "library",
+            "bom-ref": "pkg:composer/sebastian/code-unit@2.0.0",
+            "name": "sebastian/code-unit",
+            "version": "2.0.0",
+            "purl": "pkg:composer/sebastian/code-unit@2.0.0",
+            "licenses": [
+                {
+                    "license": {
+                        "id": "BSD-3-Clause"
+                    }
+                }
+            ]
+        },
+        {
+            "type": "library",
+            "bom-ref": "pkg:composer/sebastian/comparator@5.0.5",
+            "name": "sebastian/comparator",
+            "version": "5.0.5",
+            "purl": "pkg:composer/sebastian/comparator@5.0.5",
+            "licenses": [
+                {
+                    "license": {
+                        "id": "BSD-3-Clause"
+                    }
+                }
+            ]
+        },
+        {
+            "type": "library",
+            "bom-ref": "pkg:composer/sebastian/complexity@3.2.0",
+            "name": "sebastian/complexity",
+            "version": "3.2.0",
+            "purl": "pkg:composer/sebastian/complexity@3.2.0",
+            "licenses": [
+                {
+                    "license": {
+                        "id": "BSD-3-Clause"
+                    }
+                }
+            ]
+        },
+        {
+            "type": "library",
+            "bom-ref": "pkg:composer/sebastian/diff@5.1.1",
+            "name": "sebastian/diff",
+            "version": "5.1.1",
+            "purl": "pkg:composer/sebastian/diff@5.1.1",
+            "licenses": [
+                {
+                    "license": {
+                        "id": "BSD-3-Clause"
+                    }
+                }
+            ]
+        },
+        {
+            "type": "library",
+            "bom-ref": "pkg:composer/sebastian/environment@6.1.0",
+            "name": "sebastian/environment",
+            "version": "6.1.0",
+            "purl": "pkg:composer/sebastian/environment@6.1.0",
+            "licenses": [
+                {
+                    "license": {
+                        "id": "BSD-3-Clause"
+                    }
+                }
+            ]
+        },
+        {
+            "type": "library",
+            "bom-ref": "pkg:composer/sebastian/exporter@5.1.4",
+            "name": "sebastian/exporter",
+            "version": "5.1.4",
+            "purl": "pkg:composer/sebastian/exporter@5.1.4",
+            "licenses": [
+                {
+                    "license": {
+                        "id": "BSD-3-Clause"
+                    }
+                }
+            ]
+        },
+        {
+            "type": "library",
+            "bom-ref": "pkg:composer/sebastian/global-state@6.0.2",
+            "name": "sebastian/global-state",
+            "version": "6.0.2",
+            "purl": "pkg:composer/sebastian/global-state@6.0.2",
+            "licenses": [
+                {
+                    "license": {
+                        "id": "BSD-3-Clause"
+                    }
+                }
+            ]
+        },
+        {
+            "type": "library",
+            "bom-ref": "pkg:composer/sebastian/lines-of-code@2.0.2",
+            "name": "sebastian/lines-of-code",
+            "version": "2.0.2",
+            "purl": "pkg:composer/sebastian/lines-of-code@2.0.2",
+            "licenses": [
+                {
+                    "license": {
+                        "id": "BSD-3-Clause"
+                    }
+                }
+            ]
+        },
+        {
+            "type": "library",
+            "bom-ref": "pkg:composer/sebastian/object-enumerator@5.0.0",
+            "name": "sebastian/object-enumerator",
+            "version": "5.0.0",
+            "purl": "pkg:composer/sebastian/object-enumerator@5.0.0",
+            "licenses": [
+                {
+                    "license": {
+                        "id": "BSD-3-Clause"
+                    }
+                }
+            ]
+        },
+        {
+            "type": "library",
+            "bom-ref": "pkg:composer/sebastian/object-reflector@3.0.0",
+            "name": "sebastian/object-reflector",
+            "version": "3.0.0",
+            "purl": "pkg:composer/sebastian/object-reflector@3.0.0",
+            "licenses": [
+                {
+                    "license": {
+                        "id": "BSD-3-Clause"
+                    }
+                }
+            ]
+        },
+        {
+            "type": "library",
+            "bom-ref": "pkg:composer/sebastian/recursion-context@5.0.1",
+            "name": "sebastian/recursion-context",
+            "version": "5.0.1",
+            "purl": "pkg:composer/sebastian/recursion-context@5.0.1",
+            "licenses": [
+                {
+                    "license": {
+                        "id": "BSD-3-Clause"
+                    }
+                }
+            ]
+        },
+        {
+            "type": "library",
+            "bom-ref": "pkg:composer/sebastian/type@4.0.0",
+            "name": "sebastian/type",
+            "version": "4.0.0",
+            "purl": "pkg:composer/sebastian/type@4.0.0",
+            "licenses": [
+                {
+                    "license": {
+                        "id": "BSD-3-Clause"
+                    }
+                }
+            ]
+        },
+        {
+            "type": "library",
+            "bom-ref": "pkg:composer/sebastian/version@4.0.1",
+            "name": "sebastian/version",
+            "version": "4.0.1",
+            "purl": "pkg:composer/sebastian/version@4.0.1",
+            "licenses": [
+                {
+                    "license": {
+                        "id": "BSD-3-Clause"
+                    }
+                }
+            ]
+        },
+        {
+            "type": "library",
+            "bom-ref": "pkg:composer/spatie/backtrace@1.8.2",
+            "name": "spatie/backtrace",
+            "version": "1.8.2",
+            "purl": "pkg:composer/spatie/backtrace@1.8.2",
+            "licenses": [
+                {
+                    "license": {
+                        "id": "MIT"
+                    }
+                }
+            ]
+        },
+        {
+            "type": "library",
+            "bom-ref": "pkg:composer/spatie/error-solutions@1.1.3",
+            "name": "spatie/error-solutions",
+            "version": "1.1.3",
+            "purl": "pkg:composer/spatie/error-solutions@1.1.3",
+            "licenses": [
+                {
+                    "license": {
+                        "id": "MIT"
+                    }
+                }
+            ]
+        },
+        {
+            "type": "library",
+            "bom-ref": "pkg:composer/spatie/flare-client-php@1.11.1",
+            "name": "spatie/flare-client-php",
+            "version": "1.11.1",
+            "purl": "pkg:composer/spatie/flare-client-php@1.11.1",
+            "licenses": [
+                {
+                    "license": {
+                        "id": "MIT"
+                    }
+                }
+            ]
+        },
+        {
+            "type": "library",
+            "bom-ref": "pkg:composer/spatie/ignition@1.16.0",
+            "name": "spatie/ignition",
+            "version": "1.16.0",
+            "purl": "pkg:composer/spatie/ignition@1.16.0",
+            "licenses": [
+                {
+                    "license": {
+                        "id": "MIT"
+                    }
+                }
+            ]
+        },
+        {
+            "type": "library",
+            "bom-ref": "pkg:composer/spatie/laravel-ignition@2.9.1",
+            "name": "spatie/laravel-ignition",
+            "version": "2.9.1",
+            "purl": "pkg:composer/spatie/laravel-ignition@2.9.1",
+            "licenses": [
+                {
+                    "license": {
+                        "id": "MIT"
+                    }
+                }
+            ]
+        },
+        {
+            "type": "library",
+            "bom-ref": "pkg:composer/symfony/console@v6.4.42",
+            "name": "symfony/console",
+            "version": "v6.4.42",
+            "purl": "pkg:composer/symfony/console@v6.4.42",
+            "licenses": [
+                {
+                    "license": {
+                        "id": "MIT"
+                    }
+                }
+            ]
+        },
+        {
+            "type": "library",
+            "bom-ref": "pkg:composer/symfony/css-selector@v7.4.9",
+            "name": "symfony/css-selector",
+            "version": "v7.4.9",
+            "purl": "pkg:composer/symfony/css-selector@v7.4.9",
+            "licenses": [
+                {
+                    "license": {
+                        "id": "MIT"
+                    }
+                }
+            ]
+        },
+        {
+            "type": "library",
+            "bom-ref": "pkg:composer/symfony/deprecation-contracts@v3.7.1",
+            "name": "symfony/deprecation-contracts",
+            "version": "v3.7.1",
+            "purl": "pkg:composer/symfony/deprecation-contracts@v3.7.1",
+            "licenses": [
+                {
+                    "license": {
+                        "id": "MIT"
+                    }
+                }
+            ]
+        },
+        {
+            "type": "library",
+            "bom-ref": "pkg:composer/symfony/error-handler@v6.4.36",
+            "name": "symfony/error-handler",
+            "version": "v6.4.36",
+            "purl": "pkg:composer/symfony/error-handler@v6.4.36",
+            "licenses": [
+                {
+                    "license": {
+                        "id": "MIT"
+                    }
+                }
+            ]
+        },
+        {
+            "type": "library",
+            "bom-ref": "pkg:composer/symfony/event-dispatcher-contracts@v3.7.1",
+            "name": "symfony/event-dispatcher-contracts",
+            "version": "v3.7.1",
+            "purl": "pkg:composer/symfony/event-dispatcher-contracts@v3.7.1",
+            "licenses": [
+                {
+                    "license": {
+                        "id": "MIT"
+                    }
+                }
+            ]
+        },
+        {
+            "type": "library",
+            "bom-ref": "pkg:composer/symfony/event-dispatcher@v7.4.14",
+            "name": "symfony/event-dispatcher",
+            "version": "v7.4.14",
+            "purl": "pkg:composer/symfony/event-dispatcher@v7.4.14",
+            "licenses": [
+                {
+                    "license": {
+                        "id": "MIT"
+                    }
+                }
+            ]
+        },
+        {
+            "type": "library",
+            "bom-ref": "pkg:composer/symfony/finder@v6.4.42",
+            "name": "symfony/finder",
+            "version": "v6.4.42",
+            "purl": "pkg:composer/symfony/finder@v6.4.42",
+            "licenses": [
+                {
+                    "license": {
+                        "id": "MIT"
+                    }
+                }
+            ]
+        },
+        {
+            "type": "library",
+            "bom-ref": "pkg:composer/symfony/http-foundation@v6.4.48",
+            "name": "symfony/http-foundation",
+            "version": "v6.4.48",
+            "purl": "pkg:composer/symfony/http-foundation@v6.4.48",
+            "licenses": [
+                {
+                    "license": {
+                        "id": "MIT"
+                    }
+                }
+            ]
+        },
+        {
+            "type": "library",
+            "bom-ref": "pkg:composer/symfony/http-kernel@v6.4.42",
+            "name": "symfony/http-kernel",
+            "version": "v6.4.42",
+            "purl": "pkg:composer/symfony/http-kernel@v6.4.42",
+            "licenses": [
+                {
+                    "license": {
+                        "id": "MIT"
+                    }
+                }
+            ]
+        },
+        {
+            "type": "library",
+            "bom-ref": "pkg:composer/symfony/mailer@v6.4.40",
+            "name": "symfony/mailer",
+            "version": "v6.4.40",
+            "purl": "pkg:composer/symfony/mailer@v6.4.40",
+            "licenses": [
+                {
+                    "license": {
+                        "id": "MIT"
+                    }
+                }
+            ]
+        },
+        {
+            "type": "library",
+            "bom-ref": "pkg:composer/symfony/mime@v6.4.41",
+            "name": "symfony/mime",
+            "version": "v6.4.41",
+            "purl": "pkg:composer/symfony/mime@v6.4.41",
+            "licenses": [
+                {
+                    "license": {
+                        "id": "MIT"
+                    }
+                }
+            ]
+        },
+        {
+            "type": "library",
+            "bom-ref": "pkg:composer/symfony/polyfill-ctype@v1.37.0",
+            "name": "symfony/polyfill-ctype",
+            "version": "v1.37.0",
+            "purl": "pkg:composer/symfony/polyfill-ctype@v1.37.0",
+            "licenses": [
+                {
+                    "license": {
+                        "id": "MIT"
+                    }
+                }
+            ]
+        },
+        {
+            "type": "library",
+            "bom-ref": "pkg:composer/symfony/polyfill-intl-grapheme@v1.38.1",
+            "name": "symfony/polyfill-intl-grapheme",
+            "version": "v1.38.1",
+            "purl": "pkg:composer/symfony/polyfill-intl-grapheme@v1.38.1",
+            "licenses": [
+                {
+                    "license": {
+                        "id": "MIT"
+                    }
+                }
+            ]
+        },
+        {
+            "type": "library",
+            "bom-ref": "pkg:composer/symfony/polyfill-intl-idn@v1.38.1",
+            "name": "symfony/polyfill-intl-idn",
+            "version": "v1.38.1",
+            "purl": "pkg:composer/symfony/polyfill-intl-idn@v1.38.1",
+            "licenses": [
+                {
+                    "license": {
+                        "id": "MIT"
+                    }
+                }
+            ]
+        },
+        {
+            "type": "library",
+            "bom-ref": "pkg:composer/symfony/polyfill-intl-normalizer@v1.38.0",
+            "name": "symfony/polyfill-intl-normalizer",
+            "version": "v1.38.0",
+            "purl": "pkg:composer/symfony/polyfill-intl-normalizer@v1.38.0",
+            "licenses": [
+                {
+                    "license": {
+                        "id": "MIT"
+                    }
+                }
+            ]
+        },
+        {
+            "type": "library",
+            "bom-ref": "pkg:composer/symfony/polyfill-mbstring@v1.43.0",
+            "name": "symfony/polyfill-mbstring",
+            "version": "v1.43.0",
+            "purl": "pkg:composer/symfony/polyfill-mbstring@v1.43.0",
+            "licenses": [
+                {
+                    "license": {
+                        "id": "MIT"
+                    }
+                }
+            ]
+        },
+        {
+            "type": "library",
+            "bom-ref": "pkg:composer/symfony/polyfill-php80@v1.43.0",
+            "name": "symfony/polyfill-php80",
+            "version": "v1.43.0",
+            "purl": "pkg:composer/symfony/polyfill-php80@v1.43.0",
+            "licenses": [
+                {
+                    "license": {
+                        "id": "MIT"
+                    }
+                }
+            ]
+        },
+        {
+            "type": "library",
+            "bom-ref": "pkg:composer/symfony/polyfill-php83@v1.43.0",
+            "name": "symfony/polyfill-php83",
+            "version": "v1.43.0",
+            "purl": "pkg:composer/symfony/polyfill-php83@v1.43.0",
+            "licenses": [
+                {
+                    "license": {
+                        "id": "MIT"
+                    }
+                }
+            ]
+        },
+        {
+            "type": "library",
+            "bom-ref": "pkg:composer/symfony/polyfill-uuid@v1.37.0",
+            "name": "symfony/polyfill-uuid",
+            "version": "v1.37.0",
+            "purl": "pkg:composer/symfony/polyfill-uuid@v1.37.0",
+            "licenses": [
+                {
+                    "license": {
+                        "id": "MIT"
+                    }
+                }
+            ]
+        },
+        {
+            "type": "library",
+            "bom-ref": "pkg:composer/symfony/process@v6.4.41",
+            "name": "symfony/process",
+            "version": "v6.4.41",
+            "purl": "pkg:composer/symfony/process@v6.4.41",
+            "licenses": [
+                {
+                    "license": {
+                        "id": "MIT"
+                    }
+                }
+            ]
+        },
+        {
+            "type": "library",
+            "bom-ref": "pkg:composer/symfony/routing@v6.4.41",
+            "name": "symfony/routing",
+            "version": "v6.4.41",
+            "purl": "pkg:composer/symfony/routing@v6.4.41",
+            "licenses": [
+                {
+                    "license": {
+                        "id": "MIT"
+                    }
+                }
+            ]
+        },
+        {
+            "type": "library",
+            "bom-ref": "pkg:composer/symfony/service-contracts@v3.7.1",
+            "name": "symfony/service-contracts",
+            "version": "v3.7.1",
+            "purl": "pkg:composer/symfony/service-contracts@v3.7.1",
+            "licenses": [
+                {
+                    "license": {
+                        "id": "MIT"
+                    }
+                }
+            ]
+        },
+        {
+            "type": "library",
+            "bom-ref": "pkg:composer/symfony/string@v7.4.13",
+            "name": "symfony/string",
+            "version": "v7.4.13",
+            "purl": "pkg:composer/symfony/string@v7.4.13",
+            "licenses": [
+                {
+                    "license": {
+                        "id": "MIT"
+                    }
+                }
+            ]
+        },
+        {
+            "type": "library",
+            "bom-ref": "pkg:composer/symfony/translation-contracts@v3.7.1",
+            "name": "symfony/translation-contracts",
+            "version": "v3.7.1",
+            "purl": "pkg:composer/symfony/translation-contracts@v3.7.1",
+            "licenses": [
+                {
+                    "license": {
+                        "id": "MIT"
+                    }
+                }
+            ]
+        },
+        {
+            "type": "library",
+            "bom-ref": "pkg:composer/symfony/translation@v6.4.42",
+            "name": "symfony/translation",
+            "version": "v6.4.42",
+            "purl": "pkg:composer/symfony/translation@v6.4.42",
+            "licenses": [
+                {
+                    "license": {
+                        "id": "MIT"
+                    }
+                }
+            ]
+        },
+        {
+            "type": "library",
+            "bom-ref": "pkg:composer/symfony/uid@v6.4.32",
+            "name": "symfony/uid",
+            "version": "v6.4.32",
+            "purl": "pkg:composer/symfony/uid@v6.4.32",
+            "licenses": [
+                {
+                    "license": {
+                        "id": "MIT"
+                    }
+                }
+            ]
+        },
+        {
+            "type": "library",
+            "bom-ref": "pkg:composer/symfony/var-dumper@v6.4.42",
+            "name": "symfony/var-dumper",
+            "version": "v6.4.42",
+            "purl": "pkg:composer/symfony/var-dumper@v6.4.42",
+            "licenses": [
+                {
+                    "license": {
+                        "id": "MIT"
+                    }
+                }
+            ]
+        },
+        {
+            "type": "library",
+            "bom-ref": "pkg:composer/symfony/yaml@v7.4.21",
+            "name": "symfony/yaml",
+            "version": "v7.4.21",
+            "purl": "pkg:composer/symfony/yaml@v7.4.21",
+            "licenses": [
+                {
+                    "license": {
+                        "id": "MIT"
+                    }
+                }
+            ]
+        },
+        {
+            "type": "library",
+            "bom-ref": "pkg:composer/theseer/tokenizer@1.3.1",
+            "name": "theseer/tokenizer",
+            "version": "1.3.1",
+            "purl": "pkg:composer/theseer/tokenizer@1.3.1",
+            "licenses": [
+                {
+                    "license": {
+                        "id": "BSD-3-Clause"
+                    }
+                }
+            ]
+        },
+        {
+            "type": "library",
+            "bom-ref": "pkg:composer/tijsverkoyen/css-to-inline-styles@v2.4.0",
+            "name": "tijsverkoyen/css-to-inline-styles",
+            "version": "v2.4.0",
+            "purl": "pkg:composer/tijsverkoyen/css-to-inline-styles@v2.4.0",
+            "licenses": [
+                {
+                    "license": {
+                        "id": "BSD-3-Clause"
+                    }
+                }
+            ]
+        },
+        {
+            "type": "library",
+            "bom-ref": "pkg:composer/vlucas/phpdotenv@v5.6.4",
+            "name": "vlucas/phpdotenv",
+            "version": "v5.6.4",
+            "purl": "pkg:composer/vlucas/phpdotenv@v5.6.4",
+            "licenses": [
+                {
+                    "license": {
+                        "id": "BSD-3-Clause"
+                    }
+                }
+            ]
+        },
+        {
+            "type": "library",
+            "bom-ref": "pkg:composer/voku/portable-ascii@2.1.1",
+            "name": "voku/portable-ascii",
+            "version": "2.1.1",
+            "purl": "pkg:composer/voku/portable-ascii@2.1.1",
+            "licenses": [
+                {
+                    "license": {
+                        "id": "MIT"
+                    }
+                }
+            ]
+        },
+        {
+            "type": "library",
+            "bom-ref": "pkg:npm/node_modules/@fontsource@5.3.0",
+            "name": "node_modules/@fontsource",
+            "version": "5.3.0",
+            "purl": "pkg:npm/node_modules/@fontsource@5.3.0"
+        },
+        {
+            "type": "library",
+            "bom-ref": "pkg:npm/node_modules/@fontsource@5.3.0",
+            "name": "node_modules/@fontsource",
+            "version": "5.3.0",
+            "purl": "pkg:npm/node_modules/@fontsource@5.3.0"
+        },
+        {
+            "type": "library",
+            "bom-ref": "pkg:npm/node_modules/@fortawesome@7.3.1",
+            "name": "node_modules/@fortawesome",
+            "version": "7.3.1",
+            "purl": "pkg:npm/node_modules/@fortawesome@7.3.1"
+        },
+        {
+            "type": "library",
+            "bom-ref": "pkg:npm/node_modules/@oxc-project@0.153.0",
+            "name": "node_modules/@oxc-project",
+            "version": "0.153.0",
+            "purl": "pkg:npm/node_modules/@oxc-project@0.153.0"
+        },
+        {
+            "type": "library",
+            "bom-ref": "pkg:npm/node_modules/@parcel@2.5.6",
+            "name": "node_modules/@parcel",
+            "version": "2.5.6",
+            "purl": "pkg:npm/node_modules/@parcel@2.5.6"
+        },
+        {
+            "type": "library",
+            "bom-ref": "pkg:npm/node_modules/@parcel@2.5.6",
+            "name": "node_modules/@parcel",
+            "version": "2.5.6",
+            "purl": "pkg:npm/node_modules/@parcel@2.5.6"
+        },
+        {
+            "type": "library",
+            "bom-ref": "pkg:npm/node_modules/@parcel@2.5.6",
+            "name": "node_modules/@parcel",
+            "version": "2.5.6",
+            "purl": "pkg:npm/node_modules/@parcel@2.5.6"
+        },
+        {
+            "type": "library",
+            "bom-ref": "pkg:npm/node_modules/@parcel@2.5.6",
+            "name": "node_modules/@parcel",
+            "version": "2.5.6",
+            "purl": "pkg:npm/node_modules/@parcel@2.5.6"
+        },
+        {
+            "type": "library",
+            "bom-ref": "pkg:npm/node_modules/@parcel@2.5.6",
+            "name": "node_modules/@parcel",
+            "version": "2.5.6",
+            "purl": "pkg:npm/node_modules/@parcel@2.5.6"
+        },
+        {
+            "type": "library",
+            "bom-ref": "pkg:npm/node_modules/@parcel@2.5.6",
+            "name": "node_modules/@parcel",
+            "version": "2.5.6",
+            "purl": "pkg:npm/node_modules/@parcel@2.5.6"
+        },
+        {
+            "type": "library",
+            "bom-ref": "pkg:npm/node_modules/@parcel@2.5.6",
+            "name": "node_modules/@parcel",
+            "version": "2.5.6",
+            "purl": "pkg:npm/node_modules/@parcel@2.5.6"
+        },
+        {
+            "type": "library",
+            "bom-ref": "pkg:npm/node_modules/@parcel@2.5.6",
+            "name": "node_modules/@parcel",
+            "version": "2.5.6",
+            "purl": "pkg:npm/node_modules/@parcel@2.5.6"
+        },
+        {
+            "type": "library",
+            "bom-ref": "pkg:npm/node_modules/@parcel@2.5.6",
+            "name": "node_modules/@parcel",
+            "version": "2.5.6",
+            "purl": "pkg:npm/node_modules/@parcel@2.5.6"
+        },
+        {
+            "type": "library",
+            "bom-ref": "pkg:npm/node_modules/@parcel@2.5.6",
+            "name": "node_modules/@parcel",
+            "version": "2.5.6",
+            "purl": "pkg:npm/node_modules/@parcel@2.5.6"
+        },
+        {
+            "type": "library",
+            "bom-ref": "pkg:npm/node_modules/@parcel@2.5.6",
+            "name": "node_modules/@parcel",
+            "version": "2.5.6",
+            "purl": "pkg:npm/node_modules/@parcel@2.5.6"
+        },
+        {
+            "type": "library",
+            "bom-ref": "pkg:npm/node_modules/@parcel@2.5.6",
+            "name": "node_modules/@parcel",
+            "version": "2.5.6",
+            "purl": "pkg:npm/node_modules/@parcel@2.5.6"
+        },
+        {
+            "type": "library",
+            "bom-ref": "pkg:npm/node_modules/@parcel@2.5.6",
+            "name": "node_modules/@parcel",
+            "version": "2.5.6",
+            "purl": "pkg:npm/node_modules/@parcel@2.5.6"
+        },
+        {
+            "type": "library",
+            "bom-ref": "pkg:npm/node_modules/@parcel@2.5.6",
+            "name": "node_modules/@parcel",
+            "version": "2.5.6",
+            "purl": "pkg:npm/node_modules/@parcel@2.5.6"
+        },
+        {
+            "type": "library",
+            "bom-ref": "pkg:npm/node_modules/@popperjs@2.11.8",
+            "name": "node_modules/@popperjs",
+            "version": "2.11.8",
+            "purl": "pkg:npm/node_modules/@popperjs@2.11.8"
+        },
+        {
+            "type": "library",
+            "bom-ref": "pkg:npm/node_modules/@rolldown@1.0.1",
+            "name": "node_modules/@rolldown",
+            "version": "1.0.1",
+            "purl": "pkg:npm/node_modules/@rolldown@1.0.1"
+        },
+        {
+            "type": "library",
+            "bom-ref": "pkg:npm/node_modules/@rolldown@1.2.13",
+            "name": "node_modules/@rolldown",
+            "version": "1.2.13",
+            "purl": "pkg:npm/node_modules/@rolldown@1.2.13"
+        },
+        {
+            "type": "library",
+            "bom-ref": "pkg:npm/node_modules/@rolldown@1.2.13",
+            "name": "node_modules/@rolldown",
+            "version": "1.2.13",
+            "purl": "pkg:npm/node_modules/@rolldown@1.2.13"
+        },
+        {
+            "type": "library",
+            "bom-ref": "pkg:npm/node_modules/@rolldown@1.2.13",
+            "name": "node_modules/@rolldown",
+            "version": "1.2.13",
+            "purl": "pkg:npm/node_modules/@rolldown@1.2.13"
+        },
+        {
+            "type": "library",
+            "bom-ref": "pkg:npm/node_modules/@rolldown@1.2.13",
+            "name": "node_modules/@rolldown",
+            "version": "1.2.13",
+            "purl": "pkg:npm/node_modules/@rolldown@1.2.13"
+        },
+        {
+            "type": "library",
+            "bom-ref": "pkg:npm/node_modules/@rolldown@1.2.13",
+            "name": "node_modules/@rolldown",
+            "version": "1.2.13",
+            "purl": "pkg:npm/node_modules/@rolldown@1.2.13"
+        },
+        {
+            "type": "library",
+            "bom-ref": "pkg:npm/node_modules/@rolldown@1.2.13",
+            "name": "node_modules/@rolldown",
+            "version": "1.2.13",
+            "purl": "pkg:npm/node_modules/@rolldown@1.2.13"
+        },
+        {
+            "type": "library",
+            "bom-ref": "pkg:npm/node_modules/@rolldown@1.2.13",
+            "name": "node_modules/@rolldown",
+            "version": "1.2.13",
+            "purl": "pkg:npm/node_modules/@rolldown@1.2.13"
+        },
+        {
+            "type": "library",
+            "bom-ref": "pkg:npm/node_modules/@rolldown@1.2.13",
+            "name": "node_modules/@rolldown",
+            "version": "1.2.13",
+            "purl": "pkg:npm/node_modules/@rolldown@1.2.13"
+        },
+        {
+            "type": "library",
+            "bom-ref": "pkg:npm/node_modules/@rolldown@1.2.13",
+            "name": "node_modules/@rolldown",
+            "version": "1.2.13",
+            "purl": "pkg:npm/node_modules/@rolldown@1.2.13"
+        },
+        {
+            "type": "library",
+            "bom-ref": "pkg:npm/node_modules/@rolldown@1.2.13",
+            "name": "node_modules/@rolldown",
+            "version": "1.2.13",
+            "purl": "pkg:npm/node_modules/@rolldown@1.2.13"
+        },
+        {
+            "type": "library",
+            "bom-ref": "pkg:npm/node_modules/@rolldown@1.2.13",
+            "name": "node_modules/@rolldown",
+            "version": "1.2.13",
+            "purl": "pkg:npm/node_modules/@rolldown@1.2.13"
+        },
+        {
+            "type": "library",
+            "bom-ref": "pkg:npm/node_modules/@rolldown@1.2.13",
+            "name": "node_modules/@rolldown",
+            "version": "1.2.13",
+            "purl": "pkg:npm/node_modules/@rolldown@1.2.13"
+        },
+        {
+            "type": "library",
+            "bom-ref": "pkg:npm/node_modules/@rolldown@1.2.13",
+            "name": "node_modules/@rolldown",
+            "version": "1.2.13",
+            "purl": "pkg:npm/node_modules/@rolldown@1.2.13"
+        },
+        {
+            "type": "library",
+            "bom-ref": "pkg:npm/node_modules/@rolldown@1.2.13",
+            "name": "node_modules/@rolldown",
+            "version": "1.2.13",
+            "purl": "pkg:npm/node_modules/@rolldown@1.2.13"
+        },
+        {
+            "type": "library",
+            "bom-ref": "pkg:npm/node_modules/@rolldown@1.2.13",
+            "name": "node_modules/@rolldown",
+            "version": "1.2.13",
+            "purl": "pkg:npm/node_modules/@rolldown@1.2.13"
+        },
+        {
+            "type": "library",
+            "bom-ref": "pkg:npm/node_modules@0.2.17",
+            "name": "node_modules",
+            "version": "0.2.17",
+            "purl": "pkg:npm/node_modules@0.2.17"
+        },
+        {
+            "type": "library",
+            "bom-ref": "pkg:npm/node_modules@0.4.0",
+            "name": "node_modules",
+            "version": "0.4.0",
+            "purl": "pkg:npm/node_modules@0.4.0"
+        },
+        {
+            "type": "library",
+            "bom-ref": "pkg:npm/node_modules@1.0.0",
+            "name": "node_modules",
+            "version": "1.0.0",
+            "purl": "pkg:npm/node_modules@1.0.0"
+        },
+        {
+            "type": "library",
+            "bom-ref": "pkg:npm/node_modules@1.0.1",
+            "name": "node_modules",
+            "version": "1.0.1",
+            "purl": "pkg:npm/node_modules@1.0.1"
+        },
+        {
+            "type": "library",
+            "bom-ref": "pkg:npm/node_modules@1.0.1",
+            "name": "node_modules",
+            "version": "1.0.1",
+            "purl": "pkg:npm/node_modules@1.0.1"
+        },
+        {
+            "type": "library",
+            "bom-ref": "pkg:npm/node_modules@1.0.1",
+            "name": "node_modules",
+            "version": "1.0.1",
+            "purl": "pkg:npm/node_modules@1.0.1"
+        },
+        {
+            "type": "library",
+            "bom-ref": "pkg:npm/node_modules@1.0.2",
+            "name": "node_modules",
+            "version": "1.0.2",
+            "purl": "pkg:npm/node_modules@1.0.2"
+        },
+        {
+            "type": "library",
+            "bom-ref": "pkg:npm/node_modules@1.0.2",
+            "name": "node_modules",
+            "version": "1.0.2",
+            "purl": "pkg:npm/node_modules@1.0.2"
+        },
+        {
+            "type": "library",
+            "bom-ref": "pkg:npm/node_modules@1.0.8",
+            "name": "node_modules",
+            "version": "1.0.8",
+            "purl": "pkg:npm/node_modules@1.0.8"
+        },
+        {
+            "type": "library",
+            "bom-ref": "pkg:npm/node_modules@1.1.0",
+            "name": "node_modules",
+            "version": "1.1.0",
+            "purl": "pkg:npm/node_modules@1.1.0"
+        },
+        {
+            "type": "library",
+            "bom-ref": "pkg:npm/node_modules@1.1.0",
+            "name": "node_modules",
+            "version": "1.1.0",
+            "purl": "pkg:npm/node_modules@1.1.0"
+        },
+        {
+            "type": "library",
+            "bom-ref": "pkg:npm/node_modules@1.1.1",
+            "name": "node_modules",
+            "version": "1.1.1",
+            "purl": "pkg:npm/node_modules@1.1.1"
+        },
+        {
+            "type": "library",
+            "bom-ref": "pkg:npm/node_modules@1.1.2",
+            "name": "node_modules",
+            "version": "1.1.2",
+            "purl": "pkg:npm/node_modules@1.1.2"
+        },
+        {
+            "type": "library",
+            "bom-ref": "pkg:npm/node_modules@1.1.2",
+            "name": "node_modules",
+            "version": "1.1.2",
+            "purl": "pkg:npm/node_modules@1.1.2"
+        },
+        {
+            "type": "library",
+            "bom-ref": "pkg:npm/node_modules@1.101.0",
+            "name": "node_modules",
+            "version": "1.101.0",
+            "purl": "pkg:npm/node_modules@1.101.0"
+        },
+        {
+            "type": "library",
+            "bom-ref": "pkg:npm/node_modules@1.16.0",
+            "name": "node_modules",
+            "version": "1.16.0",
+            "purl": "pkg:npm/node_modules@1.16.0"
+        },
+        {
+            "type": "library",
+            "bom-ref": "pkg:npm/node_modules@1.2.0",
+            "name": "node_modules",
+            "version": "1.2.0",
+            "purl": "pkg:npm/node_modules@1.2.0"
+        },
+        {
+            "type": "library",
+            "bom-ref": "pkg:npm/node_modules@1.2.0",
+            "name": "node_modules",
+            "version": "1.2.0",
+            "purl": "pkg:npm/node_modules@1.2.0"
+        },
+        {
+            "type": "library",
+            "bom-ref": "pkg:npm/node_modules@1.2.13",
+            "name": "node_modules",
+            "version": "1.2.13",
+            "purl": "pkg:npm/node_modules@1.2.13"
+        },
+        {
+            "type": "library",
+            "bom-ref": "pkg:npm/node_modules@1.2.2",
+            "name": "node_modules",
+            "version": "1.2.2",
+            "purl": "pkg:npm/node_modules@1.2.2"
+        },
+        {
+            "type": "library",
+            "bom-ref": "pkg:npm/node_modules@1.20.0",
+            "name": "node_modules",
+            "version": "1.20.0",
+            "purl": "pkg:npm/node_modules@1.20.0"
+        },
+        {
+            "type": "library",
+            "bom-ref": "pkg:npm/node_modules@1.3.0",
+            "name": "node_modules",
+            "version": "1.3.0",
+            "purl": "pkg:npm/node_modules@1.3.0"
+        },
+        {
+            "type": "library",
+            "bom-ref": "pkg:npm/node_modules@1.3.0",
+            "name": "node_modules",
+            "version": "1.3.0",
+            "purl": "pkg:npm/node_modules@1.3.0"
+        },
+        {
+            "type": "library",
+            "bom-ref": "pkg:npm/node_modules@1.33.0",
+            "name": "node_modules",
+            "version": "1.33.0",
+            "purl": "pkg:npm/node_modules@1.33.0"
+        },
+        {
+            "type": "library",
+            "bom-ref": "pkg:npm/node_modules@1.33.0",
+            "name": "node_modules",
+            "version": "1.33.0",
+            "purl": "pkg:npm/node_modules@1.33.0"
+        },
+        {
+            "type": "library",
+            "bom-ref": "pkg:npm/node_modules@1.33.0",
+            "name": "node_modules",
+            "version": "1.33.0",
+            "purl": "pkg:npm/node_modules@1.33.0"
+        },
+        {
+            "type": "library",
+            "bom-ref": "pkg:npm/node_modules@1.33.0",
+            "name": "node_modules",
+            "version": "1.33.0",
+            "purl": "pkg:npm/node_modules@1.33.0"
+        },
+        {
+            "type": "library",
+            "bom-ref": "pkg:npm/node_modules@1.33.0",
+            "name": "node_modules",
+            "version": "1.33.0",
+            "purl": "pkg:npm/node_modules@1.33.0"
+        },
+        {
+            "type": "library",
+            "bom-ref": "pkg:npm/node_modules@1.33.0",
+            "name": "node_modules",
+            "version": "1.33.0",
+            "purl": "pkg:npm/node_modules@1.33.0"
+        },
+        {
+            "type": "library",
+            "bom-ref": "pkg:npm/node_modules@1.33.0",
+            "name": "node_modules",
+            "version": "1.33.0",
+            "purl": "pkg:npm/node_modules@1.33.0"
+        },
+        {
+            "type": "library",
+            "bom-ref": "pkg:npm/node_modules@1.33.0",
+            "name": "node_modules",
+            "version": "1.33.0",
+            "purl": "pkg:npm/node_modules@1.33.0"
+        },
+        {
+            "type": "library",
+            "bom-ref": "pkg:npm/node_modules@1.33.0",
+            "name": "node_modules",
+            "version": "1.33.0",
+            "purl": "pkg:npm/node_modules@1.33.0"
+        },
+        {
+            "type": "library",
+            "bom-ref": "pkg:npm/node_modules@1.33.0",
+            "name": "node_modules",
+            "version": "1.33.0",
+            "purl": "pkg:npm/node_modules@1.33.0"
+        },
+        {
+            "type": "library",
+            "bom-ref": "pkg:npm/node_modules@1.33.0",
+            "name": "node_modules",
+            "version": "1.33.0",
+            "purl": "pkg:npm/node_modules@1.33.0"
+        },
+        {
+            "type": "library",
+            "bom-ref": "pkg:npm/node_modules@1.33.0",
+            "name": "node_modules",
+            "version": "1.33.0",
+            "purl": "pkg:npm/node_modules@1.33.0"
+        },
+        {
+            "type": "library",
+            "bom-ref": "pkg:npm/node_modules@1.52.0",
+            "name": "node_modules",
+            "version": "1.52.0",
+            "purl": "pkg:npm/node_modules@1.52.0"
+        },
+        {
+            "type": "library",
+            "bom-ref": "pkg:npm/node_modules@2.0.4",
+            "name": "node_modules",
+            "version": "2.0.4",
+            "purl": "pkg:npm/node_modules@2.0.4"
+        },
+        {
+            "type": "library",
+            "bom-ref": "pkg:npm/node_modules@2.1.0",
+            "name": "node_modules",
+            "version": "2.1.0",
+            "purl": "pkg:npm/node_modules@2.1.0"
+        },
+        {
+            "type": "library",
+            "bom-ref": "pkg:npm/node_modules@2.1.0",
+            "name": "node_modules",
+            "version": "2.1.0",
+            "purl": "pkg:npm/node_modules@2.1.0"
+        },
+        {
+            "type": "library",
+            "bom-ref": "pkg:npm/node_modules@2.1.1",
+            "name": "node_modules",
+            "version": "2.1.1",
+            "purl": "pkg:npm/node_modules@2.1.1"
+        },
+        {
+            "type": "library",
+            "bom-ref": "pkg:npm/node_modules@2.1.2",
+            "name": "node_modules",
+            "version": "2.1.2",
+            "purl": "pkg:npm/node_modules@2.1.2"
+        },
+        {
+            "type": "library",
+            "bom-ref": "pkg:npm/node_modules@2.1.3",
+            "name": "node_modules",
+            "version": "2.1.3",
+            "purl": "pkg:npm/node_modules@2.1.3"
+        },
+        {
+            "type": "library",
+            "bom-ref": "pkg:npm/node_modules@2.1.35",
+            "name": "node_modules",
+            "version": "2.1.35",
+            "purl": "pkg:npm/node_modules@2.1.35"
+        },
+        {
+            "type": "library",
+            "bom-ref": "pkg:npm/node_modules@2.3.2",
+            "name": "node_modules",
+            "version": "2.3.2",
+            "purl": "pkg:npm/node_modules@2.3.2"
+        },
+        {
+            "type": "library",
+            "bom-ref": "pkg:npm/node_modules@2.3.3",
+            "name": "node_modules",
+            "version": "2.3.3",
+            "purl": "pkg:npm/node_modules@2.3.3"
+        },
+        {
+            "type": "library",
+            "bom-ref": "pkg:npm/node_modules@26.9.28",
+            "name": "node_modules",
+            "version": "26.9.28",
+            "purl": "pkg:npm/node_modules@26.9.28"
+        },
+        {
+            "type": "library",
+            "bom-ref": "pkg:npm/node_modules@3.2.0",
+            "name": "node_modules",
+            "version": "3.2.0",
+            "purl": "pkg:npm/node_modules@3.2.0"
+        },
+        {
+            "type": "library",
+            "bom-ref": "pkg:npm/node_modules@3.3.20",
+            "name": "node_modules",
+            "version": "3.3.20",
+            "purl": "pkg:npm/node_modules@3.3.20"
+        },
+        {
+            "type": "library",
+            "bom-ref": "pkg:npm/node_modules@4.0.3",
+            "name": "node_modules",
+            "version": "4.0.3",
+            "purl": "pkg:npm/node_modules@4.0.3"
+        },
+        {
+            "type": "library",
+            "bom-ref": "pkg:npm/node_modules@4.0.6",
+            "name": "node_modules",
+            "version": "4.0.6",
+            "purl": "pkg:npm/node_modules@4.0.6"
+        },
+        {
+            "type": "library",
+            "bom-ref": "pkg:npm/node_modules@4.0.7",
+            "name": "node_modules",
+            "version": "4.0.7",
+            "purl": "pkg:npm/node_modules@4.0.7"
+        },
+        {
+            "type": "library",
+            "bom-ref": "pkg:npm/node_modules@4.4.3",
+            "name": "node_modules",
+            "version": "4.4.3",
+            "purl": "pkg:npm/node_modules@4.4.3"
+        },
+        {
+            "type": "library",
+            "bom-ref": "pkg:npm/node_modules@5.0.0",
+            "name": "node_modules",
+            "version": "5.0.0",
+            "purl": "pkg:npm/node_modules@5.0.0"
+        },
+        {
+            "type": "library",
+            "bom-ref": "pkg:npm/node_modules@5.0.0",
+            "name": "node_modules",
+            "version": "5.0.0",
+            "purl": "pkg:npm/node_modules@5.0.0"
+        },
+        {
+            "type": "library",
+            "bom-ref": "pkg:npm/node_modules@5.0.1",
+            "name": "node_modules",
+            "version": "5.0.1",
+            "purl": "pkg:npm/node_modules@5.0.1"
+        },
+        {
+            "type": "library",
+            "bom-ref": "pkg:npm/node_modules@5.1.9",
+            "name": "node_modules",
+            "version": "5.1.9",
+            "purl": "pkg:npm/node_modules@5.1.9"
+        },
+        {
+            "type": "library",
+            "bom-ref": "pkg:npm/node_modules@5.3.8",
+            "name": "node_modules",
+            "version": "5.3.8",
+            "purl": "pkg:npm/node_modules@5.3.8"
+        },
+        {
+            "type": "library",
+            "bom-ref": "pkg:npm/node_modules@6.0.2",
+            "name": "node_modules",
+            "version": "6.0.2",
+            "purl": "pkg:npm/node_modules@6.0.2"
+        },
+        {
+            "type": "library",
+            "bom-ref": "pkg:npm/node_modules@6.5.0",
+            "name": "node_modules",
+            "version": "6.5.0",
+            "purl": "pkg:npm/node_modules@6.5.0"
+        },
+        {
+            "type": "library",
+            "bom-ref": "pkg:npm/node_modules@7.1.1",
+            "name": "node_modules",
+            "version": "7.1.1",
+            "purl": "pkg:npm/node_modules@7.1.1"
+        },
+        {
+            "type": "library",
+            "bom-ref": "pkg:npm/node_modules@8.3.4",
+            "name": "node_modules",
+            "version": "8.3.4",
+            "purl": "pkg:npm/node_modules@8.3.4"
+        },
+        {
+            "type": "library",
+            "bom-ref": "pkg:npm/node_modules@8.5.29",
+            "name": "node_modules",
+            "version": "8.5.29",
+            "purl": "pkg:npm/node_modules@8.5.29"
+        },
+        {
+            "type": "library",
+            "bom-ref": "pkg:npm/node_modules@8.9.2",
+            "name": "node_modules",
+            "version": "8.9.2",
+            "purl": "pkg:npm/node_modules@8.9.2"
+        }
+    ]
 }
