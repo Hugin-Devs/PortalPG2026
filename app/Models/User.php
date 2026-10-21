@@ -16,16 +16,16 @@ class User extends Authenticatable
     /**
      * The attributes that are mass assignable.
      *
+     * Anti-mass-assignment (L1): solo campos de perfil. `role`, `is_active`,
+     * `last_login_at` y `password_changed_at` se asignan con `forceFill()`
+     * en puntos de código controlados y auditados.
+     *
      * @var array<int, string>
      */
     protected $fillable = [
         'name',
         'email',
         'password',
-        'role',
-        'is_active',
-        'last_login_at',
-        'password_changed_at',
     ];
 
     /**

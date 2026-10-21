@@ -32,10 +32,13 @@ class UserController extends Controller
         ]);
 
         $data['password'] = Hash::make($data['password']);
-        $data['is_active'] = $request->has('is_active');
+        $isactive = $request->has('is_active');
+        $role = $data['role'];
+        unset($data['role']);
 
         $user = User::create($data);
-        Audit::log('user.created', User::class, $user->id, "Usuario creado: {$user->email} ({$user->role})");
+        $user->forceFill(['role' => $role, 'is_active' => $isactive])->save();
+        Audit::log('user.created', User::class, $user->id, "Usuario creado ({$role})");
 
         return redirect('/admin/usuarios')->with('success', 'Usuario creado correctamente.');
     }
@@ -47,6 +50,8 @@ class UserController extends Controller
 
     public function update(Request $request, User $user)
     {
+        $this->authorizeTarget($user);
+
         if ($user->id === auth()->id() && ! $request->has('is_active')) {
             return back()->with('error', 'No puedes desactivarte a ti mismo.');
         }
@@ -65,25 +70,66 @@ class UserController extends Controller
         }
 
         $data['is_active'] = $request->has('is_active');
+        $role = $data['role'];
+        $isactive = $data['is_active'];
+        unset($data['role'], $data['is_active']);
 
         $user->update($data);
-        Audit::log('user.updated', User::class, $user->id, "Usuario actualizado: {$user->email} ({$user->role})");
+        $user->forceFill(['role' => $role, 'is_active' => $isactive])->save();
+        Audit::log('user.updated', User::class, $user->id, "Usuario actualizado ({$role})");
 
         return redirect('/admin/usuarios')->with('success', 'Usuario actualizado correctamente.');
     }
 
     public function destroy(User $user)
     {
+        $this->authorizeTarget($user);
+
         if ($user->id === auth()->id()) {
             return back()->with('error', 'No puedes eliminarte a ti mismo.');
         }
         if ($user->posts()->count() > 0) {
             return back()->with('error', 'No se puede eliminar un usuario con noticias asociadas.');
         }
-        Audit::log('user.deleted', User::class, $user->id, "Usuario eliminado: {$user->email}");
+        Audit::log('user.deleted', User::class, $user->id, 'Usuario eliminado');
         $user->delete();
 
         return redirect('/admin/usuarios')->with('success', 'Usuario eliminado correctamente.');
+    }
+
+    /**
+     * Jerarquía de roles: un principal solo puede modificar usuarios de un
+     * rango estrictamente inferior al suyo. Un superadmin es el único que
+     * puede tocar cuentas superadmin (anti-takeover H3).
+     */
+    private function authorizeTarget(User $user): void
+    {
+        $actor = auth()->user();
+
+        // Autoedición de perfil permitida (nombre/email); el cambio de
+        // contraseña y la desactivación propia ya tienen sus propias guardas.
+        if ($user->id === $actor?->id) {
+            return;
+        }
+
+        if ($user->role === 'superadmin' && $actor?->role !== 'superadmin') {
+            abort(403, 'Solo un superadministrador puede modificar cuentas superadmin.');
+        }
+
+        if ($actor?->role !== 'superadmin'
+            && self::roleRank($user->role) >= self::roleRank($actor->role)) {
+            abort(403, 'Solo puedes modificar usuarios de un rango inferior al tuyo.');
+        }
+    }
+
+    private static function roleRank(?string $role): int
+    {
+        return match ($role) {
+            'superadmin' => 3,
+            'admin' => 2,
+            'editor' => 1,
+            default => 0,
+        };
     }
 
     private function roleValidationRule(?User $user = null): array
@@ -92,8 +138,17 @@ class UserController extends Controller
             'required',
             'in:superadmin,admin,editor',
             function ($attribute, $value, $fail) use ($user) {
-                if ($value === 'superadmin' && auth()->user()?->role !== 'superadmin') {
+                $actor = auth()->user();
+
+                if ($value === 'superadmin' && $actor?->role !== 'superadmin') {
                     $fail('No tienes permiso para asignar el rol superadmin.');
+                }
+
+                // Jerarquía de asignación: solo se otorgan rangos estrictamente
+                // inferiores al del actor (un admin delega editor, no admin).
+                if ($actor?->role !== 'superadmin'
+                    && self::roleRank($value) >= self::roleRank($actor->role)) {
+                    $fail('Solo puedes asignar roles de un rango inferior al tuyo.');
                 }
 
                 // No degradar al último superadmin: dejaría el sistema sin administrador total.

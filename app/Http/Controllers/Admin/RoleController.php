@@ -56,30 +56,67 @@ class RoleController extends Controller
 
     public function update(Request $request)
     {
-        $role = $request->input('role');
-        $permissionIds = $request->input('permissions', '');
+        $data = $request->validate([
+            'role' => ['required', 'in:superadmin,admin,editor'],
+            'permissions' => ['nullable', 'string', 'max:2000'],
+        ]);
 
-        $ids = $permissionIds ? explode(',', $permissionIds) : [];
+        $role = $data['role'];
+        $actor = $request->user();
 
-        \DB::table('role_permission')->where('role', $role)->delete();
+        // Solo un superadmin puede alterar los permisos del rol superadmin
+        // (que de todos modos bypasa la comprobación en CheckPermission).
+        if ($role === 'superadmin' && $actor?->role !== 'superadmin') {
+            abort(403, 'Solo un superadministrador puede modificar el rol superadmin.');
+        }
 
-        $data = [];
-        foreach ($ids as $permId) {
-            $data[] = [
+        $ids = collect(explode(',', (string) ($data['permissions'] ?? '')))
+            ->filter(fn ($id) => $id !== '')
+            ->map(fn ($id) => (int) $id)
+            ->unique()
+            ->values();
+
+        // Intersección con permisos existentes: un ID desconocido o duplicado
+        // es error de validación ANTES de tocar la tabla (evita el DELETE
+        // autocomiteado que dejaba el rol sin permisos).
+        $validIds = Permission::whereIn('id', $ids)->pluck('id');
+        if ($validIds->count() !== $ids->count()) {
+            return back()->withErrors([
+                'permissions' => 'La lista de permisos contiene identificadores no válidos.',
+            ])->withInput();
+        }
+
+        // Anti-autoescalada: un actor no superadmin solo puede otorgar
+        // permisos que su propio rol ya posee.
+        if ($actor?->role !== 'superadmin') {
+            $owned = \DB::table('role_permission')
+                ->where('role', $actor->role)
+                ->pluck('permission_id');
+            if (collect($validIds)->diff($owned)->isNotEmpty()) {
+                return back()->withErrors([
+                    'permissions' => 'No puedes otorgar permisos que tu rol no posee.',
+                ])->withInput();
+            }
+        }
+
+        \DB::transaction(function () use ($role, $validIds) {
+            \DB::table('role_permission')->where('role', $role)->delete();
+
+            $rows = $validIds->map(fn ($id) => [
                 'role' => $role,
-                'permission_id' => $permId,
+                'permission_id' => $id,
                 'created_at' => now(),
                 'updated_at' => now(),
-            ];
-        }
+            ])->all();
 
-        if (! empty($data)) {
-            \DB::table('role_permission')->insert($data);
-        }
+            if (! empty($rows)) {
+                \DB::table('role_permission')->insert($rows);
+            }
+        });
 
         Audit::log('role.updated', null, null, "Permisos actualizados para rol: {$role}", [
             'role' => $role,
-            'permission_count' => count($ids),
+            'permission_count' => count($validIds),
         ]);
 
         return back()->with('success', "Permisos actualizados para el rol \"$role\".");

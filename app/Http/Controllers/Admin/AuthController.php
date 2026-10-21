@@ -24,8 +24,11 @@ class AuthController extends Controller
         ]);
 
         $limiterKey = 'login:'.$request->ip();
+        // Límite por cuenta (hash, sin PII en caché): un ataque de stuffing
+        // rotando IPs no debe poder concentrar intentos contra una cuenta.
+        $accountKey = 'login:account:'.hash('sha256', strtolower($credentials['email']));
 
-        if (RateLimiter::tooManyAttempts($limiterKey, 5)) {
+        if (RateLimiter::tooManyAttempts($limiterKey, 5) || RateLimiter::tooManyAttempts($accountKey, 5)) {
             return redirect('/admin/login')->withErrors([
                 'email' => 'Demasiados intentos fallidos. Vuelve a intentarlo en '.RateLimiter::availableIn($limiterKey).' segundos.',
             ]);
@@ -39,20 +42,23 @@ class AuthController extends Controller
                 $request->session()->invalidate();
                 $request->session()->regenerateToken();
                 RateLimiter::hit($limiterKey, 60);
+                RateLimiter::hit($accountKey, 60);
 
                 return redirect('/admin/login')->withErrors(['email' => 'Credenciales inválidas.']);
             }
 
             RateLimiter::clear($limiterKey);
+            RateLimiter::clear($accountKey);
             $user->forceFill(['last_login_at' => now()])->save();
             $request->session()->regenerate();
-            Audit::log('login.success', User::class, $user->id, "Login exitoso: {$user->email}");
+            Audit::log('login.success', User::class, $user->id, "Login exitoso: usuario #{$user->id}");
 
             return redirect()->intended('/admin');
         }
 
         RateLimiter::hit($limiterKey, 60);
-        Audit::log('login.failed', null, null, 'Intento fallido de login', ['email' => $request->input('email')]);
+        RateLimiter::hit($accountKey, 60);
+        Audit::log('login.failed', null, null, 'Intento fallido de login');
 
         return redirect('/admin/login')->withErrors(['email' => 'Credenciales inválidas.']);
     }
@@ -60,7 +66,7 @@ class AuthController extends Controller
     public function logout(Request $request)
     {
         $user = auth()->user();
-        Audit::log('logout', User::class, $user?->id, $user ? "Logout: {$user->email}" : 'Logout');
+        Audit::log('logout', User::class, $user?->id, $user ? "Logout: usuario #{$user->id}" : 'Logout');
 
         auth()->logout();
         $request->session()->invalidate();
@@ -89,11 +95,11 @@ class AuthController extends Controller
             return back()->withErrors(['current_password' => 'La contraseña actual no es correcta.']);
         }
 
-        $user->update([
+        $user->forceFill([
             'password' => $data['password'],
             'password_changed_at' => now(),
-        ]);
-        Audit::log('password.changed', User::class, $user->id, "Cambio de contraseña: {$user->email}");
+        ])->save();
+        Audit::log('password.changed', User::class, $user->id, "Cambio de contraseña: usuario #{$user->id}");
 
         return redirect()->intended('/admin')->with('success', 'Contraseña actualizada correctamente.');
     }

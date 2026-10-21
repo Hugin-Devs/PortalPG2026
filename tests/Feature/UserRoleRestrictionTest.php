@@ -102,6 +102,96 @@ class UserRoleRestrictionTest extends TestCase
         $this->assertSame('admin', $superadmin->fresh()->role);
     }
 
+    public function test_admin_cannot_change_password_of_superadmin_account(): void
+    {
+        $admin = $this->createAdminWithUserPermissions();
+        $superadmin = User::factory()->create(['role' => 'superadmin']);
+
+        $response = $this->actingAs($admin)->put("/admin/usuarios/{$superadmin->id}", [
+            'name' => $superadmin->name,
+            'email' => $superadmin->email,
+            'password' => 'hijacked123',
+            'password_confirmation' => 'hijacked123',
+            'role' => 'superadmin',
+        ]);
+
+        $response->assertForbidden();
+        $this->assertFalse(\Hash::check('hijacked123', $superadmin->fresh()->password));
+    }
+
+    public function test_admin_cannot_deactivate_superadmin_account(): void
+    {
+        $admin = $this->createAdminWithUserPermissions();
+        $superadmin = User::factory()->create(['role' => 'superadmin']);
+
+        $response = $this->actingAs($admin)->put("/admin/usuarios/{$superadmin->id}", [
+            'name' => $superadmin->name,
+            'email' => $superadmin->email,
+            'role' => 'superadmin',
+        ]);
+
+        $response->assertForbidden();
+        $this->assertTrue($superadmin->fresh()->is_active);
+    }
+
+    public function test_admin_cannot_delete_superadmin_account(): void
+    {
+        $admin = $this->createAdminWithUserPermissions();
+        $superadmin = User::factory()->create(['role' => 'superadmin']);
+
+        $response = $this->actingAs($admin)->delete("/admin/usuarios/{$superadmin->id}");
+
+        $response->assertForbidden();
+        $this->assertDatabaseHas('users', ['id' => $superadmin->id]);
+    }
+
+    public function test_admin_cannot_modify_peer_admin_account(): void
+    {
+        $admin = $this->createAdminWithUserPermissions();
+        $peer = User::factory()->create(['role' => 'admin']);
+
+        $response = $this->actingAs($admin)->put("/admin/usuarios/{$peer->id}", [
+            'name' => $peer->name,
+            'email' => $peer->email,
+            'role' => 'editor',
+        ]);
+
+        $response->assertForbidden();
+        $this->assertSame('admin', $peer->fresh()->role);
+    }
+
+    public function test_admin_cannot_assign_admin_role_only_editor(): void
+    {
+        $admin = $this->createAdminWithUserPermissions();
+
+        $response = $this->actingAs($admin)->post('/admin/usuarios', [
+            'name' => 'Nuevo admin',
+            'email' => 'nuevo-admin@gdc.gob.ve',
+            'password' => 'password123',
+            'password_confirmation' => 'password123',
+            'role' => 'admin',
+        ]);
+
+        $response->assertSessionHasErrors('role');
+        $this->assertDatabaseMissing('users', ['email' => 'nuevo-admin@gdc.gob.ve']);
+    }
+
+    public function test_admin_can_still_create_and_edit_editors(): void
+    {
+        $admin = $this->createAdminWithUserPermissions();
+
+        $response = $this->actingAs($admin)->post('/admin/usuarios', [
+            'name' => 'Nuevo editor',
+            'email' => 'nuevo-editor@gdc.gob.ve',
+            'password' => 'password123',
+            'password_confirmation' => 'password123',
+            'role' => 'editor',
+        ]);
+
+        $response->assertRedirect('/admin/usuarios');
+        $this->assertDatabaseHas('users', ['email' => 'nuevo-editor@gdc.gob.ve', 'role' => 'editor']);
+    }
+
     private function createAdminWithUserPermissions(): User
     {
         $admin = User::factory()->create(['role' => 'admin']);

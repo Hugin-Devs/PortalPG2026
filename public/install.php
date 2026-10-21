@@ -164,12 +164,14 @@ if (($_SERVER['REQUEST_METHOD'] ?? 'GET') === 'POST') {
         DB::transaction(function () use ($old, $saPassword, $adPassword, $seedEmails) {
             $superadmin = User::updateOrCreate(
                 ['email' => $old['sa_email']],
-                ['name' => $old['sa_name'], 'password' => Hash::make($saPassword), 'role' => 'superadmin', 'is_active' => true, 'password_changed_at' => now()]
+                ['name' => $old['sa_name'], 'password' => Hash::make($saPassword)]
             );
+            $superadmin->forceFill(['role' => 'superadmin', 'is_active' => true, 'password_changed_at' => now()])->save();
             $admin = User::updateOrCreate(
                 ['email' => $old['ad_email']],
-                ['name' => $old['ad_name'], 'password' => Hash::make($adPassword), 'role' => 'admin', 'is_active' => true, 'password_changed_at' => now()]
+                ['name' => $old['ad_name'], 'password' => Hash::make($adPassword)]
             );
+            $admin->forceFill(['role' => 'admin', 'is_active' => true, 'password_changed_at' => now()])->save();
 
             // El contenido sembrado (noticias, galerías, gacetas, videos) va
             // firmado por los usuarios seed: reasignarlo al superadmin real

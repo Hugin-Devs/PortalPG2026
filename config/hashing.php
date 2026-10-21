@@ -29,7 +29,8 @@ return [
     */
 
     'bcrypt' => [
-        'rounds' => env('BCRYPT_ROUNDS', 10),
+        // >=12 exige la política de seguridad del proyecto (bcrypt cost >=12).
+        'rounds' => env('BCRYPT_ROUNDS', 12),
     ],
 
     /*

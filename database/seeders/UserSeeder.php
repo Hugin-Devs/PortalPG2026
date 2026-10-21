@@ -56,25 +56,25 @@ class UserSeeder extends Seeder
         // deja en null para forzar el cambio de contraseña en el primer login.
         $user = User::firstOrCreate(
             ['email' => $attrs['email']],
-            [
-                'name' => $attrs['name'],
-                'password' => Hash::make('password'),
-                'role' => $attrs['role'],
-                'password_changed_at' => app()->environment('production') ? null : now(),
-            ]
+            ['name' => $attrs['name'], 'password' => Hash::make('password')]
         );
+        // `role` y `password_changed_at` no son mass-assignable (anti-mass-assignment).
+        $user->forceFill([
+            'role' => $attrs['role'],
+            'password_changed_at' => app()->environment('production') ? null : now(),
+        ])->save();
 
         if ($user->name !== $attrs['name'] || $user->role !== $attrs['role']) {
-            $user->update([
+            $user->forceFill([
                 'name' => $attrs['name'],
                 'role' => $attrs['role'],
-            ]);
+            ])->save();
         }
 
         // En entornos no productivos, alinear también password_changed_at de
         // filas ya existentes (re-seed) para no bloquear los arneses E2E.
         if (! app()->environment('production') && is_null($user->password_changed_at)) {
-            $user->update(['password_changed_at' => now()]);
+            $user->forceFill(['password_changed_at' => now()])->save();
         }
     }
 }
