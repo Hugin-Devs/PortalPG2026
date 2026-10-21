@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\Category;
+use App\Support\Audit;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
 
@@ -35,7 +36,8 @@ class CategoryController extends Controller
 
         $data['slug'] = Str::slug($request->name);
 
-        Category::create($data);
+        $category = Category::create($data);
+        Audit::log('category.created', Category::class, $category->id, 'Categoría creada');
 
         return redirect('/admin/categorias')->with('success', 'Categoría creada correctamente.');
     }
@@ -62,6 +64,7 @@ class CategoryController extends Controller
         $data['is_active'] = $request->has('is_active');
 
         $category->update($data);
+        Audit::log('category.updated', Category::class, $category->id, 'Categoría actualizada');
 
         return redirect('/admin/categorias')->with('success', 'Categoría actualizada correctamente.');
     }
@@ -71,6 +74,7 @@ class CategoryController extends Controller
         if ($category->posts()->count() > 0) {
             return back()->with('error', 'No se puede eliminar una categoría con noticias asociadas.');
         }
+        Audit::log('category.deleted', Category::class, $category->id, 'Categoría eliminada');
         $category->delete();
 
         return redirect('/admin/categorias')->with('success', 'Categoría eliminada correctamente.');

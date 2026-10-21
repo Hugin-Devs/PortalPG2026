@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\Partner;
 use App\Services\Webp;
+use App\Support\Audit;
 use App\Support\Uploads;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
@@ -29,7 +30,7 @@ class PartnerController extends Controller
             'name' => 'required|max:255',
             'description' => 'nullable|string',
             'logo' => 'nullable|image|mimes:jpeg,png,jpg,gif,webp|max:2048',
-            'url' => 'nullable|url',
+            'url' => ['nullable', 'url', 'regex:/^https?:\/\//i'],
             'order' => 'nullable|integer|min:0',
         ]);
 
@@ -41,7 +42,8 @@ class PartnerController extends Controller
             unset($data['logo']);
         }
 
-        Partner::create($data);
+        $partner = Partner::create($data);
+        Audit::log('partner.created', Partner::class, $partner->id, 'Ente afiliado creado');
 
         return redirect('/admin/entes')->with('success', 'Ente afiliado creado correctamente.');
     }
@@ -57,7 +59,7 @@ class PartnerController extends Controller
             'name' => 'required|max:255',
             'description' => 'nullable|string',
             'logo' => 'nullable|image|mimes:jpeg,png,jpg,gif,webp|max:2048',
-            'url' => 'nullable|url',
+            'url' => ['nullable', 'url', 'regex:/^https?:\/\//i'],
             'order' => 'nullable|integer|min:0',
             'is_active' => 'nullable|boolean',
             'remove_logo' => 'nullable|boolean',
@@ -88,6 +90,7 @@ class PartnerController extends Controller
         }
 
         $partner->update($data);
+        Audit::log('partner.updated', Partner::class, $partner->id, 'Ente afiliado actualizado');
 
         return redirect('/admin/entes')->with('success', 'Ente afiliado actualizado correctamente.');
     }
@@ -98,6 +101,7 @@ class PartnerController extends Controller
             \Storage::disk('public')->delete($partner->logo);
             Webp::delete($partner->logo);
         }
+        Audit::log('partner.deleted', Partner::class, $partner->id, 'Ente afiliado eliminado');
         $partner->delete();
 
         return redirect('/admin/entes')->with('success', 'Ente afiliado eliminado correctamente.');

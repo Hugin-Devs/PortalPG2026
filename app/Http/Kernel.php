@@ -3,6 +3,7 @@
 namespace App\Http;
 
 use App\Http\Middleware\AddSecurityHeaders;
+use App\Http\Middleware\AssignRequestId;
 use App\Http\Middleware\Authenticate;
 use App\Http\Middleware\CheckPermission;
 use App\Http\Middleware\CheckRole;
@@ -51,6 +52,7 @@ class Kernel extends HttpKernel
         SanitizeLatin9Input::class,
         ConvertEmptyStringsToNull::class,
         AddSecurityHeaders::class,
+        AssignRequestId::class,
     ];
 
     /**

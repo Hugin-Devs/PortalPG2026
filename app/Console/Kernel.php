@@ -12,7 +12,8 @@ class Kernel extends ConsoleKernel
      */
     protected function schedule(Schedule $schedule): void
     {
-        // $schedule->command('inspire')->hourly();
+        // Retención de PII: mensajes de contacto fuera de ventana (GDPR).
+        $schedule->command('contacts:prune')->dailyAt('03:17');
     }
 
     /**

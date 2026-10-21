@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\Setting;
 use App\Services\Webp;
+use App\Support\Audit;
 use App\Support\Uploads;
 use Illuminate\Http\Request;
 
@@ -77,6 +78,8 @@ class SettingsController extends Controller
             $this->deleteLogo();
             Setting::updateOrCreate(['key' => 'site_logo'], ['value' => '']);
         }
+
+        Audit::log('settings.updated', null, null, 'Configuración general actualizada (identidad/enlaces/logo)');
 
         return redirect('/admin/configuracion')->with('success', 'Configuración actualizada correctamente.');
     }

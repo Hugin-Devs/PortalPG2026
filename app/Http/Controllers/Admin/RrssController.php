@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\Setting;
+use App\Support\Audit;
 use Illuminate\Http\Request;
 
 class RrssController extends Controller
@@ -55,6 +56,8 @@ class RrssController extends Controller
                 ['value' => implode("\n", self::splitLines($data[$field] ?? ''))]
             );
         }
+
+        Audit::log('rrss.updated', null, null, 'Redes sociales actualizadas');
 
         return redirect('/admin/rrss')->with('success', 'Redes sociales actualizadas correctamente.');
     }

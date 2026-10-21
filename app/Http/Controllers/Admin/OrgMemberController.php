@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\OrgMember;
+use App\Support\Audit;
 use Illuminate\Http\Request;
 
 class OrgMemberController extends Controller
@@ -30,7 +31,8 @@ class OrgMemberController extends Controller
             'order' => 'nullable|integer|min:0',
         ]);
 
-        OrgMember::create($data);
+        $member = OrgMember::create($data);
+        Audit::log('org_member.created', OrgMember::class, $member->id, 'Miembro de la estructura creado');
 
         return redirect('/admin/estructura')->with('success', 'Miembro creado correctamente.');
     }
@@ -54,12 +56,14 @@ class OrgMemberController extends Controller
         $data['is_active'] = $request->has('is_active');
 
         $orgMember->update($data);
+        Audit::log('org_member.updated', OrgMember::class, $orgMember->id, 'Miembro de la estructura actualizado');
 
         return redirect('/admin/estructura')->with('success', 'Miembro actualizado correctamente.');
     }
 
     public function destroy(OrgMember $orgMember)
     {
+        Audit::log('org_member.deleted', OrgMember::class, $orgMember->id, 'Miembro de la estructura eliminado');
         $orgMember->delete();
 
         return redirect('/admin/estructura')->with('success', 'Miembro eliminado correctamente.');

@@ -40,4 +40,16 @@ return [
     */
 
     'audit_enabled' => (bool) env('AUDIT_ENABLED', true),
+
+    /*
+    |--------------------------------------------------------------------------
+    | Retención de mensajes de contacto (GDPR Art. 5(1)(e))
+    |--------------------------------------------------------------------------
+    |
+    | Días que se conserva un mensaje en contacts antes de que
+    | `php artisan contacts:prune` (programado a diario) lo elimine.
+    |
+    */
+
+    'contact_retention_days' => (int) env('CONTACT_RETENTION_DAYS', 365),
 ];

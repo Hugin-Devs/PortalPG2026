@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\Video;
+use App\Support\Audit;
 use App\Support\Uploads;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
@@ -46,7 +47,8 @@ class VideoController extends Controller
             $data['path'] = $file->storeAs('videos', $filename, 'public');
         }
 
-        Video::create($data);
+        $video = Video::create($data);
+        Audit::log('video.created', Video::class, $video->id, "Video cargado ({$data['type']})");
 
         return redirect('/admin/videos#tab-cargar')->with('success', 'Video cargado correctamente.');
     }
@@ -61,9 +63,12 @@ class VideoController extends Controller
 
         if ($request->filled('video_id')) {
             Video::findOrFail($request->video_id)->update(['is_featured' => true]);
+            Audit::log('video.featured', Video::class, (int) $request->video_id, 'Video marcado para la portada');
 
             return redirect('/admin/videos#tab-portada')->with('success', 'Video marcado para la portada.');
         }
+
+        Audit::log('video.featured', null, null, 'Portada de video vaciada');
 
         return redirect('/admin/videos#tab-portada')->with('success', 'Ningún video en la portada.');
     }
@@ -73,6 +78,7 @@ class VideoController extends Controller
         if ($video->path) {
             \Storage::disk('public')->delete($video->path);
         }
+        Audit::log('video.deleted', Video::class, $video->id, 'Video eliminado');
         $video->delete();
 
         return redirect('/admin/videos#tab-cargar')->with('success', 'Video eliminado correctamente.');

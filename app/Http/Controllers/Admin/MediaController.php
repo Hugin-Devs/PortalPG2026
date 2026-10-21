@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\Media;
 use App\Services\Webp;
+use App\Support\Audit;
 use App\Support\Uploads;
 use Illuminate\Http\Request;
 
@@ -40,6 +41,7 @@ class MediaController extends Controller
         }
 
         $count = count($request->file('files'));
+        Audit::log('media.uploaded', null, null, "Subida de {$count} archivo(s) a la biblioteca");
 
         if ($request->expectsJson()) {
             return response()->json(['location' => asset('storage/'.$path)]);
@@ -54,6 +56,7 @@ class MediaController extends Controller
     {
         \Storage::disk('public')->delete($media->path);
         Webp::delete($media->path);
+        Audit::log('media.deleted', Media::class, $media->id, 'Archivo eliminado de la biblioteca');
         $media->delete();
 
         return redirect('/admin/medios')->with('success', 'Archivo eliminado correctamente.');

@@ -1,0 +1,13 @@
+# Defensa en profundidad (C-2): si el servidor web mapeara alguna extensión
+# a un handler PHP, los ficheros subidos desde el panel nunca se ejecutan.
+# Apache 2.4: denegar ejecución + quitar handlers PHP.
+<IfModule mod_php.c>
+    php_flag engine off
+</IfModule>
+<IfModule mod_php7.c>
+    php_flag engine off
+</IfModule>
+<FilesMatch "(?i)\.(php|phtml|php\d|phar|pl|py|cgi|sh)$">
+    Require all denied
+</FilesMatch>
+Options -ExecCGI -Indexes
