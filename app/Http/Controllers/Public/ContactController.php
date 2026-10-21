@@ -25,7 +25,7 @@ class ContactController extends Controller
             'name' => 'required|max:255',
             'email' => 'required|email',
             'subject' => 'required|max:255',
-            'message' => 'required',
+            'message' => 'required|string|max:5000',
         ]);
 
         Contact::create($data);

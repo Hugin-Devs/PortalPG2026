@@ -20,13 +20,6 @@ class Post extends Model
         'published_at' => 'datetime',
     ];
 
-    public function getRenderedContentAttribute(): string
-    {
-        $c = (string) $this->content;
-
-        return preg_match('/<[a-z][^>]*>/i', $c) ? $c : nl2br(e($c));
-    }
-
     public function category()
     {
         return $this->belongsTo(Category::class);

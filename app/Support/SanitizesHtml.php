@@ -3,57 +3,61 @@
 namespace App\Support;
 
 /**
- * Sanitiza HTML almacenado con HTMLPurifier antes de persistirlo.
+ * Sanitiza HTML almacenado con HTMLPurifier antes de persistirlo y al
+ * renderizarlo (defensa en profundidad: si una fila heredada se escribió
+ * por SQL crudo, el HTML crudo nunca llega a la vista).
  *
  * Se usa en modelos cuyo contenido se renderiza con {!! !!} (Post, Page)
  * para prevenir XSS almacenado (hallazgo INJ-01 del análisis de vulnerabilidades).
+ *
+ * La allowlist vive en config/purifier.php (fuente única).
  */
 trait SanitizesHtml
 {
-    /**
-     * Etiquetas HTML permitidas tras sanitización (alineado con TinyMCE).
-     *
-     * D15: sin `img` — las imágenes se gestionan con la portada y la galería
-     * de la noticia; lo que se pegue en el texto se elimina al guardar.
-     */
-    protected static function allowedHtml(): string
-    {
-        return 'p,br,b,strong,i,em,u,a[href|title],'
-            .'h1,h2,h3,h4,h5,h6,ul,ol,li,blockquote,pre,code,'
-            .'table,thead,tbody,tr,th,td,span[class],div[class]';
-    }
+    /** Memo por instancia del HTML ya purificado en lectura. */
+    protected ?string $renderedContentMemo = null;
 
-    /**
-     * Esquemas de URI permitidos. Sin `data:` desde D15 (ya no hay imágenes
-     * inline permitidas; el regex de anclas data: más abajo sigue siendo la
-     * defensa principal contra `<a href="data:...">`).
-     */
-    protected static function allowedUriSchemes(): array
+    protected static function purifyConfig(): array
     {
         return [
-            'http' => true,
-            'https' => true,
-            'mailto' => true,
-            'tel' => true,
+            'HTML.Allowed' => (string) config('purifier.allowed'),
+            'URI.AllowedSchemes' => (array) config('purifier.allowed_schemes'),
         ];
     }
 
-    public function setContentAttribute($value): void
+    protected static function purifyHtml(string $value): string
     {
-        // HTMLPurifier aplica URI.AllowedSchemes de forma global. Permitiendo
-        // `data:` para imágenes inline de TinyMCE (`<img src="data:...">`)
-        // también lo habilitaría en `<a href="data:...">`. Eliminamos el
-        // ancla completa antes de la sanitización (hallazgo INJ-01 residual)
-        // mientras conservamos las imágenes inline.
+        // HTMLPurifier aplica URI.AllowedSchemes de forma global. Defensa
+        // adicional contra `<a href="data:...">` (hallazgo INJ-01 residual).
         $value = preg_replace(
             '#<a\b[^>]*href=[\'"]?data:[^\'"\s>]*[\'"]?[^>]*>.*?</a>#is',
             '',
             $value
         ) ?? $value;
 
-        $this->attributes['content'] = clean($value, [
-            'HTML.Allowed' => static::allowedHtml(),
-            'URI.AllowedSchemes' => static::allowedUriSchemes(),
-        ]);
+        return clean($value, static::purifyConfig());
+    }
+
+    public function setContentAttribute($value): void
+    {
+        $this->attributes['content'] = static::purifyHtml((string) $value);
+    }
+
+    /**
+     * HTML listo para `{!! !!}`: purifica en LECTURA también, para que ni
+     * filas anteriores a la mutadora ni escrituras por SQL crudo puedan
+     * servir XSS almacenado.
+     */
+    public function getRenderedContentAttribute(): string
+    {
+        if ($this->renderedContentMemo !== null) {
+            return $this->renderedContentMemo;
+        }
+
+        $c = (string) $this->content;
+
+        return $this->renderedContentMemo = preg_match('/<[a-z][^>]*>/i', $c)
+            ? static::purifyHtml($c)
+            : nl2br(e($c));
     }
 }

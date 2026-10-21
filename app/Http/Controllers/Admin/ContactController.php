@@ -35,7 +35,7 @@ class ContactController extends Controller
             'phone' => 'nullable|string|max:50',
             'email' => 'nullable|email|max:255',
             'hours' => 'nullable|string|max:255',
-            'map_url' => 'nullable|url|max:2000',
+            'map_url' => ['nullable', 'url', 'max:2000', 'regex:/^https?:\/\//i'],
         ]);
 
         foreach (self::FIELDS as $field => $key) {
