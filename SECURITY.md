@@ -1,6 +1,6 @@
 # SECURITY.md — Riesgos heredados, waivers y condiciones de despliegue
 
-> **Última revisión de seguridad**: 2026-10-23 · **HEAD revisado**: `8d28020` (+ correcciones F6 en working tree) · **Gate**: 16✅ / 4⚠️ / 0❌
+> **Última revisión de seguridad**: 2026-10-23 · **HEAD**: `7ac0028` · **Gate**: 16✅ / 4⚠️ / 0❌
 > Revisión completa bajo protocolo actualizado (gate de 20 ítems + coherencia 12 clases + gate de tests), con ejecución real: Pint ✅ · PHPUnit **180/180** ✅ · `composer audit --locked` (4 ignorados) · `npm audit` **0** ✅.
 > Ronda previa (2026-10-22, HEAD `b6e2be4`): 13✅ / 7⚠️ / 0❌.
 > **Revisión programada de waivers: 2026-11-21.**

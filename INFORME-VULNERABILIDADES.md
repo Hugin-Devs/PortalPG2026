@@ -1,6 +1,6 @@
 # Informe de Análisis de Vulnerabilidades — Portal2026
 
-> **Fecha:** 2026-10-08  
+> **Fecha:** 2026-10-08 · **Última actualización:** 2026-10-23 (ronda F6, commit `7ac0028`)  
 > **Proyecto:** Portal institucional GDC (Laravel 10 + Blade + MySQL)  
 > **Ejecutado por:** Análisis automatizado + revisión manual de código y configuración  
 > **Documento base:** [PLAN-VULNERABILIDADES.md](PLAN-VULNERABILIDADES.md)  
@@ -33,13 +33,13 @@ Tratar los **2 hallazgos Críticos** como incidentes de seguridad potenciales y 
 
 ---
 
-## 1.b Estado de remediación (actualizado 2026-10-08)
+## 1.b Estado de remediación (actualizado 2026-10-23)
 
-Tras dos rondas de cierre (remediación inicial + auditoría comprobatoria), el estado de los hallazgos es:
+Tras tres rondas de cierre (remediación inicial + auditoría comprobatoria + ajustes F6), el estado de los hallazgos es:
 
 | ID | Hallazgo | Estado | Observaciones |
 |---|---|---|---|
-| AUTH-01 | Login sin rate limiting | ✅ Remedado | Rate limiter por IP + lockout por intentos fallidos (5 fallos / 60 s); valores leídos desde `config/security.php` para respetar `config:cache` |
+| AUTH-01 | Login sin rate limiting | ✅ Remedado | Rate limiter por IP + **lockout configurable** (`LOGIN_LOCKOUT_ATTEMPTS=5` / `LOGIN_LOCKOUT_DECAY=60`, `config/security.php` para `config:cache`) |
 | AUTH-02 | Password seed `password` | ✅ Remedado | Middleware `EnsurePasswordChanged` + vista `/admin/cambiar-contrasena` |
 | AUTHZ-01 | Escalada a `superadmin` | ✅ Remedado | Solo `superadmin` asigna `superadmin`; no se puede degradar al último |
 | AUTHZ-02 | Editor puede publicar | ✅ Remedado | `NewsController::resolveStatus` fuerza `draft` para `editor` |
@@ -48,12 +48,12 @@ Tras dos rondas de cierre (remediación inicial + auditoría comprobatoria), el 
 | FILE-01 | Extensión de archivos subidos controlada por cliente | ✅ Remedado | `App\Support\Uploads::safeExtension()` usa la extensión adivinada por contenido en 7 puntos de subida |
 | FILE-03 | Gacetas sin integridad | ✅ Remedado | Columna `file_hash` (SHA-256) en `gacetas` |
 | CFG-01 | Sin headers de seguridad | ✅ Remedado | Middleware `AddSecurityHeaders` (CSP, HSTS, X-Frame-Options, `frame-ancestors`, `form-action`, …) |
-| CFG-02 | `SESSION_SECURE_COOKIE` sin default | ✅ Remedado | `env('SESSION_SECURE_COOKIE', env('APP_ENV') !== 'local')` |
+| CFG-02 | `SESSION_SECURE_COOKIE` sin default | ✅ Remedado | `env('SESSION_SECURE_COOKIE', env('APP_ENV') !== 'local')`; sesión con lifetime **60 min** y cookie **cifrada en reposo** (`SESSION_ENCRYPT=true`) |
 | CFG-03 | `APP_DEBUG=true` + Ignition | ✅ Remedado | `APP_DEBUG=false` por defecto; Ignition solo en `require-dev` |
 | CFG-06 | `env()` fuera de `config/` con `config:cache` | ✅ Remedado | Nuevo `config/security.php` centraliza rate limits, `TRUSTED_PROXIES` y `TRUSTED_HOSTS`; leídos con `config()` |
 | SC-01 | Dependencias vulnerables | ✅ Remedado | Guzzle 7.15.5, commonmark 2.10.3, flysystem 3.36.0, Vite 8.3.4; `audit.ignore` de 17 → 3 IDs justificados |
 | SC-02 | Laravel 10 EOL | ⚠️ Aceptado | Riesgo aceptado por requisito institucional + controles compensatorios (§7) |
-| LOG-01 | Sin auditoría de acciones | ✅ Remedado | Migración `activity_logs`, hooks `Audit::log` (login/logout/cambios), vista `/admin/auditoria`; 11 tests (cierre G6) |
+| LOG-01 | Sin auditoría de acciones | ✅ Remedado | Migración `activity_logs`, hooks `Audit::log`, vista `/admin/auditoria` con **filtros** (acción/usuario/rol/fechas/búsqueda) y **export CSV** (permiso `audit.export`, CWE-1236 neutralizado); **retención 400 días** (`audit:prune` diario 04:23); eventos ampliados (`permission.denied`, diff de permisos en `role.updated`, nombres de archivo en `media.uploaded`, `user.validation_failed` sin valores); 31 tests |
 | ABUSE-01 | `POST /contacto`/`buscar` sin límite | ✅ Remedado | `throttle:contact` y `throttle:search` configurables |
 | PRIV-01 | PII sin cifrar en reposo | ✅ Remedado | Casts `encrypted` + comando `php artisan pii:encrypt` para datos heredados |
 
@@ -73,7 +73,23 @@ Tras dos rondas de cierre (remediación inicial + auditoría comprobatoria), el 
 
 `FILE-07` (cuotas de almacenamiento), `FILE-09` (sidecars WebP desde imágenes maliciosas), `INJ-03` (XSS reflejado), `INJ-05` (CRLF / open redirect), `INJ-06` (SSTI en Blade), `SC-05` (integridad de `public/vendor/tinymce`), `LOG-03` (exposición de archivos sensibles) y `PRIV-03` (trazabilidad para notificación de brechas). Seguimiento en `PENDIENTES.md` G8.
 
-**Verificación final:** 68 tests PHPUnit OK (1 skipped) · 16/16 suites E2E en verde · `composer lint` passed · `npm run build` OK · `npm audit` 0 vulnerabilidades · `composer audit` 1 advisory low + 3 ignorados justificados.
+**Verificación final (2026-10-23):** 180 tests PHPUnit OK · pint passed · `composer audit --locked` 4 ignorados justificados · `npm audit` 0 vulnerabilidades · 17 suites E2E bash/psql (requieren PostgreSQL; no ejecutables en el entorno de desarrollo local). Rondas anteriores: 68 tests + 16/16 E2E.
+
+---
+
+## 1.c Ronda de ajustes 2026-10-23 (F6, commit `7ac0028`)
+
+Refuerzo de los controles compensatorios de `SECURITY.md` sobre los hallazgos ya remedados (AUTH-01, CFG-02, LOG-01), sin cambios en el estado de riesgo:
+
+| Ajuste | Hallazgo | Detalle |
+|---|---|---|
+| Lockout configurable | AUTH-01 | Umbral y ventana de bloqueo leídos de `config/security.php` (`LOGIN_LOCKOUT_ATTEMPTS=5`, `LOGIN_LOCKOUT_DECAY=60`), respetando `config:cache` |
+| Sesión endurecida | CFG-02 | Cookie con lifetime **60 min** y **cifrada en reposo** (`SESSION_ENCRYPT=true`); invariantes blindadas por test (`SecurityConfigTest`) |
+| Auditoría filtrable + export | LOG-01 | Vista `/admin/auditoria` con filtros (acción/usuario/rol/fechas/búsqueda) y export CSV con neutralización de CWE-1236, tras el permiso nuevo `audit.export` |
+| Retención de auditoría | LOG-01 | `AUDIT_RETENTION_DAYS=400` (~13 meses, ciclo anual completo) + comando `audit:prune` programado a diario (04:23) e índice `activity_logs.user_id` |
+| Eventos ampliados | LOG-01 | `permission.denied` (denegaciones de autorización), diff real de permisos en `role.updated` (concedidos/quitados), nombres de archivo en `media.uploaded`, `user.validation_failed` (solo nombres de campo, sin valores para no exponer PII/credenciales) |
+
+**Tests:** 156 → **180** (nuevos: `RateLimitTest::test_lockout_threshold_comes_from_config`, `SecurityConfigTest::test_session_cookie_invariants`, `AuditFilterTest` (7), `AuditExportTest` (5), `AuditEventsTest` (6), `AuditPruneTest` (4)). `pint` y suite en verde.
 
 ---
 
@@ -138,23 +154,25 @@ Tras dos rondas de cierre (remediación inicial + auditoría comprobatoria), el 
 
 ### 4.1 Tabla resumen
 
+> El estado se sincroniza con la remediación real (§1.b); ver §1.c para el refuerzo F6 de 2026-10-23. El detalle histórico de cada hallazgo (evidencia de origen, vector CVSS, recomendación) se conserva en §4.2 sin cambios.
+
 | ID | Hallazgo | CVSS v4.0 | Severidad | SLA | Estado |
 |---|---|---|---|---|---|
-| AUTH-01 | `/admin/login` sin rate limiting ni lockout | 6.9 (M) | Media | 90 días | Abierto |
-| AUTH-02 | Usuarios seed con contraseña `password` | 9.3 (C) | Crítica | 7 días | Abierto |
-| AUTHZ-01 | `users.edit` permite asignar rol `superadmin` | 8.6 (H) | Alta | 30 días | Abierto |
-| AUTHZ-02 | Editor puede publicar noticias (`status=published`) | 5.3 (M) | Media | 90 días | Abierto |
-| INJ-01 | XSS almacenado en `Post::rendered_content` | 5.1 (M) | Media | 90 días | Abierto |
-| INJ-02 | Uploads SVG con extensión decidida por el cliente | 5.1 (M) | Media | 90 días | Abierto |
-| FILE-03 | Gacetas oficiales sin control de integridad/acceso | 7.1 (H) | Alta | 30 días | Abierto |
-| CFG-01 | Ausencia de CSP, HSTS, X-Frame-Options, X-Content-Type-Options | 5.3 (M) | Media | 90 días | Abierto |
-| CFG-02 | `SESSION_SECURE_COOKIE` sin default `true` | 6.3 (M) | Media | 90 días | Abierto |
-| CFG-03 | `APP_DEBUG=true` + endpoints de Ignition habilitados | 9.3 (C) | Crítica | 7 días | Abierto |
-| SC-01 | Dependencias PHP/JS con advisories conocidos | 6.9 (M)* | Alta | 30 días | Abierto |
-| SC-02 | Laravel 10.50.2 EOL (sin parches de seguridad) | 6.9 (M) | Media | 90 días | Aceptado con compensatorios |
-| LOG-01 | Sin registro de auditoría de acciones administrativas | 6.9 (M) | Media | 90 días | Abierto |
-| ABUSE-01 | `POST /contacto` y `/buscar` sin rate limiting | 6.9 (M) | Media | 90 días | Abierto |
-| PRIV-01 | PII (`contacts`, `users`) sin cifrado en reposo | 7.1 (H) | Alta | 30 días | Abierto |
+| AUTH-01 | `/admin/login` sin rate limiting ni lockout | 6.9 (M) | Media | 90 días | ✅ Remedado (lockout configurable) |
+| AUTH-02 | Usuarios seed con contraseña `password` | 9.3 (C) | Crítica | 7 días | ✅ Remedado |
+| AUTHZ-01 | `users.edit` permite asignar rol `superadmin` | 8.6 (H) | Alta | 30 días | ✅ Remedado |
+| AUTHZ-02 | Editor puede publicar noticias (`status=published`) | 5.3 (M) | Media | 90 días | ✅ Remedado |
+| INJ-01 | XSS almacenado en `Post::rendered_content` | 5.1 (M) | Media | 90 días | ✅ Remedado |
+| INJ-02 | Uploads SVG con extensión decidida por el cliente | 5.1 (M) | Media | 90 días | ✅ Remedado |
+| FILE-03 | Gacetas oficiales sin control de integridad/acceso | 7.1 (H) | Alta | 30 días | ✅ Remedado |
+| CFG-01 | Ausencia de CSP, HSTS, X-Frame-Options, X-Content-Type-Options | 5.3 (M) | Media | 90 días | ✅ Remedado |
+| CFG-02 | `SESSION_SECURE_COOKIE` sin default `true` | 6.3 (M) | Media | 90 días | ✅ Remedado (sesión 60 min + cifrada) |
+| CFG-03 | `APP_DEBUG=true` + endpoints de Ignition habilitados | 9.3 (C) | Crítica | 7 días | ✅ Remedado |
+| SC-01 | Dependencias PHP/JS con advisories conocidos | 6.9 (M)* | Alta | 30 días | ✅ Remedado |
+| SC-02 | Laravel 10.50.2 EOL (sin parches de seguridad) | 6.9 (M) | Media | 90 días | ⚠️ Aceptado con compensatorios |
+| LOG-01 | Sin registro de auditoría de acciones administrativas | 6.9 (M) | Media | 90 días | ✅ Remedado (filtros, export, retención 400 d) |
+| ABUSE-01 | `POST /contacto` y `/buscar` sin rate limiting | 6.9 (M) | Media | 90 días | ✅ Remedado |
+| PRIV-01 | PII (`contacts`, `users`) sin cifrado en reposo | 7.1 (H) | Alta | 30 días | ✅ Remedado |
 
 \* El score CVSS v4.0 base es 6.9; se eleva a **Alta** por la presencia de advisories individuales clasificados como High (p. ej. `league/commonmark` DoS/XSS, `guzzlehttp/guzzle` host/cookie bypass).
 
