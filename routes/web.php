@@ -44,7 +44,7 @@ Route::prefix('admin')->group(function () {
     Route::post('/login', [AuthController::class, 'login'])->middleware('throttle:login');
 
     // auth.session invalida el resto de sesiones del usuario cuando cambia su
-    // contraseña (una sesión robada queda fuera antes de 120 min).
+    // contraseña (una sesión robada queda fuera antes de SESSION_LIFETIME, 60 min).
     Route::middleware(['auth', 'auth.session', 'password.changed'])->group(function () {
         Route::get('/cambiar-contrasena', [AuthController::class, 'showChangePassword'])->name('password.change');
         Route::post('/cambiar-contrasena', [AuthController::class, 'changePassword'])->name('password.change.update');
@@ -139,5 +139,6 @@ Route::prefix('admin')->group(function () {
 
         // Admin - Auditoría (G6)
         Route::get('/auditoria', [AuditController::class, 'index'])->name('admin.audit.index')->middleware('permission:audit.view');
+        Route::get('/auditoria/export', [AuditController::class, 'export'])->name('admin.audit.export')->middleware('permission:audit.export');
     });
 });

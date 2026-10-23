@@ -14,6 +14,8 @@ class Kernel extends ConsoleKernel
     {
         // Retención de PII: mensajes de contacto fuera de ventana (GDPR).
         $schedule->command('contacts:prune')->dailyAt('03:17');
+        // Retención de logs de auditoría (ventana por defecto 400 días).
+        $schedule->command('audit:prune')->dailyAt('04:23');
     }
 
     /**

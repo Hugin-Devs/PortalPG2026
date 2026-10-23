@@ -28,7 +28,10 @@ class AuthController extends Controller
         // rotando IPs no debe poder concentrar intentos contra una cuenta.
         $accountKey = 'login:account:'.hash('sha256', strtolower($credentials['email']));
 
-        if (RateLimiter::tooManyAttempts($limiterKey, 5) || RateLimiter::tooManyAttempts($accountKey, 5)) {
+        $maxAttempts = (int) config('security.login_lockout.attempts', 5);
+        $decaySeconds = (int) config('security.login_lockout.decay_seconds', 60);
+
+        if (RateLimiter::tooManyAttempts($limiterKey, $maxAttempts) || RateLimiter::tooManyAttempts($accountKey, $maxAttempts)) {
             return redirect('/admin/login')->withErrors([
                 'email' => 'Demasiados intentos fallidos. Vuelve a intentarlo en '.RateLimiter::availableIn($limiterKey).' segundos.',
             ]);
@@ -41,8 +44,8 @@ class AuthController extends Controller
                 auth()->logout();
                 $request->session()->invalidate();
                 $request->session()->regenerateToken();
-                RateLimiter::hit($limiterKey, 60);
-                RateLimiter::hit($accountKey, 60);
+                RateLimiter::hit($limiterKey, $decaySeconds);
+                RateLimiter::hit($accountKey, $decaySeconds);
 
                 return redirect('/admin/login')->withErrors(['email' => 'Credenciales inválidas.']);
             }
@@ -56,8 +59,8 @@ class AuthController extends Controller
             return redirect()->intended('/admin');
         }
 
-        RateLimiter::hit($limiterKey, 60);
-        RateLimiter::hit($accountKey, 60);
+        RateLimiter::hit($limiterKey, $decaySeconds);
+        RateLimiter::hit($accountKey, $decaySeconds);
         Audit::log('login.failed', null, null, 'Intento fallido de login');
 
         return redirect('/admin/login')->withErrors(['email' => 'Credenciales inválidas.']);

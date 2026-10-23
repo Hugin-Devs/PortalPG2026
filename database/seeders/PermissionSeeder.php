@@ -57,6 +57,7 @@ class PermissionSeeder extends Seeder
             ['name' => 'Eliminar usuarios', 'slug' => 'users.delete', 'group' => 'Configuración Portal', 'module' => 'Usuarios'],
             ['name' => 'Gestionar roles', 'slug' => 'roles.manage', 'group' => 'Configuración Portal', 'module' => 'Roles y Permisos'],
             ['name' => 'Ver auditoría', 'slug' => 'audit.view', 'group' => 'Configuración Portal', 'module' => 'Auditoría'],
+            ['name' => 'Exportar auditoría', 'slug' => 'audit.export', 'group' => 'Configuración Portal', 'module' => 'Auditoría'],
         ];
 
         // updateOrCreate: además de crear faltantes, corrige group/module/name

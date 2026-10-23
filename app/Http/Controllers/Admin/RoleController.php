@@ -99,6 +99,17 @@ class RoleController extends Controller
             }
         }
 
+        // Estado previo para el diff de la auditoría (slugs concedidos/quitados).
+        $beforeSlugs = \DB::table('role_permission')
+            ->where('role', $role)
+            ->join('permissions', 'role_permission.permission_id', '=', 'permissions.id')
+            ->pluck('permissions.slug')
+            ->sort()
+            ->values();
+        $afterSlugs = Permission::whereIn('id', $validIds)->pluck('slug')->sort()->values();
+        $granted = $afterSlugs->diff($beforeSlugs)->values();
+        $removed = $beforeSlugs->diff($afterSlugs)->values();
+
         \DB::transaction(function () use ($role, $validIds) {
             \DB::table('role_permission')->where('role', $role)->delete();
 
@@ -117,6 +128,8 @@ class RoleController extends Controller
         Audit::log('role.updated', null, null, "Permisos actualizados para rol: {$role}", [
             'role' => $role,
             'permission_count' => count($validIds),
+            'granted' => $granted->all(),
+            'removed' => $removed->all(),
         ]);
 
         return back()->with('success', "Permisos actualizados para el rol \"$role\".");

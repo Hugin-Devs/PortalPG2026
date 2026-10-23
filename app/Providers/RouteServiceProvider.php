@@ -27,7 +27,8 @@ class RouteServiceProvider extends ServiceProvider
         RateLimiter::for('login', function (Request $request) {
             // Tope duro por IP como respaldo frente a saturación (DoS/credential
             // stuffing). La protección real de fuerza bruta es el lockout por
-            // intentos fallidos en AuthController (5 fallos -> 60 s).
+            // intentos fallidos en AuthController (config security.login_lockout:
+            // attempts fallos -> decay_seconds).
             // Configurable via config('security.rate_limits.login') para respetar
             // `php artisan config:cache`.
             return Limit::perMinute((int) config('security.rate_limits.login'))->by($request->ip());

@@ -25,6 +25,7 @@ class MediaController extends Controller
             'files.*' => 'file|mimes:jpeg,png,jpg,gif,webp,pdf,doc,docx|max:10240',
         ]);
 
+        $filenames = [];
         foreach ($request->file('files') as $file) {
             $filename = time().'_'.uniqid().'.'.Uploads::safeExtension($file, ['jpg', 'jpeg', 'png', 'gif', 'webp', 'pdf', 'doc', 'docx']);
             $path = Uploads::storeDated($file, $filename);
@@ -38,10 +39,15 @@ class MediaController extends Controller
                 'size' => $file->getSize(),
                 'user_id' => auth()->id(),
             ]);
+
+            $filenames[] = $filename;
         }
 
         $count = count($request->file('files'));
-        Audit::log('media.uploaded', null, null, "Subida de {$count} archivo(s) a la biblioteca");
+        // Nombres generados por servidor (no los del cliente) para trazabilidad.
+        Audit::log('media.uploaded', null, null, "Subida de {$count} archivo(s) a la biblioteca", [
+            'filenames' => $filenames,
+        ]);
 
         if ($request->expectsJson()) {
             return response()->json(['location' => asset('storage/'.$path)]);

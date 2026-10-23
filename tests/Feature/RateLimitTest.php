@@ -61,4 +61,30 @@ class RateLimitTest extends TestCase
 
         $this->assertSame(0, RateLimiter::attempts('login:127.0.0.1'));
     }
+
+    public function test_lockout_threshold_comes_from_config(): void
+    {
+        config(['security.login_lockout.attempts' => 2]);
+
+        $user = User::factory()->create();
+
+        // 2 fallos = umbral configurado; el 3.º debe quedar bloqueado con el
+        // mensaje de lockout (no con "Credenciales inválidas").
+        $this->post('/admin/login', [
+            'email' => $user->email,
+            'password' => 'wrong-password',
+        ]);
+        $this->post('/admin/login', [
+            'email' => $user->email,
+            'password' => 'wrong-password',
+        ]);
+
+        $response = $this->from('/admin/login')->post('/admin/login', [
+            'email' => $user->email,
+            'password' => 'wrong-password',
+        ]);
+
+        $response->assertRedirect('/admin/login');
+        $this->assertStringContainsString('Demasiados intentos', session('errors')->first('email'));
+    }
 }

@@ -22,6 +22,22 @@ return [
 
     /*
     |--------------------------------------------------------------------------
+    | Lockout de login (fuerza bruta)
+    |--------------------------------------------------------------------------
+    |
+    | Protección real anti fuerza bruta en AuthController: tras N intentos
+    | fallidos (por IP y por cuenta) se bloquea durante decay_seconds.
+    | El throttle 'login' de arriba es solo el tope duro por minuto.
+    |
+    */
+
+    'login_lockout' => [
+        'attempts' => (int) env('LOGIN_LOCKOUT_ATTEMPTS', 5),
+        'decay_seconds' => (int) env('LOGIN_LOCKOUT_DECAY', 60),
+    ],
+
+    /*
+    |--------------------------------------------------------------------------
     | Proxies y hosts de confianza
     |--------------------------------------------------------------------------
     |
@@ -52,4 +68,17 @@ return [
     */
 
     'contact_retention_days' => (int) env('CONTACT_RETENTION_DAYS', 365),
+
+    /*
+    |--------------------------------------------------------------------------
+    | Retención de logs de auditoría (activity_logs)
+    |--------------------------------------------------------------------------
+    |
+    | Días que se conserva un registro de auditoría antes de que
+    | `php artisan audit:prune` (programado a diario) lo elimine.
+    | 400 días (≈13 meses) cubre auditorías anuales de ciclo completo.
+    |
+    */
+
+    'audit_retention_days' => (int) env('AUDIT_RETENTION_DAYS', 400),
 ];

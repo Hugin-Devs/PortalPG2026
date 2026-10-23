@@ -7,6 +7,7 @@ use App\Models\User;
 use App\Support\Audit;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Validation\ValidationException;
 
 class UserController extends Controller
 {
@@ -24,12 +25,18 @@ class UserController extends Controller
 
     public function store(Request $request)
     {
-        $data = $request->validate([
-            'name' => 'required|max:255',
-            'email' => 'required|email|unique:users,email',
-            'password' => 'required|min:8|confirmed',
-            'role' => $this->roleValidationRule(),
-        ]);
+        try {
+            $data = $request->validate([
+                'name' => 'required|max:255',
+                'email' => 'required|email|unique:users,email',
+                'password' => 'required|min:8|confirmed',
+                'role' => $this->roleValidationRule(),
+            ]);
+        } catch (ValidationException $e) {
+            $this->auditValidationFailure($e);
+
+            throw $e;
+        }
 
         $data['password'] = Hash::make($data['password']);
         $isactive = $request->has('is_active');
@@ -56,12 +63,18 @@ class UserController extends Controller
             return back()->with('error', 'No puedes desactivarte a ti mismo.');
         }
 
-        $data = $request->validate([
-            'name' => 'required|max:255',
-            'email' => 'required|email|unique:users,email,'.$user->id,
-            'password' => 'nullable|min:8|confirmed',
-            'role' => $this->roleValidationRule($user),
-        ]);
+        try {
+            $data = $request->validate([
+                'name' => 'required|max:255',
+                'email' => 'required|email|unique:users,email,'.$user->id,
+                'password' => 'nullable|min:8|confirmed',
+                'role' => $this->roleValidationRule($user),
+            ]);
+        } catch (ValidationException $e) {
+            $this->auditValidationFailure($e, $user->id);
+
+            throw $e;
+        }
 
         if ($data['password'] ?? null) {
             $data['password'] = Hash::make($data['password']);
@@ -95,6 +108,17 @@ class UserController extends Controller
         $user->delete();
 
         return redirect('/admin/usuarios')->with('success', 'Usuario eliminado correctamente.');
+    }
+
+    /**
+     * Registra la validación fallida en la gestión de usuarios con solo los
+     * nombres de los campos (nunca los valores: contendrían PII o credenciales).
+     */
+    private function auditValidationFailure(ValidationException $e, ?int $targetUserId = null): void
+    {
+        Audit::log('user.validation_failed', $targetUserId ? User::class : null, $targetUserId, 'Validación fallida en gestión de usuarios', [
+            'fields' => array_keys($e->errors()),
+        ]);
     }
 
     /**
