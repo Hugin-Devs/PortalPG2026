@@ -75,7 +75,7 @@
     "vector": "CVSS:4.0/AV:N/AC:L/AT:N/PR:N/UI:N/VC:N/VI:N/VA:L/SC:N/SI:N/SA:N",
     "score": 6.9,
     "severity": "M",
-    "status": "pending"
+    "status": "remediated"
   },
   "ABUSE-01": {
     "vector": "CVSS:4.0/AV:N/AC:L/AT:N/PR:N/UI:N/VC:N/VI:N/VA:L/SC:N/SI:N/SA:N",

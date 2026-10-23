@@ -53,7 +53,7 @@ Tras dos rondas de cierre (remediación inicial + auditoría comprobatoria), el 
 | CFG-06 | `env()` fuera de `config/` con `config:cache` | ✅ Remedado | Nuevo `config/security.php` centraliza rate limits, `TRUSTED_PROXIES` y `TRUSTED_HOSTS`; leídos con `config()` |
 | SC-01 | Dependencias vulnerables | ✅ Remedado | Guzzle 7.15.5, commonmark 2.10.3, flysystem 3.36.0, Vite 8.3.4; `audit.ignore` de 17 → 3 IDs justificados |
 | SC-02 | Laravel 10 EOL | ⚠️ Aceptado | Riesgo aceptado por requisito institucional + controles compensatorios (§7) |
-| LOG-01 | Sin auditoría de acciones | ⏳ Pendiente | Seguimiento en `PENDIENTES.md` G6 |
+| LOG-01 | Sin auditoría de acciones | ✅ Remedado | Migración `activity_logs`, hooks `Audit::log` (login/logout/cambios), vista `/admin/auditoria`; 11 tests (cierre G6) |
 | ABUSE-01 | `POST /contacto`/`buscar` sin límite | ✅ Remedado | `throttle:contact` y `throttle:search` configurables |
 | PRIV-01 | PII sin cifrar en reposo | ✅ Remedado | Casts `encrypted` + comando `php artisan pii:encrypt` para datos heredados |
 

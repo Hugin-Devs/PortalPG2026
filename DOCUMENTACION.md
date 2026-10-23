@@ -605,7 +605,7 @@ Pendientes de decisión antes o después del despliegue (ver §14 para el checkl
 
 > Esta sección es para **desarrollo**. Para el servidor real, ve §14 (Despliegue en Producción).
 
-Requisitos: PHP 8.1+ con extensiones `pdo_pgsql`, `mbstring`, `openssl`, `gd` (con WebP), `curl`, `bcmath`, `dom`; PostgreSQL 14+; Node.js 18+; Composer. (Entorno de referencia de la migración PG: Termux/Android con PostgreSQL 18.6 y PHP 8.5.)
+Requisitos: PHP 8.3+ (PHP 8.1/8.2 EOL, no admitidos) con extensiones `pdo_pgsql`, `mbstring`, `openssl`, `gd` (con WebP), `curl`, `bcmath`, `dom`; PostgreSQL 14+; Node.js 18+; Composer. (Entorno de referencia de la migración PG: Termux/Android con PostgreSQL 18.6 y PHP 8.5.)
 
 ```bash
 # 1. Navegar al proyecto

@@ -6,7 +6,7 @@ Portal web institucional del **Gobierno de Distrito Capital (GDC)**: sitio infor
 
 | Componente | Tecnología |
 |---|---|
-| Backend | Laravel 10 (PHP 8.1+), Blade |
+| Backend | Laravel 10 (PHP 8.3+), Blade |
 | Frontend | Bootstrap 5.3 + Sass, Vite, JavaScript vanilla |
 | Base de datos | PostgreSQL 14+ (probado con 18.6) |
 | Editor | TinyMCE 8 auto-hospedado (GPL), Font Awesome y fuentes locales (funciona offline) |
@@ -20,7 +20,7 @@ Sin Livewire, Vue, React ni jQuery.
 
 ## Requisitos de desarrollo
 
-PHP 8.1+ (probado con 8.5), Composer, Node.js 18+, PostgreSQL 14+ con la extensión PHP `pdo_pgsql`. Guía completa en `DOCUMENTACION.md` §13.
+PHP 8.3+ (probado con 8.5; PHP 8.1/8.2 EOL, no admitidos), Composer, Node.js 18+, PostgreSQL 14+ con la extensión PHP `pdo_pgsql`. Guía completa en `DOCUMENTACION.md` §13.
 
 ## Inicio rápido
 

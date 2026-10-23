@@ -50,4 +50,26 @@ class SecurityConfigTest extends TestCase
         $this->assertIsString(config('security.trusted_proxies'));
         $this->assertIsString(config('security.trusted_hosts'));
     }
+
+    /**
+     * Regresión (F6, revisión 2026-10-23): el constraint de PHP debe ser ^8.3.
+     * PHP 8.1/8.2 están EOL (31-dic-2025 / 31-dic-2026) y no reciben parches
+     * de seguridad; fijar ^8.3 garantiza que `composer install` falle en
+     * cualquier runtime sin soporte en lugar de desplegar en silencio.
+     */
+    public function test_composer_requires_supported_php_version(): void
+    {
+        $composer = json_decode(
+            file_get_contents(dirname(__DIR__, 2).'/composer.json'),
+            true,
+            512,
+            JSON_THROW_ON_ERROR
+        );
+
+        $this->assertSame(
+            '^8.3',
+            $composer['require']['php'],
+            'composer.json debe exigir PHP ^8.3 (8.1/8.2 EOL). Actualizar README/DOCUMENTACION al cambiarlo.'
+        );
+    }
 }

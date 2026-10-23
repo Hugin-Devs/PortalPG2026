@@ -1,8 +1,19 @@
 # SECURITY.md — Riesgos heredados, waivers y condiciones de despliegue
 
-> **Última revisión de seguridad**: 2026-10-22 · **HEAD revisado**: `b6e2be4` · **Gate**: 13✅ / 7⚠️ / 0❌
-> Revisión completa (20 ítems, evidencia de comandos, análisis adversarial): cerrada en sesión de desarrollo; resumen ejecutivo en este fichero.
+> **Última revisión de seguridad**: 2026-10-23 · **HEAD revisado**: `8d28020` (+ correcciones F6 en working tree) · **Gate**: 16✅ / 4⚠️ / 0❌
+> Revisión completa bajo protocolo actualizado (gate de 20 ítems + coherencia 12 clases + gate de tests), con ejecución real: Pint ✅ · PHPUnit **156/156** ✅ · `composer audit --locked` (4 ignorados) · `npm audit` **0** ✅.
+> Ronda previa (2026-10-22, HEAD `b6e2be4`): 13✅ / 7⚠️ / 0❌.
 > **Revisión programada de waivers: 2026-11-21.**
+
+## 0. Correcciones aplicadas en la revisión 2026-10-23
+
+| Corrección | Motivo | Verificación |
+|---|---|---|
+| `composer.json`: `"php": "^8.1"` → `"^8.3"` | PHP 8.1 EOL (31-dic-2025) y 8.2 caduca (31-dic-2026); fijar `^8.3` hace fallar `composer install` en runtimes sin soporte en lugar de desplegar en silencio | Test de regresión `SecurityConfigTest::test_composer_requires_supported_php_version`; README/DOCUMENTACION.md actualizados a "PHP 8.3+" |
+| `follow-redirects` 1.16.0 → **1.16.1** (`npm audit fix`) | 2 advisories high (GHSA-q3jh-wrc6-jgq8, GHSA-8r9p-f939-6h3c: fuga de cabeceras de credenciales vía cabeceras en forma de array / regex de sensitiveHeaders); dependencia transitiva de axios (tooling de build, no runtime PHP) | `npm audit` → **0 vulnerabilidades** |
+| `cvss-scores.json` + INFORME §1.b: LOG-01 `pending` → `remediated` | Incoherencia clase 9 (contrato documentado ≠ estado real): LOG-01 estaba cerrado desde G6 (auditoría activa, 11 tests) pero los artefactos lo marcaban pendiente | Sincronizados con el cierre real de G6 |
+
+**CVE-2026-48019 (CRLF email, High 8.9, sin parche en Laravel 10): verificado como no aplicable.** El supuesto de explotación exige que la aplicación envíe correo a direcciones suministradas por usuarios; este portal no envía ningún correo (el formulario de contacto solo persiste en BD — `ContactController::store` → `Contact::create`; `MustVerifyEmail` está comentado; sin `Mail::`/`Mailable`/`Notification` activos). Se re-evalúa si se añade cualquier flujo de correo saliente.
 
 ## 1. Condiciones obligatorias de despliegue
 
@@ -32,7 +43,7 @@ Checklist previa al arranque (primer lanzamiento):
 
 | Riesgo | Restricción / motivo | Compensación | Revisión |
 |--------|----------------------|--------------|----------|
-| **Laravel 10 EOL** (seguridad hasta 04-feb-2025) | Versión mínima admitida por requisito del cliente; migración pendiente de presupuesto | 4 advisories en `composer.json → audit.ignore` (todos de funciones no usadas o con `APP_DEBUG=false`); SCA semanal manual (`composer audit`); CSP estricta; **migrar a Laravel 12/13 antes de 2026-11-21** | 2026-11-21 |
+| **Laravel 10 EOL** (seguridad hasta 04-feb-2025) | Versión mínima admitida por requisito del cliente; migración pendiente de presupuesto | 4 advisories en `composer.json → audit.ignore` (todos de funciones no usadas o con `APP_DEBUG=false`); SCA semanal manual (`composer audit`); CSP estricta; **PHP fijado a `^8.3`** (runtime parcheado aunque el framework esté EOL); **migrar a Laravel 12/13 antes de 2026-11-21** | 2026-11-21 |
 | **Sin MFA en el panel admin** | Añadir TOTP/WebAuthn exige dependencia nueva (no se añade sin aprobación) | Rate limit por IP **y** por cuenta (5 fallos/60 s), bloqueo con mensaje genérico, auditoría de login fallido, sesión revocada al cambiar contraseña | 2026-11-21 — se recomienda L2 |
 | **`style-src 'unsafe-inline'`** | Requerido por TinyMCE | `script-src` con nonce por petición (sin `unsafe-inline`), HTMLPurifier en escritura **y** lectura, `object-src 'none'`, `base-uri 'self'` | Al migrar editor |
 | **`AES-256-CBC` + HMAC** (no AEAD-GCM) | Cambiar el cipher de Laravel re-cifraría todo el PII existente | Encrypt-then-MAC autenticado; clave solo en `.env`; CSPRNG para nonces | Con la migración de framework |
@@ -52,4 +63,4 @@ Checklist previa al arranque (primer lanzamiento):
 
 ## 4. Política de cambios
 
-Todo PR debe pasar: `php vendor/bin/pint --test`, `php artisan test` (158+), y si toca auth/authz/validación/cripto: tests nuevos obligatorios (TDD). Antes de cada release: `composer audit`, regenerar SBOM, y re-ejecutar `bash tests/e2e/run-all.sh` (17/17). **PR sin tests = PR rechazado.**
+Todo PR debe pasar: `php vendor/bin/pint --test`, `php artisan test` (156+), y si toca auth/authz/validación/cripto: tests nuevos obligatorios (TDD). Antes de cada release: `composer audit`, `npm audit`, regenerar SBOM, y re-ejecutar `bash tests/e2e/run-all.sh` (17/17, requiere PostgreSQL). **PR sin tests = PR rechazado.** El constraint `php: ^8.3` está blindado por test (`SecurityConfigTest`).
