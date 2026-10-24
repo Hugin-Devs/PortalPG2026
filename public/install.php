@@ -89,7 +89,6 @@ function pagina(string $titulo, string $cuerpoHtml): never
 // ---------------------------------------------------------------------------
 
 try {
-    $seedRestantes = User::whereIn('email', $seedEmails)->count();
     $superadmins = User::where('role', 'superadmin')->count();
     // Aviso de codificación: la BD de producción debe ser LATIN9 (§14.K).
     $serverEncoding = '';
@@ -108,12 +107,15 @@ if (! $latin9Ok) {
 }
 
 // El portal ya está configurado: no tocar nada, solo retirar el instalador.
-if ($superadmins > 0 && $seedRestantes === 0) {
+// Basta con que exista UN superadministrador para cerrar el instalador (antes
+// la condición era AND con "sin usuarios seed", lo que permitía un reset de
+// contraseñas sin autenticación si se re-echaba a correr `db:seed`).
+if ($superadmins > 0) {
     $eliminado = eliminar_script();
     $nota = $eliminado
         ? 'El instalador se ha eliminado automáticamente.'
         : '<strong>Elimina este archivo manualmente</strong> (<code>public/install.php</code>): no se pudo borrar solo.';
-    pagina('Ya configurado', '<div class="ok">El portal ya tiene un superadministrador y no quedan usuarios de prueba.</div><p>'.$nota.'</p>');
+    pagina('Ya configurado', '<div class="ok">El portal ya tiene un superadministrador.</div><p>'.$nota.'</p>');
 }
 
 // ---------------------------------------------------------------------------

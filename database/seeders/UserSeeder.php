@@ -6,6 +6,7 @@ use App\Models\User;
 use Illuminate\Contracts\Encryption\DecryptException;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Str;
 
 class UserSeeder extends Seeder
 {
@@ -54,9 +55,19 @@ class UserSeeder extends Seeder
         // se crean con password_changed_at ya establecido para que los arneses
         // E2E y el login manual funcionen sin fricción. En producción sí se
         // deja en null para forzar el cambio de contraseña en el primer login.
+        //
+        // En producción la contraseña NO es 'password': se genera una aleatoria
+        // (CSPRNG de Laravel) que nadie conoce, para cerrar la ventana entre
+        // `db:seed` y la ejecución de install.php (que borra estos usuarios).
+        // Si install.php no se ejecuta, nadie puede entrar con estas cuentas.
         $user = User::firstOrCreate(
             ['email' => $attrs['email']],
-            ['name' => $attrs['name'], 'password' => Hash::make('password')]
+            [
+                'name' => $attrs['name'],
+                'password' => Hash::make(
+                    app()->environment('production') ? Str::random(40) : 'password'
+                ),
+            ]
         );
         // `role` y `password_changed_at` no son mass-assignable (anti-mass-assignment).
         $user->forceFill([

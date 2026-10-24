@@ -42,6 +42,14 @@ class RouteServiceProvider extends ServiceProvider
             return Limit::perMinute((int) config('security.rate_limits.search'))->by($request->ip());
         });
 
+        // Cambio de contraseña: único endpoint autenticado que compara
+        // credenciales; se limita por usuario+IP para impedir probing de la
+        // contraseña actual desde una sesión robada.
+        RateLimiter::for('password-change', function (Request $request) {
+            return Limit::perMinute((int) config('security.rate_limits.password_change'))
+                ->by('password-change:'.($request->user()?->id ?? 0).':'.$request->ip());
+        });
+
         $this->routes(function () {
             Route::middleware('web')
                 ->group(base_path('routes/web.php'));

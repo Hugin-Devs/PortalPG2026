@@ -18,6 +18,7 @@ return [
         'login' => (int) env('LOGIN_RATE_LIMIT', 60),
         'contact' => (int) env('CONTACT_RATE_LIMIT', 10),
         'search' => (int) env('SEARCH_RATE_LIMIT', 60),
+        'password_change' => (int) env('PASSWORD_CHANGE_RATE_LIMIT', 10),
     ],
 
     /*

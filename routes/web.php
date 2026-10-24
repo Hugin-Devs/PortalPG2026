@@ -47,7 +47,7 @@ Route::prefix('admin')->group(function () {
     // contraseña (una sesión robada queda fuera antes de SESSION_LIFETIME, 60 min).
     Route::middleware(['auth', 'auth.session', 'password.changed'])->group(function () {
         Route::get('/cambiar-contrasena', [AuthController::class, 'showChangePassword'])->name('password.change');
-        Route::post('/cambiar-contrasena', [AuthController::class, 'changePassword'])->name('password.change.update');
+        Route::post('/cambiar-contrasena', [AuthController::class, 'changePassword'])->middleware('throttle:password-change')->name('password.change.update');
         Route::get('/', [DashboardController::class, 'index'])->name('admin.dashboard');
         Route::post('/logout', [AuthController::class, 'logout'])->name('admin.logout');
 

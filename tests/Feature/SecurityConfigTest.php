@@ -47,10 +47,33 @@ class SecurityConfigTest extends TestCase
         $this->assertIsInt(config('security.rate_limits.login'));
         $this->assertIsInt(config('security.rate_limits.contact'));
         $this->assertIsInt(config('security.rate_limits.search'));
+        $this->assertIsInt(config('security.rate_limits.password_change'));
         $this->assertIsInt(config('security.login_lockout.attempts'));
         $this->assertIsInt(config('security.login_lockout.decay_seconds'));
         $this->assertIsString(config('security.trusted_proxies'));
         $this->assertIsString(config('security.trusted_hosts'));
+    }
+
+    /**
+     * POST /admin/cambiar-contrasena es el único endpoint autenticado que
+     * compara credenciales; sin throttle una sesión robada podría probar
+     * contraseñas actuales sin límite.
+     */
+    public function test_password_change_endpoint_is_throttled(): void
+    {
+        config(['security.rate_limits.password_change' => 2]);
+
+        $user = User::factory()->create();
+
+        $attempt = fn () => $this->from('/admin/cambiar-contrasena')->actingAs($user)->post('/admin/cambiar-contrasena', [
+            'current_password' => 'wrong-current-password',
+            'password' => 'new-secret-123',
+            'password_confirmation' => 'new-secret-123',
+        ]);
+
+        $attempt()->assertRedirect('/admin/cambiar-contrasena');
+        $attempt()->assertRedirect('/admin/cambiar-contrasena');
+        $attempt()->assertStatus(429);
     }
 
     /**

@@ -3,6 +3,22 @@
     "ignored-advisories": {
         "laravel/framework": [
             {
+                "advisoryId": "PKSA-b41t-wbzk-9q51",
+                "packageName": "laravel/framework",
+                "affectedVersions": "<12.68.0|>=13.0.0,<13.29.0",
+                "title": "Laravel TokenGuard authentication bypass through non-string API credentials",
+                "cve": "CVE-2026-114509",
+                "link": "https://github.com/advisories/GHSA-f9x3-7vq9-cph6",
+                "reportedAt": "2026-10-23T21:50:27+00:00",
+                "sources": [
+                    {
+                        "name": "GitHub",
+                        "remoteId": "GHSA-f9x3-7vq9-cph6"
+                    }
+                ],
+                "severity": "critical"
+            },
+            {
                 "advisoryId": "PKSA-d5tc-s1qs-h781",
                 "packageName": "laravel/framework",
                 "affectedVersions": ">=13.0.0,<13.30.0|<12.69.0",
@@ -68,5 +84,6 @@
             }
         ]
     },
-    "abandoned": []
+    "abandoned": [],
+    "filter": []
 }

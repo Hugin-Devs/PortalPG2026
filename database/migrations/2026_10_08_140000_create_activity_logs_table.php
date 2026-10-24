@@ -10,7 +10,10 @@ return new class extends Migration
     {
         Schema::create('activity_logs', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('user_id')->nullable()->constrained()->cascadeOnDelete();
+            // nullOnDelete: borrar un usuario conserva su historial de
+            // auditoría (user_id queda NULL). Antes era cascadeOnDelete, lo
+            // que permitía destruir el rastro de auditoría borrando la cuenta.
+            $table->foreignId('user_id')->nullable()->constrained()->nullOnDelete();
             $table->string('role', 32)->nullable();
             $table->string('action', 64);
             $table->string('entity_type', 128)->nullable();

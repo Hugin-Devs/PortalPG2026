@@ -6,6 +6,7 @@ use App\Models\Category;
 use App\Models\Contact;
 use App\Models\Post;
 use App\Models\User;
+use App\Support\Audit;
 use Database\Seeders\PermissionSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Hash;
@@ -125,6 +126,30 @@ class AuditLogTest extends TestCase
         $this->assertDatabaseHas('activity_logs', [
             'action' => 'user.deleted',
             'entity_id' => $user->id,
+        ]);
+    }
+
+    public function test_deleting_a_user_preserves_their_audit_history(): void
+    {
+        $superadmin = User::factory()->create(['role' => 'superadmin']);
+        $victim = User::factory()->create(['role' => 'editor']);
+
+        // El usuario genera historial propio antes de ser borrado.
+        $this->actingAs($victim);
+        Audit::log('login.success', description: 'Historial previo');
+
+        $this->assertSame(1, \DB::table('activity_logs')->where('user_id', $victim->id)->count());
+
+        $this->actingAs($superadmin)->delete("/admin/usuarios/{$victim->id}")
+            ->assertRedirect('/admin/usuarios');
+
+        // FK nullOnDelete: la fila sobrevive con user_id NULL en lugar de
+        // desaparecer con cascadeOnDelete (integridad de la auditoría).
+        $this->assertDatabaseMissing('users', ['id' => $victim->id]);
+        $this->assertDatabaseHas('activity_logs', [
+            'action' => 'login.success',
+            'description' => 'Historial previo',
+            'user_id' => null,
         ]);
     }
 
