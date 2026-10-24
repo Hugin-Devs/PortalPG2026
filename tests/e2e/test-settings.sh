@@ -206,9 +206,9 @@ done
 
 echo '--- 12. Permisos en BD ---'
 c=$(sql 'SELECT COUNT(*) FROM permissions;')
-check '[ "$c" = 40 ]' "40 permisos ($c)" "permisos != 40 ($c)"
+check '[ "$c" = 41 ]' "41 permisos ($c)" "permisos != 41 ($c)"
 c=$(sql 'SELECT COUNT(*) FROM role_permission;')
-check '[ "$c" = 67 ]' "67 asignaciones 40+22+5 ($c)" "asignaciones != 67 ($c)"
+check '[ "$c" = 68 ]' "68 asignaciones 41+22+5 ($c)" "asignaciones != 68 ($c)"
 c=$(sql "SELECT COUNT(*) FROM permissions WHERE slug='settings.manage' AND \"group\" LIKE 'Configuraci%Portal';")
 check '[ "$c" = 1 ]' "settings.manage en grupo Configuracion Portal ($c)" "settings.manage mal ubicado ($c)"
 c=$(sql 'SELECT COUNT(DISTINCT "group") FROM permissions;')

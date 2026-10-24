@@ -31,11 +31,11 @@ echo '--- 1. Seeders idempotentes ---'
 ( cd "$E2E_ROOT" && php artisan db:seed --class=PermissionSeeder --force >/dev/null 2>&1 )
 ( cd "$E2E_ROOT" && php artisan db:seed --class=SocialSettingSeeder --force >/dev/null 2>&1 )
 c=$(sql 'SELECT COUNT(*) FROM permissions;')
-check '[ "$c" = 40 ]' "40 permisos (got $c)" 'permisos != 40'
+check '[ "$c" = 41 ]' "41 permisos (got $c)" 'permisos != 41'
 c=$(sql "SELECT COUNT(*) FROM settings WHERE \"key\" LIKE 'social_%';")
 check '[ "$c" = 7 ]' "7 settings sociales (got $c)" 'settings != 7'
 c=$(sql 'SELECT COUNT(*) FROM role_permission;')
-check '[ "$c" = 67 ]' "67 asignaciones 40+22+5 (got $c)" 'asignaciones != 67'
+check '[ "$c" = 68 ]' "68 asignaciones 41+22+5 (got $c)" 'asignaciones != 68'
 c=$(sql "SELECT slug FROM permissions WHERE slug='rrss.manage';")
 check '[ "$c" = rrss.manage ]' 'slug rrss.manage existe' "falta rrss.manage (got $c)"
 c=$(sql "SELECT COUNT(*) FROM permissions WHERE slug='settings.manage';")

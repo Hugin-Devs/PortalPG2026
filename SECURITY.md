@@ -53,7 +53,7 @@ Checklist previa al arranque (primer lanzamiento):
 
 ## 3. Controles activos (resumen verificado)
 
-- **Authz**: deny-by-default en 59/59 rutas admin con `permission:*`; test de regresión `AdminRouteAuthorizationCoverageTest` que **falla** si una ruta nueva queda sin permiso; jerarquía de roles (solo superadmin toca superadmin; nadie se auto-otorga permisos que no posee).
+- **Authz**: deny-by-default en 64/64 rutas admin (60 con `permission:*` + 6 justificadas sin permiso); test de regresión `AdminRouteAuthorizationCoverageTest` que **falla** si una ruta nueva queda sin permiso; jerarquía de roles (solo superadmin toca superadmin; nadie se auto-otorga permisos que no posee).
 - **Authn**: bcrypt cost 12, lockout configurable (`LOGIN_LOCKOUT_ATTEMPTS`=5 / `LOGIN_LOCKOUT_DECAY`=60 s por IP y por cuenta), `auth.session` revoca otras sesiones al cambiar contraseña.
 - **Sesión**: cookie `HttpOnly` + `SameSite=Lax`, lifetime 60 min, cifrada en reposo (`SESSION_ENCRYPT=true`).
 - **Auditoría**: vista `/admin/auditoria` con filtros (acción, usuario, rol, rango de fechas, búsqueda libre); export CSV bajo permiso `audit.export` (neutraliza CWE-1236); retención `AUDIT_RETENTION_DAYS`=400 con `audit:prune` programado a diario; eventos ampliados (`permission.denied`, diff de permisos en `role.updated`, nombres de archivo en `media.uploaded`, `user.validation_failed`).

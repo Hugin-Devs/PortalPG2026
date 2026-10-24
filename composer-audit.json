@@ -1,5 +1,6 @@
 {
-    "advisories": {
+    "advisories": [],
+    "ignored-advisories": {
         "laravel/framework": [
             {
                 "advisoryId": "PKSA-d5tc-s1qs-h781",
@@ -16,11 +17,7 @@
                     }
                 ],
                 "severity": "low"
-            }
-        ]
-    },
-    "ignored-advisories": {
-        "laravel/framework": [
+            },
             {
                 "advisoryId": "PKSA-m5cs-t1y6-qpcs",
                 "packageName": "laravel/framework",
@@ -71,6 +68,5 @@
             }
         ]
     },
-    "abandoned": [],
-    "filter": []
+    "abandoned": []
 }

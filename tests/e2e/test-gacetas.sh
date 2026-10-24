@@ -162,7 +162,7 @@ http "$E2E_BASE/admin/gacetas"
 check 'grep -q "Nueva Gaceta" "$HTTP_BODY"' 'rol admin puede gestionar gacetas' 'rol admin no puede gestionar'
 check 'grep -q "Gacetas</a>" "$HTTP_BODY"' 'sidebar admin con Gacetas' 'falta Gacetas en sidebar'
 pc=$(sql 'SELECT COUNT(*) FROM permissions;')
-check '[ "$pc" = 40 ]' "permisos totales 40 ($pc)" "permisos: $pc"
+check '[ "$pc" = 41 ]' "permisos totales 41 ($pc)" "permisos: $pc"
 rc=$(sql 'SELECT role, COUNT(*) FROM role_permission GROUP BY role;')
 case "$rc" in *admin*22*|*22*admin*) ra=1 ;; *) ra=0 ;; esac
 check '[ "$ra" = 1 ]' "reparto admin 22 ($rc)" "reparto admin inesperado: $rc"

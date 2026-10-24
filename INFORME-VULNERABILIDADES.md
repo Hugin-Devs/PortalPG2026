@@ -1,7 +1,7 @@
 # Informe de Análisis de Vulnerabilidades — Portal2026
 
-> **Fecha:** 2026-10-08 · **Última actualización:** 2026-10-23 (ronda F6, commit `7ac0028`)  
-> **Proyecto:** Portal institucional GDC (Laravel 10 + Blade + MySQL)  
+> **Fecha:** 2026-10-08 · **Última actualización:** 2026-10-23 (ronda F6 — código `7ac0028`, docs `b7d1292`)  
+> **Proyecto:** Portal institucional GDC (Laravel 10 + Blade + **PostgreSQL**, PHP `^8.3`)  
 > **Ejecutado por:** Análisis automatizado + revisión manual de código y configuración  
 > **Documento base:** [PLAN-VULNERABILIDADES.md](PLAN-VULNERABILIDADES.md)  
 > **Entregables asociados:** `SBOM-Portal2026.json`, `composer-audit.json`, `npm-audit.json`, `cvss-scores.json`
@@ -10,15 +10,17 @@
 
 ## 1. Resumen ejecutivo
 
+> **Nota de estado (2026-10-23):** los párrafos de este §1 describen el estado **inicial** al momento del análisis (2026-10-08). Todas las filas de los hallazgos listados están **remediadas** salvo `SC-02` (aceptado con compensatorios); el estado real vigente está en §1.b y el detalle del refuerzo F6 en §1.c.
+
 Se ejecutó el **Plan de Análisis de Vulnerabilidades** aprobado para el Portal2026, combinando análisis de dependencias (`composer audit`, `npm audit`), análisis estático de código (SAST), revisión de configuración y validación de la suite de pruebas existente. **No se realizaron pruebas activas de explotación** contra producción; la evaluación se limitó al repositorio y a la réplica local de desarrollo, conforme a las reglas de engagement.
 
-**Hallazgos principales:**
+**Hallazgos principales (estado inicial, 2026-10-08):**
 
 | Severidad | Cantidad | IDs de hallazgos representativos |
 |---|---|---|
 | Crítica | 2 | AUTH-02 (credenciales seed), CFG-03 (APP_DEBUG + Ignition) |
-| Alta | 3 | AUTHZ-01 (escalada a superadmin), FILE-03 (integridad de gacetas), PRIV-01 (PII sin cifrado en reposo) |
-| Media | 8 | AUTH-01, AUTHZ-02, INJ-01, INJ-02, CFG-01, CFG-02, SC-01, SC-02, LOG-01, ABUSE-01 |
+| Alta | 4 | AUTHZ-01 (escalada a superadmin), FILE-03 (integridad de gacetas), **SC-01** (dependencias vulnerables), PRIV-01 (PII sin cifrado en reposo) |
+| Media | 9 | AUTH-01, AUTHZ-02, INJ-01, INJ-02, CFG-01, CFG-02, SC-02, LOG-01, ABUSE-01 |
 | Baja | 0 | — |
 
 **Riesgos de cumplimiento (LOPDP / Infogobierno):**
@@ -35,7 +37,7 @@ Tratar los **2 hallazgos Críticos** como incidentes de seguridad potenciales y 
 
 ## 1.b Estado de remediación (actualizado 2026-10-23)
 
-Tras tres rondas de cierre (remediación inicial + auditoría comprobatoria + ajustes F6), el estado de los hallazgos es:
+Tras cuatro rondas de cierre (remediación inicial + auditoría comprobatoria + endurecimiento PG + ajustes F6), el estado de los hallazgos es:
 
 | ID | Hallazgo | Estado | Observaciones |
 |---|---|---|---|
@@ -44,14 +46,14 @@ Tras tres rondas de cierre (remediación inicial + auditoría comprobatoria + aj
 | AUTHZ-01 | Escalada a `superadmin` | ✅ Remedado | Solo `superadmin` asigna `superadmin`; no se puede degradar al último |
 | AUTHZ-02 | Editor puede publicar | ✅ Remedado | `NewsController::resolveStatus` fuerza `draft` para `editor` |
 | INJ-01 | XSS en `rendered_content` | ✅ Remedado | Trait `SanitizesHtml` (HTMLPurifier) en `Post` **y** `Page`; post-proceso elimina `<a href="data:...">` |
-| INJ-02 | SVG con extensión del cliente | ✅ Remedado | `svg` eliminado de los mimes de los 5 puntos de subida |
-| FILE-01 | Extensión de archivos subidos controlada por cliente | ✅ Remedado | `App\Support\Uploads::safeExtension()` usa la extensión adivinada por contenido en 7 puntos de subida |
+| INJ-02 | SVG con extensión del cliente | ✅ Remedado | `svg` eliminado de los mimes de los 8 puntos de subida |
+| FILE-01 | Extensión de archivos subidos controlada por cliente | ✅ Remedado | `App\Support\Uploads::safeExtension()` usa la extensión adivinada por contenido en 8 puntos de subida |
 | FILE-03 | Gacetas sin integridad | ✅ Remedado | Columna `file_hash` (SHA-256) en `gacetas` |
 | CFG-01 | Sin headers de seguridad | ✅ Remedado | Middleware `AddSecurityHeaders` (CSP, HSTS, X-Frame-Options, `frame-ancestors`, `form-action`, …) |
-| CFG-02 | `SESSION_SECURE_COOKIE` sin default | ✅ Remedado | `env('SESSION_SECURE_COOKIE', env('APP_ENV') !== 'local')`; sesión con lifetime **60 min** y cookie **cifrada en reposo** (`SESSION_ENCRYPT=true`) |
+| CFG-02 | `SESSION_SECURE_COOKIE` sin default | ✅ Remedado | `env('SESSION_SECURE_COOKIE', env('APP_ENV') !== 'local')`; sesión con lifetime **60 min** y cookie cifrada en reposo (`'encrypt' => true` en `config/session.php:49`) |
 | CFG-03 | `APP_DEBUG=true` + Ignition | ✅ Remedado | `APP_DEBUG=false` por defecto; Ignition solo en `require-dev` |
 | CFG-06 | `env()` fuera de `config/` con `config:cache` | ✅ Remedado | Nuevo `config/security.php` centraliza rate limits, `TRUSTED_PROXIES` y `TRUSTED_HOSTS`; leídos con `config()` |
-| SC-01 | Dependencias vulnerables | ✅ Remedado | Guzzle 7.15.5, commonmark 2.10.3, flysystem 3.36.0, Vite 8.3.4; `audit.ignore` de 17 → 3 IDs justificados |
+| SC-01 | Dependencias vulnerables | ✅ Remedado | Guzzle 7.15.5, commonmark 2.10.3, flysystem 3.36.0, Vite 8.3.4; `composer audit` **0 advisories activos**, 4 IDs de `laravel/framework` ignorados bajo waiver EOL (§2); `npm audit` 0 vulnerabilidades |
 | SC-02 | Laravel 10 EOL | ⚠️ Aceptado | Riesgo aceptado por requisito institucional + controles compensatorios (§7) |
 | LOG-01 | Sin auditoría de acciones | ✅ Remedado | Migración `activity_logs`, hooks `Audit::log`, vista `/admin/auditoria` con **filtros** (acción/usuario/rol/fechas/búsqueda) y **export CSV** (permiso `audit.export`, CWE-1236 neutralizado); **retención 400 días** (`audit:prune` diario 04:23); eventos ampliados (`permission.denied`, diff de permisos en `role.updated`, nombres de archivo en `media.uploaded`, `user.validation_failed` sin valores); 31 tests |
 | ABUSE-01 | `POST /contacto`/`buscar` sin límite | ✅ Remedado | `throttle:contact` y `throttle:search` configurables |
@@ -112,7 +114,7 @@ Refuerzo de los controles compensatorios de `SECURITY.md` sobre los hallazgos ya
 | F2.1 | SCA | `composer audit --format=json`, `npm audit --json` | `composer-audit.json`, `npm-audit.json` |
 | F2.2 | SAST | `grep`/`Select-String` sobre PHP/Blade, revisión manual | §4 |
 | F2.4 | Config review | Lectura de `config/`, `.env.example`, `.htaccess` | §4.2 |
-| F2.5 | Validación de controles | `vendor/bin/phpunit --testdox` | 68/68 tests OK (1 skipped) |
+| F2.5 | Validación de controles | `vendor/bin/phpunit --testdox` | 180/180 tests OK (882 assertions); ronda inicial: 68/68 |
 | F3 | Explotación controlada | **No ejecutada** por reglas de engagement | Marcado como *pendiente en staging* |
 | F4 | Informe | Markdown + CVSS v4.0 (`cvss` 3.6) + SBOM | `INFORME-VULNERABILIDADES.md`, `SBOM-Portal2026.json` |
 
@@ -128,10 +130,10 @@ Refuerzo de los controles compensatorios de `SECURITY.md` sobre los hallazgos ya
 
 ### 3.1 Rutas identificadas
 
-- **13 rutas públicas** + `POST /contacto` (único endpoint de escritura pública).
-- **`GET|POST /admin/login`** fuera del middleware `auth` y **sin throttle**.
-- **~40 rutas administrativas** dentro de `auth` + `permission:<slug>`.
-- **Rutas de Ignition** expuestas automáticamente: `_ignition/execute-solution`, `_ignition/health-check`, `_ignition/update-config` (activas solo con `APP_DEBUG=true`).
+- **14 rutas públicas** (13 de navegación + `POST /contacto`, único endpoint de escritura pública).
+- **`GET|POST /admin/login`** fuera del middleware `auth`; `POST /admin/login` aplica `throttle:login` (la ruta GET no).
+- **66 rutas administrativas** bajo `prefix('admin')`: 64 dentro del grupo `auth` + `auth.session` + `password.changed` y 60 con `permission:<slug>` (6 justificadas y cubiertas por `AdminRouteAuthorizationCoverageTest`).
+- **Rutas de Ignition** expuestas automáticamente: `_ignition/execute-solution`, `_ignition/health-check`, `_ignition/update-config` (activas solo con `APP_DEBUG=true`; Ignition está en `require-dev` y no se instala en producción).
 
 ### 3.2 Controles de seguridad presentes
 
@@ -139,14 +141,14 @@ Refuerzo de los controles compensatorios de `SECURITY.md` sobre los hallazgos ya
 |---|---|---|
 | CSRF | ✅ Activo en todo `web` | `VerifyCsrfToken.php` (`$except` vacío) |
 | Hash de contraseñas | ✅ bcrypt | `config/hashing.php` |
-| Regeneración de sesión | ✅ En login/logout | `AuthController.php:31,43` |
+| Regeneración de sesión | ✅ En login/logout | `AuthController.php:56` (login), `:75-76` (logout) |
 | Cookies HttpOnly / SameSite | ✅ `http_only=true`, `same_site=lax` | `config/session.php` |
 | Validación de entrada | ✅ Generalizada (Form Request/validate) | Múltiples controladores |
-| Rate limiting | ❌ **No implementado** | `throttle` registrado pero no aplicado |
-| Headers de seguridad | ❌ **Ausentes** | `public/.htaccess` stock |
-| Secure cookie | ⚠️ Sin default | `config/session.php:171` |
-| TrustHosts | ❌ Deshabilitado | `Kernel.php:41` |
-| Auditoría de acciones | ❌ **Ausente** | Sin logs de acceso/CRUD admin |
+| Rate limiting | ✅ Implementado | `throttle:login`/`contact`/`search` (`routes/web.php`), limiters en `RouteServiceProvider`, lockout configurable 5/60 s (`config/security.php`) |
+| Headers de seguridad | ✅ Presentes | `AddSecurityHeaders` (CSP/HSTS/X-Frame-Options/`frame-ancestors`/`form-action`), test `SecurityHeadersTest` |
+| Secure cookie | ✅ Con default por entorno | `config/session.php:171` (`APP_ENV !== 'local'`); lifetime 60 min, `'encrypt' => true` |
+| TrustHosts | ✅ Implementado | `app/Http/Middleware/TrustHosts.php`, registrado en `app/Http/Kernel.php` |
+| Auditoría de acciones | ✅ Presente | `activity_logs` + `Audit::log`, `/admin/auditoria` con filtros y export CSV, `audit:prune` diario |
 
 ---
 
@@ -410,11 +412,11 @@ Refuerzo de los controles compensatorios de `SECURITY.md` sobre los hallazgos ya
 - **Vector CVSS v4.0:** `CVSS:4.0/AV:N/AC:L/AT:N/PR:L/UI:N/VC:H/VI:N/VA:N/SC:N/SI:N/SA:N`
 - **Score:** 7.1 (Alta)
 - **Ubicación:** Tablas `contacts` y `users`
-- **Evidencia:** `contacts` almacena `name`, `email`, `subject`, `message`; `users` almacena `name`, `email`, `password` (hash bcrypt). MySQL/MariaDB no cifra estas columnas por defecto. Un acceso no autorizado a la BD o a un backup expone PII en texto claro.
+- **Evidencia:** `contacts` almacena `name`, `email`, `subject`, `message`; `users` almacena `name`, `email`, `password` (hash bcrypt). PostgreSQL no cifra estas columnas por defecto. Un acceso no autorizado a la BD o a un backup expone PII en texto claro.
 - **Impacto:** Brecha de PII ciudadana y de funcionarios; obligación de notificación según LOPDP; daño reputacional institucional.
 - **Recomendación:**
   1. Cifrar columnas sensibles con `Encrypted` casts de Laravel (atributos `name`, `email`, `message` de `contacts`; opcionalmente `email` de `users`).
-  2. Usar cifrado en reposo de MySQL (TDE) si el motor lo soporta.
+  2. Usar cifrado en reposo del servidor de PostgreSQL (o cifrado de volumen/backups), ya que el motor no lo aplica por defecto.
   3. Restringir backups y credenciales de BD; no incluir datos reales en entornos de desarrollo.
 - **Esfuerzo:** Medio-Alto
 
@@ -422,18 +424,20 @@ Refuerzo de los controles compensatorios de `SECURITY.md` sobre los hallazgos ya
 
 ## 5. Resumen de pruebas y calidad de código
 
-- **PHPUnit:** 68 tests, 277 assertions, **100 % OK** (1 skipped cuando no existe `public/storage`). La suite cubre autenticación, permisos, contacto, rate limiting, XSS, sanitización HTML, uploads (extensión por contenido), gacetas (hash), PII (cifrado), headers de seguridad, CORS, cambio forzado de contraseña y restricción de roles.
-- **Pint / lint:** No se ejecutó en este análisis (el entorno shell no tenía `composer` en PATH inicial, aunque se localizó en Laragon). Se recomienda correr `composer lint` antes de cada despliegue.
+- **PHPUnit:** 180 tests, 882 assertions, **100 % OK** (3 skipped requieren PostgreSQL o el symlink `public/storage`). La suite cubre autenticación, permisos, contacto, rate limiting, XSS, sanitización HTML, uploads (extensión por contenido), gacetas (hash), PII (cifrado), headers de seguridad, CORS, cambio forzado de contraseña, restricción de roles y auditoría (31 tests: filtros, export, eventos, retención).
+- **Pint / lint:** `vendor/bin/pint --test` **pasa limpio**; se ejecuta como gate antes de cada despliegue.
 
 ---
 
 ## 6. Hoja de ruta de remediación
 
-| Prioridad | Hallazgos | Acción inmediata | Responsable sugerido | Plazo |
+> **Cierre de §6 (2026-10-23):** todas las filas de prioridad Crítica, Alta y Media fueron ejecutadas y verificadas. El único punto sin cerrar es la **migración a Laravel 12/13** (SC-02), que sigue bajo waiver institucional y se revisa el 2026-11-21 (§7).
+
+| Prioridad | Hallazgos | Acción | Responsable sugerido | Estado |
 |---|---|---|---|---|
-| **Crítico (≤7 días)** | AUTH-02, CFG-03 | Cambiar passwords seed, forzar cambio, poner `APP_DEBUG=false`, deshabilitar Ignition en prod | DevSecOps / SysAdmin | 7 días |
-| **Alto (≤30 días)** | AUTHZ-01, FILE-03, PRIV-01, SC-01 | Restringir asignación de superadmin, proteger gacetas, cifrar PII, actualizar dependencias vulnerables | Desarrollo | 30 días |
-| **Medio (≤90 días)** | AUTH-01, AUTHZ-02, INJ-01, INJ-02, CFG-01, CFG-02, LOG-01, ABUSE-01, SC-02 | Rate limiting, sanitización HTML, headers de seguridad, auditoría, controles compensatorios EOL | Desarrollo / Infra | 90 días |
+| **Crítico (≤7 días)** | AUTH-02, CFG-03 | Cambiar passwords seed, forzar cambio, poner `APP_DEBUG=false`, deshabilitar Ignition en prod | DevSecOps / SysAdmin | ✅ Ejecutado |
+| **Alto (≤30 días)** | AUTHZ-01, FILE-03, PRIV-01, SC-01 | Restringir asignación de superadmin, proteger gacetas, cifrar PII, actualizar dependencias vulnerables | Desarrollo | ✅ Ejecutado |
+| **Medio (≤90 días)** | AUTH-01, AUTHZ-02, INJ-01, INJ-02, CFG-01, CFG-02, LOG-01, ABUSE-01, SC-02 | Rate limiting, sanitización HTML, headers de seguridad, auditoría, controles compensatorios EOL | Desarrollo / Infra | ✅ Ejecutado (SC-02 bajo waiver §7) |
 
 ---
 
@@ -455,18 +459,20 @@ Dado que el upgrade fue descartado institucionalmente, se establecen los siguien
 
 | Norma | Hallazgos relacionados | Estado |
 |---|---|---|
-| **LOPDP** (Venezuela, Gaceta 6.210) | PRIV-01 (cifrado de PII), LOG-01 (auditoría), AUTH-02/AUTH-01 (seguridad de credenciales) | Incumplimiento parcial; requiere remediación |
-| **Ley de Infogobierno** (Gaceta 40.274) | FILE-03 (integridad de documentos oficiales), CFG-01/CFG-03 (protección de TIC), LOG-01 (rendición de cuentas) | Incumplimiento parcial; requiere remediación |
+| **LOPDP** (Venezuela, Gaceta 6.210) | PRIV-01 (cifrado de PII), LOG-01 (auditoría), AUTH-02/AUTH-01 (seguridad de credenciales) | ✅ Remediado (PII cifrado, auditoría activa con retención 400 d) |
+| **Ley de Infogobierno** (Gaceta 40.274) | FILE-03 (integridad de documentos oficiales), CFG-01/CFG-03 (protección de TIC), LOG-01 (rendición de cuentas) | ✅ Remediado (hash SHA-256 en gacetas, headers, auditoría) |
 
 ---
 
 ## 9. Conclusiones
 
-El Portal2026 presenta **dos riesgos Críticos** (credenciales seed y debug/Ignition) que deben corregirse antes de cualquier despliegue público. Además, existen **tres riesgos Altos** de escalada de privilegios, integridad de gacetas y protección de PII. La mayoría de los hallazgos tienen correcciones de bajo o medio esfuerzo y están bien delimitados en el código.
+> **Actualización (2026-10-23):** los párrafos siguientes describen el estado **inicial** (2026-10-08). Los dos riesgos Críticos, los cuatro Altos y los nueve Medios listados están **remediados** (§1.b); el único riesgo residual vigente es **SC-02 (Laravel 10 EOL)**, aceptado con los compensatorios de §7 y con revisión obligatoria el 2026-11-21.
 
-El principal riesgo sistémico es la **combinación** de: autenticación sin rate limiting + contraseñas por defecto + ausencia de headers de seguridad + EOL de Laravel 10. Esta combinación aumenta la probabilidad de compromiso del panel administrativo y la posterior manipulación de contenido oficial y PII.
+El Portal2026 presentaba, al momento del análisis, **dos riesgos Críticos** (credenciales seed y debug/Ignition) que debían corregirse antes de cualquier despliegue público. Además existían **cuatro riesgos Altos** de escalada de privilegios, integridad de gacetas, dependencias vulnerables y protección de PII. La mayoría de los hallazgos tenían correcciones de bajo o medio esfuerzo y estaban bien delimitados en el código.
 
-Se recomienda ejecutar la hoja de ruta §6, actualizar `PENDIENTES.md` y programar una **revalidación en staging** dentro de 30–90 días que incluya pruebas DAST con OWASP ZAP/Burp para los casos no validados dinámicamente en este análisis.
+El principal riesgo sistémico identificado era la **combinación** de: autenticación sin rate limiting + contraseñas por defecto + ausencia de headers de seguridad + EOL de Laravel 10. Esta combinación aumentaba la probabilidad de compromiso del panel administrativo y la posterior manipulación de contenido oficial y PII.
+
+Se ejecutó la hoja de ruta §6 y se actualizaron `PENDIENTES.md` y `DOCUMENTACION.md`. Persiste la recomendación de una **revalidación en staging** que incluya pruebas DAST con OWASP ZAP/Burp para los casos no validados dinámicamente en este análisis (§2.3), y de la **migración de framework** fuera de Laravel 10 (§7).
 
 ---
 
@@ -478,12 +484,12 @@ Se recomienda ejecutar la hoja de ruta §6, actualizar `PENDIENTES.md` y program
 |---|---|
 | `composer-audit.json` | Salida JSON de `composer audit --format=json` |
 | `npm-audit.json` | Salida JSON de `npm audit --json` |
-| `SBOM-Portal2026.json` | SBOM CycloneDX 1.5 con 199 componentes |
+| `SBOM-Portal2026.json` | SBOM CycloneDX 1.5 con 214 componentes (refrescado en `b6e2be4`) |
 | `cvss-scores.json` | Scores CVSS v4.0 calculados para cada hallazgo |
 
 ### 10.2 Métricas del SBOM
 
-- **Total de componentes:** 199
+- **Total de componentes:** 214
 - **Componentes PHP (Composer):** extraídos de `composer.lock`
 - **Componentes JS (npm):** extraídos de `package-lock.json`
 - **Formato:** CycloneDX 1.5 (`bomFormat`, `specVersion`, `components`, `metadata`)
