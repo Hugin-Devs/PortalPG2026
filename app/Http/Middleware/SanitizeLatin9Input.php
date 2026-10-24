@@ -15,7 +15,7 @@ use Symfony\Component\HttpFoundation\Response;
  * Es imprescindible también para parámetros que van DIRECTOS a una consulta
  * SQL (p. ej. el término de búsqueda de /buscar con ILIKE): aunque los
  * modelos sanitizan al escribir, un carácter sin equivalente LATIN9 en un
- * WHERE provocaría el error 22021 de PostgreSQL (ver DOCUMENTACION.md §14.K).
+ * WHERE provocaría el error 22021 de PostgreSQL (ver docs/DOCUMENTACION.md §14.K).
  */
 class SanitizeLatin9Input
 {

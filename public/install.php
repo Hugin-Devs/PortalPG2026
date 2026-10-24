@@ -3,7 +3,7 @@
 /**
  * Instalador one-shot de usuarios (superadministrador + administrador).
  *
- * Ver DOCUMENTACION.md §14.E/§14.F.1. Se ejecuta UNA sola vez tras desplegar,
+ * Ver docs/DOCUMENTACION.md §14.E/§14.F.1. Se ejecuta UNA sola vez tras desplegar,
  * justo después de `php artisan migrate --seed`, y se auto-elimina al
  * completarse (o al detectar que el portal ya está configurado).
  *
@@ -103,7 +103,7 @@ try {
 
 $avisoEncoding = '';
 if (! $latin9Ok) {
-    $avisoEncoding = '<p class="error">La base de datos usa la codificación <code>'.h($serverEncoding ?: 'desconocida').'</code>; la BD de producción debe ser <strong>LATIN9</strong> (ISO-8859-15). Ver DOCUMENTACION.md §14.K.</p>';
+    $avisoEncoding = '<p class="error">La base de datos usa la codificación <code>'.h($serverEncoding ?: 'desconocida').'</code>; la BD de producción debe ser <strong>LATIN9</strong> (ISO-8859-15). Ver docs/DOCUMENTACION.md §14.K.</p>';
 }
 
 // El portal ya está configurado: no tocar nada, solo retirar el instalador.

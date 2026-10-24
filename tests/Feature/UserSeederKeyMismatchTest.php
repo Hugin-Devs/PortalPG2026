@@ -15,7 +15,7 @@ use Tests\TestCase;
  * Regresión del fallo «The MAC is invalid» en producción: si el APP_KEY
  * cambia tras haberse creado una fila seed de users, su name cifrado no se
  * puede descifrar. El seeder debe detenerse con una guía accionable (y no
- * con un stack trace crudo) — DOCUMENTACION.md §14.D.
+ * con un stack trace crudo) — docs/DOCUMENTACION.md §14.D.
  */
 class UserSeederKeyMismatchTest extends TestCase
 {

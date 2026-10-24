@@ -7,7 +7,7 @@ use App\Support\Latin9;
 /**
  * Translitera automáticamente a LATIN9 seguro todo texto que se asigna a un
  * atributo del modelo (fillable o no), antes de los mutadores y de los
- * casts `encrypted` (ver DOCUMENTACION.md §14.K).
+ * casts `encrypted` (ver docs/DOCUMENTACION.md §14.K).
  *
  * La base de datos de producción es PostgreSQL LATIN9: cualquier carácter
  * sin equivalente (emoji, “ ”, …, —) provocaría el error 22021. Al

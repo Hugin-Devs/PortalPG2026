@@ -19,12 +19,13 @@
 | **symfony/yaml 7.4.14 → 7.4.21** (CVE-2026-109413, recursión sin límite en el YAML inline lexer) | Idem; un solo documento YAML podía tumbear el proceso | Ídem |
 | **CVE-2026-114509** (Laravel TokenGuard auth bypass, **critical**, sin parche para 10.x): verificado **no aplicable** y registrado como waiver | El proyecto solo usa el guard `web` (session); no existe `routes/api.php`, ni guards `token`/`auth:api`, ni uso de Sanctum/`personalAccessToken` (verificado por grep en todo el código) | Waiver en `composer.json → audit.ignore` (`PKSA-b41t-wbzk-9q51`) + §2 de este documento |
 | `SBOM-Portal2026.json` + `composer-audit.json` regenerados tras el update de Symfony | El SBOM (21-oct) era anterior al lockfile (23-oct) | 214 componentes; `composer-audit.json` con 0 advisories activos |
+| Documentación reorganizada: planificación y entregables a **`docs/`** (DOCUMENTACION, PENDIENTES, SPECS, INFORME, PLAN, SBOM y evidencias); raíz solo con `README.md` + `SECURITY.md` | Raíz saturada de 10 ficheros de planificación; `SECURITY.md` debe vivir en raíz (GitHub lo publica) y `README.md` es la puerta de entrada | `git mv` (historial preservado); referencias de código/README actualizadas a `docs/`; DOCUMENTACION §12 unificada con PENDIENTES (quita la doble sincronía); registro de cierres a `docs/historico-cierres-pendientes.md` |
 
 ## 0. Correcciones aplicadas en la revisión 2026-10-23
 
 | Corrección | Motivo | Verificación |
 |---|---|---|
-| `composer.json`: `"php": "^8.1"` → `"^8.3"` | PHP 8.1 EOL (31-dic-2025) y 8.2 caduca (31-dic-2026); fijar `^8.3` hace fallar `composer install` en runtimes sin soporte en lugar de desplegar en silencio | Test de regresión `SecurityConfigTest::test_composer_requires_supported_php_version`; README/DOCUMENTACION.md actualizados a "PHP 8.3+" |
+| `composer.json`: `"php": "^8.1"` → `"^8.3"` | PHP 8.1 EOL (31-dic-2025) y 8.2 caduca (31-dic-2026); fijar `^8.3` hace fallar `composer install` en runtimes sin soporte en lugar de desplegar en silencio | Test de regresión `SecurityConfigTest::test_composer_requires_supported_php_version`; README/docs/DOCUMENTACION.md actualizados a "PHP 8.3+" |
 | `follow-redirects` 1.16.0 → **1.16.1** (`npm audit fix`) | 2 advisories high (GHSA-q3jh-wrc6-jgq8, GHSA-8r9p-f939-6h3c: fuga de cabeceras de credenciales vía cabeceras en forma de array / regex de sensitiveHeaders); dependencia transitiva de axios (tooling de build, no runtime PHP) | `npm audit` → **0 vulnerabilidades** |
 | `cvss-scores.json` + INFORME §1.b: LOG-01 `pending` → `remediated` | Incoherencia clase 9 (contrato documentado ≠ estado real): LOG-01 estaba cerrado desde G6 (auditoría activa, 11 tests) pero los artefactos lo marcaban pendiente | Sincronizados con el cierre real de G6 |
 
@@ -52,7 +53,7 @@ Checklist previa al arranque (primer lanzamiento):
 - [ ] Cambio inmediato de la contraseña seed (el instalador la fija; `EnsurePasswordChanged` la fuerza igualmente)
 - [ ] `php artisan pii:encrypt` si la BD procede de una instalación anterior
 - [ ] Verificación de cabeceras: `curl -I https://.../` → CSP con nonce, X-Frame-Options, nosniff, Referrer-Policy, Permissions-Policy, HSTS
-- [ ] Copia de seguridad de la BD y de `APP_KEY` en gestor de secretos (la rotación de APP_KEY rompe el descifrado de PII; ver DOCUMENTACION §14.D)
+- [ ] Copia de seguridad de la BD y de `APP_KEY` en gestor de secretos (la rotación de APP_KEY rompe el descifrado de PII; ver docs/DOCUMENTACION.md §14.D)
 
 ## 2. Riesgos heredados y restricciones (waivers registrados)
 
@@ -76,8 +77,8 @@ Checklist previa al arranque (primer lanzamiento):
 - **XSS**: HTMLPurifier en escritura y lectura (`rendered_content`), allowlist única en `config/purifier.php`, CSP con nonce.
 - **Subidas**: extensión por contenido con fallback `bin`, SVG prohibido, nombre generado por servidor, `.htaccess` anti-ejecución en `storage/app/public`.
 - **PII**: `contacts.*` y `users.name` cifrados en reposo (`pii:encrypt`); auditoría sin PII; retención de contactos con `contacts:prune` (diario).
-- **Integridad**: SBOM CycloneDX en la raíz (regenerar en cada release); lockfile congelado; 0 advisories activos.
-- **Runbook mínimo**: ante incidente → rotar `APP_KEY` solo si se acepta romper el descifrado de PII (ver DOCUMENTACION §14.D); revocar sesión de un usuario = cambiar su contraseña (invalida todas); parar un ataque de fuerza bruta = `LOGIN_RATE_LIMIT`/bloqueo ya activo + revisar `/admin/auditoria`.
+- **Integridad**: SBOM CycloneDX en `docs/` (regenerar en cada release); lockfile congelado; 0 advisories activos.
+- **Runbook mínimo**: ante incidente → rotar `APP_KEY` solo si se acepta romper el descifrado de PII (ver docs/DOCUMENTACION.md §14.D); revocar sesión de un usuario = cambiar su contraseña (invalida todas); parar un ataque de fuerza bruta = `LOGIN_RATE_LIMIT`/bloqueo ya activo + revisar `/admin/auditoria`.
 
 ## 4. Política de cambios
 

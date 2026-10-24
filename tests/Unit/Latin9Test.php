@@ -6,7 +6,7 @@ use App\Support\Latin9;
 use PHPUnit\Framework\TestCase;
 
 /**
- * Política de transliteración LATIN9 (DOCUMENTACION.md §14.K): la BD de
+ * Política de transliteración LATIN9 (docs/DOCUMENTACION.md §14.K): la BD de
  * producción es PostgreSQL ISO-8859-15 y el texto se adapta ANTES de cruzar
  * el cable (el servidor convierte LATIN9 <-> UTF-8).
  */

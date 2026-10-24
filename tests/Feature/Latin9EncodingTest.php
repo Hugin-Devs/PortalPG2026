@@ -15,7 +15,7 @@ use Illuminate\Support\Facades\DB;
 use Tests\TestCase;
 
 /**
- * Contrato de la adaptación LATIN9 (DOCUMENTACION.md §14.K): la BD de
+ * Contrato de la adaptación LATIN9 (docs/DOCUMENTACION.md §14.K): la BD de
  * producción es PostgreSQL ISO-8859-15 con client_encoding UTF8; la app
  * translitera texto antes de que cruce el cable.
  *

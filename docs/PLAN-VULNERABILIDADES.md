@@ -1,8 +1,9 @@
 # Plan de Análisis de Vulnerabilidades de Ciberseguridad — Portal2026
 
-> **Versión:** 1.0 · **Fecha:** octubre 2026 · **Estado:** aprobado para ejecución
-> **Aplica a:** Portal institucional GDC (sitio público + panel `/admin`) — Laravel 10 + Blade + MySQL
-> **Documentos relacionados:** [DOCUMENTACION.md](DOCUMENTACION.md) (fuente de verdad técnica), [PENDIENTES.md](PENDIENTES.md) (sección A: seguridad y producción), [SPECS.md](SPECS.md) (histórico)
+> **Versión:** 1.0 · **Fecha:** octubre 2026 · **Estado:** ⚠️ **histórico — plan ejecutado y cerrado (2026-10-08 … 2026-10-23). No actualizar.**
+> Resultado y remediación viva: [INFORME-VULNERABILIDADES.md](INFORME-VULNERABILIDADES.md). Fechas de cierre: [historico-cierres-pendientes.md](historico-cierres-pendientes.md).
+> **Aplica a:** Portal institucional GDC (sitio público + panel `/admin`) — Laravel 10 + Blade + MySQL *(nota histórica: el portal migró a PostgreSQL — ver DOCUMENTACION.md §13)*
+> **Documentos relacionados:** [DOCUMENTACION.md](DOCUMENTACION.md) (fuente de verdad técnica), [PENDIENTES.md](PENDIENTES.md) (ítems abiertos), [SPECS.md](SPECS.md) (histórico)
 
 ---
 

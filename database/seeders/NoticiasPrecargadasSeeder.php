@@ -50,7 +50,7 @@ class NoticiasPrecargadasSeeder extends Seeder
      * registran en la tabla media. El texto del txt se conserva íntegro
      * (menciones y hashtags); solo se elimina la línea de Fecha. Los
      * emojis se eliminan al guardar: la BD de producción es LATIN9 y no
-     * puede representarlos (DOCUMENTACION.md §14.K).
+     * puede representarlos (docs/DOCUMENTACION.md §14.K).
      *
      * Al sembrar se purgan las noticias de prueba 'noticia-destacada-*'
      * (borrado físico, incluidas filas soft-deleted: libera el slug).

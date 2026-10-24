@@ -27,7 +27,7 @@ class UserSeeder extends Seeder
             } catch (DecryptException $e) {
                 // La fila existe pero su name cifrado no se puede descifrar
                 // con el APP_KEY actual: el APP_KEY cambió tras haberse creado
-                // la fila (DOCUMENTACION.md §14.D). Detener el seed con una
+                // la fila (docs/DOCUMENTACION.md §14.D). Detener el seed con una
                 // guía clara en vez de un stack trace crudo.
                 $this->command?->error(sprintf(
                     "No se pudo descifrar users.name de «%s» con el APP_KEY actual (%s).\n".
@@ -38,7 +38,7 @@ class UserSeeder extends Seeder
                     "       DELETE FROM users WHERE email = '%s';\n".
                     "     y re-ejecutar php artisan db:seed\n".
                     "  3. Restaurar la APP_KEY original en .env\n".
-                    'Ver DOCUMENTACION.md §14.D.',
+                    'Ver docs/DOCUMENTACION.md §14.D.',
                     $attrs['email'],
                     $e->getMessage(),
                     $attrs['email']

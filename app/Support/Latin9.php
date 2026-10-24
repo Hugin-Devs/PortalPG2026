@@ -4,7 +4,7 @@ namespace App\Support;
 
 /**
  * Adaptación de texto a la codificación LATIN9 (ISO-8859-15) de la base de
- * datos de producción (ver DOCUMENTACION.md §14.K).
+ * datos de producción (ver docs/DOCUMENTACION.md §14.K).
  *
  * La conexión PostgreSQL usa client_encoding=UTF8 y el servidor convierte
  * LATIN9 <-> UTF-8 automáticamente, pero cualquier carácter sin equivalente
