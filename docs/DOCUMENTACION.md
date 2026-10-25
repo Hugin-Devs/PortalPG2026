@@ -518,10 +518,12 @@ npm run build      # copia TinyMCE a public/vendor + vite build a public/build
 > están en [SECURITY.md](../SECURITY.md) (raíz del repo). Las mejoras
 > futuras, en la §C de PENDIENTES.md.
 >
-> **Estado a 2026-10-23**: desarrollo funcional completo (189 tests
-> PHPUnit en verde, Pint, SCA 0 activos). Antes de publicar quedan 2 ítems
-> de contenido del cliente (D6/E1) y 4 verificaciones pre-release
-> (R1–R4 en PENDIENTES.md).
+> **Estado a 2026-10-25**: desarrollo funcional completo y gates de
+> pre-release verificados — **228 tests PHPUnit en verde** (1032 assertions),
+> **cobertura 82.22%**, **E2E 17/17**, **baseline ZAP sin altas** (1 media =
+> waiver TinyMCE), Pint ✅, SCA 0 activos. Antes de publicar quedan la
+> verificación de las 7 condiciones en el servidor (R4) y 2 ítems de
+> contenido del cliente (D6/E1) — ver [PENDIENTES.md](PENDIENTES.md).
 
 ---
 
@@ -765,11 +767,12 @@ php artisan route:list
 
 ## 16. Tests (suites E2E + PHPUnit)
 
-Suites **bash + psql** (Linux) contra un servidor de desarrollo (`php artisan serve`). Usan `curl` para HTTP y `psql` para las aserciones SQL directas sobre PostgreSQL; las credenciales de BD y la base URL se configuran por variables de entorno (`E2E_BASE`, por defecto `http://127.0.0.1:8000`).
+Suites **bash + psql** contra un servidor de desarrollo (`php artisan serve`). Usan `curl` para HTTP y `psql` para las aserciones SQL directas sobre PostgreSQL; 
+las credenciales de BD y la base URL se configuran por variables de entorno (`E2E_BASE`, por defecto `http://127.0.0.1:8000`). En **Windows/Git Bash** funcionan desde la ronda R1 (2026-10-25): `lib.sh` fija `LC_ALL=C.UTF-8` (requisito de `grep -P`), limpia los `\r` que añade `psql` de Windows, traduce las rutas MSYS en `curl` y fuerza `timezone=America/Caracas` en `PGOPTIONS` para que el `now()` de las suites coincida con la zona de la app.
 
 > **Gate de dialecto**: además de las suites E2E, PHPUnit se ejecuta en dos motores: SQLite en memoria (rápida, default de `phpunit.xml`) y PostgreSQL real (`DB_CONNECTION=pgsql DB_DATABASE=portalpg2026 ./vendor/bin/phpunit`). Ambas corridas deben estar en verde antes de merge.
 >
-> **Gate LATIN9** (BD de producción, §14.K): crear la BD `createdb -E LATIN9 -l C -T template0 portalpg2026_latin9` (owner el usuario de la app) y correr `DB_CONNECTION=pgsql DB_DATABASE=portalpg2026_latin9 ./vendor/bin/phpunit` — las 144 deben estar en verde (`Latin9EncodingTest` verifica round-trip y que un INSERT crudo con `…` falla con 22021). Las suites E2E también pueden correr contra ella: apuntar `DB_DATABASE` del `.env` a la BD LATIN9 y usar `DB_NAME=portalpg2026_latin9 bash tests/e2e/test-noticias.sh` (el `php artisan serve` hereda el `.env`; las variables de entorno por CLI no llegan al hijo `php -S`).
+> **Gate LATIN9** (BD de producción, §14.K): crear la BD `createdb -E LATIN9 -l C -T template0 portalpg2026_latin9` (owner el usuario de la app) y correr `DB_CONNECTION=pgsql DB_DATABASE=portalpg2026_latin9 ./vendor/bin/phpunit` — la suite completa debe estar en verde (`Latin9EncodingTest` verifica round-trip y que un INSERT crudo con `…` falla con 22021). Las suites E2E también pueden correr contra ella: apuntar `DB_DATABASE` del `.env` a la BD LATIN9 y usar `DB_NAME=portalpg2026_latin9 bash tests/e2e/test-noticias.sh` (el `php artisan serve` hereda el `.env`; las variables de entorno por CLI no llegan al hijo `php -S`).
 
 | Suite | Cubre |
 |---|---|
@@ -806,7 +809,8 @@ Garantías de las suites:
 
 ### PHPUnit (`tests/Unit`, `tests/Feature`)
 
-- Ejecución: `./vendor/bin/phpunit` (o `--testsuite Unit,Feature`) — **124 tests / 610 assertions**, en verde (1 skipped cuando no existe el symlink `public/storage`).
+- Ejecución: `./vendor/bin/phpunit` (o `--testsuite Unit,Feature`) — **228 tests / 1032 assertions**, en verde (3 skipped: requieren PostgreSQL o el symlink `public/storage`; 6 avisos preexistentes de `iconv` en LATIN9, intencionales).
+- **Cobertura (desde R3, 2026-10-25):** con Xdebug 3.5.3 instalado, `./vendor/bin/phpunit --coverage-text --coverage-html coverage-html` → **82.22% de líneas** en `app/` (objetivo ≥80%); authn/authz/validación/cifrado ≈100% salvo el fallback de iconv de `App\Support\Latin9`. El HTML se genera en `/coverage-html` (ignorado por git).
 - **BD aislada**: `phpunit.xml` define `DB_CONNECTION=sqlite` / `DB_DATABASE=:memory:` (B2 cerrado) — `RefreshDatabase` migra en memoria por test, **nunca toca la BD de desarrollo**. El `APP_KEY` de `phpunit.xml` es una clave **exclusiva de tests**; no usar en producción.
 - Cobertura de flujos críticos:
   - `AuthTest` — login correcto/incorrecto/inactivo, logout, `last_login_at`, mensaje genérico.
@@ -836,7 +840,11 @@ Garantías de las suites:
   - `UserRoleRestrictionTest` — solo superadmin asigna `superadmin`; último superadmin no se puede degradar.
   - `CorsConfigurationTest` — CORS limitado a rutas `api/*` inexistentes; páginas públicas no envían `Access-Control-Allow-Origin`.
   - `StorageSymlinkTest` — el symlink `public/storage` apunta a `storage/app/public` (skipped si no existe).
+  - `AdminPartnerCrudTest` (R3) — CRUD de entes: slug único, validación de URL/logo, reemplazo y borrado de logo con sidecar, auditoría `partner.*`, authz (admin solo ve, editor 403).
+  - `AdminContactInboxTest` (R3) — bandeja de contacto admin: edición de la info visible, validaciones de email/mapa, `read_at` una sola vez, borrado + auditoría, authz por rol.
+  - `AdminSettingsControllerTest` (R3) — configuración: `site_name` obligatorio, las 5 ramas de `validateLink` (URL absoluta válida/inválida, ruta sin `/`, traversal, archivo inexistente, archivo existente), subida/quitar logo con sidecar, superadmin-only.
+  - `InstallScriptGuardTest` (F6b) — el guard de `public/install.php` se cierra con solo existir un superadmin.
   - `Unit/WebpTest` — reglas de conversión de D9.
-- El detalle funcional fino sigue en las suites E2E de PowerShell.
+- El detalle funcional fino sigue en las suites E2E bash+psql (§16).
 - Estilo: `composer lint` (`pint --test`) debe pasar; `composer lint:fix` aplica Pint (C2).
 - Nota: el `UserFactory` usa `Hash::make('password')` (no un hash hardcodeado) para respetar `BCRYPT_ROUNDS` de tests.

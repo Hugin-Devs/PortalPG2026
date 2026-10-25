@@ -4,11 +4,11 @@
 > instantánea sin historial para entrega institucional; exportar el PDF con `scripts/export-informe.ps1`
 > o Imprimir → Guardar como PDF (tamaño carta). Este documento es el informe de trabajo completo con historial.
 >
-> **Fecha:** 2026-10-08 · **Última actualización:** 2026-10-23 (ronda F6 — código `7ac0028`, docs `b7d1292`)  
+> **Fecha:** 2026-10-08 · **Última actualización:** 2026-10-25 (ronda de verificación R1–R3 — commit `60de864`)  
 > **Proyecto:** Portal institucional GDC (Laravel 10 + Blade + **PostgreSQL**, PHP `^8.3`)  
 > **Ejecutado por:** Análisis automatizado + revisión manual de código y configuración  
 > **Documento base:** [PLAN-VULNERABILIDADES.md](PLAN-VULNERABILIDADES.md)  
-> **Entregables asociados:** `SBOM-Portal2026.json`, `composer-audit.json`, `npm-audit.json`, `cvss-scores.json`
+> **Entregables asociados:** `SBOM-Portal2026.json`, `composer-audit.json`, `npm-audit.json`, `cvss-scores.json`, `zap-baseline-2026-10-25.{html,json}`
 
 ---
 
@@ -77,9 +77,9 @@ Tras cuatro rondas de cierre (remediación inicial + auditoría comprobatoria + 
 
 **Casos residuales pendientes de DAST / verificación manual / infraestructura:**
 
-`FILE-07` (cuotas de almacenamiento), `FILE-09` (sidecars WebP desde imágenes maliciosas), `INJ-03` (XSS reflejado), `INJ-05` (CRLF / open redirect), `INJ-06` (SSTI en Blade), `SC-05` (integridad de `public/vendor/tinymce`), `LOG-03` (exposición de archivos sensibles) y `PRIV-03` (trazabilidad para notificación de brechas). Seguimiento en `PENDIENTES.md` G8.
+`FILE-07` (cuotas de almacenamiento), `FILE-09` (sidecars WebP desde imágenes maliciosas), `INJ-03` (XSS reflejado), `INJ-05` (CRLF / open redirect), `INJ-06` (SSTI en Blade), `SC-05` (integridad de `public/vendor/tinymce`), `LOG-03` (exposición de archivos sensibles) y `PRIV-03` (trazabilidad para notificación de brechas). Seguimiento en `PENDIENTES.md` D. *Nota 2026-10-25: el baseline ZAP (pasivo) no cubre estos casos — siguen pendientes de pruebas activas en staging.*
 
-**Verificación final (2026-10-23):** 180 tests PHPUnit OK · pint passed · `composer audit --locked` 4 ignorados justificados · `npm audit` 0 vulnerabilidades · 17 suites E2E bash/psql (requieren PostgreSQL; no ejecutables en el entorno de desarrollo local). Rondas anteriores: 68 tests + 16/16 E2E.
+**Verificación final (2026-10-25):** **228 tests PHPUnit OK** (1032 assertions) · **cobertura 82.22%** (Xdebug) · pint passed · `composer audit` 0 activos + 5 ignorados justificados · `npm audit` 0 vulnerabilidades · **17/17 suites E2E** en verde contra PostgreSQL local · **baseline ZAP 2.17.0**: 0 altas / 1 media (waiver TinyMCE) / 2 bajas / 4 informativas (§1.d). Rondas anteriores: 180 tests (2026-10-23), 68 tests + 16/16 E2E (2026-10-08).
 
 ---
 
@@ -96,6 +96,20 @@ Refuerzo de los controles compensatorios de `SECURITY.md` sobre los hallazgos ya
 | Eventos ampliados | LOG-01 | `permission.denied` (denegaciones de autorización), diff real de permisos en `role.updated` (concedidos/quitados), nombres de archivo en `media.uploaded`, `user.validation_failed` (solo nombres de campo, sin valores para no exponer PII/credenciales) |
 
 **Tests:** 156 → **180** (nuevos: `RateLimitTest::test_lockout_threshold_comes_from_config`, `SecurityConfigTest::test_session_cookie_invariants`, `AuditFilterTest` (7), `AuditExportTest` (5), `AuditEventsTest` (6), `AuditPruneTest` (4)). `pint` y suite en verde.
+
+---
+
+## 1.d Ronda de verificación previa 2026-10-25 (R1–R3, commit `60de864`)
+
+Cierre de las tres verificaciones que bloqueaban la publicación:
+
+| Verificación | Resultado | Evidencia |
+|---|---|---|
+| **R1 — Suite E2E completa** | **17/17 en verde** contra PostgreSQL local (incluidos `test-entes`/`test-share`, antes en rojo por bugs de entorno Windows/Git Bash, no del código). Fixes en `tests/e2e/lib.sh`: locale UTF-8 para `grep -P`, `tr -d '\r'` en las salidas de `psql`, wrapper de `curl` para rutas MSYS + `MSYS2_ARG_CONV_EXCL`, `timezone=America/Caracas` en `PGOPTIONS` | `bash tests/e2e/run-all.sh` (log 2026-10-25); backup `pg_dump` previo |
+| **R2 — DAST baseline (OWASP ZAP 2.17.0)** | Spider de 67 URLs + passive scan contra `http://127.0.0.1:8000` → **0 altas / 1 media / 2 bajas / 4 informativas**. **Fixes:** cookie `XSRF-TOKEN` con `HttpOnly` (la app no usa `X-XSRF-TOKEN`) y `X-Powered-By` retirado en runtime. **Residual:** media = CSP `style-src unsafe-inline` (waiver TinyMCE §2/SECURITY.md); bajas = cuerpo estándar de la redirección de `/admin/login` (378 B, sin datos sensibles) y `nosniff` ausente en **ficheros estáticos** (no pasan por Laravel → añadido a la condición 5 de despliegue) | `docs/zap-baseline-2026-10-25.html` + `.json`; job reproducible `scripts/zap-baseline.yaml`; regresiones en `SecurityHeadersTest` |
+| **R3 — Cobertura de código** | Xdebug 3.5.3 (PHP 8.3 ZTS vs16) → **82.22% de líneas** en `app/` (objetivo ≥80%). Authn/authz/validación/cifrado ≈100% salvo el fallback de iconv de `App\Support\Latin9` (defensivo, no forzable en este runtime). Tests nuevos: `AdminPartnerCrudTest` (12), `AdminContactInboxTest` (8), `AdminSettingsControllerTest` (10) + 7 regresiones críticas | `php vendor/bin/phpunit --coverage-text`; informe HTML en `/coverage-html` (local) |
+
+**Suite total:** 180 → **228 tests** (1032 assertions, 0 fallos) · Pint en verde.
 
 ---
 
@@ -118,13 +132,13 @@ Refuerzo de los controles compensatorios de `SECURITY.md` sobre los hallazgos ya
 | F2.1 | SCA | `composer audit --format=json`, `npm audit --json` | `composer-audit.json`, `npm-audit.json` |
 | F2.2 | SAST | `grep`/`Select-String` sobre PHP/Blade, revisión manual | §4 |
 | F2.4 | Config review | Lectura de `config/`, `.env.example`, `.htaccess` | §4.2 |
-| F2.5 | Validación de controles | `vendor/bin/phpunit --testdox` | 180/180 tests OK (882 assertions); ronda inicial: 68/68 |
-| F3 | Explotación controlada | **No ejecutada** por reglas de engagement | Marcado como *pendiente en staging* |
+| F2.5 | Validación de controles | `vendor/bin/phpunit --testdox` + `--coverage-text` (Xdebug) | **228/228 tests OK (1032 assertions), cobertura 82.22%**; ronda inicial: 68/68 |
+| F3 | Explotación controlada | **Baseline ZAP 2.17.0** (spider + passive scan) ejecutado 2026-10-25; activo/fuzzing no ejecutado por reglas de engagement | `zap-baseline-2026-10-25.{html,json}` · activo pendiente en staging |
 | F4 | Informe | Markdown + CVSS v4.0 (`cvss` 3.6) + SBOM | `INFORME-VULNERABILIDADES.md`, `SBOM-Portal2026.json` |
 
 ### 2.3 Limitaciones
 
-- No se dispuso de OWASP ZAP/Burp en el entorno; por tanto, **DAST activo no se ejecutó**. Los casos de prueba dinámicos (fuerza bruta, XSS reflejado, validación de uploads) se documentan como hallazgos basados en evidencia de código y deberán revalidarse en staging con herramientas DAST.
+- **DAST baseline ejecutado el 2026-10-25** con OWASP ZAP 2.17.0 contra el servidor local (0 altas / 1 media waiver / 2 bajas — §1.d). Queda pendiente la **revalidación autenticada y contra staging real** tras el desplegue, además del fuzzing/activo, que no se ejecutó por reglas de engagement.
 - No se realizó pentest de infraestructura ni pruebas de denegación de servicio destructivas.
 - El `.env` real no fue inspeccionado para evitar exposición de secretos; se usó `.env.example` como referencia.
 
@@ -428,7 +442,10 @@ Refuerzo de los controles compensatorios de `SECURITY.md` sobre los hallazgos ya
 
 ## 5. Resumen de pruebas y calidad de código
 
-- **PHPUnit:** 180 tests, 882 assertions, **100 % OK** (3 skipped requieren PostgreSQL o el symlink `public/storage`). La suite cubre autenticación, permisos, contacto, rate limiting, XSS, sanitización HTML, uploads (extensión por contenido), gacetas (hash), PII (cifrado), headers de seguridad, CORS, cambio forzado de contraseña, restricción de roles y auditoría (31 tests: filtros, export, eventos, retención).
+- **PHPUnit (2026-10-25):** **228 tests, 1032 assertions, 100 % OK** (3 skipped requieren PostgreSQL o el symlink `public/storage`; 6 avisos preexistentes de `iconv` en LATIN9, intencionales). La suite cubre autenticación, permisos, contacto, rate limiting, XSS, sanitización HTML, uploads (extensión por contenido), gacetas (hash), PII (cifrado), headers de seguridad, CORS, cambio forzado de contraseña, restricción de roles, auditoría (37 tests), y desde la ronda R3 también CRUD de entes, bandeja de contacto y validación de configuración.
+- **Cobertura (Xdebug 3.5.3):** **82.22% de líneas** en `app/` (objetivo ≥80%); authn/authz/validación/cifrado ≈100% salvo el fallback de iconv de `App\Support\Latin9` (documentado).
+- **E2E (bash + psql):** **17/17 suites en verde** contra PostgreSQL local (2026-10-25).
+- **DAST baseline:** OWASP ZAP 2.17.0 → 0 altas / 1 media (waiver) / 2 bajas / 4 informativas (`zap-baseline-2026-10-25.html`).
 - **Pint / lint:** `vendor/bin/pint --test` **pasa limpio**; se ejecuta como gate antes de cada despliegue.
 
 ---
@@ -478,6 +495,8 @@ El principal riesgo sistémico identificado era la **combinación** de: autentic
 
 Se ejecutó la hoja de ruta §6 y se actualizaron `PENDIENTES.md` y `DOCUMENTACION.md`. Persiste la recomendación de una **revalidación en staging** que incluya pruebas DAST con OWASP ZAP/Burp para los casos no validados dinámicamente en este análisis (§2.3), y de la **migración de framework** fuera de Laravel 10 (§7).
 
+> **Actualización (2026-10-25):** se ejecutó el **baseline DAST con OWASP ZAP 2.17.0** contra el servidor local (0 altas, 1 media correspondiente al waiver de CSP ya registrado, 2 bajas documentadas y corregidas/en condición de despliegue — §1.d), la **suite E2E completa quedó en 17/17** y la **cobertura alcanzó 82.22%**. Solo queda pendiente, de esta recomendación, la revalidación **autenticada contra staging real** tras el despliegue; la migración de framework sigue bajo waiver con revisión el 2026-11-21.
+
 ---
 
 ## 10. Anexos
@@ -486,10 +505,12 @@ Se ejecutó la hoja de ruta §6 y se actualizaron `PENDIENTES.md` y `DOCUMENTACI
 
 | Archivo | Descripción |
 |---|---|
-| `composer-audit.json` | Salida JSON de `composer audit --format=json` |
-| `npm-audit.json` | Salida JSON de `npm audit --json` |
-| `SBOM-Portal2026.json` | SBOM CycloneDX 1.5 con 214 componentes (refrescado en `b6e2be4`) |
+| `composer-audit.json` | Salida JSON de `composer audit --format=json` (0 advisories activos + 5 ignorados justificados) |
+| `npm-audit.json` | Salida JSON de `npm audit --json` (0 vulnerabilidades) |
+| `SBOM-Portal2026.json` | SBOM CycloneDX 1.5 con 214 componentes (regenerado 2026-10-23) |
 | `cvss-scores.json` | Scores CVSS v4.0 calculados para cada hallazgo |
+| `zap-baseline-2026-10-25.html` / `.json` | Informe del baseline DAST (ZAP 2.17.0, spider + passive scan, 2026-10-25) |
+| `informe-estado-actual.html` | Entregable imprimible del estado actual (instantánea sin historial) |
 
 ### 10.2 Métricas del SBOM
 
@@ -500,14 +521,15 @@ Se ejecutó la hoja de ruta §6 y se actualizaron `PENDIENTES.md` y `DOCUMENTACI
 
 ### 10.3 Referencias
 
-- [PLAN-VULNERABILIDADES.md](PLAN-VULNERABILIDADES.md)
-- [DOCUMENTACION.md](DOCUMENTACION.md) §12 (riesgos conocidos), §14.F (seguridad post-despliegue)
-- [PENDIENTES.md](PENDIENTES.md) sección A
+- [PLAN-VULNERABILIDADES.md](PLAN-VULNERABILIDADES.md) (histórico, ejecutado)
+- [DOCUMENTACION.md](DOCUMENTACION.md) §14 (despliegue en producción) y §16 (tests)
+- [PENDIENTES.md](PENDIENTES.md) (trabajo abierto) e [historico-cierres-pendientes.md](historico-cierres-pendientes.md)
+- [SECURITY.md](../SECURITY.md) (waivers y condiciones de despliegue)
 - OWASP Top 10:2025
 - OWASP ASVS 5.0.0 Nivel 2
 - CVSS v4.0 (FIRST)
-- LOPDP (Gaceta Oficial N.º 6.210, 2022)
-- Ley de Infogobierno (Gaceta Oficial N.º 40.274, 2013)
+- LOPDP (Venezuela, Gaceta Oficial N.º 6.210, 2022)
+- Ley de Infogobierno (Venezuela, Gaceta Oficial N.º 40.274, 2013)
 
 ---
 

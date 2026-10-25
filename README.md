@@ -18,7 +18,7 @@ Sin Livewire, Vue, React ni jQuery.
 Toda la planificación y los entregables viven en **`docs/`**:
 
 - **[docs/DOCUMENTACION.md](docs/DOCUMENTACION.md)** — fuente de verdad del proyecto: esquema de BD, rutas, controladores, vistas, roles y permisos, seeders, **checklist de despliegue en producción (§14)** y tests (§16).
-- **[docs/PENDIENTES.md](docs/PENDIENTES.md)** — checklist vivo de trabajo abierto (incl. pre-release R1–R4).
+- **[docs/PENDIENTES.md](docs/PENDIENTES.md)** — checklist vivo de trabajo abierto (pre-release: solo R4 pendiente; R1–R3 cerrados el 2026-10-25).
 - **[SECURITY.md](SECURITY.md)** (raíz) — riesgos heredados, waivers y **condiciones obligatorias de despliegue**.
 - **[docs/INFORME-VULNERABILIDADES.md](docs/INFORME-VULNERABILIDADES.md)** — informe de análisis de vulnerabilidades y estado de remediación.
 - **[docs/informe-estado-actual.html](docs/informe-estado-actual.html)** — **entregable imprimible** (instantánea del estado actual, tamaño carta); PDF con `scripts/export-informe.ps1`.
@@ -50,10 +50,12 @@ php artisan serve
 
 ```bash
 ./vendor/bin/phpunit          # Unit + Feature (228 tests, BD sqlite en memoria — ver docs/DOCUMENTACION.md §16)
+./vendor/bin/phpunit --coverage-text   # cobertura (requiere Xdebug; 82.22% actual)
 composer lint                 # estilo de código (pint --test); composer lint:fix lo aplica
 ```
 
-Suites E2E en `tests/e2e/` (bash + psql) contra un servidor de desarrollo local; se ejecutan con `bash tests/e2e/run-all.sh` (ver §16 de `docs/DOCUMENTACION.md`).
+Suites E2E en `tests/e2e/` (bash + psql) contra un servidor de desarrollo local; se ejecutan con `bash tests/e2e/run-all.sh` (17/17 en verde — ver §16 de `docs/DOCUMENTACION.md`).
+Baseline DAST con OWASP ZAP: `scripts/zap-baseline.yaml` (informe de referencia en `docs/zap-baseline-2026-10-25.html`).
 
 ## Despliegue
 
