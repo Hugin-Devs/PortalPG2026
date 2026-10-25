@@ -20,3 +20,7 @@ yarn-error.log
 .DS_Store
 ._*
 .phpunit.result.cache
+# Artefacto de entrega local (se regenera con scripts/export-informe.ps1)
+docs/informe-estado-actual.pdf
+# Informe HTML de cobertura (se regenera con php artisan test --coverage-html)
+/coverage-html/

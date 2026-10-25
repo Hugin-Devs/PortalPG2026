@@ -73,4 +73,11 @@ class PasswordChangeTest extends TestCase
 
         $response->assertSessionHasErrors('password');
     }
+
+    public function test_change_password_form_renders_for_authenticated_user(): void
+    {
+        $user = User::factory()->create(['password_changed_at' => now()]);
+
+        $this->actingAs($user)->get('/admin/cambiar-contrasena')->assertOk();
+    }
 }

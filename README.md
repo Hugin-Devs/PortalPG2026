@@ -21,6 +21,7 @@ Toda la planificación y los entregables viven en **`docs/`**:
 - **[docs/PENDIENTES.md](docs/PENDIENTES.md)** — checklist vivo de trabajo abierto (incl. pre-release R1–R4).
 - **[SECURITY.md](SECURITY.md)** (raíz) — riesgos heredados, waivers y **condiciones obligatorias de despliegue**.
 - **[docs/INFORME-VULNERABILIDADES.md](docs/INFORME-VULNERABILIDADES.md)** — informe de análisis de vulnerabilidades y estado de remediación.
+- **[docs/informe-estado-actual.html](docs/informe-estado-actual.html)** — **entregable imprimible** (instantánea del estado actual, tamaño carta); PDF con `scripts/export-informe.ps1`.
 - **[docs/SPECS.md](docs/SPECS.md)** — requisitos originales (julio 2026). Documento **histórico**: prevalece `docs/DOCUMENTACION.md`.
 
 ## Requisitos de desarrollo
@@ -48,7 +49,7 @@ php artisan serve
 ## Tests
 
 ```bash
-./vendor/bin/phpunit          # Unit + Feature (189 tests, BD sqlite en memoria — ver docs/DOCUMENTACION.md §16)
+./vendor/bin/phpunit          # Unit + Feature (228 tests, BD sqlite en memoria — ver docs/DOCUMENTACION.md §16)
 composer lint                 # estilo de código (pint --test); composer lint:fix lo aplica
 ```
 

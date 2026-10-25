@@ -35,4 +35,33 @@ class SecurityHeadersTest extends TestCase
         $this->assertStringContainsString("style-src 'self' 'unsafe-inline'", $csp);
         $this->assertMatchesRegularExpression("/nonce-[A-Za-z0-9+\/=]{24}/", $csp);
     }
+
+    public function test_hsts_header_is_emitted_in_production(): void
+    {
+        config(['app.env' => 'production']);
+
+        $this->get('/')->assertHeader(
+            'Strict-Transport-Security',
+            'max-age=31536000; includeSubDomains'
+        );
+    }
+
+    public function test_session_and_xsrf_cookies_are_httponly(): void
+    {
+        $response = $this->get('/');
+
+        $cookies = collect($response->headers->getCookies());
+        $session = $cookies->first(fn ($c) => $c->getName() === config('session.cookie'));
+        $xsrf = $cookies->first(fn ($c) => $c->getName() === 'XSRF-TOKEN');
+
+        $this->assertNotNull($session, 'Falta la cookie de sesión');
+        $this->assertTrue($session->isHttpOnly(), 'La cookie de sesión debe ser HttpOnly');
+        $this->assertNotNull($xsrf, 'Falta la cookie XSRF-TOKEN');
+        $this->assertTrue($xsrf->isHttpOnly(), 'La cookie XSRF-TOKEN debe ser HttpOnly (ZAP baseline)');
+    }
+
+    public function test_x_powered_by_header_is_removed_at_runtime(): void
+    {
+        $this->get('/')->assertHeaderMissing('X-Powered-By');
+    }
 }

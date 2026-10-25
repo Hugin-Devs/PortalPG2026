@@ -1,5 +1,9 @@
 # Informe de Análisis de Vulnerabilidades — Portal2026
 
+> 📄 **Entregable (estado actual, imprimible):** [informe-estado-actual.html](informe-estado-actual.html) —
+> instantánea sin historial para entrega institucional; exportar el PDF con `scripts/export-informe.ps1`
+> o Imprimir → Guardar como PDF (tamaño carta). Este documento es el informe de trabajo completo con historial.
+>
 > **Fecha:** 2026-10-08 · **Última actualización:** 2026-10-23 (ronda F6 — código `7ac0028`, docs `b7d1292`)  
 > **Proyecto:** Portal institucional GDC (Laravel 10 + Blade + **PostgreSQL**, PHP `^8.3`)  
 > **Ejecutado por:** Análisis automatizado + revisión manual de código y configuración  

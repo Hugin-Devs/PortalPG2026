@@ -1,0 +1,480 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Informe de Seguridad — Estado Actual — Portal2026 (GDC)</title>
+<style>
+  /* ============================================================
+     Informe de entrega — estado actual del sistema
+     Formato de impresión: CARTA (Letter), márgenes 2 cm.
+     Imprimir desde el navegador: Imprimir → Guardar como PDF.
+     Exportar PDF: scripts/export-informe.ps1 (Edge headless).
+     ============================================================ */
+  @page {
+    size: letter;
+    margin: 2cm;
+  }
+  * { box-sizing: border-box; }
+  html { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+  body {
+    font-family: "Segoe UI", "Helvetica Neue", Arial, sans-serif;
+    font-size: 10.5pt;
+    line-height: 1.45;
+    color: #1a1a1a;
+    margin: 0;
+    max-width: 21cm;              /* ancho carta menos márgenes */
+    margin-inline: auto;
+    padding: 1.5rem 1rem;
+  }
+
+  /* ---------- Portada ---------- */
+  .cover {
+    border: 2px solid #273376;
+    padding: 2rem 2.2rem;
+    margin-bottom: 2rem;
+  }
+  .cover .institution {
+    color: #273376;
+    font-size: 10pt;
+    font-weight: 700;
+    letter-spacing: .08em;
+    text-transform: uppercase;
+    margin: 0 0 .3rem;
+  }
+  .cover h1 {
+    color: #273376;
+    font-size: 20pt;
+    margin: .2rem 0 .1rem;
+    line-height: 1.2;
+  }
+  .cover .subtitle {
+    font-size: 12pt;
+    color: #444;
+    margin: 0 0 1.4rem;
+  }
+  .meta {
+    width: 100%;
+    border-collapse: collapse;
+    margin-bottom: 1.2rem;
+  }
+  .meta th, .meta td {
+    border: 1px solid #b9bfd6;
+    padding: .45rem .6rem;
+    text-align: left;
+    vertical-align: top;
+  }
+  .meta th { background: #eef0f7; width: 34%; font-weight: 600; }
+  .status-banner {
+    background: #e8f5e9;
+    border: 1px solid #2e7d32;
+    color: #1b5e20;
+    padding: .7rem .9rem;
+    font-weight: 600;
+    font-size: 11pt;
+  }
+  .status-banner small { display: block; font-weight: 400; color: #333; margin-top: .3rem; }
+  .confidencial {
+    margin-top: 1.2rem;
+    font-size: 9pt;
+    color: #555;
+    border-top: 1px solid #ccc;
+    padding-top: .6rem;
+  }
+
+  /* ---------- Encabezados ---------- */
+  h2 {
+    color: #273376;
+    font-size: 13.5pt;
+    border-bottom: 2px solid #273376;
+    padding-bottom: .25rem;
+    margin: 1.8rem 0 .8rem;
+    break-after: avoid;
+  }
+  h3 {
+    color: #273376;
+    font-size: 11.5pt;
+    margin: 1.2rem 0 .5rem;
+    break-after: avoid;
+  }
+  p { margin: .5rem 0; }
+  ul, ol { margin: .4rem 0 .6rem; padding-left: 1.4rem; }
+  li { margin: .15rem 0; }
+
+  /* ---------- Tablas ---------- */
+  table.data {
+    width: 100%;
+    border-collapse: collapse;
+    margin: .6rem 0 1rem;
+    font-size: 9.5pt;
+  }
+  table.data th, table.data td {
+    border: 1px solid #9aa1bd;
+    padding: .38rem .5rem;
+    text-align: left;
+    vertical-align: top;
+  }
+  table.data thead th {
+    background: #273376;
+    color: #fff;
+    font-weight: 600;
+  }
+  table.data tbody tr { break-inside: avoid; }
+  table.data tbody tr:nth-child(even) { background: #f5f6fa; }
+
+  /* ---------- Estados ---------- */
+  .ok      { color: #1b5e20; font-weight: 700; }
+  .warn    { color: #8a5a00; font-weight: 700; }
+  .pending { color: #8a1f1f; font-weight: 700; }
+  .pill {
+    display: inline-block;
+    padding: .05rem .45rem;
+    border-radius: .6rem;
+    font-size: 8.5pt;
+    font-weight: 700;
+    border: 1px solid;
+  }
+  .pill.ok   { background: #e8f5e9; border-color: #2e7d32; color: #1b5e20; }
+  .pill.warn { background: #fff8e1; border-color: #b8860b; color: #8a5a00; }
+
+  code, .mono {
+    font-family: Consolas, "Courier New", monospace;
+    font-size: 9pt;
+    background: #f0f1f5;
+    padding: 0 .25rem;
+    border-radius: 2px;
+  }
+  .note {
+    background: #f5f6fa;
+    border-left: 4px solid #273376;
+    padding: .55rem .8rem;
+    margin: .7rem 0;
+  }
+  .page-break { break-before: page; }
+  .small { font-size: 9pt; color: #444; }
+  footer.doc-footer {
+    margin-top: 2.5rem;
+    border-top: 1px solid #b9bfd6;
+    padding-top: .5rem;
+    font-size: 8.5pt;
+    color: #666;
+  }
+
+  /* Pantalla */
+  @media screen {
+    body { background: #fdfdfd; padding-top: 2rem; }
+    .cover { box-shadow: 0 2px 12px rgba(0,0,0,.08); }
+  }
+</style>
+</head>
+<body>
+
+<!-- ============================ PORTADA ============================ -->
+<section class="cover">
+  <p class="institution">Gobierno del Distrito Capital · Portal institucional</p>
+  <h1>Informe de Seguridad — Estado Actual del Sistema</h1>
+  <p class="subtitle">Análisis de vulnerabilidades y postura de seguridad vigente · Portal2026</p>
+
+  <table class="meta">
+    <tr><th>Sistema</th><td>Portal institucional GDC (Portal2026) — sitio público + panel administrativo <code>/admin</code></td></tr>
+    <tr><th>Stack</th><td>Laravel 10.50.2 · PHP ^8.3 · PostgreSQL 14+ · Bootstrap 5.3 / Vite</td></tr>
+    <tr><th>Fecha de instantánea</th><td>24 de octubre de 2026</td></tr>
+    <tr><th>Versión evaluada</th><td>Commit <code>7c6614b</code> (ronda de despliegue 2026-10-23/24)</td></tr>
+    <tr><th>Dirigido a</th><td><em>[PENDIENTE — completar con el destinatario]</em></td></tr>
+    <tr><th>Clasificación</th><td>Documento oficial — Uso institucional</td></tr>
+  </table>
+
+  <div class="status-banner">
+    Estado global: LISTO PARA DESPLIEGUE CONDICIONADO
+    <small>
+      17 hallazgos del análisis: <strong>16 remediados</strong>, <strong>1 aceptado con controles compensatorios</strong>
+      (SC-02, Laravel 10 EOL — requisito institucional). La publicación queda sujeta a las
+      7 condiciones de despliegue (§8) y a las verificaciones pendientes de §9.
+    </small>
+  </div>
+
+  <p class="confidencial">
+    Documento generado como instantánea del estado de seguridad real del sistema a la fecha indicada.
+    No contiene historial de rondas anteriores: únicamente el estado vigente de controles, hallazgos y riesgos.
+  </p>
+</section>
+
+<!-- ============================ 1 ============================ -->
+<h2>1. Resumen ejecutivo</h2>
+
+<p>
+  Se ejecutó un análisis de vulnerabilidades del Portal2026 combinando análisis de dependencias (SCA),
+  revisión estática de código y configuración, y validación con la suite de pruebas automatizadas.
+  El análisis original identificó <strong>17 hallazgos</strong> (2 críticos, 4 altos, 11 medios).
+  A la fecha de esta instantánea, <strong>16 están remediados y verificados con pruebas automatizadas</strong>;
+  el restante (SC-02, framework Laravel 10 en fin de soporte) está <strong>aceptado por requisito institucional</strong>
+  con controles compensatorios documentados y fecha de revisión obligatoria.
+</p>
+
+<table class="data">
+  <thead><tr><th>Indicador</th><th>Estado actual</th></tr></thead>
+  <tbody>
+    <tr><td>Hallazgos remediados</td><td><span class="ok">16 / 17</span> (el 17.º: SC-02, aceptado con compensatorios)</td></tr>
+    <tr><td>Pruebas automatizadas (PHPUnit)</td><td><span class="ok">189 / 189 en verde</span> · 902 aserciones · 0 fallos</td></tr>
+    <tr><td>Control de calidad de código (Pint)</td><td><span class="ok">Pasa limpio</span></td></tr>
+    <tr><td>Dependencias PHP (<code>composer audit</code>)</td><td><span class="ok">0 advisories activos</span> · 5 ignorados con justificación documentada (§5)</td></tr>
+    <tr><td>Dependencias JS (<code>npm audit</code>)</td><td><span class="ok">0 vulnerabilidades</span></td></tr>
+    <tr><td>SBOM (CycloneDX 1.5)</td><td>214 componentes, regenerado en la última ronda</td></tr>
+    <tr><td>Riesgo residual</td><td><span class="warn">SC-02 — Laravel 10.50.2 EOL</span> + verificaciones pendientes de staging (§9)</td></tr>
+  </tbody>
+</table>
+
+<div class="note">
+  <strong>Recomendación:</strong> publicar únicamente después de verificar las 7 condiciones de §8 en el servidor
+  objetivo y completar las verificaciones de §9 (suite E2E completa y baseline DAST en staging).
+</div>
+
+<!-- ============================ 2 ============================ -->
+<h2>2. Alcance y metodología</h2>
+
+<h3>2.1 Alcance evaluado</h3>
+<ul>
+  <li><strong>Aplicación:</strong> rutas públicas (inicio, noticias, categorías, entes, gacetas, contacto, búsqueda, páginas estáticas) y panel administrativo (<code>/admin/*</code>).</li>
+  <li><strong>Código:</strong> <code>app/</code>, <code>routes/</code>, <code>config/</code>, <code>resources/views/</code>, <code>database/seeders/</code>, <code>public/install.php</code>.</li>
+  <li><strong>Dependencias:</strong> <code>composer.lock</code> (PHP) y <code>package-lock.json</code> (Node).</li>
+  <li><strong>Configuración:</strong> plantillas <code>.env.example</code>/<code>.env_example_produccion</code>, <code>config/session.php</code>, <code>config/cors.php</code>, <code>public/.htaccess</code>, middleware global.</li>
+</ul>
+
+<h3>2.2 Métodos</h3>
+<table class="data">
+  <thead><tr><th>Método</th><th>Ejecución</th><th>Evidencia</th></tr></thead>
+  <tbody>
+    <tr><td>SCA (dependencias)</td><td><code>composer audit</code> y <code>npm audit</code> contra advisories de GitHub</td><td><code>docs/composer-audit.json</code>, <code>docs/npm-audit.json</code></td></tr>
+    <tr><td>SAST / revisión estática</td><td>Búsqueda de patrones peligrosos (SQL dinámico, eval, deserialización, extensiones de cliente, fuga de secretos) + revisión manual de autenticación, autorización, subidas y criptografía</td><td>Este informe §3–§4</td></tr>
+    <tr><td>Validación con pruebas</td><td>Suite PHPUnit (228 pruebas) con casos negativos de autorización, rate limiting, sanitización, cifrado y regresiones de cada hallazgo</td><td>Suite <code>tests/</code> del commit evaluado</td></tr>
+    <tr><td>Inventario de suministro</td><td>SBOM CycloneDX 1.5 desde los lockfiles</td><td><code>docs/SBOM-Portal2026.json</code></td></tr>
+  </tbody>
+</table>
+
+<h3>2.3 Limitaciones</h3>
+<ul>
+  <li>El <strong>DAST baseline se ejecutó contra el servidor local</strong> (OWASP ZAP 2.17.0, 2026-10-25: 0 altas / 1 media waiver / 2 bajas); queda pendiente un escaneo <strong>autenticado</strong> y su repetición contra el entorno de staging real una vez desplegado.</li>
+  <li>No se realizaron pruebas de denegación de servicio destructivas ni pentest de infraestructura de red.</li>
+  <li>Sin CI: pruebas, cobertura y análisis se ejecutan de forma manual en cada release (ver §6).</li>
+</ul>
+
+<!-- ============================ 3 ============================ -->
+<h2 class="page-break">3. Controles de seguridad vigentes</h2>
+
+<p>Controles activos en la versión evaluada, verificados por código o por pruebas automatizadas:</p>
+
+<table class="data">
+  <thead><tr><th>Área</th><th>Control vigente</th><th>Verificación</th></tr></thead>
+  <tbody>
+    <tr><td>Autenticación</td><td>bcrypt cost 12; login con mensaje genérico (mitiga enumeración); lockout por IP <strong>y</strong> por cuenta (5 fallos / 60 s, configurable); cambio de contraseña forzado en el primer login; revocación de otras sesiones al cambiar la contraseña</td><td>Pruebas <code>AuthTest</code>, <code>RateLimitTest</code></td></tr>
+    <tr><td>Autorización</td><td>Denegación por defecto en 64/64 rutas administrativas (60 con middleware <code>permission:*</code> + 4 justificadas); test de regresión que falla si una ruta nueva queda sin permiso; jerarquía de roles (solo superadmin asigna superadmin; protección del último superadmin)</td><td><code>AdminRouteAuthorizationCoverageTest</code>, <code>UserRoleRestrictionTest</code></td></tr>
+    <tr><td>Sesiones</td><td>Cookie <code>HttpOnly</code> + <code>SameSite=Lax</code> + <code>Secure</code> fuera de local; lifetime 60 min; contenido de sesión cifrado en reposo</td><td><code>SecurityConfigTest</code> (invariantes)</td></tr>
+    <tr><td>Límites de tasa</td><td>Throttle en login, búsqueda, formulario de contacto y <strong>cambio de contraseña</strong> (10/min por usuario+IP); límites centralizados en configuración (compatibles con <code>config:cache</code>)</td><td><code>RateLimitTest</code>, <code>SecurityConfigTest</code></td></tr>
+    <tr><td>Entrada y XSS</td><td>HTMLPurifier en escritura <strong>y</strong> lectura del contenido WYSIWYG; CSP con nonce por petición (sin <code>unsafe-inline</code> en scripts); escapado de Blade por defecto</td><td><code>HtmlSanitizationTest</code>, <code>SecurityHeadersTest</code>, <code>SearchXssTest</code></td></tr>
+    <tr><td>Subidas</td><td>Extensión determinada por <strong>contenido</strong> (no por el cliente); SVG prohibido; nombres de archivo generados por servidor; límites de tamaño por tipo; bloqueo de ejecución de scripts en el almacenamiento público</td><td><code>UploadExtensionTest</code></td></tr>
+    <tr><td>PII y privacidad</td><td>Cifrado en reposo de datos de contacto y nombres de usuarios; retención de contactos con poda programada (365 d); minimización en logs y auditoría</td><td><code>PiiEncryptionTest</code>, <code>ContactsPruneTest</code></td></tr>
+    <tr><td>Auditoría</td><td>Registro de acciones administrativas (login, CRUD, roles, publicaciones, acceso a mensajes, denegaciones de permiso) con filtros y exportación CSV; retención 400 días con poda diaria; <strong>el historial sobrevive al borrar usuarios</strong> (clave foránea <em>set null</em>)</td><td><code>AuditLogTest</code> (10), <code>AuditFilterTest</code>, <code>AuditExportTest</code>, <code>AuditEventsTest</code>, <code>AuditPruneTest</code></td></tr>
+    <tr><td>Integridad documental</td><td>SHA-256 por gaceta oficial</td><td><code>GacetaHashTest</code></td></tr>
+    <tr><td>Cabeceras HTTP</td><td>CSP (nonce), HSTS, X-Frame-Options, X-Content-Type-Options, Referrer-Policy, Permissions-Policy, <code>frame-ancestors</code> y <code>form-action</code> restringidos</td><td><code>SecurityHeadersTest</code></td></tr>
+    <tr><td>Instalación</td><td>Instalador web de primer arranque que se cierra ante <strong>un solo superadmin existente</strong>, elimina usuarios de prueba y se auto-borra; en producción las contraseñas de prueba se generan aleatoriamente (no existen credenciales adivinables entre el sembrado y la instalación)</td><td><code>InstallScriptGuardTest</code>, <code>UserSeederPasswordTest</code></td></tr>
+    <tr><td>Configuración</td><td><code>APP_DEBUG=false</code> por defecto; Ignition solo en desarrollo; plantilla de producción con rate limits endurecidos y proxies/hosts de confianza declarables</td><td>Revisión de configuración</td></tr>
+  </tbody>
+</table>
+
+<!-- ============================ 4 ============================ -->
+<h2 class="page-break">4. Estado de los hallazgos</h2>
+
+<p>
+  Tabla completa de los 17 hallazgos del análisis, con su puntuación CVSS v4.0 original y su
+  <strong>estado vigente</strong>. Todas las remediaciones cuentan con pruebas automatizadas de regresión
+  en la suite del commit evaluado.
+</p>
+
+<table class="data">
+  <thead>
+    <tr><th style="width:8%">ID</th><th style="width:34%">Hallazgo</th><th style="width:9%">CVSS 4.0</th><th style="width:9%">Sev.</th><th style="width:12%">SLA</th><th style="width:28%">Estado actual</th></tr>
+  </thead>
+  <tbody>
+    <tr><td>AUTH-02</td><td>Usuarios de prueba con contraseña conocida</td><td>9.3</td><td>Crítica</td><td>7 días</td><td><span class="pill ok">Remediado</span> Cambio forzado en primer login; en producción las contraseñas de prueba son aleatorias</td></tr>
+    <tr><td>CFG-03</td><td>Depuración activa y endpoints de Ignition</td><td>9.3</td><td>Crítica</td><td>7 días</td><td><span class="pill ok">Remediado</span> <code>APP_DEBUG=false</code>; Ignition solo en dependencias de desarrollo</td></tr>
+    <tr><td>AUTHZ-01</td><td>Asignación libre del rol superadministrador</td><td>8.6</td><td>Alta</td><td>30 días</td><td><span class="pill ok">Remediado</span> Solo superadmin asigna superadmin; último superadmin protegido</td></tr>
+    <tr><td>FILE-03</td><td>Gacetas oficiales sin control de integridad</td><td>7.1</td><td>Alta</td><td>30 días</td><td><span class="pill ok">Remediado</span> Hash SHA-256 por documento</td></tr>
+    <tr><td>PRIV-01</td><td>PII sin cifrar en reposo</td><td>7.1</td><td>Alta</td><td>30 días</td><td><span class="pill ok">Remediado</span> Cifrado en reposo + comando para datos heredados</td></tr>
+    <tr><td>FILE-01</td><td>Extensión de archivos subidos decidida por el cliente</td><td>—*</td><td>Alta</td><td>30 días</td><td><span class="pill ok">Remediado</span> Extensión deducida por contenido en todos los puntos de subida</td></tr>
+    <tr><td>SC-01</td><td>Dependencias con advisories conocidos</td><td>6.9</td><td>Alta</td><td>30 días</td><td><span class="pill ok">Remediado</span> Dependencias actualizadas; 0 advisories activos</td></tr>
+    <tr><td>AUTH-01</td><td>Login sin límite de intentos</td><td>6.9</td><td>Media</td><td>90 días</td><td><span class="pill ok">Remediado</span> Throttle por IP + lockout por IP y cuenta configurable</td></tr>
+    <tr><td>SC-02</td><td>Framework Laravel 10 en fin de soporte (EOL)</td><td>6.9</td><td>Media</td><td>90 días</td><td><span class="pill warn">Aceptado</span> Requisito institucional + compensatorios (§5)</td></tr>
+    <tr><td>LOG-01</td><td>Sin registro de auditoría de acciones</td><td>6.9</td><td>Media</td><td>90 días</td><td><span class="pill ok">Remediado</span> Auditoría completa con filtros, exportación y retención</td></tr>
+    <tr><td>ABUSE-01</td><td>Formulario de contacto y búsqueda sin límite</td><td>6.9</td><td>Media</td><td>90 días</td><td><span class="pill ok">Remediado</span> Throttle en ambas rutas</td></tr>
+    <tr><td>CFG-02</td><td>Cookie de sesión sin marca <code>Secure</code> por defecto</td><td>6.3</td><td>Media</td><td>90 días</td><td><span class="pill ok">Remediado</span> Secure por defecto fuera de local; sesión 60 min y cifrada</td></tr>
+    <tr><td>AUTHZ-02</td><td>Editor podía publicar noticias</td><td>5.3</td><td>Media</td><td>90 días</td><td><span class="pill ok">Remediado</span> Estado de publicación sujeto a permiso</td></tr>
+    <tr><td>CFG-01</td><td>Ausencia de cabeceras de seguridad</td><td>5.3</td><td>Media</td><td>90 días</td><td><span class="pill ok">Remediado</span> Middleware de cabeceras + CSP con nonce</td></tr>
+    <tr><td>INJ-01</td><td>XSS almacenado en el contenido de noticias</td><td>5.1</td><td>Media</td><td>90 días</td><td><span class="pill ok">Remediado</span> HTMLPurifier en escritura y lectura</td></tr>
+    <tr><td>INJ-02</td><td>Subida de SVG con script embebido</td><td>5.1</td><td>Media</td><td>90 días</td><td><span class="pill ok">Remediado</span> SVG prohibido en todas las subidas</td></tr>
+    <tr><td>CFG-06</td><td>Lectura de variables de entorno fuera de la configuración (inútiles con caché)</td><td>—*</td><td>Media</td><td>90 días</td><td><span class="pill ok">Remediado</span> Centralizado en <code>config/security.php</code></td></tr>
+  </tbody>
+</table>
+
+<p class="small">
+  * FILE-01 y CFG-06 fueron detectados en la auditoría comprobatoria posterior al análisis inicial;
+  no recibieron puntuación CVSS formal y se clasificaron como Alto y Medio respectivamente.
+  Todos los vectores CVSS se conservan en <code>docs/cvss-scores.json</code>.
+</p>
+
+<!-- ============================ 5 ============================ -->
+<h2>5. Riesgos aceptados y controles compensatorios</h2>
+
+<h3>5.1 SC-02 — Laravel 10.50.2 en fin de soporte</h3>
+<p>
+  Laravel 10 alcanzó su fin de soporte de seguridad en febrero de 2026. La institución ha decidido
+  mantener esta versión como requisito del proyecto; por tanto, las futuras vulnerabilidades del
+  framework no recibirán correcciones oficiales. Riesgo <strong>aceptado</strong> con los
+  siguientes controles compensatorios:
+</p>
+<ol>
+  <li><strong>Análisis continuo de dependencias:</strong> <code>composer audit</code> y <code>npm audit</code> antes de cada release; revisión y justificación documental de todo ID ignorado.</li>
+  <li>CSP estricta con nonce y resto de cabeceras de seguridad como defensa en profundidad.</li>
+  <li>Runtime PHP fijado a versiones con soporte activo (<code>php: ^8.3</code>, blindado por prueba automatizada).</li>
+  <li>Auditoría de acciones administrativas con retención de 400 días para detección y respuesta.</li>
+  <li><strong>Revisión obligatoria el 21 de noviembre de 2026</strong> (o al aprobarse presupuesto de mantenimiento) para reevaluar la migración a una versión soportada.</li>
+</ol>
+
+<h3>5.2 Otros riesgos aceptados (registrados)</h3>
+<table class="data">
+  <thead><tr><th>Riesgo</th><th>Motivo</th><th>Compensación</th></tr></thead>
+  <tbody>
+    <tr><td>5 advisories de dependencias ignorados en el análisis</td><td>4 de <code>laravel/framework</code> derivados del EOL; 1 (bypass de autenticación por token, crítico) <strong>no aplicable</strong>: el sistema no usa autenticación por token ni API — solo sesión web</td><td>Documentados en <code>SECURITY.md</code> §2; se re-evalúan al migrar de framework o si se añade API</td></tr>
+    <tr><td>Sin MFA en el panel administrativo</td><td>Requiere dependencia nueva, no aprobada</td><td>Lockout por cuenta, sesión revocable, auditoría de accesos; se recomienda TOTP/WebAuthn en la revisión de mantenimiento</td></tr>
+    <tr><td><code>style-src 'unsafe-inline'</code> en CSP</td><td>Requerido por el editor TinyMCE</td><td>Scripts con nonce; HTMLPurifier en escritura y lectura; <code>object-src 'none'</code></td></tr>
+    <tr><td>Cifrado de sesión y PII con AES-256-CBC + HMAC (no AEAD-GCM)</td><td>Cambiar el algoritmo re-cifraría todo el PII existente</td><td>Cifrado autenticado (encrypt-then-MAC); clave solo en el entorno; no es reversible sin la clave</td></tr>
+  </tbody>
+</table>
+
+<!-- ============================ 6 ============================ -->
+<h2 class="page-break">6. Evidencia de verificación</h2>
+
+<table class="data">
+  <thead><tr><th>Verificación</th><th>Resultado (commit <code>7c6614b</code>)</th></tr></thead>
+  <tbody>
+    <tr><td>Suite de pruebas PHPUnit</td><td><span class="ok">228 pruebas · 1032 aserciones · 0 fallos</span> (3 omitidas por requisitos de entorno)</td></tr>
+    <tr><td>Suites E2E funcionales (bash + psql)</td><td><span class="ok">17/17 en verde</span> contra PostgreSQL local (2026-10-25)</td></tr>
+    <tr><td>Cobertura de código (Xdebug)</td><td><span class="ok">82.22% de líneas</span> en <code>app/</code> (objetivo ≥80%); autenticación, autorización, validación y cifrado ≈100%</td></tr>
+    <tr><td>DAST baseline (OWASP ZAP 2.17.0)</td><td><span class="ok">Ejecutado 2026-10-25</span> contra servidor local: 0 altas, 1 media (waiver de CSP ya registrado), 2 bajas, 4 informativas — informe en <code>docs/zap-baseline-2026-10-25.html</code></td></tr>
+    <tr><td>Control de estilo (Laravel Pint)</td><td><span class="ok">Pasa</span></td></tr>
+    <tr><td>Análisis de dependencias PHP</td><td><span class="ok">0 advisories activos</span>; 5 ignorados con justificación (§5.2)</td></tr>
+    <tr><td>Análisis de dependencias JS</td><td><span class="ok">0 vulnerabilidades</span></td></tr>
+    <tr><td>SBOM</td><td>CycloneDX 1.5 · 214 componentes (<code>docs/SBOM-Portal2026.json</code>)</td></tr>
+  </tbody>
+</table>
+
+<!-- ============================ 7 ============================ -->
+<h2>7. Cumplimiento normativo</h2>
+
+<table class="data">
+  <thead><tr><th>Marco</th><th>Exigencia relevante</th><th>Estado</th></tr></thead>
+  <tbody>
+    <tr>
+      <td>LOPDP (Gaceta Oficial N.º 6.210)</td>
+      <td>Seguridad de los datos personales; notificación de brechas; rendición de cuentas</td>
+      <td><span class="ok">Atendido:</span> PII cifrada en reposo, auditoría de accesos con retención de 400 días, minimización de datos en logs</td>
+    </tr>
+    <tr>
+      <td>Ley de Infogobierno (Gaceta Oficial N.º 40.274)</td>
+      <td>Integridad de documentos oficiales; protección de las TIC institucionales</td>
+      <td><span class="ok">Atendido:</span> SHA-256 en gacetas, cabeceras de seguridad, auditoría administrativa</td>
+    </tr>
+  </tbody>
+</table>
+
+<!-- ============================ 8 ============================ -->
+<h2>8. Condiciones obligatorias de despliegue</h2>
+
+<p>El portal solo puede publicarse en internet cuando las siguientes 7 condiciones estén verificadas en el servidor:</p>
+
+<table class="data">
+  <thead><tr><th style="width:5%">#</th><th>Condición</th></tr></thead>
+  <tbody>
+    <tr><td>1</td><td>Eliminar <code>public/install.php</code> del artefacto publicado</td></tr>
+    <tr><td>2</td><td>Declarar proxies y hosts de confianza en el entorno (<code>TRUSTED_PROXIES</code>, <code>TRUSTED_HOSTS</code>) para que los límites de tasa y la auditoría registren la IP real del cliente</td></tr>
+    <tr><td>3</td><td>Habilitar cifrado del enlace a PostgreSQL (<code>DB_SSLMODE=require</code> o superior)</td></tr>
+    <tr><td>4</td><td>php.ini de PHP-FPM: subidas hasta 100 MB y <code>expose_php=Off</code></td></tr>
+    <tr><td>5</td><td>Bloquear la ejecución de scripts en el directorio de almacenamiento servido públicamente (regla de Nginx equivalente al .htaccess)</td></tr>
+    <tr><td>6</td><td>Programar cron de <code>schedule:run</code> (ejecuta las podas de contactos y auditoría)</td></tr>
+    <tr><td>7</td><td>HSTS a nivel de proxy tras confirmar HTTPS extremo a extremo</td></tr>
+  </tbody>
+</table>
+
+<p class="small">Checklist completo de primer arranque en <code>docs/DOCUMENTACION.md</code> §14 y <code>SECURITY.md</code> §1.</p>
+
+<!-- ============================ 9 ============================ -->
+<h2>9. Verificaciones pendientes antes de publicar</h2>
+
+<table class="data">
+  <thead><tr><th style="width:8%">ID</th><th>Verificación</th><th style="width:26%">Estado</th></tr></thead>
+  <tbody>
+    <tr><td>R4</td><td>Verificar las 7 condiciones de §8 en el servidor de producción (incluido <code>nosniff</code> en ficheros estáticos)</td><td><span class="pending">Pendiente</span></td></tr>
+    <tr><td>D6/E1</td><td>Cargar el listado real de entes afiliados (contenido del cliente)</td><td><span class="pending">Pendiente</span></td></tr>
+    <tr><td>—</td><td>DAST <strong>autenticado</strong> y repetición del baseline contra staging real tras el desplegue (mejora recomendada)</td><td><span class="warn">Recomendado</span></td></tr>
+  </tbody>
+</table>
+
+<p class="small">
+  Cerrado el 2026-10-25: <strong>R1</strong> (E2E 17/17), <strong>R2</strong> (baseline ZAP) y
+  <strong>R3</strong> (cobertura 82.22%).
+</p>
+
+<!-- ============================ 10 ============================ -->
+<h2>10. Conclusiones</h2>
+
+<p>
+  El sistema evaluado presenta, a la fecha de esta instantánea, una <strong>postura de seguridad sólida
+  para un portal institucional de su naturaleza</strong>: los 16 hallazgos remediados del análisis cubren
+  autenticación, autorización, inyección/XSS, subida de archivos, integridad documental, protección de PII,
+  auditoría y cadena de suministro, y cada remediación está blindada por pruebas automatizadas de regresión
+  (228 pruebas en verde).
+</p>
+<p>
+  El <strong>único riesgo técnico residual asumido</strong> es el fin de soporte del framework Laravel 10,
+  aceptado como requisito institucional y mitigado con controles compensatorios y una fecha de revisión
+  obligatoria (21 de noviembre de 2026). El principal gap metodológico pendiente no es del código sino de la
+  operación: completar el pase E2E, el baseline DAST en staging y la verificación de las condiciones de
+  despliegue (§8–§9) antes de exponer el portal a Internet.
+</p>
+<p>
+  Con las verificaciones de §9 en verde y las condiciones de §8 cumplidas, el sistema queda
+  <strong>apto para publicación</strong> bajo la postura de riesgo descrita en este informe.
+</p>
+
+<!-- ============================ ANEXO ============================ -->
+<h2>Anexo A. Artefactos de evidencia</h2>
+
+<table class="data">
+  <thead><tr><th>Artefacto</th><th>Contenido</th></tr></thead>
+  <tbody>
+    <tr><td><code>docs/SBOM-Portal2026.json</code></td><td>Inventario de dependencias CycloneDX 1.5 (214 componentes)</td></tr>
+    <tr><td><code>docs/composer-audit.json</code></td><td>Resultado del análisis de dependencias PHP con los advisories ignorados y su identidad</td></tr>
+    <tr><td><code>docs/npm-audit.json</code></td><td>Resultado del análisis de dependencias JS (0 vulnerabilidades)</td></tr>
+    <tr><td><code>docs/cvss-scores.json</code></td><td>Vectores y puntuaciones CVSS v4.0 de los hallazgos</td></tr>
+    <tr><td><code>docs/INFORME-VULNERABILIDADES.md</code></td><td>Informe completo de trabajo con el detalle de origen de cada hallazgo</td></tr>
+    <tr><td><code>SECURITY.md</code></td><td>Registro de waivers, compensaciones y condiciones de despliegue</td></tr>
+    <tr><td>Suite <code>tests/</code></td><td>228 pruebas automatizadas, incluidas las de regresión de cada hallazgo</td></tr>
+  </tbody>
+</table>
+
+<h2>Anexo B. Referencias normativas y técnicas</h2>
+<ul class="small">
+  <li>OWASP Top 10:2025 · OWASP ASVS 5.0</li>
+  <li>CVSS v4.0 (FIRST)</li>
+  <li>LOPDP — Ley Orgánica de Protección de Datos Personales (Venezuela, Gaceta Oficial N.º 6.210, 2022)</li>
+  <li>Ley de Infogobierno (Venezuela, Gaceta Oficial N.º 40.274, 2013)</li>
+  <li>CycloneDX 1.5 (estándar de SBOM)</li>
+</ul>
+
+<footer class="doc-footer">
+  Informe de estado actual — Portal2026 · Instantánea del 24 de octubre de 2026 (commit <code>7c6614b</code>) ·
+  Documento oficial — Uso institucional · Generado desde <code>docs/informe-estado-actual.html</code>
+  (exportar PDF con <code>scripts/export-informe.ps1</code> o Imprimir → Guardar como PDF, tamaño carta).
+</footer>
+
+</body>
+</html>

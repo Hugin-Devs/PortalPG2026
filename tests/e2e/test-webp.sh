@@ -50,7 +50,9 @@ check "[ -f \"${E2E_PUB}/${pathA%.*}.webp\" ]" 'sidecar .webp creado en upload' 
 webpRel="${pathA%.*}.webp"
 http "$E2E_BASE/storage/$webpRel"
 check '[ "$HTTP_STATUS" = 200 ]' 'GET /storage/*.webp -> 200' "GET webp $HTTP_STATUS"
-ct=$(curl -sI "$E2E_BASE/storage/$webpRel" | grep -i '^content-type:')
+# GET + %{content_type} en lugar de HEAD (php -S retiene el handle tras HEAD
+# y el delete posterior queda en delete-pending en Windows — ver test-settings).
+ct=$(curl -s -o "$E2E_TMP/ct-check.bin" -w '%{content_type}' "$E2E_BASE/storage/$webpRel")
 case "$ct" in *image/webp*|*[Ii]mage*[Pp]webp*|*[Ii]mage*webp*) ctw=1 ;; *) ctw=0 ;; esac
 check '[ "$ctw" = 1 ]' "content-type image/webp ($ct)" "content-type no webp: $ct"
 http "$E2E_BASE/storage/$pathA"

@@ -2,6 +2,12 @@
 # lib.sh — helpers compartidos para las suites E2E (bash + psql, port desde PowerShell + MySQL)
 # NO usar shebangs: Termux no tiene /usr/bin/env. Ejecutar siempre: bash tests/e2e/test-<nombre>.sh
 
+# grep -P exige locale unibyte o UTF-8: en Windows/Git Bash LANG/LC_ALL vienen
+# vacíos y grep -P falla con "supports only unibyte and UTF-8 locales", lo que
+# rompía la extracción del CSRF y el login de TODAS las suites (R1).
+export LC_ALL="${LC_ALL:-C.UTF-8}"
+export LANG="${LANG:-C.UTF-8}"
+
 E2E_LIB_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 E2E_ROOT="$(cd "$E2E_LIB_DIR/../.." && pwd)"
 E2E_BASE="${E2E_BASE:-http://127.0.0.1:8000}"
@@ -20,13 +26,50 @@ COOKIE_JAR=""
 # La BD de producción es LATIN9 y psql debe hablar UTF8 con ella (si no,
 # con locale C hereda SQL_ASCII y los acentos se guardan rotos o fallan).
 # PGOPTIONS se envía al servidor con sintaxis -c nombre=valor.
-export PGOPTIONS="${PGOPTIONS:+$PGOPTIONS }-c client_encoding=UTF8"
+# timezone=America/Caracas: el servidor está en GMT y la app (config/app.php)
+# compara/escribe published_at con hora de Caracas; un now() de psql en UTC
+# hacía que las filas insertadas por las suites parecieran "programadas a
+# futuro" y las consultas live() devolvieran 404 (test-wysiwyg).
+export PGOPTIONS="${PGOPTIONS:+$PGOPTIONS }-c client_encoding=UTF8 -c timezone=America/Caracas"
 
 sql() {
-  PGPASSWORD="$(cat "$PGPASSWORD_FILE")" psql -h "$DB_HOST" -U "$DB_USER" -d "$DB_NAME" -At -c "$1" 2>&1
+  PGPASSWORD="$(cat "$PGPASSWORD_FILE")" psql -h "$DB_HOST" -U "$DB_USER" -d "$DB_NAME" -At -c "$1" 2>&1 | tr -d '\r'
 }
 sqlt() {
-  PGPASSWORD="$(cat "$PGPASSWORD_FILE")" psql -h "$DB_HOST" -U "$DB_USER" -d "$DB_NAME" -At -F $'\t' -c "$1" 2>&1
+  PGPASSWORD="$(cat "$PGPASSWORD_FILE")" psql -h "$DB_HOST" -U "$DB_USER" -d "$DB_NAME" -At -F $'\t' -c "$1" 2>&1 | tr -d '\r'
+}
+
+# curl nativo de Windows (mingw64/system32) no entiende rutas MSYS (/c/…):
+# 1) Git Bash traduce automáticamente args con "/" (p. ej.
+#    --data-urlencode 'nav…=/documentos/x' → 'C:/Program Files/Git/…'),
+#    rompiendo la validación; 2) los args file=@/c/… no se traducen y curl
+#    falla con "error 26". El wrapper desactiva la conversión (EXCL) para ESTA
+#    invocación y traduce él mismo las rutas que sí son de ficheros (-o y @…).
+# Sin cygpath (Termux/WSL) se delega tal cual.
+curl() {
+  if ! command -v cygpath >/dev/null 2>&1; then
+    command curl "$@"
+    return
+  fi
+  local out=() a prev='' pre rest path suffix
+  for a in "$@"; do
+    case "$prev" in
+      -o|--output|-b|-c|--cookie|--cookie-jar)
+        case "$a" in /*) a=$(cygpath -m "$a") ;; esac ;;
+    esac
+    if [[ "$a" == *@/* ]]; then
+      pre="${a%%@*}"
+      rest="${a#*@}"
+      path="${rest%%;*}"
+      suffix=''
+      case "$rest" in *';'*) suffix=";${rest#*;}" ;; esac
+      case "$path" in /*) path=$(cygpath -m "$path") ;; esac
+      a="${pre}@${path}${suffix}"
+    fi
+    out+=("$a")
+    prev="$a"
+  done
+  MSYS2_ARG_CONV_EXCL='*' command curl "${out[@]}"
 }
 
 OK=0

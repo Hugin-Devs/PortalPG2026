@@ -75,4 +75,11 @@ class AuthTest extends TestCase
         $response->assertRedirect('/admin/login');
         $this->assertGuest();
     }
+
+    public function test_guest_on_permission_route_is_redirected_to_login(): void
+    {
+        // CheckPermission debe fallar cerrado (redirect a login) cuando no hay
+        // sesión, antes de evaluar el permiso.
+        $this->get('/admin/entes')->assertRedirect('/admin/login');
+    }
 }

@@ -162,4 +162,13 @@ class Latin9EncodingTest extends TestCase
         Setting::create(['key' => 'e2e.latin9', 'value' => 'texto…']);
         $this->assertSame('texto...', Setting::where('key', 'e2e.latin9')->value('value'));
     }
+
+    public function test_json_request_bodies_are_sanitized_by_the_global_middleware(): void
+    {
+        // Rama isJson() de SanitizeLatin9Input::clean(): el body JSON también
+        // se translitera antes de llegar al controlador. Un POST JSON con
+        // campos incompletos responde 422 y sin desbordar.
+        $this->json('POST', '/contacto', ['name' => 'José ⚡'])
+            ->assertStatus(422);
+    }
 }

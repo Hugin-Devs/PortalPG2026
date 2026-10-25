@@ -3,9 +3,9 @@
 > **Fuente viva del trabajo pendiente.** Ir marcando `- [x]` al completar un ítem.
 > El registro histórico de cierres (fechas y notas de todo lo completado) vive en
 > [historico-cierres-pendientes.md](historico-cierres-pendientes.md).
-> Última actualización: 2026-10-23 (reorganización a `docs/`)
+> Última actualización: 2026-10-25 (cierre de R1–R3)
 
-**Abiertos: 6** — 2 de contenido del cliente + 4 de pre-release.
+**Abiertos: 3** — 2 de contenido del cliente + 1 de pre-release.
 
 ---
 
@@ -18,17 +18,14 @@
 
 ## B. Pre-release (bloquean la publicación)
 
-- [ ] **R1 — Ejecutar la suite E2E completa**  
-  `bash tests/e2e/run-all.sh` (17 suites, requiere PostgreSQL local). Hay **2 fallos preexistentes documentados** (`test-entes`, `test-share`) que deben arreglarse o justificarse antes del release.
-
-- [ ] **R2 — Baseline DAST contra staging**  
-  OWASP ZAP/Burp contra staging con credenciales reales; waiver "Sin SAST/DAST automatizados" registrado en SECURITY.md §2.
-
-- [ ] **R3 — Medir cobertura de código**  
-  Driver Xdebug/PCOV + `php artisan test --coverage`; objetivo ≥80% en lógica de negocio (waiver "Cobertura no medida" en SECURITY.md §2).
-
 - [ ] **R4 — Verificar las 7 condiciones de despliegue en el servidor**  
-  SECURITY.md §1: `install.php` eliminado del artefacto, `TRUSTED_PROXIES`/`TRUSTED_HOSTS`, `DB_SSLMODE`, php.ini de FPM, bloqueo de scripts en `/storage` (Nginx), cron `schedule:run`, HSTS a nivel de proxy.
+  SECURITY.md §1: `install.php` eliminado del artefacto, `TRUSTED_PROXIES`/`TRUSTED_HOSTS`, `DB_SSLMODE`, php.ini de FPM, bloqueo de scripts en `/storage` **+ `nosniff` en estáticos** (Nginx), cron `schedule:run`, HSTS a nivel de proxy.
+
+### Cerrados (2026-10-25)
+
+- [x] **R1 — Suite E2E completa** → **17/17 verdes** (incluidos los preexistentes `test-entes`/`test-share`; fixes de entorno en `tests/e2e/lib.sh`: locale, CRLF de psql, wrapper curl rutas MSYS, timezone Caracas).
+- [x] **R2 — Baseline DAST** → **OWASP ZAP 2.17.0** contra `127.0.0.1:8000`: 0 altas / 1 media (waiver TinyMCE) / 2 bajas / 4 informativas. Informes en `docs/zap-baseline-2026-10-25.{html,json}`; fixes: cookie XSRF `HttpOnly` + `X-Powered-By` fuera. *DAST autenticado queda como mejora.*
+- [x] **R3 — Cobertura** → Xdebug 3.5.3 + **82.22% líneas** (≥80%); tests nuevos Partner/Contact/Settings + regresiones críticas.
 
 ## C. Diferidos / fuera de alcance (no se van a hacer)
 

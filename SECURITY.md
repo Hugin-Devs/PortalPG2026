@@ -1,10 +1,19 @@
 # SECURITY.md — Riesgos heredados, waivers y condiciones de despliegue
 
-> **Última revisión de seguridad**: 2026-10-23 (ronda de despliegue, post-F6) · **HEAD base**: `853f45f` · **Gate**: 16✅ / 4⚠️ / 0❌ (sin retrocesos; ver §0.1)
+> **Última revisión de seguridad**: 2026-10-25 (ronda de verificación previa: E2E + DAST + cobertura) · **Gate**: 16✅ / 4⚠️ / 0❌ (sin retrocesos)
+> **Ronda 2026-10-25 (R1–R3):** E2E **17/17 en verde** · cobertura **82.22%** (≥80% objetivo) · **baseline ZAP 2.17.0**: 0 altas / 1 media / 2 bajas / 4 informativas · fixes: cookie XSRF `HttpOnly`, `X-Powered-By` retirado en runtime · Pint ✅.
 > Ronda de despliegue (2026-10-23): Pint ✅ · PHPUnit **189/189** ✅ (902 assertions) · `composer audit`: **0 activos** + 5 ignorados justificados · `npm audit` **0** ✅ · SBOM regenerado (214 componentes).
 > Ronda F6 (2026-10-23, HEAD `7ac0028`): gate 16✅ / 4⚠️ / 0❌, PHPUnit 180/180.
 > Ronda previa (2026-10-22, HEAD `b6e2be4`): 13✅ / 7⚠️ / 0❌.
 > **Revisión programada de waivers: 2026-11-21.**
+
+## 0.2 Ronda de verificación previa 2026-10-25 (E2E + DAST + cobertura)
+
+| Elemento | Resultado |
+|---|---|
+| **R1 — E2E** | `bash tests/e2e/run-all.sh` → **17/17 verdes** (incluye `test-entes`/`test-share`, antes en rojo). Arreglos de entorno en `tests/e2e/lib.sh`: `LC_ALL=C.UTF-8` (grep -P), `tr -d '\r'` en `sql/sqlt` (CRLF de psql Windows), wrapper `curl` con conversión de rutas MSYS y `MSYS2_ARG_CONV_EXCL` (el curl nativo no entiende `/c/…` ni formatea `key=/ruta`), `timezone=America/Caracas` en `PGOPTIONS` (el `now()` en GMT hacía que las filas insertadas por las suites parecieran programadas a futuro). `test-dashboard.sh`: regex del dashboard simplificada (PCRE "regular expression is too large"). `test-settings/test-webp`: content-type vía GET+`%{content_type}` en vez de HEAD (el servidor embebido retenía el handle y el borrado quedaba en delete-pending en Windows). Backup previo de `portalpg2026` con `pg_dump`. |
+| **R2 — DAST (baseline ZAP 2.17.0)** | Spider (67 URLs) + passive scan contra `http://127.0.0.1:8000` → **0 altas / 1 media / 2 bajas / 4 informativas**. Informes: `docs/zap-baseline-2026-10-25.html` + `.json` (job reproducible en `scripts/zap-baseline.yaml`). **Fixes aplicados:** cookie `XSRF-TOKEN` con `HttpOnly` (app no usa `X-XSRF-TOKEN`; `VerifyCsrfToken::newCookie` sobrescrito) y `X-Powered-By` retirado en runtime (`header_remove` en `AddSecurityHeaders`). **Triaje de lo residual:** *CSP style-src unsafe-inline* (media) = waiver TinyMCE ya registrado (§2); *Big Redirect en /admin/login* (baja) = cuerpo estándar de redirección Symfony (378 B, sin datos sensibles) — aceptado; *X-Content-Type-Options ausente en ficheros estáticos* (baja) = los estáticos los sirve el webserver, no Laravel → añadido a la condición 5; informativas sin acción (auth request, comentarios del bundle, modern app, session management). |
+| **R3 — Cobertura** | Xdebug 3.5.3 (PHP 8.3 ZTS vs16) instalado en Laragon (`php.ini` + `xdebug.mode=coverage`); `phpunit --coverage-text` → **82.22% líneas** (1344/1636). Authn/authz/validación/cifrado: **100% salvo la rama de fallback de `App\Support\Latin9`** (iconv sin TRANSLIT — defensiva, no forzable en este runtime) y documentada. Tests nuevos: `AdminPartnerCrudTest` (12), `AdminContactInboxTest` (8), `AdminSettingsControllerTest` (10) + 6 de regresión crítica (formulario de cambio de contraseña, guest en `CheckPermission`, memo de `SanitizesHtml`, rama JSON del middleware LATIN9, HSTS en producción). |
 
 ## 0.1 Correcciones aplicadas en la ronda de despliegue 2026-10-23 (post-F6)
 
@@ -42,7 +51,7 @@ Entorno objetivo: **Apache/Nginx + PHP-FPM, HTTPS terminado en proxy inverso.**
 | 2 | **`TRUSTED_PROXIES=<IP del proxy>`** y **`TRUSTED_HOSTS=portal.gdc.gob.ve`** en el `.env` de producción (sin esto el rate limiting colapsa al bucket del proxy y la auditoría registra la IP del proxy) | `grep -E '^TRUSTED_' .env` |
 | 3 | **`DB_SSLMODE=require`** (cifrar el enlace a PostgreSQL) | `grep DB_SSLMODE .env` |
 | 4 | **php.ini de PHP-FPM**: `upload_max_filesize=100M`, `post_max_size=110M`, `expose_php=Off` (vídeos de hasta 100 MB) | `php -i \| grep -E 'upload_max_filesize\|post_max_size'` |
-| 5 | **Nginx: bloquear scripts en `/storage`** (el `.htaccess` de `storage/app/public` solo aplica en Apache): `location ~* \.(php\|phtml\|phar)$ { deny all; }` | revisión del vhost |
+| 5 | **Nginx: bloquear scripts en `/storage`** (el `.htaccess` de `storage/app/public` solo aplica en Apache): `location ~* \.(php\|phtml\|phar)$ { deny all; }` **y servir los estáticos con `X-Content-Type-Options: nosniff`** (los estáticos no pasan por Laravel: `add_header X-Content-Type-Options nosniff always;` en el bloque `location` de `/build`, `/storage`, `/images`) | revisión del vhost + `curl -I` sobre un `/build/assets/*.js` |
 | 6 | **Cron de programados**: `* * * * * php /ruta/artisan schedule:run` (ejecuta `contacts:prune` a diario — retención GDPR) | `crontab -l` |
 | 7 | **HSTS a nivel de proxy** (`Strict-Transport-Security: max-age=31536000; includeSubDomains`) tras confirmar HTTPS end-to-end | `curl -I https://portal.gdc.gob.ve/` |
 
@@ -63,8 +72,8 @@ Checklist previa al arranque (primer lanzamiento):
 | **Sin MFA en el panel admin** | Añadir TOTP/WebAuthn exige dependencia nueva (no se añade sin aprobación) | Rate limit por IP **y** por cuenta (5 fallos/60 s), bloqueo con mensaje genérico, auditoría de login fallido, sesión revocada al cambiar contraseña | 2026-11-21 — se recomienda L2 |
 | **`style-src 'unsafe-inline'`** | Requerido por TinyMCE | `script-src` con nonce por petición (sin `unsafe-inline`), HTMLPurifier en escritura **y** lectura, `object-src 'none'`, `base-uri 'self'` | Al migrar editor |
 | **`AES-256-CBC` + HMAC** (no AEAD-GCM) | Cambiar el cipher de Laravel re-cifraría todo el PII existente | Encrypt-then-MAC autenticado; clave solo en `.env`; CSPRNG para nonces | Con la migración de framework |
-| **Sin SAST/DAST automatizados** | Sin CI (decisión registrada en PENDIENTES C4) y sin herramientas instaladas en el entorno de desarrollo | 180 tests PHPUnit + 17 suites E2E bash/psql + secret-scan manual + revisión de código; **recomendado: baseline ZAP contra staging antes de publicar** | Antes de publicar |
-| **Cobertura de código no medida** | Sin driver Xdebug/PCOV en el entorno de desarrollo | Authn/authz/validación/cripto cubiertos por tests de comportamiento (14 negativos de autorización) | Medir en staging |
+| **Sin SAST automatizado / DAST completo** | Sin CI (decisión registrada en PENDIENTES C4); el DAST baseline se ejecuta manual | **Baseline ZAP 2.17.0 ejecutado 2026-10-25** contra servidor local (0 altas / 1 media waiver / 2 bajas — `docs/zap-baseline-2026-10-25.html`); 228 tests PHPUnit + 17 suites E2E + secret-scan manual + revisión de código | Pendiente: DAST **autenticado** y SAST manual en cada release |
+| **Cobertura medida** (antes: no medida) | Xdebug 3.5.3 instalado 2026-10-25 (driver de cobertura en Laragon) | **82.22% líneas** en `app/` (objetivo ≥80% cumplido); authn/authz/validación/cifrado ≈100% salvo fallback iconv de `App\Support\Latin9` (defensivo, no forzable en este runtime); sin CI que la gatee | Re-medir en cada release (`php vendor/bin/phpunit --coverage-text`) |
 | **`public/install.php` en el repositorio** | Decisión del cliente: instalador one-shot eliminado en el despliegue (condición 1) | Guarda de doble condición + autoborrado; riesgo asumido **solo** hasta el primer arranque | Cerrada al verificar condición 1 |
 | **CVE-2026-114509** (TokenGuard auth bypass, critical, sin parche Laravel 10) | No aplicable: sin guard `token`/`auth:api`, sin `routes/api.php`, Sanctum instalado pero sin uso (sin `personalAccessToken`, sin rutas API) — verificado por grep 2026-10-23 | Waiver registrado en `audit.ignore`; se **re-evalúa si se añade cualquier autenticación por token/API**; compensación: solo guard `web` por sesión | Con la migración de framework (2026-11-21) |
 

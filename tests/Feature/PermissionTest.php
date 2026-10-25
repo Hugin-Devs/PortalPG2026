@@ -2,9 +2,11 @@
 
 namespace Tests\Feature;
 
+use App\Http\Middleware\CheckPermission;
 use App\Models\User;
 use Database\Seeders\PermissionSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Http\Request;
 use Tests\TestCase;
 
 class PermissionTest extends TestCase
@@ -79,5 +81,22 @@ class PermissionTest extends TestCase
     public function test_unauthenticated_request_to_protected_module_redirects_to_login(): void
     {
         $this->get('/admin/usuarios')->assertRedirect('/admin/login');
+    }
+
+    public function test_permission_middleware_fails_closed_for_guests_before_evaluating(): void
+    {
+        // Vía HTTP esta rama es inalcanzable (el middleware `auth` redirige
+        // antes); se prueba el middleware directamente para garantizar que,
+        // si alguna ruta quedara sin `auth`, CheckPermission falla cerrado.
+        $request = Request::create('/admin/usuarios', 'GET');
+
+        $response = (new CheckPermission)->handle(
+            $request,
+            fn () => response('no debería llegar'),
+            'users.view'
+        );
+
+        $this->assertTrue($response->isRedirect());
+        $this->assertStringEndsWith('/admin/login', (string) $response->headers->get('Location'));
     }
 }

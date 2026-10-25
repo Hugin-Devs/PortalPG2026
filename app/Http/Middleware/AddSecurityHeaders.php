@@ -18,6 +18,11 @@ class AddSecurityHeaders
 
         $response = $next($request);
 
+        // ZAP baseline: retirar X-Powered-By en runtime aunque expose_php
+        // esté On (dev). En producción la condición 4 del despliegue fija
+        // expose_php=Off como primera línea; esto es defensa en profundidad.
+        header_remove('X-Powered-By');
+
         $response->headers->set('X-Frame-Options', 'SAMEORIGIN');
         $response->headers->set('X-Content-Type-Options', 'nosniff');
         $response->headers->set('Referrer-Policy', 'strict-origin-when-cross-origin');

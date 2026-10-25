@@ -171,7 +171,10 @@ check '[ -f "$E2E_PUB/settings/logo.png" ]' 'archivo logo.png en disco' 'archivo
 check '[ -f "$E2E_PUB/settings/logo.webp" ]' 'sidecar logo.webp generado en upload' 'falta sidecar logo.webp'
 http "$E2E_BASE/storage/settings/logo.png"
 check '[ "$HTTP_STATUS" = 200 ]' 'GET /storage/settings/logo.png -> 200' "GET $HTTP_STATUS"
-ct=$(curl -sI "$E2E_BASE/storage/settings/logo.png" | grep -i '^content-type:')
+# Content-type vía GET + %{content_type}, no HEAD: el servidor embebido
+# (php -S / artisan serve) retiene el handle del fichero tras un HEAD y el
+# subsecuente delete queda en delete-pending en Windows (borrado aparente).
+ct=$(curl -s -o "$E2E_TMP/ct-check.bin" -w '%{content_type}' "$E2E_BASE/storage/settings/logo.png")
 case "$ct" in *[Ii]mage*) ctOk=1 ;; *) ctOk=0 ;; esac
 check '[ "$ctOk" = 1 ]' "content-type image ($ct)" "content-type no image: $ct"
 http "$E2E_BASE/storage/settings/logo.webp"

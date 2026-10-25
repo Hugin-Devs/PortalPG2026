@@ -116,4 +116,18 @@ class HtmlSanitizationTest extends TestCase
         $this->assertStringContainsString('Después', $stored);
         $this->assertStringNotContainsString('data:image/png;base64', $stored);
     }
+
+    public function test_rendered_content_is_memoized_per_instance(): void
+    {
+        // Segunda lectura de rendered_content debe servir desde la memo de la
+        // instancia (no re-purificar): rama de memoización de SanitizesHtml.
+        $post = new Post;
+        $post->content = '<p>Contenido memo</p>';
+
+        $first = $post->rendered_content;
+        $second = $post->rendered_content;
+
+        $this->assertNotEmpty($first);
+        $this->assertSame($first, $second);
+    }
 }

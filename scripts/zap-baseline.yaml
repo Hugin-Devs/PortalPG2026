@@ -1,0 +1,46 @@
+---
+# Baseline ZAP (OWASP ZAP 2.17 · Automation Framework) — Portal2026
+# Uso:
+#   set PATH=%PATH%;C:\Program Files\Eclipse Adoptium\jre-21.0.12.101-hotspot\bin
+#   "D:\ZAP\Zed Attack Proxy\zap.bat" -cmd -autorun scripts\zap-baseline.yaml
+# Requiere el servidor dev en http://127.0.0.1:8000 (php artisan serve).
+# Salida: docs/zap-baseline-2026-10-25.html + .json (evidencia R2).
+env:
+  contexts:
+    - name: portal
+      urls:
+        - http://127.0.0.1:8000/
+      includePaths:
+        - http://127\.0\.0\.1:8000/.*
+      excludePaths:
+        - http://127\.0\.0\.1:8000/logout.*
+        - http://127\.0\.0\.1:8000/storage/.*
+  parameters:
+    global:
+      maxRuleThreads: 10
+      failOnWarning: false
+      failOnError: false
+jobs:
+  - type: spider
+    parameters:
+      context: portal
+      url: http://127.0.0.1:8000/
+      maxDuration: 10
+      maxDepth: 10
+  - type: passiveScan-wait
+    parameters:
+      maxDuration: 3
+  - type: report
+    parameters:
+      reportDir: C:/Users/aegir/Documents/GitHub/PortalPG2026/docs
+      reportFile: zap-baseline-2026-10-25
+      template: traditional-html
+      reportTitle: Baseline ZAP - Portal2026
+      reportDescription: Escaneo baseline (spider + passive scan) contra http://127.0.0.1:8000
+  - type: report
+    parameters:
+      reportDir: C:/Users/aegir/Documents/GitHub/PortalPG2026/docs
+      reportFile: zap-baseline-2026-10-25
+      template: traditional-json
+      reportTitle: Baseline ZAP - Portal2026
+      reportDescription: Escaneo baseline (spider + passive scan) contra http://127.0.0.1:8000

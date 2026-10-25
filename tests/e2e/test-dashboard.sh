@@ -5,7 +5,10 @@ E2E_SUITE=dashboard
 source "$(dirname "${BASH_SOURCE[0]}")/lib.sh"
 
 stat_num() { # $1 = nombre de tarjeta (data-stat); -z: match multiliena (GNU grep -P es linea a linea)
-  grep -zoP "data-stat=\"$1\"(?:(?!data-stat|data-chart)[\s\S]){0,800}?class=\"fs-2 fw-bold stat-number[^\"]*\">\K\d+" "$HTTP_BODY" | tr -dc '0-9'
+# Sin lookahead repetido ((?:(?!…)…){0,800}): el PCRE de Git Bash revienta con
+# "regular expression is too large". El bloque data-stat → stat-number es
+# contiguo en la vista, así que el lazy {0,800} basta (R1).
+grep -zoP "data-stat=\"$1\"[\s\S]{0,800}?class=\"fs-2 fw-bold stat-number[^\"]*\">\K\d+" "$HTTP_BODY" | tr -dc '0-9'
 }
 
 monthStart=$(date +%Y-%m-01)
