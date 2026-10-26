@@ -1,7 +1,7 @@
 # Plan de migración a Laravel 13 — Portal PG2026
 
 > **Rama:** `Laravel13-Dev` · **Destino:** `laravel/framework ^13.10.1` (>13.10.0, lock fijó **13.38.0**)
-> **Estado:** Fases 0–3 completadas + **cierre documental de Fase 4 hecho** (2026-10-26). Pendiente: validación en servidor/local con pgsql (E2E + LATIN9 + ZAP), SBOM/cobertura y merge · **Autorización:** waiver institucional SC-02/A5 levantado (cierre documental realizado)
+> **Estado:** Fases 0–3 completadas · cierre documental hecho · **validación local completada 2026-10-26 (E2E 17/17 + LATIN9 real + cobertura 82.25% + audits 0/0 + SBOM 215)**. Pendiente: ZAP, staging/prod y PR · **Autorización:** waiver SC-02/A5 levantado
 
 ---
 
@@ -154,15 +154,18 @@
 - [x] `docs/DOCUMENTACION.md` §14: §14.F.5 sin referencia a `audit.ignore`; nuevo **§14.G.1 "Notas del salto a Laravel 13"** (PHP ≥8.3, lock 13.38.0, migración `drop_personal_access_tokens`, `cache:clear` por la allowlist, **re-login** por `session.serialization=json`, rename CSRF, smoke post-despliegue)
 - [x] `docs/INFORME-VULNERABILIDADES.md`: SC-02 ✅ en las dos tablas de estado, detalle §4.2 cerrado, §6 hoja de ruta al 100%, §7 compensatorios marcados como cumplidos
 
-### 6.2 Validación en servidor y release (⏳ — validación local primero, a cargo del usuario)
+### 6.2 Validación local ✅ (2026-10-26) — pendientes: ZAP, staging y PR
 
-- [ ] **Validación local** con pgsql LATIN9: `bash tests/e2e/run-all.sh` → 17/17 · `Latin9EncodingTest`/`PiiEncryptionTest`/`PgMigrationQueriesTest` contra pgsql real · smoke `artisan serve` (login + escritura admin)
-- [ ] Regenerar SBOM + `composer audit` + `npm audit` sobre el lock final
-- [ ] Cobertura ≥82% mantenida (`php artisan test --coverage-text`)
+- [x] **Validación local con pgsql LATIN9**: `bash tests/e2e/run-all.sh` → **17/17 en verde** contra PostgreSQL 16.15 LATIN9 (incluye `test-noticias` con el `upsert` de `daily_views`, CSRF con curl sin `Sec-Fetch-Site` → `tokensMatch`, login con `session.serialization=json` y cache `file` con la allowlist)
+- [x] **Tests LATIN9 contra servidor real** (`DB_CONNECTION=pgsql`): `Latin9EncodingTest` + `PgMigrationQueriesTest` + `PiiEncryptionTest` → **17/17 (142 assertions)** — gate `raw unsanitized write fails only on latin9 servers` y roundtrip de PII cifrado verificados en servidor LATIN9 real
+- [x] **SBOM regenerado** (`docs/SBOM-Portal2026.json`): **215 componentes** (117 composer + 98 npm), CycloneDX 1.5, tool v1.3 — incluye `laravel/framework@v13.38.0`
+- [x] `composer audit --locked` **0 advisories / 0 waivers** · `npm audit` **0** (prod y total)
+- [x] **Cobertura 82.25%** (1348/1639 líneas) — Xdebug 3.5.3 reinstalado en el PHP de Laragon para el gate
 - [ ] Baseline ZAP repetido (comparar con `docs/zap-baseline-2026-10-25.*`)
 - [ ] Despliegue staging (pgsql LATIN9 real) → smoke → producción con rollback por SHA (runbook §14.G + §14.G.1)
 - [ ] PR `Laravel13-Dev` → `main`
 
+> **Infra local de validación (reproducible):** PostgreSQL **16.15** en Docker — `docker start portalpg-e2e` (puerto **5433**, `POSTGRES_INITDB_ARGS=--encoding=LATIN9 --lc-collate=C --lc-ctype=C`, user/db/pass `portalpg`); `.env` local con `DB_PORT=5433` y `DB_PASSWORD=portalpg` (`.env.example` **sin cambios**: producción sigue en 5432) + `~/.portalpg2026_password` para `lib.sh`; app con `php artisan serve :8000`; psql cliente de `C:\laragon\pgsql16\bin` (16.10). **Por qué Docker:** el PG 9.4 del sistema (5432, servicio con admin required para detenerlo) no soporta `ON CONFLICT` (lo exigen los `upsert` de `PermissionSeeder` y `daily_views`) y el PG 16.10 portable en `C:\laragon\pgsql16` **no puede hacer `bind` en esta máquina** (denegación por proceso sin identificar: `php` binda el mismo puerto en el mismo segundo que `postgres.exe` recibe `Permission denied`; descartados puertos excluidos, MOTW, ruta, nombre, AppLocker, ASR, privilegios y exclusiones de Defender — artefacto conservado por si se diagnostica). Xdebug 3.5.3 (`ts-vs16-x64`) en `ext` + `php.ini` de Laragon.
 ---
 
 ## 7. Matriz de riesgos

@@ -6,7 +6,7 @@
 > Última actualización: 2026-10-26 (despliegue en producción, cierre de R4 y **migración a Laravel 13.38.0** en rama `Laravel13-Dev`)
 
 **Abiertos: 4** — 2 de contenido del cliente + 2 de pre-release (TLS y backup de BD).
-*+ validación de la migración Laravel 13 en servidor (E2E 17/17, smoke LATIN9, ZAP) antes del merge — `docs/PLAN-LARAVEL13.md` Fase 4.*
+*Validación local Laravel 13 completada 2026-10-26 (E2E 17/17 + LATIN9 real + cobertura 82.25%); quedan ZAP, staging y PR — `docs/PLAN-LARAVEL13.md` §6.2.*
 
 ---
 
