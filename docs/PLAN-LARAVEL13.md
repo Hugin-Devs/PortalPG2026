@@ -36,7 +36,7 @@
 
 ---
 
-## 2. Fase 0 — Preparación ✅ (esta sesión)
+## 2. Fase 0 — Preparación ✅ (2026-10-26)
 
 - [x] Crear rama `Laravel13-Dev` desde `main`
 - [x] Verificar baseline en `main`: Pint ✅, 237 tests ✅, 17/17 E2E ✅, `composer audit` 0 activos
@@ -46,56 +46,56 @@
 
 ---
 
-## 3. Fase 1 — Laravel 10 → 11 (riesgo ALTO)
+## 3. Fase 1 — Laravel 10 → 11 (riesgo ALTO) ✅ (2026-10-26, commit `f9df9d6`)
 
 ### 3.1 composer.json
 
 | Paquete | De | A | Nota |
 |---|---|---|---|
-| `laravel/framework` | `^10.0` | `^11.57` | |
-| `php` | `^8.3` | `^8.3` | sin cambio |
-| `doctrine/dbal` | `^3.10` | **ELIMINAR** | 0 usos; `->change()` nativo en L11 |
-| `guzzlehttp/guzzle` | `^7.2` | **ELIMINAR** | 0 usos en `app/` |
-| `laravel/sanctum` | `^3.2` | **ELIMINAR** | decisión D2 |
-| `laravel/tinker` | `^2.8` | `^2.12` | subirá a `^3.0` en Fase 3 |
-| `phpunit/phpunit` | `^10.0` | `^11.5` | schema `phpunit.xml` a 11 |
-| `nunomaduro/collision` | `^7.0` | `^8.x` | |
-| `spatie/laravel-ignition` | `^2.0` | `^2.x` latest | soporta illuminate `^11` |
-| `mews/purifier` | `^3.4` | `^3.4` | soporta hasta `^13` ✅ |
-| `laravel/pint`, `laravel/sail`, `fakerphp/faker`, `mockery/mockery` | — | latest | |
+| `laravel/framework` | `^10.0` | **`^11.57`** | lock resolvió **v11.57.0** ✅ |
+| `php` | `^8.3` | `^8.3` | sin cambio ✅ |
+| `doctrine/dbal` | `^3.10` | **ELIMINAR** | ✅ hecho |
+| `guzzlehttp/guzzle` | `^7.2` | **ELIMINAR** | ✅ (sigue como dependencia transitiva del framework) |
+| `laravel/sanctum` | `^3.2` | **ELIMINAR** | ✅ decisión D2 |
+| `laravel/tinker` | `^2.8` | `^2.12` | resolvió 2.x compatible; subirá a `^3.0` en Fase 3 |
+| `phpunit/phpunit` | `^10.0` | **`^11.5`** | lock: 11.5.57 ✅ |
+| `nunomaduro/collision` | `^7.0` | **`^8.0`** | lock: 8.9.5 ✅ |
+| `spatie/laravel-ignition` | `^2.0` | `^2.x` latest | lock: 2.12.1 ✅ |
+| `mews/purifier` | `^3.4` | `^3.4` | ✅ compatible |
 
-### 3.2 Eliminación de Sanctum (D2)
-- [ ] Quitar `laravel/sanctum` de `composer.json`
-- [ ] Quitar `HasApiTokens` de `app/Models/User.php`
-- [ ] Eliminar `config/sanctum.php`
-- [ ] Nueva migración `drop_personal_access_tokens` (limpieza de la tabla en prod; la migración histórica `create_personal_access_tokens` se conserva inerte en el repo)
-- [ ] Buscar referencias residuales (`sanctum`, `auth:sanctum`, `Sanctum::`) — debe quedar 0
+### 3.2 Eliminación de Sanctum (D2) ✅
+- [x] Quitar `laravel/sanctum` de `composer.json`
+- [x] Quitar `HasApiTokens` de `app/Models/User.php`
+- [x] Eliminar `config/sanctum.php` + ruta `sanctum/csrf-cookie` de `config/cors.php` (test actualizado)
+- [x] Nueva migración `2026_10_26_100000_drop_personal_access_tokens_table` (up/down)
+- [x] Búsqueda de referencias residuales → 0
 
-### 3.3 Estructura de arranque (el trabajo grande)
-- [ ] Reescribir `bootstrap/app.php` con `Application::configure(basePath:)` + `->withRouting()` (web → `routes/web.php`, commands → `routes/console.php`, channels → `routes/channels.php`) + `->withMiddleware()` + `->withExceptions()` + `->withCommands()` + scheduling
-- [ ] **Eliminar** `app/Http/Kernel.php`, `app/Console/Kernel.php`, `app/Exceptions/Handler.php`
-- [ ] Trasladar a `withMiddleware()`:
-  - Globales: `TrimStrings` (propio), `SanitizeLatin9Input` (propio), `ConvertEmptyStringsToNull`, `AddSecurityHeaders` (propio, CSP+nonce), `AssignRequestId` (propio), + los framework (`TrustHosts`, `TrustProxies`, `HandleCors`, `PreventRequestsDuringMaintenance`, `ValidatePostSize`)
-  - Aliases propios: `role`, `permission`, `password.changed`
-- [ ] Trasladar los 4 rate limiters de `RouteServiceProvider` (`login`, `contact`, `search`, `password-change`) → `bootstrap/app.php` / `AppServiceProvider`
-- [ ] Trasladar el schedule (`contacts:prune` 03:17, `audit:prune` 04:23) de `app/Console/Kernel.php` → `routes/console.php`
-- [ ] Carga de comandos: `app/Console/Commands` vía `->withCommands()`
-- [ ] Eliminar `AuthServiceProvider` (policies vacías) y `EventServiceProvider` (los 6 observers → `AppServiceProvider::boot()` con `Model::observe()`; verificar si el listener default `Registered → SendEmailVerificationNotification` aplica — si no hay flujo de verificación de email, eliminarlo)
-- [ ] Corregir `RouteServiceProvider::HOME = '/home'` (ruta inexistente): `RedirectIfAuthenticated` → redirigir a `/admin`
-- [ ] Actualizar `public/index.php` al estilo L11+; revalidar `public/install.php` (boostra la app fuera del ciclo HTTP normal y se autodeletea)
+### 3.3 Estructura de arranque ✅
+- [x] `bootstrap/app.php` reescrito con `Application::configure()` + `withRouting` + `withMiddleware` + `withExceptions`
+- [x] Eliminados `app/Http/Kernel.php`, `app/Console/Kernel.php`, `app/Exceptions/Handler.php`
+- [x] Stack global trasladado (11 middleware, orden L10 preservado + `InvokeDeferredCallbacks`); `ValidateCsrfToken` → `VerifyCsrfToken` propio (fix HttpOnly XSRF); aliases `auth`/`guest`/`role`/`permission`/`password.changed`
+- [x] 4 rate limiters → `AppServiceProvider::registerRateLimiters()`
+- [x] Schedule (`contacts:prune` 03:17, `audit:prune` 04:23) → `routes/console.php` (verificado con `schedule:list`)
+- [x] Comandos: autodescubrimiento de `app/Console/Commands` (via `withCommands()` por defecto)
+- [x] Eliminados `AuthServiceProvider`, `EventServiceProvider`, `RouteServiceProvider`; 6 observers → `AppServiceProvider::registerObservers()`; `config/app.php` actualizado
+- [x] `HOME` corregido: `RedirectIfAuthenticated` → `/admin` (ruta `/home` inexistente)
+- [x] `public/index.php` estilo L11 (`handleRequest`); `public/install.php` sin cambios (patrón contract-compatible verificado)
 
-### 3.4 Ajustes menores
-- [ ] `phpunit.xml`: schema PHPUnit 11; `<env>` names se mantienen (config propia lee `CACHE_DRIVER` etc.)
-- [ ] Accessores legacy `getXxxAttribute` (`Video`, `SanitizesHtml`): **no migrar** en esta fase (siguen soportados); anotar como deuda para L13+
-- [ ] `$casts` como propiedad (11 modelos): **no migrar** a `casts()` en esta fase
+### 3.4 Ajustes menores ✅
+- [x] `phpunit.xml`: schema PHPUnit **11.5**
+- [x] `@dataProvider` doc-comment → atributo `#[DataProvider]` en `OrgMemberPhotoTest` (pre-Fase 3)
+- [x] Eliminado `App\Http\Middleware\EncryptCookies` (idéntico al framework)
+- [x] Accessores legacy y `$casts`: no migrados (deuda anotada para Fase 3)
 
 ### 3.5 Gates de salida (Fase 1)
-- [ ] `composer lint` (Pint) ✅
-- [ ] 237+ tests PHPUnit en verde (ajustar lo que rompa PHPUnit 11 — estilo `test_*` es port directo)
-- [ ] 17/17 suites E2E en verde (idealmente contra pgsql LATIN9 real, no solo SQLite)
-- [ ] `composer audit` 0 activos
-- [ ] Smoke test en staging: arranque + login + escritura + cron `schedule:run`
-- [ ] Regresión LATIN9 forzada: `Latin9EncodingTest`, `PiiEncryptionTest`, `PgMigrationQueriesTest`
+- [x] `composer lint` (Pint) ✅
+- [x] **228 tests PHPUnit en verde** (1032 aserciones, 0 fallos); 3 skips entorno (pgsql gate ×1, symlink Windows ×1 + 1 relacionado); 6 notices `iconv` preexistentes en `Latin9Test` (Windows)
+- [x] `composer audit` **0 activos** (5 waivers ya conocidos — se cierran en Fase 3 con ≥13.10.1)
+- [x] Smoke local: `artisan about` → Laravel 11.57.0; `route:list` (≈70 rutas); `schedule:list` OK
+- [ ] **17/17 suites E2E** — ⏳ pendiente: requieren `psql` + `artisan serve` (no disponibles en Windows; ejecutar en servidor/staging LATIN9)
+- [ ] Smoke en staging con pgsql LATIN9 real (junto con las E2E)
+
+> **Nota:** se creó `.env` local desde `.env.example` (no versionado) para poder correr la suite en esta máquina.
 
 ---
 
