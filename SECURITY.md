@@ -1,11 +1,11 @@
 # SECURITY.md — Riesgos heredados, waivers y condiciones de despliegue
 
-> **Última revisión de seguridad**: 2026-10-25 (ronda de verificación previa: E2E + DAST + cobertura) · **Gate**: 16✅ / 4⚠️ / 0❌ (sin retrocesos)
+> **Última revisión de seguridad**: **2026-10-26 — migración de framework a Laravel 13.38.0** (rama `Laravel13-Dev`, `docs/PLAN-LARAVEL13.md`): `composer audit` → **0 advisories, 0 waivers** (se eliminó `audit.ignore` de `composer.json`); waiver **SC-02 (Laravel 10 EOL) cerrado**; PHPUnit 229/238 en verde (1046 assertions; 6 notices iconv + 3 skips de entorno); Pint ✅. *Pendiente de validación en servidor: E2E 17/17, smoke LATIN9, baseline ZAP repetido.*
 > **Ronda 2026-10-25 (R1–R3):** E2E **17/17 en verde** · cobertura **82.22%** (≥80% objetivo) · **baseline ZAP 2.17.0**: 0 altas / 1 media / 2 bajas / 4 informativas · fixes: cookie XSRF `HttpOnly`, `X-Powered-By` retirado en runtime · Pint ✅.
-> Ronda de despliegue (2026-10-23): Pint ✅ · PHPUnit **189/189** ✅ (902 assertions) · `composer audit`: **0 activos** + 5 ignorados justificados · `npm audit` **0** ✅ · SBOM regenerado (214 componentes).
+> Ronda de despliegue (2026-10-23): Pint ✅ · PHPUnit **189/189** ✅ (902 assertions) · `npm audit` **0** ✅ · SBOM regenerado (214 componentes).
 > Ronda F6 (2026-10-23, HEAD `7ac0028`): gate 16✅ / 4⚠️ / 0❌, PHPUnit 180/180.
 > Ronda previa (2026-10-22, HEAD `b6e2be4`): 13✅ / 7⚠️ / 0❌.
-> **Revisión programada de waivers: 2026-11-21.**
+> **Revisión programada de waivers: 2026-11-21** (el waiver de framework SC-02 quedó cerrado fuera de plazo el 2026-10-26; quedan MFA/L2 y TinyMCE).
 
 ## 0.2 Ronda de verificación previa 2026-10-25 (E2E + DAST + cobertura)
 
@@ -70,14 +70,14 @@ Checklist previa al arranque (primer lanzamiento):
 
 | Riesgo | Restricción / motivo | Compensación | Revisión |
 |--------|----------------------|--------------|----------|
-| **Laravel 10 EOL** (seguridad hasta 04-feb-2025) | Versión mínima admitida por requisito del cliente; migración pendiente de presupuesto | 4 advisories en `composer.json → audit.ignore` (todos de funciones no usadas o con `APP_DEBUG=false`); SCA semanal manual (`composer audit`); CSP estricta; **PHP fijado a `^8.3`** (runtime parcheado aunque el framework esté EOL); **migrar a Laravel 12/13 antes de 2026-11-21** | 2026-11-21 |
+| ~~**Laravel 10 EOL** (seguridad hasta 04-feb-2025)~~ **CERRADO 2026-10-26** | El requisito institucional de permanecer en Laravel 10 fue levantado; migración completa **10 → 11 → 12 → 13** ejecutada en la rama `Laravel13-Dev` (`docs/PLAN-LARAVEL13.md`, Fases 0–3) | **`laravel/framework` 13.38.0** (`^13.10.1`, estrictamente >13.10.0 y fuera del rango de los advisories EOL); `audit.ignore` **eliminado** de `composer.json` → `composer audit --locked` = 0 activos + **0 waivers**; PHP sigue en `^8.3` (parcheado) | ~~2026-11-21~~ **Cerrada** — validación en servidor (E2E + LATIN9 + ZAP) pendiente antes del merge a `main` |
 | **Sin MFA en el panel admin** | Añadir TOTP/WebAuthn exige dependencia nueva (no se añade sin aprobación) | Rate limit por IP **y** por cuenta (5 fallos/60 s), bloqueo con mensaje genérico, auditoría de login fallido, sesión revocada al cambiar contraseña | 2026-11-21 — se recomienda L2 |
 | **`style-src 'unsafe-inline'`** | Requerido por TinyMCE | `script-src` con nonce por petición (sin `unsafe-inline`), HTMLPurifier en escritura **y** lectura, `object-src 'none'`, `base-uri 'self'` | Al migrar editor |
-| **`AES-256-CBC` + HMAC** (no AEAD-GCM) | Cambiar el cipher de Laravel re-cifraría todo el PII existente | Encrypt-then-MAC autenticado; clave solo en `.env`; CSPRNG para nonces | Con la migración de framework |
-| **Sin SAST automatizado / DAST completo** | Sin CI (decisión registrada en PENDIENTES C4); el DAST baseline se ejecuta manual | **Baseline ZAP 2.17.0 ejecutado 2026-10-25** contra servidor local (0 altas / 1 media waiver / 2 bajas — `docs/zap-baseline-2026-10-25.html`); 237 tests PHPUnit + 17 suites E2E + secret-scan manual + revisión de código | Pendiente: DAST **autenticado** y SAST manual en cada release |
+| **`AES-256-CBC` + HMAC** (no AEAD-GCM) | Cambiar el cipher de Laravel re-cifraría todo el PII existente | Encrypt-then-MAC autenticado; clave solo en `.env`; CSPRNG para nonces | Migración de framework completada 2026-10-26 **sin** cambiar el cipher (exige re-cifrado de PII) — reprogramado con presupuesto |
+| **Sin SAST automatizado / DAST completo** | Sin CI (decisión registrada en PENDIENTES C4); el DAST baseline se ejecuta manual | **Baseline ZAP 2.17.0 ejecutado 2026-10-25** contra servidor local (0 altas / 1 media waiver / 2 bajas — `docs/zap-baseline-2026-10-25.html`); 238 tests PHPUnit + 17 suites E2E + secret-scan manual + revisión de código | Pendiente: DAST **autenticado** y SAST manual en cada release; repetir baseline sobre Laravel 13 |
 | **Cobertura medida** (antes: no medida) | Xdebug 3.5.3 instalado 2026-10-25 (driver de cobertura en Laragon) | **82.22% líneas** en `app/` (objetivo ≥80% cumplido); authn/authz/validación/cifrado ≈100% salvo fallback iconv de `App\Support\Latin9` (defensivo, no forzable en este runtime); sin CI que la gatee | Re-medir en cada release (`php vendor/bin/phpunit --coverage-text`) |
 | **`public/install.php` en el repositorio** | Decisión del cliente: instalador one-shot eliminado en el despliegue (condición 1) | Guarda de doble condición + autoborrado; riesgo asumido **solo** hasta el primer arranque | Cerrada al verificar condición 1 |
-| **CVE-2026-114509** (TokenGuard auth bypass, critical, sin parche Laravel 10) | No aplicable: sin guard `token`/`auth:api`, sin `routes/api.php`, Sanctum instalado pero sin uso (sin `personalAccessToken`, sin rutas API) — verificado por grep 2026-10-23 | Waiver registrado en `audit.ignore`; se **re-evalúa si se añade cualquier autenticación por token/API**; compensación: solo guard `web` por sesión | Con la migración de framework (2026-11-21) |
+| ~~**CVE-2026-114509** (TokenGuard auth bypass)~~ **CERRADO 2026-10-26** | No aplicable (sin guard `token`/`auth:api`, sin `routes/api.php`) y **parcheado** en ≥13.29.0 — el lock actual es 13.38.0; Sanctum fue eliminado del proyecto en la Fase 1 de la migración | Sin waiver: `audit.ignore` eliminado; se re-evalúa si se añade cualquier autenticación por token/API | **Cerrada** |
 
 ## 3. Controles activos (resumen verificado)
 
@@ -93,4 +93,4 @@ Checklist previa al arranque (primer lanzamiento):
 
 ## 4. Política de cambios
 
-Todo PR debe pasar: `php vendor/bin/pint --test`, `php artisan test` (237 tests / 1032 assertions), y si toca auth/authz/validación/cripto: tests nuevos obligatorios (TDD). Antes de cada release: `composer audit`, `npm audit`, regenerar SBOM, y re-ejecutar `bash tests/e2e/run-all.sh` (17/17, requiere PostgreSQL). **PR sin tests = PR rechazado.** El constraint `php: ^8.3` está blindado por test (`SecurityConfigTest`).
+Todo PR debe pasar: `php vendor/bin/pint --test`, `php artisan test` (**229 en verde / 238 métodos, 1046 assertions**; 6 notices `iconv` preexistentes en `Latin9Test` y 3 skips por entorno — pgsql/symlink), y si toca auth/authz/validación/cripto: tests nuevos obligatorios (TDD). Antes de cada release: `composer audit` (Laravel 13.38.0: 0 advisories, 0 waivers), `npm audit`, regenerar SBOM, y re-ejecutar `bash tests/e2e/run-all.sh` (17/17, requiere PostgreSQL). **PR sin tests = PR rechazado.** El constraint `php: ^8.3` está blindado por test (`SecurityConfigTest`).

@@ -699,7 +699,7 @@ php artisan optimize             # config:cache + route:cache + view:cache
 2. Confirmar `APP_DEBUG=false` y `APP_ENV=production`.
 3. **Cifrar PII heredado**: `php artisan pii:encrypt` (idempotente; `--dry-run` para previsualizar). Re-cifra `contacts.name/email/subject/message` y `users.name` que sigan en texto plano tras la migración `encrypt_pii_columns`.
 4. **HTTPS obligatorio** y HSTS fijado en el servidor web (`Strict-Transport-Security: max-age=31536000; includeSubDomains`). La app también lo emite en producción. Si hay proxy/CDN, configurar `TRUSTED_PROXIES` (CSV de IPs o `*`) y `TRUSTED_HOSTS` (CSV de dominios) en `.env`.
-5. Ejecutar `composer audit` y revisar los advisories ocultos por el bloque `audit.ignore` de `composer.json`.
+5. Ejecutar `composer audit` y revisar cualquier advisory activo (desde la migración a Laravel 13 no hay bloque `audit.ignore` en `composer.json`: **0 advisories, 0 waivers** — cualquier ID ignorado que aparezca debe justificarse por escrito en SECURITY.md §2).
 6. Permisos: `storage/` y `bootstrap/cache/` deben ser escribibles por el usuario de PHP-FPM/Apache, p. ej. `chown -R www-data:www-data storage bootstrap/cache`.
 7. `.env` con permisos restrictivos (`chmod 600 .env`) y fuera de la raíz web.
 8. Cargar contenido real: entes (`PartnerSeeder` está vacío), URLs de redes sociales desde `/admin/rrss` y enlaces de "Intranet GDC" (Funcionarios Activos / Jubilados) desde `/admin/configuracion` (vacío = ítem oculto); verificar `/admin/login`.
@@ -740,6 +740,18 @@ tail -50 storage/logs/laravel-$(date +%Y-%m-%d).log
 > **Nunca** en una actualización: `key:generate` (rompe el PII cifrado), `migrate:fresh`, `db:seed`
 > completo (`UserSeeder`/`NoticiasPrecargadasSeeder` recrean usuarios seed) ni `git pull` con
 > cambios locales sin revisar (`git status` debe estar limpio salvo `public/install.php` borrado).
+
+#### G.1 Notas del salto a Laravel 13 (rama `Laravel13-Dev`, docs/PLAN-LARAVEL13.md)
+
+El procedimiento de G sirve tal cual; al actualizar desde una instalación en Laravel 10/11/12:
+
+1. **PHP**: el servidor debe tener **PHP ≥ 8.3** (sin cambio respecto a la instalación actual).
+2. **Dependencias**: `composer install --no-dev` resuelve el lock a **`laravel/framework` 13.38.0** (`^13.10.1`). En la primera actualización que suba de 10.x/11.x/12.x, si el servidor no tiene Composer, hay que regenerar `vendor/` localmente con el lock nuevo y subirlo completo (incluye el salto Guzzle 7 → 8).
+3. **Migración nueva**: `2026_10_26_100000_drop_personal_access_tokens_table` (Sanctum se eliminó; la tabla `personal_access_tokens` se dropea). La cubre el `php artisan migrate --force` del paso G.3.
+4. **`php artisan cache:clear` además de `optimize:clear`** en el primer despliegue: `config/cache.php` añade la allowlist `serializable_classes` (Laravel 13 endurece la deserialización del store `file`); vaciar el caché evita leer entradas previas al cambio.
+5. **Re-login obligatorio de todos los usuarios**: `config/session.php` fija `serialization = 'json'` (endurecimiento anti-deserialización, decisión D3 del plan) — las sesiones existentes quedan inválidas al desplegar y cada usuario deberá iniciar sesión de nuevo. No requiere acción más allá de comunicarlo.
+6. **CSRF**: el middleware de la app es ahora `App\Http\Middleware\PreventRequestForgery` (antes `VerifyCsrfToken`; renombrado por el framework en L13). El comportamiento para formularios clásicos (`@csrf`) y para `curl` sin cabeceras `Sec-Fetch-Site` no cambia (se valida el token). No hay referencias en `.env`, Nginx ni cron que actualizar.
+7. **Verificación post-despliegue**: `php artisan about` debe mostrar `Laravel Version 13.38.0`; además del smoke de G.4, revisar login + escritura en `/admin` (sesión json) y `tail` del log sin errores de deserialización.
 
 #### H. Cron de programados (obligatorio)
 `app/Console/Kernel.php` programa **2 tareas diarias** — `contacts:prune` a las 03:17 (retención

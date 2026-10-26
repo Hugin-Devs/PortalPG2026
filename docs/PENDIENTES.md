@@ -3,9 +3,10 @@
 > **Fuente viva del trabajo pendiente.** Ir marcando `- [x]` al completar un ítem.
 > El registro histórico de cierres (fechas y notas de todo lo completado) vive en
 > [historico-cierres-pendientes.md](historico-cierres-pendientes.md).
-> Última actualización: 2026-10-26 (despliegue en producción y cierre de R4)
+> Última actualización: 2026-10-26 (despliegue en producción, cierre de R4 y **migración a Laravel 13.38.0** en rama `Laravel13-Dev`)
 
 **Abiertos: 4** — 2 de contenido del cliente + 2 de pre-release (TLS y backup de BD).
+*+ validación de la migración Laravel 13 en servidor (E2E 17/17, smoke LATIN9, ZAP) antes del merge — `docs/PLAN-LARAVEL13.md` Fase 4.*
 
 ---
 
@@ -33,7 +34,7 @@
 
 ## C. Diferidos / fuera de alcance (no se van a hacer)
 
-- **A5 — Upgrade de Laravel 11/12** — descartado: es **requisito de la institución** que el portal sea Laravel 10 (pese a EOL feb 2026); se mantiene en 10.x. *Revisar con el presupuesto de mantenimiento (SECURITY.md §2, 2026-11-21).*
+- ~~**A5 — Upgrade de Laravel 11/12**~~ **Cerrado 2026-10-26**: el requisito institucional de permanecer en Laravel 10 fue levantado (waiver SC-02); migración completa **10 → 11 → 12 → 13.38.0** en la rama `Laravel13-Dev` según `docs/PLAN-LARAVEL13.md` (Fases 0–3), 229/238 tests + Pint + `composer audit` 0/0 en verde. *Queda la validación en servidor (E2E + LATIN9 + ZAP) y el merge a `main` (Fase 4).*
 - **C1 — CI con GitHub Actions** — descartado: no se utilizará GitHub Actions.
 - **D2 — CRUD de páginas estáticas en el admin** — archivado: **sin instrucción de que se vaya a necesitar**; `/pagina/{slug}` queda tal cual (vista `page.blade.php` lista, tabla `pages` vacía).
 - **D5 — Front de la página de detalle de entes (`/entes/{slug}`)** — archivado: la vista actual es funcional (skeleton); se retoma solo con nueva instrucción de diseño.

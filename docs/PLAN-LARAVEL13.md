@@ -1,7 +1,7 @@
 # Plan de migración a Laravel 13 — Portal PG2026
 
 > **Rama:** `Laravel13-Dev` · **Destino:** `laravel/framework ^13.10.1` (>13.10.0, lock fijó **13.38.0**)
-> **Estado:** Fases 0–3 completadas (2026-10-26). Pendiente Fase 4 (cierre documental + E2E/staging en servidor) · **Autorización:** waiver institucional SC-02/A5 levantado (institución aprueba el upgrade; cierre documental pendiente en Fase 4)
+> **Estado:** Fases 0–3 completadas + **cierre documental de Fase 4 hecho** (2026-10-26). Pendiente: validación en servidor/local con pgsql (E2E + LATIN9 + ZAP), SBOM/cobertura y merge · **Autorización:** waiver institucional SC-02/A5 levantado (cierre documental realizado)
 
 ---
 
@@ -146,13 +146,21 @@
 
 ## 6. Fase 4 — Cierre, hardening y release
 
-- [ ] `SECURITY.md`: cerrar SC-02/A5 (upgrade ejecutado), retirar compensatorios EOL de Laravel 10, actualizar inventario de dependencias con estado de soporte, retirar waivers obsoletos
-- [ ] `docs/PENDIENTES.md`: marcar A5/SC-02 como ✅
-- [ ] `docs/DOCUMENTACION.md` §14: runbook actualizado (`composer install --no-dev` con lock, `optimize`, nota de re-login por `session.serialization=json`, cron, vhost)
-- [ ] `docs/INFORME-VULNERABILIDADES.md`: nota de cierre de SC-02
-- [ ] Regenerar SBOM + `composer audit` + `npm audit`
-- [ ] Cobertura ≥82% mantenida
-- [ ] Despliegue staging (pgsql LATIN9 real) → smoke → producción con rollback por SHA
+### 6.1 Cierre documental ✅ (2026-10-26)
+
+- [x] `SECURITY.md`: SC-02/A5 cerrados (upgrade ejecutado), fila Laravel 10 EOL y CVE-2026-114509 tachadas/cerradas, compensatorios EOL degradados a buenas prácticas, AES-256-CBC reprogramado (cipher no cambió), cabecera y §4 actualizados (229/238 tests, audit 0/0)
+- [x] `docs/PENDIENTES.md`: A5 marcado como cerrado 2026-10-26 + nota de validación pendiente en cabecera
+- [x] `docs/historico-cierres-pendientes.md`: fila `A5 / SC-02` con el detalle del cierre
+- [x] `docs/DOCUMENTACION.md` §14: §14.F.5 sin referencia a `audit.ignore`; nuevo **§14.G.1 "Notas del salto a Laravel 13"** (PHP ≥8.3, lock 13.38.0, migración `drop_personal_access_tokens`, `cache:clear` por la allowlist, **re-login** por `session.serialization=json`, rename CSRF, smoke post-despliegue)
+- [x] `docs/INFORME-VULNERABILIDADES.md`: SC-02 ✅ en las dos tablas de estado, detalle §4.2 cerrado, §6 hoja de ruta al 100%, §7 compensatorios marcados como cumplidos
+
+### 6.2 Validación en servidor y release (⏳ — validación local primero, a cargo del usuario)
+
+- [ ] **Validación local** con pgsql LATIN9: `bash tests/e2e/run-all.sh` → 17/17 · `Latin9EncodingTest`/`PiiEncryptionTest`/`PgMigrationQueriesTest` contra pgsql real · smoke `artisan serve` (login + escritura admin)
+- [ ] Regenerar SBOM + `composer audit` + `npm audit` sobre el lock final
+- [ ] Cobertura ≥82% mantenida (`php artisan test --coverage-text`)
+- [ ] Baseline ZAP repetido (comparar con `docs/zap-baseline-2026-10-25.*`)
+- [ ] Despliegue staging (pgsql LATIN9 real) → smoke → producción con rollback por SHA (runbook §14.G + §14.G.1)
 - [ ] PR `Laravel13-Dev` → `main`
 
 ---

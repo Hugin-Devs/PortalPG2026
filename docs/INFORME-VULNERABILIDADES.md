@@ -58,7 +58,7 @@ Tras cuatro rondas de cierre (remediación inicial + auditoría comprobatoria + 
 | CFG-03 | `APP_DEBUG=true` + Ignition | ✅ Remedado | `APP_DEBUG=false` por defecto; Ignition solo en `require-dev` |
 | CFG-06 | `env()` fuera de `config/` con `config:cache` | ✅ Remedado | Nuevo `config/security.php` centraliza rate limits, `TRUSTED_PROXIES` y `TRUSTED_HOSTS`; leídos con `config()` |
 | SC-01 | Dependencias vulnerables | ✅ Remedado | Guzzle 7.15.5, commonmark 2.10.3, flysystem 3.36.0, Vite 8.3.4; `composer audit` **0 advisories activos**, 4 IDs de `laravel/framework` ignorados bajo waiver EOL (§2); `npm audit` 0 vulnerabilidades |
-| SC-02 | Laravel 10 EOL | ⚠️ Aceptado | Riesgo aceptado por requisito institucional + controles compensatorios (§7) |
+| SC-02 | Laravel 10 EOL | ✅ Cerrado 2026-10-26 | Migración completa a **Laravel 13.38.0** en rama `Laravel13-Dev` (waiver institucional levantado; `docs/PLAN-LARAVEL13.md`) — ver §7 |
 | LOG-01 | Sin auditoría de acciones | ✅ Remedado | Migración `activity_logs`, hooks `Audit::log`, vista `/admin/auditoria` con **filtros** (acción/usuario/rol/fechas/búsqueda) y **export CSV** (permiso `audit.export`, CWE-1236 neutralizado); **retención 400 días** (`audit:prune` diario 04:23); eventos ampliados (`permission.denied`, diff de permisos en `role.updated`, nombres de archivo en `media.uploaded`, `user.validation_failed` sin valores); 31 tests |
 | ABUSE-01 | `POST /contacto`/`buscar` sin límite | ✅ Remedado | `throttle:contact` y `throttle:search` configurables |
 | PRIV-01 | PII sin cifrar en reposo | ✅ Remedado | Casts `encrypted` + comando `php artisan pii:encrypt` para datos heredados |
@@ -189,7 +189,7 @@ Cierre de las tres verificaciones que bloqueaban la publicación:
 | CFG-02 | `SESSION_SECURE_COOKIE` sin default `true` | 6.3 (M) | Media | 90 días | ✅ Remedado (sesión 60 min + cifrada) |
 | CFG-03 | `APP_DEBUG=true` + endpoints de Ignition habilitados | 9.3 (C) | Crítica | 7 días | ✅ Remedado |
 | SC-01 | Dependencias PHP/JS con advisories conocidos | 6.9 (M)* | Alta | 30 días | ✅ Remedado |
-| SC-02 | Laravel 10.50.2 EOL (sin parches de seguridad) | 6.9 (M) | Media | 90 días | ⚠️ Aceptado con compensatorios |
+| SC-02 | Laravel 10.50.2 EOL (sin parches de seguridad) | 6.9 (M) | Media | 90 días | ✅ Cerrado 2026-10-26 (Laravel 13.38.0) |
 | LOG-01 | Sin registro de auditoría de acciones administrativas | 6.9 (M) | Media | 90 días | ✅ Remedado (filtros, export, retención 400 d) |
 | ABUSE-01 | `POST /contacto` y `/buscar` sin rate limiting | 6.9 (M) | Media | 90 días | ✅ Remedado |
 | PRIV-01 | PII (`contacts`, `users`) sin cifrado en reposo | 7.1 (H) | Alta | 30 días | ✅ Remedado |
@@ -388,7 +388,7 @@ Cierre de las tres verificaciones que bloqueaban la publicación:
   3. Restringir acceso administrativo por IP/VPN si es posible.
   4. Planificar re-evaluación semestral para decidir si el requisito institucional puede revisarse.
 - **Esfuerzo:** Alto
-- **Estado:** Riesgo aceptado con compensatorios (requiere decisión institucional documentada).
+- **Estado:** **✅ Cerrado 2026-10-26** — el requisito institucional de permanecer en Laravel 10 fue levantado; migración completa **10 → 11 → 12 → 13.38.0** (`laravel/framework ^13.10.1`, estrictamente >13.10.0 y fuera del rango de todos los advisories EOL) ejecutada en la rama `Laravel13-Dev` según `docs/PLAN-LARAVEL13.md` (Fases 0–3); `audit.ignore` eliminado de `composer.json` → `composer audit --locked` con **0 advisories activos y 0 waivers**; los controles compensatorios de arriba se mantienen como buena práctica, ya no como compensación de EOL. *Pendiente antes del merge: validación E2E + LATIN9 + ZAP en servidor (Fase 4).*
 
 ---
 
@@ -452,27 +452,32 @@ Cierre de las tres verificaciones que bloqueaban la publicación:
 
 ## 6. Hoja de ruta de remediación
 
-> **Cierre de §6 (2026-10-23):** todas las filas de prioridad Crítica, Alta y Media fueron ejecutadas y verificadas. El único punto sin cerrar es la **migración a Laravel 12/13** (SC-02), que sigue bajo waiver institucional y se revisa el 2026-11-21 (§7).
+> **Cierre de §6 (2026-10-23):** todas las filas de prioridad Crítica, Alta y Media fueron ejecutadas y verificadas. ~~El único punto sin cerrar es la migración a Laravel 12/13 (SC-02)~~ **SC-02 cerrado el 2026-10-26**: migración completa a **Laravel 13.38.0** en rama `Laravel13-Dev` (`docs/PLAN-LARAVEL13.md`), fuera de plazo respecto a la revisión del 2026-11-21. **Hoja de ruta: 100% cerrada**, sujeta a la validación en servidor de la Fase 4 (E2E + LATIN9 + ZAP).
 
 | Prioridad | Hallazgos | Acción | Responsable sugerido | Estado |
 |---|---|---|---|---|
 | **Crítico (≤7 días)** | AUTH-02, CFG-03 | Cambiar passwords seed, forzar cambio, poner `APP_DEBUG=false`, deshabilitar Ignition en prod | DevSecOps / SysAdmin | ✅ Ejecutado |
 | **Alto (≤30 días)** | AUTHZ-01, FILE-03, PRIV-01, SC-01 | Restringir asignación de superadmin, proteger gacetas, cifrar PII, actualizar dependencias vulnerables | Desarrollo | ✅ Ejecutado |
-| **Medio (≤90 días)** | AUTH-01, AUTHZ-02, INJ-01, INJ-02, CFG-01, CFG-02, LOG-01, ABUSE-01, SC-02 | Rate limiting, sanitización HTML, headers de seguridad, auditoría, controles compensatorios EOL | Desarrollo / Infra | ✅ Ejecutado (SC-02 bajo waiver §7) |
+| **Medio (≤90 días)** | AUTH-01, AUTHZ-02, INJ-01, INJ-02, CFG-01, CFG-02, LOG-01, ABUSE-01, SC-02 | Rate limiting, sanitización HTML, headers de seguridad, auditoría, controles compensatorios EOL | Desarrollo / Infra | ✅ Ejecutado (SC-02 cerrado 2026-10-26: Laravel 13.38.0) |
 
 ---
 
 ## 7. Controles compensatorios para riesgos aceptados
 
-### Laravel 10 EOL (SC-02)
+### Laravel 10 EOL (SC-02) — ✅ CERRADO 2026-10-26
 
-Dado que el upgrade fue descartado institucionalmente, se establecen los siguientes controles compensatorios:
+> El requisito institucional de permanecer en Laravel 10 fue levantado. La migración
+> completa **10 → 11 → 12 → 13.38.0** se ejecutó en la rama `Laravel13-Dev`
+> (`docs/PLAN-LARAVEL13.md`, Fases 0–3) con `composer audit --locked` en **0 advisories
+> y 0 waivers**. Los controles siguientes dejan de ser compensación de EOL y se
+> conservan como buenas prácticas de SCA/operaciones (1, 2, 3 y 4); el 5 (reevaluación
+> semestral del requisito) se da por cumplido con este cierre.
 
 1. **SCA continuo:** ejecutar `composer audit` y `npm audit` semanalmente; revisar y justificar cualquier ID ignorado.
 2. **WAF/Reverse proxy:** desplegar reglas OWASP CRS y reglas específicas para Laravel ante el servidor web.
 3. **Acceso administrativo restringido:** limitar `/admin/*` a rangos IP institucionales o VPN si la arquitectura lo permite.
 4. **Monitoreo de integridad:** detectar cambios no autorizados en archivos de la aplicación (`app/`, `routes/`, `config/`, `public/`).
-5. **Reevaluación semestral** del requisito de permanecer en Laravel 10.
+5. ~~**Reevaluación semestral** del requisito de permanecer en Laravel 10.~~ Cumplido: requisito levantado y migración ejecutada el 2026-10-26.
 
 ---
 
