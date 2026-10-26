@@ -3,9 +3,9 @@
 > **Fuente viva del trabajo pendiente.** Ir marcando `- [x]` al completar un ítem.
 > El registro histórico de cierres (fechas y notas de todo lo completado) vive en
 > [historico-cierres-pendientes.md](historico-cierres-pendientes.md).
-> Última actualización: 2026-10-25 (cierre de R1–R3)
+> Última actualización: 2026-10-26 (despliegue en producción y cierre de R4)
 
-**Abiertos: 3** — 2 de contenido del cliente + 1 de pre-release.
+**Abiertos: 4** — 2 de contenido del cliente + 2 de pre-release (TLS y backup de BD).
 
 ---
 
@@ -18,11 +18,15 @@
 
 ## B. Pre-release (bloquean la publicación)
 
-- [ ] **R4 — Verificar las 7 condiciones de despliegue en el servidor**  
-  SECURITY.md §1: `install.php` eliminado del artefacto, `TRUSTED_PROXIES`/`TRUSTED_HOSTS`, `DB_SSLMODE`, php.ini de FPM, bloqueo de scripts en `/storage` **+ `nosniff` en estáticos** (Nginx), cron `schedule:run`, HSTS a nivel de proxy.
+- [ ] **R5 — Certificado TLS del dominio**  
+  El certificado actual es auto-firmado con `CN=<IP>` y **venció el 2026-06-19**: el navegador rechaza la conexión a `https://web.gdc.gob.ve` (desde consola funciona con `-k`). Hace falta un certificado institucional o CA interna con SAN del dominio (Let's Encrypt no aplica: DNS interno, no hay puerto 80 público). Detalle en DOCUMENTACION.md §14.L.
+
+- [ ] **R6 — Copia de seguridad de la BD**  
+  No hay cliente PostgreSQL (`psql`/`pg_dump`) en el servidor ⇒ no existe dump de `portalweb`. El despliegue del 2026-10-25 se hizo con backup de `.env`, `storage/` y assets pero **sin dump de BD** (aceptado explícitamente). Instalar `postgresql-client` y dejar un `pg_dump` diario + verificación de restauración.
 
 ### Cerrados (2026-10-25)
 
+- [x] **R4 — Verificar las 7 condiciones de despliegue en el servidor** → **7/7 verificadas el 2026-10-25** durante el despliegue real (DOCUMENTACION.md §14.L): `install.php` ausente, `TRUSTED_HOSTS=web.gdc.gob.ve` / `TRUSTED_PROXIES` vacío, `DB_SSLMODE=require`, php.ini FPM 100M/110M/256M/60 + `expose_php=Off`, bloqueo de scripts en `/storage` (403) + `nosniff` en `/build`,`/storage`,`/images`, cron `/etc/cron.d/portal` con `schedule:run`, HSTS emitido por app y Nginx.
 - [x] **R1 — Suite E2E completa** → **17/17 verdes** (incluidos los preexistentes `test-entes`/`test-share`; fixes de entorno en `tests/e2e/lib.sh`: locale, CRLF de psql, wrapper curl rutas MSYS, timezone Caracas).
 - [x] **R2 — Baseline DAST** → **OWASP ZAP 2.17.0** contra `127.0.0.1:8000`: 0 altas / 1 media (waiver TinyMCE) / 2 bajas / 4 informativas. Informes en `docs/zap-baseline-2026-10-25.{html,json}`; fixes: cookie XSRF `HttpOnly` + `X-Powered-By` fuera. *DAST autenticado queda como mejora.*
 - [x] **R3 — Cobertura** → Xdebug 3.5.3 + **82.22% líneas** (≥80%); tests nuevos Partner/Contact/Settings + regresiones críticas.

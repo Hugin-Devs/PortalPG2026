@@ -23,7 +23,7 @@ Desarrollar un portal web institucional para **GDC** que sirva como canal oficia
 
 | Tecnología | Versión | Notas |
 |---|---|---|
-| PHP | 8.2+ | |
+| PHP | 8.3+ (obligatorio desde 2026-10-23: `composer.json` fija `^8.3`; antes 8.2+) | |
 | Laravel | 10.x | Última versión estable de la rama 10 |
 | Bootstrap | 5.3+ | Solo componentes visuales, sin funcionalidad JS que interfiera con el backend |
 | Base de datos | PostgreSQL 14+ (antes MySQL 8 / MariaDB 10+; migrado a PG — ver DOCUMENTACION.md §13). Producción: encoding **LATIN9** (ISO-8859-15) con conexión UTF8 y transliteración en la app — §14.K | |

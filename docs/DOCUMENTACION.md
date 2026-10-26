@@ -12,10 +12,10 @@ Inspirado en: https://mippci.gob.ve
 
 | Componente | Versión |
 |---|---|
-| PHP | 8.2+ (recomendado; `composer.json` admite `^8.1`) |
+| PHP | 8.3+ (obligatorio: `composer.json` fija `^8.3`; 8.1/8.2 EOL) |
 | Laravel | 10.x |
 | Bootstrap | 5.3+ |
-| Base de datos | PostgreSQL 14+ (probado con 18.6) |
+| Base de datos | PostgreSQL 14+ recomendado (probado con 18.6). Producción opera con **13.23 / LATIN9** — ver §14.K y §14.L |
 | Motor de plantillas | Blade |
 | Frontend Assets | Vite |
 | JavaScript | Vanilla JS + Bootstrap JS |
@@ -431,9 +431,9 @@ Páginas personalizadas en español para todos los tipos de error HTTP, con bot�
 
 ### Sistema de permisos (granular, por rol)
 
-- **Tabla**: `permissions` (38 permisos con `slug` tipo `news.create`) + `role_permission` (rol ↔ permiso, con índice único). Reparto: superadmin 38 / admin 21 / editor 5 (`news.*`, `media.view`, `media.upload`). Slugs de solo-superadmin: `rrss.manage`, `settings.manage` y los 4 de `videos.*`.
-- **Grupos** (`permissions.group`, 1er nivel): los 38 permisos están agrupados en los **mismos 3 nombres que las secciones del sidebar** — `Gestión Noticias` (15: `news.*`, `media.*`, `videos.*`, `gacetas.*`), `Gestión Portal` (17: `categories.*`, `partners.*`, `about.*`, `contact.*`, `org.*`, `rrss.manage`) y `Configuración Portal` (6: `settings.manage`, `users.*`, `roles.manage`).
-- **Módulos** (`permissions.module`, 2º nivel): cada permiso indica además el **módulo/función = ítem del sidebar** (14 en total): `Noticias`, `Medios`, `Videos`, `Gacetas` · `Categorías`, `Entes Afiliados`, `Sobre Nosotros`, `Contacto` (solo `contact.edit`), `Mensajes` (`contact.view/delete`), `Estructura Org.`, `Redes Sociales` · `Identidad / Enlaces`, `Usuarios`, `Roles y Permisos`. La vista `/admin/roles` renderiza categoría → módulo → permiso, ordenadas con `FIELD()` (categoría, módulo y acción `view/create/upload/edit/manage/delete`); los módulos no se repiten entre categorías.
+- **Tabla**: `permissions` (41 permisos con `slug` tipo `news.create`) + `role_permission` (rol ↔ permiso, con índice único). Reparto de asignaciones (68 filas): superadmin 41 (todos), admin 22, editor 5 (`news.view/create/edit`, `media.view`, `media.upload`). Slugs de solo-superadmin (19): `news.delete`, `media.delete`, los 4 de `videos.*`, `partners.create/edit/delete`, `org.delete`, `rrss.manage`, `settings.manage`, los 4 de `users.*`, `roles.manage`, `audit.view`, `audit.export`.
+- **Grupos** (`permissions.group`, 1er nivel): los 41 permisos están agrupados en los **mismos 3 nombres que las secciones del sidebar** — `Gestión Noticias` (16: `news.*`, `media.*`, `videos.*`, `gacetas.*`), `Gestión Portal` (17: `categories.*`, `partners.*`, `about.*`, `contact.*`, `org.*`, `rrss.manage`) y `Configuración Portal` (8: `settings.manage`, `users.*`, `roles.manage`, `audit.*`).
+- **Módulos** (`permissions.module`, 2º nivel): cada permiso indica además el **módulo/función = ítem del sidebar** (15 en total): `Noticias`, `Medios`, `Videos`, `Gacetas` · `Categorías`, `Entes Afiliados`, `Sobre Nosotros`, `Contacto` (solo `contact.edit`), `Mensajes` (`contact.view/delete`), `Estructura Org.`, `Redes Sociales` · `Identidad / Enlaces`, `Usuarios`, `Roles y Permisos`, `Auditoría` (`audit.view/export`). La vista `/admin/roles` renderiza categoría → módulo → permiso, ordenadas con `FIELD()` (categoría, módulo y acción `view/create/upload/edit/manage/delete`); los módulos no se repiten entre categorías.
 - **Middleware**: alias `permission` registrado en `app/Http/Kernel.php` → `App\Http\Middleware\CheckPermission`. Aplicado ruta a ruta en `routes/web.php` (ej. `->middleware('permission:news.edit')`). El rol `superadmin` tiene bypass. El alias `role` → `App\Http\Middleware\CheckRole` también está registrado, pero hoy no se usa en ninguna ruta.
 - **Consulta en vista**: `auth()->user()->hasPermission('slug')` y `hasAnyPermission([slugs])` (`app/Models/User.php`) — las vistas del admin ocultan botones/menús sin permiso; el sidebar usa `hasAnyPermission()` para decidir si la cabecera de cada sección ("Gestión Noticias", "Gestión Portal", "Configuración Portal") es visible.
 - **Gestión**: módulo `/admin/roles` (`RoleController`) muestra la matriz rol×permiso; cada rol envía un solo formulario (JS junta los checkbox en un input oculto) y `update()` reemplaza las asignaciones del rol.
@@ -461,7 +461,7 @@ Ejecutan en este orden (definido en `DatabaseSeeder`):
 | `CategorySeeder` | 6 categorías: Nacionales, Política, Comunal, Cultura, Deporte, Educación |
 | `NoticiasPrecargadasSeeder` | **Seeder por defecto de las noticias**: lote de noticias reales desde `public/Noticias Precargadas/` (D16): por carpeta, imágenes `001…NNN` + un `.txt` con el cuerpo y una línea final `Fecha:` (metadato); 001 → `featured_image`, 002+ → galería `post_media`; fecha del sello del nombre de la 001 (fallback: línea Fecha); copia a `uploads/YYYY/MM/` + fila `media` + sidecar WebP; texto íntegro (solo se excluye la línea Fecha); idempotente (omite posts ya sembrados con portada); **purga** con `withTrashed()` + `forceDelete()` de las placeholders `noticia-destacada-*` (borrado físico); corre tras `CategorySeeder`; si aún no hay usuarios, crea `admin@gdc.gob.ve` con `firstOrCreate` |
 | `UserSeeder` | 3 usuarios: superadmin, admin, editor (password `password`) — `firstOrCreate` + restaura nombre/rol canónicos |
-| `PermissionSeeder` | 38 permisos en 2 niveles alineados al sidebar: `group` = 3 categorías (`Gestión Noticias`/`Gestión Portal`/`Configuración Portal`) y `module` = 14 módulos/ítems (incluye `settings.manage` con nombre "Editar identidad y enlaces" y los 4 `videos.*`, solo superadmin) + asignaciones a los 3 roles — idempotente y **migrador**: `updateOrCreate` corrige `group`/`module`/`name` de filas existentes |
+| `PermissionSeeder` | 41 permisos en 2 niveles alineados al sidebar: `group` = 3 categorías (`Gestión Noticias` 16 / `Gestión Portal` 17 / `Configuración Portal` 8) y `module` = 15 módulos/ítems (incluye `settings.manage` con nombre "Editar identidad y enlaces", los 4 `videos.*` y `audit.view`/`audit.export`, solo superadmin) + asignaciones a los 3 roles (41/22/5 = 68 filas) — idempotente y **migrador**: `updateOrCreate` corrige `group`/`module`/`name` de filas existentes |
 | `PartnerSeeder` | **Borrador** — array vacío, pendiente de contenido (name, description, url, order; slug auto y logo vía panel) |
 | `ContactSettingSeeder` | Los 5 settings de contacto (`contact_address/phone/email/hours/map_url`) con los valores por defecto — `firstOrCreate`: **no pisa** lo editado desde `/admin/contacto` |
 | `SocialSettingSeeder` | Los 7 settings de redes (`social_facebook/instagram/youtube/x/threads/telegram/whatsapp`) — `REDES` es el **espacio para pegar las URLs reales** (una por línea; varias líneas = varias cuentas de la misma red, D14); crea las claves faltantes y **rellena solo los valores vacíos**: nunca pisa lo editado desde `/admin/rrss` |
@@ -518,12 +518,16 @@ npm run build      # copia TinyMCE a public/vendor + vite build a public/build
 > están en [SECURITY.md](../SECURITY.md) (raíz del repo). Las mejoras
 > futuras, en la §C de PENDIENTES.md.
 >
-> **Estado a 2026-10-25**: desarrollo funcional completo y gates de
-> pre-release verificados — **228 tests PHPUnit en verde** (1032 assertions),
+> **Estado a 2026-10-26**: desarrollo funcional completo, gates de
+> pre-release verificados — **237 tests PHPUnit en verde** (1032 assertions),
 > **cobertura 82.22%**, **E2E 17/17**, **baseline ZAP sin altas** (1 media =
-> waiver TinyMCE), Pint ✅, SCA 0 activos. Antes de publicar quedan la
-> verificación de las 7 condiciones en el servidor (R4) y 2 ítems de
-> contenido del cliente (D6/E1) — ver [PENDIENTES.md](PENDIENTES.md).
+> waiver TinyMCE), Pint ✅, SCA 0 activos — **y desplegado en el servidor
+> institucional el 2026-10-25** (código en `origin/main`, 7 condiciones de
+> `SECURITY.md` §1 verificadas 7/7, registro en §14.L).
+>
+> Quedan 2 ítems de contenido del cliente (D6/E1) y, como bloqueantes para
+> la salida a internet, el **certificado TLS** y la **copia de seguridad de
+> la BD** (ver [PENDIENTES.md](PENDIENTES.md)).
 
 ---
 
@@ -531,7 +535,7 @@ npm run build      # copia TinyMCE a public/vendor + vite build a public/build
 
 > Esta sección es para **desarrollo**. Para el servidor real, ve §14 (Despliegue en Producción).
 
-Requisitos: PHP 8.3+ (PHP 8.1/8.2 EOL, no admitidos) con extensiones `pdo_pgsql`, `mbstring`, `openssl`, `gd` (con WebP), `curl`, `bcmath`, `dom`; PostgreSQL 14+; Node.js 18+; Composer. (Entorno de referencia de la migración PG: Termux/Android con PostgreSQL 18.6 y PHP 8.5.)
+Requisitos: PHP 8.3+ (PHP 8.1/8.2 EOL, no admitidos) con extensiones `pdo_pgsql`, `mbstring`, `openssl`, `gd` (con WebP), `curl`, `dom`; PostgreSQL 14+; Node.js 18+; Composer. (Entorno de referencia de la migración PG: Termux/Android con PostgreSQL 18.6 y PHP 8.5.)
 
 ```bash
 # 1. Navegar al proyecto
@@ -570,17 +574,17 @@ php artisan serve --port=8000   #  →  http://localhost:8000
 
 ## 14. Despliegue en Producción
 
-**Destino:** servidor institucional Linux con salida a internet (Nginx o Apache + PHP + PostgreSQL), con acceso por **FTP** y **SSH**.
+**Destino:** servidor institucional Linux con salida a internet (Nginx + PHP-FPM + PostgreSQL), con acceso por **SSH** (FTP opcional). El entorno real desplegado (§14.L) es **Debian 12 + Nginx + PHP-FPM 8.3 + PostgreSQL 13.23 (LATIN9)** y la actualización se hace con **`git pull` sobre el clon del repositorio** ya instalado en el servidor.
 
 ### 14.1 Requisitos del servidor
 
 | Componente | Mínimo | Notas |
 |---|---|---|
-| PHP | 8.1+ (recomendado 8.3+) | Extensiones: `pdo_pgsql`, `mbstring`, `openssl`, `tokenizer`, `xml`, `ctype`, `json`, `fileinfo`, `curl`, `bcmath`, `dom`, **`gd` con soporte WebP** (`imagewebp()` — habilita D9 WebP con fallback; sin él el portal funciona igual pero sin convertir imágenes) |
-| PostgreSQL | 14+ | BD y usuario dedicados (no `postgres`); TLS activado (`DB_SSLMODE=require`) |
+| PHP | **8.3+** (obligatorio: `composer.json` fija `^8.3`) | Extensiones: `pdo_pgsql`, `mbstring`, `openssl`, `tokenizer`, `xml`, `ctype`, `json`, `fileinfo`, `curl`, `dom`, **`gd` con soporte WebP** (`imagewebp()` — habilita D9 WebP con fallback; sin él el portal funciona igual pero sin convertir imágenes). No se usa `bcmath` |
+| PostgreSQL | 14+ recomendado (en producción opera 13.23, verificado el 2026-10-25) | BD y usuario dedicados (no `postgres`); TLS activado (`DB_SSLMODE=require`) |
 | Node.js | 18+ | Solo si se compila en el servidor; si no, compilar localmente y subir los assets (14.3.C) |
 | Composer | 2.x | Solo si se instala en el servidor; si no, subir `vendor/` ya instalado en `--no-dev` |
-| HTTPS | obligatorio | Certificado institucional o Let's Encrypt |
+| HTTPS | obligatorio | Certificado institucional o Let's Encrypt (§14.L: pendiente en el servidor actual) |
 
 ### 14.2 Estructura del servidor (vhost)
 
@@ -588,37 +592,55 @@ Recomendado: **la raíz del vhost apunta a `public/`** — así `.env`, `storage
 
 ```nginx
 server {
-    server_name portal.gdc.gob.ve;
-    root /var/www/portal2026/public;          # solo public/ es accesible por HTTP
+    server_name web.gdc.gob.ve;
+    root /var/www/html/PortalPG2026/public;   # solo public/ es accesible por HTTP
     index index.php;
 
     location / {
         try_files $uri $uri/ /index.php?$query_string;
     }
 
-    location ~ \.php$ {
-        include fastcgi_params;
-        fastcgi_param SCRIPT_FILENAME $realpath_root$fastcgi_script_name;
-        fastcgi_pass unix:/run/php/php8.3-fpm.sock;   # ajustar versión/puerto
+    # Condición 5 (SECURITY.md): sin ejecución de scripts en subidas/estáticos
+    # y nosniff en los que no pasan por Laravel (los bloques con add_header
+    # propio no heredan los del server{}).
+    location ^~ /storage/ {
+        location ~* \.(?:php|phtml|phar)$ { deny all; }
+        try_files $uri =404;
+        add_header X-Content-Type-Options nosniff always;
+    }
+    location ^~ /build/ {
+        try_files $uri =404;
+        add_header X-Content-Type-Options nosniff always;
+    }
+    location ^~ /images/ {
+        try_files $uri =404;
+        add_header X-Content-Type-Options nosniff always;
     }
 
-    location ~ /\. { deny all; }               # bloquea .env, .git, etc.
+    location ~ /\.(?!well-known) { deny all; }   # bloquea .env, .git, .htaccess
+
+    location ~ \.php$ {
+        include snippets/fastcgi-php.conf;       # try_files $fastcgi_script_name =404
+        fastcgi_pass unix:/run/php/php8.3-fpm.sock;
+    }
 }
 ```
 
-Equivalente Apache: `DocumentRoot /var/www/portal2026/public` con el `.htaccess` de Laravel habilitado (`AllowOverride All`).
+Equivalente Apache: `DocumentRoot /var/www/html/PortalPG2026/public` con el `.htaccess` de Laravel habilitado (`AllowOverride All`); en Apache el `.htaccess` de `storage/app/public` ya bloquea la ejecución de scripts en subidas (en Nginx hace falta el bloque `^~ /storage/` de arriba).
 
 > ⚠️ Si la raíz web fuera la del proyecto completo, el sitio quedaría expuesto a la lectura de `.env` (credenciales BD y APP_KEY). Nunca hacerlo.
+>
+> ⚠️ **`expires 1y` a nivel de `server{}`** (tal como está en producción hoy) hace que también el HTML se entregue con `Cache-Control: max-age=31536000`: tras cada despliegue los visitantes pueden ver una página cacheada hasta un año. Decisión registrada 2026-10-25: **no se toca** en esta ronda; si se retoma, acotar `expires` a `location` de estáticos (`css|js|jpg|png|webp|svg|woff2`).
 
 ### 14.3 Checklist de despliegue (primera vez)
 
 #### A. Código
-1. Preferible: `git clone <repo> /var/www/portal2026` por **SSH**.
+1. Preferible: `git clone <repo> /var/www/html/PortalPG2026` por **SSH**, con `www-data` como propietario del árbol (`chown -R www-data:www-data`) para que PHP-FPM y los comandos artisan corran sin fricción. **El `.env` de producción no está en git**: sobrevive a cualquier `git pull`/`reset --hard`.
 2. Por FTP: subir todo excluyendo `node_modules/` (se reinstala con `npm ci`) y, si en el servidor hay Composer, también `vendor/`. El `.env` de desarrollo **no se sube** (se crea en el paso D).
 
 #### B. Dependencias PHP
 ```bash
-cd /var/www/portal2026
+cd /var/www/html/PortalPG2026
 composer install --no-dev --optimize-autoloader
 ```
 - *Sin Composer en el servidor*: ejecutar `composer install --no-dev` en una copia limpia local (sin `.env` de dev) y subir `vendor/`.
@@ -637,13 +659,13 @@ Crear **in situ** desde la plantilla **`.env_example_produccion`** (versionada e
 | `APP_ENV` | `production` |
 | `APP_DEBUG` | **`false`** (con `true`, los errores 500 filtran trazas y datos sensibles) |
 | `APP_KEY` | generarla UNA sola vez con `php artisan key:generate` **antes del primer `db:seed`** y no volver a tocarla: si se regenera con filas ya creadas, todo lo cifrado con la clave anterior (`users.name`, `contacts.name/email/subject/message`) queda ilegible y cualquier lectura revienta con `DecryptException: The MAC is invalid` (p. ej. un re-`db:seed`). Recuperación: restaurar la clave original, o si la BD es descartable `php artisan migrate:fresh --seed --force`, o borrar las filas afectadas con SQL crudo (`psql`/`DB::table`, que no descifran) y re-sembrar — `UserSeeder` imprime exactamente esta guía al detectarlo (§14.E) |
-| `APP_URL` | `https://portal.gdc.gob.ve` (dominio real) |
+| `APP_URL` | `https://web.gdc.gob.ve` (dominio real; **definirlo UNA sola vez** — una clave repetida en `.env` confunde al parser y suele ganar la primera) |
 | `DB_HOST` / `DB_DATABASE` / `DB_USERNAME` / `DB_PASSWORD` | BD dedicada de producción (**LATIN9**, ver §14.K) |
 | `DB_CHARSET` | No cambiar: la conexión va en `utf8` aunque la BD sea LATIN9 (§14.K) |
 | `MAIL_*` | SMTP real (el default de `.env.example` es un host de ejemplo que no existe) |
 | `SESSION_SECURE_COOKIE` | `true` |
 
-Verificar: `php artisan config:show | grep APP_DEBUG` (debe ser `false`).
+Verificar: `php artisan config:show app.debug` (debe ser `false`) — en Laravel 10 `config:show` exige la clave; un `config:show` sin argumentos falla con *Not enough arguments (missing: "config")*.
 
 #### E. Instalación
 Orden correcto (§14.D): el `APP_KEY` se genera **una sola vez, antes** del primer seed, y no se vuelve a tocar.
@@ -666,9 +688,11 @@ php artisan optimize             # config:cache + route:cache + view:cache
 > BD es descartable / `DELETE` crudo de la fila afectada).
 
 > **Si solo hay FTP (sin SSH)** para `storage:link`: pedir al administrador del servidor que cree el enlace
-> `ln -s /var/www/portal2026/storage/app/public /var/www/portal2026/public/storage`,
-> o configurar un alias en el vhost: `location /storage/ { alias /var/www/portal2026/storage/app/public/; }`.
+> `ln -s /var/www/html/PortalPG2026/storage/app/public /var/www/html/PortalPG2026/public/storage`,
+> o configurar un alias en el vhost: `location /storage/ { alias /var/www/html/PortalPG2026/storage/app/public/; }`.
 > Sin esto, las imágenes subidas (medios, destacadas, logos de entes) no se sirven.
+> ⚠️ El enlace **apunta al `storage/` de la misma instalación**: en el servidor real apuntaba a una
+> copia residual en `/home/webgdc/...` y los ficheros subidos no se servían (corregido el 2026-10-25, §14.L).
 
 #### F. Pasos de seguridad post-despliegue (obligatorios)
 1. **Cambiar o eliminar los usuarios seed**: lo hace **`public/install.php`** (§14.E) en el primer arranque — formulario web que da de alta el superadmin/admin reales, **reasigna al superadmin real todo el contenido sembrado** (noticias y galerías `posts`/`media`, más `gacetas`/`videos` si los hubiera) que estuviera firmado por los usuarios seed, borra `admin@gdc.gob.ve`, `admin2@gdc.gob.ve` y `editor@gdc.gob.ve` (password `password`) y se **auto-elimina** (con guarda: si ya hay superadmin y no quedan seed, solo se retira sin tocar nada). El contenido de `NoticiasPrecargadasSeeder`/`PostSeeder` cargado con `db:seed` **no se ve afectado** por el borrado de usuarios. Si el instalador ya se borró o hay que repetirlo a mano: borrar los usuarios seed desde `/admin/usuarios` o con tinker (§15).
@@ -680,25 +704,68 @@ php artisan optimize             # config:cache + route:cache + view:cache
 7. `.env` con permisos restrictivos (`chmod 600 .env`) y fuera de la raíz web.
 8. Cargar contenido real: entes (`PartnerSeeder` está vacío), URLs de redes sociales desde `/admin/rrss` y enlaces de "Intranet GDC" (Funcionarios Activos / Jubilados) desde `/admin/configuracion` (vacío = ítem oculto); verificar `/admin/login`.
 
-#### G. Actualizaciones posteriores
+#### G. Actualizaciones posteriores (procedimiento ejecutado el 2026-10-25)
+
 ```bash
-# tras subir una versión nueva de código:
+# 0. Ventana de mantenimiento + respaldo de lo no versionado
+php artisan down
+tar czf ~/backups/$(date +%F)-assets.tgz public/build public/vendor
+tar czf ~/backups/$(date +%F)-storage.tgz storage/app/public storage/logs
+cp .env ~/backups/$(date +%F)-env.before && chmod 600 ~/backups/$(date +%F)-env.before
+
+# 1. Código (como www-data; sin cambios locales == fast-forward seguro)
+git fetch origin && git reset --hard origin/main
+rm -f public/install.php          # git lo restaura: la condición 1 obliga a borrarlo otra vez
+
+# 2. Dependencias y assets
 composer install --no-dev --optimize-autoloader
-npm ci && npm run build          # o subir public/build + public/vendor
+npm ci && npm run build           # o subir public/build + public/vendor
+
+# 3. Caché, BD y contenido (NUNCA un `db:seed` completo: recrearía usuarios seed)
+php artisan optimize:clear        # obligatorio si cambiaron config/* o routes/*
 php artisan migrate --force
-php artisan webp:generate        # opcional: backfill idempotente de sidecars .webp
-php artisan optimize             # si algo falla: php artisan optimize:clear
+php artisan db:seed --class=PermissionSeeder --force   # solo si cambió (idempotente, solo añade)
+php artisan pii:encrypt --dry-run # 0 pendientes ⇒ no ejecutar
+php artisan webp:generate         # idempotente
+php artisan optimize              # config:cache + route:cache + view:cache
+
+# 4. Verificación mínima y apertura
+php artisan migrate:status        # todas "Ran"
+php artisan up
+curl -sk -o /dev/null -w "%{http_code}\n" https://<dominio>/
+test -f public/install.php && echo "¡FALTA BORRAR install.php!"
+tail -50 storage/logs/laravel-$(date +%Y-%m-%d).log
 ```
 
-#### H. No se necesita cron ni worker
-El proyecto **no tiene tareas programadas** (`app/Console/Kernel.php` sin schedule) y la cola es `sync`. No hay que configurar `schedule:run` ni un proceso de jobs.
+> **Nunca** en una actualización: `key:generate` (rompe el PII cifrado), `migrate:fresh`, `db:seed`
+> completo (`UserSeeder`/`NoticiasPrecargadasSeeder` recrean usuarios seed) ni `git pull` con
+> cambios locales sin revisar (`git status` debe estar limpio salvo `public/install.php` borrado).
 
-#### I. Límites de PHP (`php.ini`)
-| Directriz | Valor | Motivo |
+#### H. Cron de programados (obligatorio)
+`app/Console/Kernel.php` programa **2 tareas diarias** — `contacts:prune` a las 03:17 (retención
+GDPR, `CONTACT_RETENTION_DAYS=365`) y `audit:prune` a las 04:23 (`AUDIT_RETENTION_DAYS=400`) —
+y la cola es `sync` (no hace falta worker de jobs). **Sí hay que registrar el cron**:
+
+```cron
+# /etc/cron.d/portal  (root:root, 644, con salto de línea final)
+* * * * * www-data php /var/www/html/PortalPG2026/artisan schedule:run >> /dev/null 2>&1
+```
+
+Verificación: `cat /etc/cron.d/portal` + `php artisan schedule:run` a mano (debe imprimir
+*No scheduled commands are ready to run* fuera de las horas programadas, sin errores).
+Sin este cron las podas no se ejecutan y la auditoría/contactos crecen sin límite (condición 6 de SECURITY.md §1).
+
+#### I. Límites de PHP (`php.ini` de FPM)
+Editar `/etc/php/8.3/fpm/php.ini` y reiniciar: `systemctl restart php8.3-fpm` (condición 4 de SECURITY.md §1).
+
+| Directriz | Valor desplegado | Motivo |
 |---|---|---|
-| `upload_max_filesize` / `post_max_size` | ≥ `21M` | Gacetas aceptan hasta 20 MB (medios: 10 MB) |
-| `memory_limit` | ≥ `256M` | Listados/administración con muchas filas y subidas múltiples |
-| `max_execution_time` | ≥ `60` | Subidas múltiples de archivos |
+| `upload_max_filesize` / `post_max_size` | `100M` / `110M` | Vídeos de hasta 100 MB (gacetas 20 MB, medios 10 MB); mínimo funcional 21M/21M |
+| `memory_limit` | `256M` | Listados/administración con muchas filas y subidas múltiples |
+| `max_execution_time` | `60` | Subidas múltiples de archivos |
+| `expose_php` | `Off` | No revelar la versión de PHP en cabeceras/`X-Powered-By` |
+
+> Los valores se comprueban en el ini de **FPM** (`grep -E '^(upload_max_filesize|post_max_size|memory_limit|max_execution_time|expose_php)' /etc/php/8.3/fpm/php.ini`): `php -i` desde CLI usa otro fichero (`/etc/php/8.3/cli/php.ini`) y puede mostrar los defaults.
 
 #### J. Qué NO funciona en el servidor de producción
 - Suites E2E (`tests/e2e/*.sh`): requieren `psql` y un servidor de desarrollo corriendo (§16); no se ejecutan contra producción.
@@ -715,6 +782,49 @@ La BD de producción es **PostgreSQL con encoding LATIN9** (no UTF-8). El proyec
   - Helper único `App\Support\Latin9`: acentos español/`€`/`Œ`/`Š`/`ž` se conservan **tal cual**; lo aproximable pasa a ASCII (`…` → `...`, `“ ”` → `"`, `—` → `-`); emojis/símbolos astrales se **eliminan** (el cuerpo de las noticias precargadas pierde los emojis de los txt de Instagram).
 - **Escrituras fuera de la app**: INSERT/UPDATE crudos (`DB::table`, `psql`, dumps) con caracteres no representables **fallan con 22021** — pasar siempre por los modelos o transliterar antes. Las suites E2E fuerzan `PGOPTIONS='-c client_encoding=UTF8'` en `lib.sh`.
 - **Gate de verificación**: `createdb -E LATIN9 -l C -T template0 portalpg2026_latin9` y `DB_CONNECTION=pgsql DB_DATABASE=portalpg2026_latin9 ./vendor/bin/phpunit` — `Latin9EncodingTest` verifica round-trip y que el INSERT crudo con `…` falla (§16).
+
+#### L. Registro del despliegue real (2026-10-25)
+
+Actualización de una instalación **ya existente con datos reales** (2 usuarios, 5 noticias) desde `aaaeb32` hasta `origin/main` = `8e06f82`. Credenciales y `APP_KEY` viven **solo** en el servidor (`.env`, `chmod 600`); este documento no las recoge.
+
+| Componente | Valor real |
+|---|---|
+| Sistema | Debian 12 (bookworm), host `webgdc1`, 4 GB RAM / 18 GB disco |
+| Web | Nginx + PHP-FPM **8.3.35** (`gd`, `pdo_pgsql`, `intl`, `mbstring`, `zip`; sin `bcmath`, que no se usa) |
+| Raíz / dominio | `/var/www/html/PortalPG2026/public` · `https://web.gdc.gob.ve` (DNS interno → servidor) |
+| BD | PostgreSQL **13.23** (`server_encoding=LATIN9`, `client_encoding=UTF8`), servidor de BD externo, `DB_SSLMODE=require` |
+| Herramientas | Composer 2.5.5, Node 26 / npm 11 (ambos presentes, se compila en el servidor) |
+| Acceso | SSH como usuario normal en grupo `www-data`; escalada a root con `su` (no hay `sudo`) |
+
+**Secuencia ejecutada** (todo como `www-data`, infraestructura como root):
+
+1. Backups previos en `/home/webgdc/backups/despliegue-2026-10-25/`: `.env` (`env.before`, 600), `public/build` + `public/vendor` (`public-assets.tgz`), `storage/app/public` + `storage/logs` (`storage.tgz`) y SHA de rollback.
+2. `php artisan down` → `git fetch && git reset --hard origin/main` → `rm -f public/install.php`.
+   *Hallazgo:* el árbol tenía 378 ficheros "modificados" que eran **solo bits de modo** (100644→100755, arrastrados de un `tar`), más `install.php` borrado → `reset --hard` fue limpio y `.env`/`storage/` (ignorados por git) no se tocaron.
+3. `composer install --no-dev --optimize-autoloader` (3 actualizaciones de seguridad Symfony, 38 paquetes dev retirados) y `npm ci && npm run build` (123 módulos + TinyMCE).
+4. **Symlink reparado**: `public/storage` apuntaba a una copia residual en `/home/webgdc/PortalPG2026/storage/app/public` (los ficheros nuevos no se servían) → repuntado al `storage/` real de la instalación; 0 ficheros pendientes de migrar.
+5. `.env`: eliminado `APP_URL` duplicado (quedó `https://web.gdc.gob.ve`), `SESSION_LIFETIME` 120→60, `TRUSTED_HOSTS=web.gdc.gob.ve` (`TRUSTED_PROXIES` vacío: no hay proxy delante), añadidas `BCRYPT_ROUNDS`, `LOGIN_LOCKOUT_ATTEMPTS/DECAY`, `PASSWORD_CHANGE_RATE_LIMIT`, `CONTACT_RETENTION_DAYS`, `AUDIT_RETENTION_DAYS`, y `chmod 600`.
+6. `optimize:clear` → `migrate --force` (**29/29**: índice + FK `nullOnDelete` de `activity_logs`) → `db:seed --class=PermissionSeeder --force` (**41 permisos**, incluye `audit.export`) → `pii:encrypt --dry-run` (**0** pendientes) → `webp:generate` (0 nuevos) → `optimize` + `view:cache`.
+7. Infraestructura: `php.ini` de FPM a 100M/110M/256M/60 + `expose_php=Off` y reinicio de FPM; `/etc/cron.d/portal` con `schedule:run` como `www-data`; vhost Nginx con los bloques `^~ /storage|/build|/images` + denegación de dotfiles (§14.2) y `nginx -t` + reload.
+8. `php artisan up` y verificación (tabla siguiente).
+
+**Las 7 condiciones de SECURITY.md §1 — verificadas 7/7 (R4 cerrado):**
+
+| # | Evidencia |
+|---|---|
+| 1 | `test ! -f public/install.php` → OK (⚠️ vuelve con cada `git reset --hard`: borrar tras cada despliegue) |
+| 2 | `config:show security.trusted_hosts` → `web.gdc.gob.ve`; `trusted_proxies` → vacío |
+| 3 | `config:show database.connections.pgsql.sslmode` → `require` |
+| 4 | `grep '^(upload_max_filesize\|post_max_size…)' /etc/php/8.3/fpm/php.ini` → 100M/110M/256M/60, `expose_php=Off` |
+| 5 | `curl .../storage/prueba.php` → **403**; `.../build/manifest.json` → 200 con `nosniff`; `.../.env` → **403** |
+| 6 | `/etc/cron.d/portal` presente; `php artisan schedule:run` sin errores |
+| 7 | `curl -I` → `Strict-Transport-Security: max-age=31536000` (app) + `max-age=63072000; preload` (Nginx) |
+
+**Resultado funcional:** `/`, `/noticias`, `/gacetas`, `/contacto`, `/sobre-nosotros`, `/entes`, `/sitemap.xml`, `/admin/login` → **200**; assets del build y subidas `/storage/**` → 200; sin errores HTTP en `storage/logs`. Copia residual `/home/webgdc/PortalPG2026` (360 MB, clon desactualizado en `aaaeb32`) eliminada el 2026-10-26, conservando su `.env` en el backup.
+
+**Rollback:** `git reset --hard aaaeb32345624cbb407fe7e19098c77894c761f4`, restaurar `.env` y `public-assets.tgz` del backup, reinstalar dependencias y `php artisan up`. Las migraciones aplicadas son **aditivas** (índice + cambio de FK), así que no requieren rollback de esquema; no se generó dump de la BD (ver PENDIENTES R6).
+
+**Pendientes tras el despliegue:** certificado TLS (el auto-firmado actual `CN=<IP>` **venció el 2026-06-19**, el navegador rechaza la conexión), copia de seguridad automática de la BD (no hay `pg_dump` instalado) y, como mejora, acotar `expires` a estáticos (§14.2).
 
 ---
 
@@ -809,7 +919,7 @@ Garantías de las suites:
 
 ### PHPUnit (`tests/Unit`, `tests/Feature`)
 
-- Ejecución: `./vendor/bin/phpunit` (o `--testsuite Unit,Feature`) — **228 tests / 1032 assertions**, en verde (3 skipped: requieren PostgreSQL o el symlink `public/storage`; 6 avisos preexistentes de `iconv` en LATIN9, intencionales).
+- Ejecución: `./vendor/bin/phpunit` (o `--testsuite Unit,Feature`) — **237 tests / 1032 assertions**, en verde (3 skipped: requieren PostgreSQL o el symlink `public/storage`; 6 avisos preexistentes de `iconv` en LATIN9, intencionales).
 - **Cobertura (desde R3, 2026-10-25):** con Xdebug 3.5.3 instalado, `./vendor/bin/phpunit --coverage-text --coverage-html coverage-html` → **82.22% de líneas** en `app/` (objetivo ≥80%); authn/authz/validación/cifrado ≈100% salvo el fallback de iconv de `App\Support\Latin9`. El HTML se genera en `/coverage-html` (ignorado por git).
 - **BD aislada**: `phpunit.xml` define `DB_CONNECTION=sqlite` / `DB_DATABASE=:memory:` (B2 cerrado) — `RefreshDatabase` migra en memoria por test, **nunca toca la BD de desarrollo**. El `APP_KEY` de `phpunit.xml` es una clave **exclusiva de tests**; no usar en producción.
 - Cobertura de flujos críticos:

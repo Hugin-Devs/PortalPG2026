@@ -178,18 +178,19 @@
   <table class="meta">
     <tr><th>Sistema</th><td>Portal institucional GDC (Portal2026) — sitio público + panel administrativo <code>/admin</code></td></tr>
     <tr><th>Stack</th><td>Laravel 10.50.2 · PHP ^8.3 · PostgreSQL 14+ · Bootstrap 5.3 / Vite</td></tr>
-    <tr><th>Fecha de instantánea</th><td>24 de octubre de 2026</td></tr>
-    <tr><th>Versión evaluada</th><td>Commit <code>7c6614b</code> (ronda de despliegue 2026-10-23/24)</td></tr>
+    <tr><th>Fecha de instantánea</th><td>26 de octubre de 2026</td></tr>
+    <tr><th>Versión evaluada</th><td>Commit <code>8e06f82</code> (desplegado en producción el 2026-10-25)</td></tr>
     <tr><th>Dirigido a</th><td><em>[PENDIENTE — completar con el destinatario]</em></td></tr>
     <tr><th>Clasificación</th><td>Documento oficial — Uso institucional</td></tr>
   </table>
 
   <div class="status-banner">
-    Estado global: LISTO PARA DESPLIEGUE CONDICIONADO
+    Estado global: DESPLEGADO EN PRODUCCIÓN (2026-10-25) — SALIDA A INTERNET PENDIENTE DE TLS
     <small>
       17 hallazgos del análisis: <strong>16 remediados</strong>, <strong>1 aceptado con controles compensatorios</strong>
-      (SC-02, Laravel 10 EOL — requisito institucional). La publicación queda sujeta a las
-      7 condiciones de despliegue (§8) y a las verificaciones pendientes de §9.
+      (SC-02, Laravel 10 EOL — requisito institucional). Las 7 condiciones de despliegue (§8) están
+      <strong>verificadas 7/7 el 2026-10-25</strong>; siguen abiertas las verificaciones de §9
+      (certificado TLS vencido y copia de seguridad de la BD).
     </small>
   </div>
 
@@ -246,14 +247,14 @@
   <tbody>
     <tr><td>SCA (dependencias)</td><td><code>composer audit</code> y <code>npm audit</code> contra advisories de GitHub</td><td><code>docs/composer-audit.json</code>, <code>docs/npm-audit.json</code></td></tr>
     <tr><td>SAST / revisión estática</td><td>Búsqueda de patrones peligrosos (SQL dinámico, eval, deserialización, extensiones de cliente, fuga de secretos) + revisión manual de autenticación, autorización, subidas y criptografía</td><td>Este informe §3–§4</td></tr>
-    <tr><td>Validación con pruebas</td><td>Suite PHPUnit (228 pruebas) con casos negativos de autorización, rate limiting, sanitización, cifrado y regresiones de cada hallazgo</td><td>Suite <code>tests/</code> del commit evaluado</td></tr>
+    <tr><td>Validación con pruebas</td><td>Suite PHPUnit (237 pruebas) con casos negativos de autorización, rate limiting, sanitización, cifrado y regresiones de cada hallazgo</td><td>Suite <code>tests/</code> del commit evaluado</td></tr>
     <tr><td>Inventario de suministro</td><td>SBOM CycloneDX 1.5 desde los lockfiles</td><td><code>docs/SBOM-Portal2026.json</code></td></tr>
   </tbody>
 </table>
 
 <h3>2.3 Limitaciones</h3>
 <ul>
-  <li>El <strong>DAST baseline se ejecutó contra el servidor local</strong> (OWASP ZAP 2.17.0, 2026-10-25: 0 altas / 1 media waiver / 2 bajas); queda pendiente un escaneo <strong>autenticado</strong> y su repetición contra el entorno de staging real una vez desplegado.</li>
+  <li>El <strong>DAST baseline se ejecutó contra el servidor local</strong> (OWASP ZAP 2.17.0, 2026-10-25: 0 altas / 1 media waiver / 2 bajas); queda pendiente un escaneo <strong>autenticado</strong> y su repetición contra el entorno de producción ya desplegado (§9).</li>
   <li>No se realizaron pruebas de denegación de servicio destructivas ni pentest de infraestructura de red.</li>
   <li>Sin CI: pruebas, cobertura y análisis se ejecutan de forma manual en cada release (ver §6).</li>
 </ul>
@@ -356,7 +357,7 @@
 <table class="data">
   <thead><tr><th>Verificación</th><th>Resultado (commit <code>7c6614b</code>)</th></tr></thead>
   <tbody>
-    <tr><td>Suite de pruebas PHPUnit</td><td><span class="ok">228 pruebas · 1032 aserciones · 0 fallos</span> (3 omitidas por requisitos de entorno)</td></tr>
+    <tr><td>Suite de pruebas PHPUnit</td><td><span class="ok">237 pruebas · 1032 aserciones · 0 fallos</span> (3 omitidas por requisitos de entorno)</td></tr>
     <tr><td>Suites E2E funcionales (bash + psql)</td><td><span class="ok">17/17 en verde</span> contra PostgreSQL local (2026-10-25)</td></tr>
     <tr><td>Cobertura de código (Xdebug)</td><td><span class="ok">82.22% de líneas</span> en <code>app/</code> (objetivo ≥80%); autenticación, autorización, validación y cifrado ≈100%</td></tr>
     <tr><td>DAST baseline (OWASP ZAP 2.17.0)</td><td><span class="ok">Ejecutado 2026-10-25</span> contra servidor local: 0 altas, 1 media (waiver de CSP ya registrado), 2 bajas, 4 informativas — informe en <code>docs/zap-baseline-2026-10-25.html</code></td></tr>
@@ -404,6 +405,15 @@
   </tbody>
 </table>
 
+<p>
+  <span class="ok">Verificadas 7/7 el 2026-10-25</span> en el servidor de producción durante el
+  despliegue real del commit <code>8e06f82</code>: <code>install.php</code> ausente, hosts de confianza
+  declarados (sin proxy delante), <code>DB_SSLMODE=require</code>, php.ini de FPM 100M/110M/256M/60,
+  ejecución de scripts bloqueada en <code>/storage</code> (403) con <code>nosniff</code> en los estáticos,
+  cron <code>schedule:run</code> en <code>/etc/cron.d/portal</code> y HSTS emitido por la aplicación y por
+  Nginx. Evidencia paso a paso en <code>docs/DOCUMENTACION.md</code> §14.L.
+</p>
+
 <p class="small">Checklist completo de primer arranque en <code>docs/DOCUMENTACION.md</code> §14 y <code>SECURITY.md</code> §1.</p>
 
 <!-- ============================ 9 ============================ -->
@@ -412,15 +422,18 @@
 <table class="data">
   <thead><tr><th style="width:8%">ID</th><th>Verificación</th><th style="width:26%">Estado</th></tr></thead>
   <tbody>
-    <tr><td>R4</td><td>Verificar las 7 condiciones de §8 en el servidor de producción (incluido <code>nosniff</code> en ficheros estáticos)</td><td><span class="pending">Pendiente</span></td></tr>
+    <tr><td>R4</td><td>Verificar las 7 condiciones de §8 en el servidor de producción (incluido <code>nosniff</code> en ficheros estáticos)</td><td><span class="ok">Cerrado 2026-10-25 (7/7)</span></td></tr>
+    <tr><td>R5</td><td><strong>Certificado TLS del dominio</strong>: el auto-firmado actual (<code>CN=&lt;IP&gt;</code>) venció el 2026-06-19 y el navegador rechaza la conexión a <code>https://web.gdc.gob.ve</code></td><td><span class="pending">Pendiente — bloquea la salida</span></td></tr>
+    <tr><td>R6</td><td><strong>Copia de seguridad de la BD</strong>: no hay <code>pg_dump</code>/<code>psql</code> en el servidor, por lo que no existe dump de la base de datos</td><td><span class="pending">Pendiente — bloquea la salida</span></td></tr>
     <tr><td>D6/E1</td><td>Cargar el listado real de entes afiliados (contenido del cliente)</td><td><span class="pending">Pendiente</span></td></tr>
-    <tr><td>—</td><td>DAST <strong>autenticado</strong> y repetición del baseline contra staging real tras el desplegue (mejora recomendada)</td><td><span class="warn">Recomendado</span></td></tr>
+    <tr><td>—</td><td>DAST <strong>autenticado</strong> y repetición del baseline contra el entorno ya desplegado (mejora recomendada)</td><td><span class="warn">Recomendado</span></td></tr>
   </tbody>
 </table>
 
 <p class="small">
-  Cerrado el 2026-10-25: <strong>R1</strong> (E2E 17/17), <strong>R2</strong> (baseline ZAP) y
-  <strong>R3</strong> (cobertura 82.22%).
+  Cerrado el 2026-10-25: <strong>R1</strong> (E2E 17/17), <strong>R2</strong> (baseline ZAP),
+  <strong>R3</strong> (cobertura 82.22%) y <strong>R4</strong> (7 condiciones de despliegue verificadas
+  en el servidor real durante el despliegue).
 </p>
 
 <!-- ============================ 10 ============================ -->
@@ -431,7 +444,7 @@
   para un portal institucional de su naturaleza</strong>: los 16 hallazgos remediados del análisis cubren
   autenticación, autorización, inyección/XSS, subida de archivos, integridad documental, protección de PII,
   auditoría y cadena de suministro, y cada remediación está blindada por pruebas automatizadas de regresión
-  (228 pruebas en verde).
+  (237 pruebas en verde).
 </p>
 <p>
   El <strong>único riesgo técnico residual asumido</strong> es el fin de soporte del framework Laravel 10,
@@ -457,7 +470,7 @@
     <tr><td><code>docs/cvss-scores.json</code></td><td>Vectores y puntuaciones CVSS v4.0 de los hallazgos</td></tr>
     <tr><td><code>docs/INFORME-VULNERABILIDADES.md</code></td><td>Informe completo de trabajo con el detalle de origen de cada hallazgo</td></tr>
     <tr><td><code>SECURITY.md</code></td><td>Registro de waivers, compensaciones y condiciones de despliegue</td></tr>
-    <tr><td>Suite <code>tests/</code></td><td>228 pruebas automatizadas, incluidas las de regresión de cada hallazgo</td></tr>
+    <tr><td>Suite <code>tests/</code></td><td>237 pruebas automatizadas, incluidas las de regresión de cada hallazgo</td></tr>
   </tbody>
 </table>
 

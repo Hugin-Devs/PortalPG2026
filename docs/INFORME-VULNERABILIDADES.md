@@ -79,7 +79,7 @@ Tras cuatro rondas de cierre (remediación inicial + auditoría comprobatoria + 
 
 `FILE-07` (cuotas de almacenamiento), `FILE-09` (sidecars WebP desde imágenes maliciosas), `INJ-03` (XSS reflejado), `INJ-05` (CRLF / open redirect), `INJ-06` (SSTI en Blade), `SC-05` (integridad de `public/vendor/tinymce`), `LOG-03` (exposición de archivos sensibles) y `PRIV-03` (trazabilidad para notificación de brechas). Seguimiento en `PENDIENTES.md` D. *Nota 2026-10-25: el baseline ZAP (pasivo) no cubre estos casos — siguen pendientes de pruebas activas en staging.*
 
-**Verificación final (2026-10-25):** **228 tests PHPUnit OK** (1032 assertions) · **cobertura 82.22%** (Xdebug) · pint passed · `composer audit` 0 activos + 5 ignorados justificados · `npm audit` 0 vulnerabilidades · **17/17 suites E2E** en verde contra PostgreSQL local · **baseline ZAP 2.17.0**: 0 altas / 1 media (waiver TinyMCE) / 2 bajas / 4 informativas (§1.d). Rondas anteriores: 180 tests (2026-10-23), 68 tests + 16/16 E2E (2026-10-08).
+**Verificación final (2026-10-25):** **237 tests PHPUnit OK** (1032 assertions) · **cobertura 82.22%** (Xdebug) · pint passed · `composer audit` 0 activos + 5 ignorados justificados · `npm audit` 0 vulnerabilidades · **17/17 suites E2E** en verde contra PostgreSQL local · **baseline ZAP 2.17.0**: 0 altas / 1 media (waiver TinyMCE) / 2 bajas / 4 informativas (§1.d). Rondas anteriores: 180 tests (2026-10-23), 68 tests + 16/16 E2E (2026-10-08).
 
 ---
 
@@ -109,7 +109,7 @@ Cierre de las tres verificaciones que bloqueaban la publicación:
 | **R2 — DAST baseline (OWASP ZAP 2.17.0)** | Spider de 67 URLs + passive scan contra `http://127.0.0.1:8000` → **0 altas / 1 media / 2 bajas / 4 informativas**. **Fixes:** cookie `XSRF-TOKEN` con `HttpOnly` (la app no usa `X-XSRF-TOKEN`) y `X-Powered-By` retirado en runtime. **Residual:** media = CSP `style-src unsafe-inline` (waiver TinyMCE §2/SECURITY.md); bajas = cuerpo estándar de la redirección de `/admin/login` (378 B, sin datos sensibles) y `nosniff` ausente en **ficheros estáticos** (no pasan por Laravel → añadido a la condición 5 de despliegue) | `docs/zap-baseline-2026-10-25.html` + `.json`; job reproducible `scripts/zap-baseline.yaml`; regresiones en `SecurityHeadersTest` |
 | **R3 — Cobertura de código** | Xdebug 3.5.3 (PHP 8.3 ZTS vs16) → **82.22% de líneas** en `app/` (objetivo ≥80%). Authn/authz/validación/cifrado ≈100% salvo el fallback de iconv de `App\Support\Latin9` (defensivo, no forzable en este runtime). Tests nuevos: `AdminPartnerCrudTest` (12), `AdminContactInboxTest` (8), `AdminSettingsControllerTest` (10) + 7 regresiones críticas | `php vendor/bin/phpunit --coverage-text`; informe HTML en `/coverage-html` (local) |
 
-**Suite total:** 180 → **228 tests** (1032 assertions, 0 fallos) · Pint en verde.
+**Suite total:** 180 → **237 tests** (1032 assertions, 0 fallos) · Pint en verde.
 
 ---
 
@@ -132,13 +132,13 @@ Cierre de las tres verificaciones que bloqueaban la publicación:
 | F2.1 | SCA | `composer audit --format=json`, `npm audit --json` | `composer-audit.json`, `npm-audit.json` |
 | F2.2 | SAST | `grep`/`Select-String` sobre PHP/Blade, revisión manual | §4 |
 | F2.4 | Config review | Lectura de `config/`, `.env.example`, `.htaccess` | §4.2 |
-| F2.5 | Validación de controles | `vendor/bin/phpunit --testdox` + `--coverage-text` (Xdebug) | **228/228 tests OK (1032 assertions), cobertura 82.22%**; ronda inicial: 68/68 |
+| F2.5 | Validación de controles | `vendor/bin/phpunit --testdox` + `--coverage-text` (Xdebug) | **237/237 tests OK (1032 assertions), cobertura 82.22%**; ronda inicial: 68/68 |
 | F3 | Explotación controlada | **Baseline ZAP 2.17.0** (spider + passive scan) ejecutado 2026-10-25; activo/fuzzing no ejecutado por reglas de engagement | `zap-baseline-2026-10-25.{html,json}` · activo pendiente en staging |
 | F4 | Informe | Markdown + CVSS v4.0 (`cvss` 3.6) + SBOM | `INFORME-VULNERABILIDADES.md`, `SBOM-Portal2026.json` |
 
 ### 2.3 Limitaciones
 
-- **DAST baseline ejecutado el 2026-10-25** con OWASP ZAP 2.17.0 contra el servidor local (0 altas / 1 media waiver / 2 bajas — §1.d). Queda pendiente la **revalidación autenticada y contra staging real** tras el desplegue, además del fuzzing/activo, que no se ejecutó por reglas de engagement.
+- **DAST baseline ejecutado el 2026-10-25** con OWASP ZAP 2.17.0 contra el servidor local (0 altas / 1 media waiver / 2 bajas — §1.d). Queda pendiente la **revalidación autenticada y la repetición contra el entorno de producción ya desplegado** (2026-10-25, ver `DOCUMENTACION.md` §14.L), además del fuzzing/activo, que no se ejecutó por reglas de engagement.
 - No se realizó pentest de infraestructura ni pruebas de denegación de servicio destructivas.
 - El `.env` real no fue inspeccionado para evitar exposición de secretos; se usó `.env.example` como referencia.
 
@@ -442,7 +442,7 @@ Cierre de las tres verificaciones que bloqueaban la publicación:
 
 ## 5. Resumen de pruebas y calidad de código
 
-- **PHPUnit (2026-10-25):** **228 tests, 1032 assertions, 100 % OK** (3 skipped requieren PostgreSQL o el symlink `public/storage`; 6 avisos preexistentes de `iconv` en LATIN9, intencionales). La suite cubre autenticación, permisos, contacto, rate limiting, XSS, sanitización HTML, uploads (extensión por contenido), gacetas (hash), PII (cifrado), headers de seguridad, CORS, cambio forzado de contraseña, restricción de roles, auditoría (37 tests), y desde la ronda R3 también CRUD de entes, bandeja de contacto y validación de configuración.
+- **PHPUnit (2026-10-25):** **237 tests, 1032 assertions, 100 % OK** (3 skipped requieren PostgreSQL o el symlink `public/storage`; 6 avisos preexistentes de `iconv` en LATIN9, intencionales). La suite cubre autenticación, permisos, contacto, rate limiting, XSS, sanitización HTML, uploads (extensión por contenido), gacetas (hash), PII (cifrado), headers de seguridad, CORS, cambio forzado de contraseña, restricción de roles, auditoría (37 tests), y desde la ronda R3 también CRUD de entes, bandeja de contacto y validación de configuración.
 - **Cobertura (Xdebug 3.5.3):** **82.22% de líneas** en `app/` (objetivo ≥80%); authn/authz/validación/cifrado ≈100% salvo el fallback de iconv de `App\Support\Latin9` (documentado).
 - **E2E (bash + psql):** **17/17 suites en verde** contra PostgreSQL local (2026-10-25).
 - **DAST baseline:** OWASP ZAP 2.17.0 → 0 altas / 1 media (waiver) / 2 bajas / 4 informativas (`zap-baseline-2026-10-25.html`).

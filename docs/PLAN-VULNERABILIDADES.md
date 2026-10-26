@@ -12,7 +12,7 @@
 Este documento define el **plan de análisis de vulnerabilidades** del Portal2026, alineado con los estándares de ciberseguridad vigentes en 2026 y adaptado a la finalidad y alcance reales del proyecto: un **portal web institucional gubernamental** (Gobierno de Distrito Capital) con:
 
 - **Sitio público informativo**: noticias, entes afiliados, gacetas oficiales, estructura organizativa, contacto.
-- **Panel administrativo** (`/admin`): gestión de contenidos con roles `superadmin`, `admin` y `editor` (38 permisos granulares).
+- **Panel administrativo** (`/admin`): gestión de contenidos con roles `superadmin`, `admin` y `editor` (41 permisos granulares).
 - **Datos personales (PII)**: formulario de contacto ciudadano (`contacts`) y cuentas de funcionarios (`users`).
 - **Documentos oficiales**: PDF/imágenes de Gacetas Oficiales, de integridad institucional crítica.
 
@@ -42,7 +42,7 @@ Este plan **no ejecuta** el análisis: define su alcance, metodología, casos de
 | Priorización de remediación | EPSS + CISA KEV | vigentes | Priorización de dependencias vulnerables |
 | Gobernanza / SGSI | ISO/IEC 27001:2022, NIST CSF 2.0 | vigentes | Contexto de gestión del riesgo |
 | Divulgación de vulnerabilidades | ISO/IEC 29147 / 30111 | vigentes | Procedimiento de reporte interno |
-| Hardening | CIS Benchmarks (PHP 8.x, Nginx/Apache, MySQL/MariaDB), CIS Controls v8.1 | vigentes | Revisión de configuración de infraestructura |
+| Hardening | CIS Benchmarks (PHP 8.x, Nginx, PostgreSQL), CIS Controls v8.1 | vigentes | Revisión de configuración de infraestructura |
 | Supply chain | SBOM (CycloneDX), OWASP Dependency-Check, `composer audit` / `npm audit` | vigentes | Fase 2.1 — SCA |
 
 ### 2.2 Marco legal aplicable (Venezuela)
@@ -67,12 +67,12 @@ Este plan **no ejecuta** el análisis: define su alcance, metodología, casos de
 | Autenticación | `GET|POST /admin/login` (`routes/web.php:40-41`) — fuera del middleware `auth` |
 | Panel administrativo | Todas las rutas `/admin/*` con middleware `auth` + `permission:<slug>` (`routes/web.php:43-127`) |
 | Puntos de subida de archivos | Medios (`MediaController`), imagen destacada (`NewsController`), logos de entes (`PartnerController`), gacetas PDF/imagen (`GacetaController`), videos (`VideoController`), logo del sitio (`SettingsController`) |
-| Lógica de autorización | `CheckPermission`, `User::hasPermission()`, roles y permisos (38 permisos / 3 roles) |
-| Capa de datos | MySQL 8/MariaDB — 13 tablas, en particular `users`, `contacts`, `posts`, `gacetas`, `permissions`, `role_permission` |
+| Lógica de autorización | `CheckPermission`, `User::hasPermission()`, roles y permisos (41 permisos / 3 roles) |
+| Capa de datos | PostgreSQL (producción: 13.23, encoding LATIN9 con conexión UTF8) — 19 tablas de la app + `migrations`, en particular `users`, `contacts`, `posts`, `gacetas`, `permissions`, `role_permission`, `activity_logs` |
 | Código frontend servido | Vistas Blade (incl. `{!! rendered_content !!}`), TinyMCE auto-hospedado, JS/Sass propios |
 | Dependencias | `composer.json`/`composer.lock` (Laravel 10.50.2 + paquetes), `package.json`/`package-lock.json` (TinyMCE, Bootstrap, Vite) |
 | Configuración de la app | `config/` (session, cors, hashing, filesystems, app), `.env.example`, `public/.htaccess` |
-| Infraestructura de despliegue | Servidor institucional Nginx/Apache + PHP + MySQL (requisitos §14.1 de DOCUMENTACION.md), permisos de `storage/`, `bootstrap/cache`, `.env` |
+| Infraestructura de despliegue | Servidor institucional Nginx + PHP-FPM 8.3 + PostgreSQL (requisitos §14.1 de DOCUMENTACION.md; desplegado el 2026-10-25 — §14.L), permisos de `storage/`, `bootstrap/cache`, `.env`, cron `/etc/cron.d/portal` |
 | Assets estáticos servidos | `/storage/*` (symlink a uploads), `public/video/*.mp4`, `public/vendor/tinymce` |
 
 ### 3.2 Fuera del alcance (*out of scope*)
@@ -162,7 +162,7 @@ Basada en PTES y NIST SP 800-115, adaptada al tamaño del proyecto. Duración to
 | 2.3 | **DAST** | OWASP ZAP (baseline + active scan) / Burp Suite | Las 13 rutas públicas, `POST /contacto`, `/buscar`, `GET|POST /admin/login` |
 | 2.4 | **Revisión de configuración** | Manual + scripts | Headers, sesión, `.env`, permisos de filesystem, TLS, `TrustHosts`, CORS, debug, `composer audit` |
 | 2.5 | **Pruebas manuales adversariales** | WSTG | Autorización (roles), uploads maliciosos, XSS almacenado, fuerza bruta, IDOR |
-| 2.6 | **Hardening de infraestructura** | CIS Benchmarks (Nginx/Apache, PHP, MySQL) | Servidor de despliegue §14 de DOCUMENTACION.md: permisos, usuarios de BD, exposición de servicios |
+| 2.6 | **Hardening de infraestructura** | CIS Benchmarks (Nginx, PHP, PostgreSQL) | Servidor de despliegue §14 de DOCUMENTACION.md: permisos, usuarios de BD, exposición de servicios |
 
 ### Fase 3 — Explotación controlada y validación (4 días, solo staging)
 
@@ -207,7 +207,7 @@ Cada caso mapea a OWASP Top 10:2025 y ASVS 5.0 (Nivel 2). Prioridad: **P1** (obl
 | AUTHZ-01 | Escalada de privilegios: `users.edit`/`users.create` asignan rol `superadmin` sin restricción (`UserController.php:30,56`) | ASVS V4.1 | P1 |
 | AUTHZ-02 | El rol `editor` puede enviar `status=published` vía API (`NewsController.php:37`) — regla "editor no publica" no forzada server-side | ASVS V4.1 | P1 |
 | AUTHZ-03 | IDOR en route-model binding (`{post}`, `{contact}`, `{user}`, `{gaceta}`, `{media}`): acceso cruzado entre usuarios | ASVS V4.2, WSTG-ATHZ-04 | P1 |
-| AUTHZ-04 | Bypass del middleware `permission` (parámetro manipulable, cobertura completa de rutas vs. 38 permisos) | ASVS V4.1 | P1 |
+| AUTHZ-04 | Bypass del middleware `permission` (parámetro manipulable, cobertura completa de rutas vs. 41 permisos) | ASVS V4.1 | P1 |
 | AUTHZ-05 | Bypass/abuso del bypass hardcodeado de `superadmin` (`CheckPermission.php:18-21`) | ASVS V4.1 | P2 |
 | AUTHZ-06 | Manipulación de `RoleController` (asignación de permisos) por rol distinto de superadmin | ASVS V4.1 | P1 |
 | AUTHZ-07 | Acceso directo a métodos/acciones sin ruta declarada (mass-assignment, verbos HTTP) | ASVS V4.1 | P2 |
