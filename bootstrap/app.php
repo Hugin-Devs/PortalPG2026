@@ -6,19 +6,19 @@ use App\Http\Middleware\Authenticate;
 use App\Http\Middleware\CheckPermission;
 use App\Http\Middleware\CheckRole;
 use App\Http\Middleware\EnsurePasswordChanged;
+use App\Http\Middleware\PreventRequestForgery as AppPreventRequestForgery;
 use App\Http\Middleware\PreventRequestsDuringMaintenance;
 use App\Http\Middleware\RedirectIfAuthenticated;
 use App\Http\Middleware\SanitizeLatin9Input;
 use App\Http\Middleware\TrimStrings;
 use App\Http\Middleware\TrustHosts;
 use App\Http\Middleware\TrustProxies;
-use App\Http\Middleware\VerifyCsrfToken;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
 use Illuminate\Foundation\Http\Middleware\ConvertEmptyStringsToNull;
 use Illuminate\Foundation\Http\Middleware\InvokeDeferredCallbacks;
-use Illuminate\Foundation\Http\Middleware\ValidateCsrfToken;
+use Illuminate\Foundation\Http\Middleware\PreventRequestForgery;
 use Illuminate\Foundation\Http\Middleware\ValidatePostSize;
 use Illuminate\Http\Middleware\HandleCors;
 
@@ -44,10 +44,11 @@ return Application::configure(basePath: dirname(__DIR__))
             AssignRequestId::class,
         ]);
 
-        // El grupo "web" por defecto trae ValidateCsrfToken; esta app usa su
-        // propia subclase (cookie XSRF-TOKEN con HttpOnly — fix ZAP R2).
+        // El grupo "web" por defecto trae PreventRequestForgery (antes
+        // VerifyCsrfToken); esta app usa su propia subclase (cookie XSRF-TOKEN
+        // con HttpOnly — fix ZAP R2).
         $middleware->web(replace: [
-            ValidateCsrfToken::class => VerifyCsrfToken::class,
+            PreventRequestForgery::class => AppPreventRequestForgery::class,
         ]);
 
         $middleware->alias([

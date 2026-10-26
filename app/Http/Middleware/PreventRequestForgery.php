@@ -2,10 +2,10 @@
 
 namespace App\Http\Middleware;
 
-use Illuminate\Foundation\Http\Middleware\VerifyCsrfToken as Middleware;
+use Illuminate\Foundation\Http\Middleware\PreventRequestForgery as Middleware;
 use Symfony\Component\HttpFoundation\Cookie;
 
-class VerifyCsrfToken extends Middleware
+class PreventRequestForgery extends Middleware
 {
     /**
      * The URIs that should be excluded from CSRF verification.
@@ -24,6 +24,10 @@ class VerifyCsrfToken extends Middleware
      * con ese header (todo el admin usa formularios clásicos con @csrf; no
      * hay ni una llamada a window.axios en las vistas). Endurecerla no
      * cambia el flujo CSRF y elimina la lectura de la cookie por script.
+     *
+     * Nota Laravel 13: el middleware ahora también acepta peticiones con
+     * `Sec-Fetch-Site: same-origin` sin token (hasValidOrigin); las peticiones
+     * sin esa cabecera (p. ej. curl/E2E) siguen validando el token clásico.
      */
     protected function newCookie($request, $config)
     {
@@ -36,7 +40,8 @@ class VerifyCsrfToken extends Middleware
             $config['secure'],
             true,
             false,
-            $config['same_site'] ?? null
+            $config['same_site'] ?? null,
+            $config['partitioned'] ?? false
         );
     }
 }

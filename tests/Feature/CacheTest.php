@@ -7,7 +7,10 @@ use App\Models\Partner;
 use App\Models\Post;
 use App\Models\User;
 use App\Support\CacheKeys;
+use Illuminate\Database\Eloquent\Collection as EloquentCollection;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Pagination\LengthAwarePaginator;
+use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Cache;
 use Tests\TestCase;
 
@@ -79,5 +82,59 @@ class CacheTest extends TestCase
         ]);
 
         $this->assertFalse(Cache::has(CacheKeys::ENTES_INDEX));
+    }
+
+    /**
+     * Invariante de config/cache.php `serializable_classes` (Fase 3 L13):
+     * el store "file" (producción) hace unserialize() con la allowlist; si
+     * falta una clase de las que la app cachea como objeto, la lectura se
+     * corrompe en silencio (__PHP_Incomplete_Class). Este test pasa los
+     * payloads reales por FileStore y exige roundtrip íntegro.
+     */
+    public function test_cache_serializable_classes_allowlist_roundtrips_cached_payloads(): void
+    {
+        $allowed = config('cache.serializable_classes');
+        $this->assertIsArray($allowed, 'Falta cache.serializable_classes en config/cache.php');
+        $this->assertContains(EloquentCollection::class, $allowed);
+        $this->assertContains(Post::class, $allowed);
+
+        $user = User::factory()->create();
+        $category = Category::factory()->create();
+        Post::create([
+            'user_id' => $user->id,
+            'category_id' => $category->id,
+            'title' => 'Post para allowlist',
+            'slug' => 'post-allowlist',
+            'excerpt' => 'Resumen',
+            'content' => '<p>Contenido</p>',
+            'status' => 'published',
+            'is_featured' => true,
+        ]);
+
+        $file = Cache::store('file');
+        $key = 'allowlist-roundtrip-test';
+
+        // Payload idéntico al de HomeController (Collection de Post + relación
+        // category eager + casts datetime → Carbon).
+        $file->put($key, Post::with('category')->get(), 60);
+        $back = $file->get($key);
+
+        $this->assertInstanceOf(EloquentCollection::class, $back);
+        $this->assertCount(1, $back);
+        $this->assertInstanceOf(Post::class, $back[0]);
+        $this->assertSame('Post para allowlist', $back[0]->title);
+        $this->assertInstanceOf(Category::class, $back[0]->category);
+        $this->assertInstanceOf(Carbon::class, $back[0]->created_at);
+
+        // Payload idéntico al de GacetaController::index (cachea ->paginate()).
+        $paginator = new LengthAwarePaginator($back, $back->count(), 12, 1);
+        $file->put($key, $paginator, 60);
+        $backPag = $file->get($key);
+
+        $this->assertInstanceOf(LengthAwarePaginator::class, $backPag);
+        $this->assertInstanceOf(Post::class, $backPag->items()[0]);
+        $this->assertInstanceOf(Category::class, $backPag->items()[0]->category);
+
+        $file->forget($key);
     }
 }
