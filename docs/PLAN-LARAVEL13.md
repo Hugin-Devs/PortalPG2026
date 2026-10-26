@@ -99,14 +99,15 @@
 
 ---
 
-## 4. Fase 2 — Laravel 11 → 12 (riesgo BAJO)
+## 4. Fase 2 — Laravel 11 → 12 (riesgo BAJO) ✅ (2026-10-26, commit `42edfe3`)
 
-- [ ] `laravel/framework` → `^12` (última 12.69.x)
-- [ ] Bump de dependencias: Symfony `^7.2`, Carbon `^3.7`, `phpunit` puede quedarse en `^11.5` o subir; collision/ignition/tinker según soporte
-- [ ] Revisar guía oficial 11→12 en el momento (pocos breaking changes: firmas de métodos y dependencias)
-- [ ] Mantener `^8.3` en PHP
+- [x] `laravel/framework` → **`^12.0`** (lock: **v12.70.1**)
+- [x] Revisión de guía oficial 11→12 contra el código: sin uso de `HasUuids`, `mergeIfMissing`, `Concurrency`, Blueprint manual ni `local` disk implícito; todas las reglas `image` llevan `mimes` explícito sin SVG → **0 breaking changes aplicables**
+- [x] Carbon 3 ya presente (3.15.1) · Symfony 7.4 · PHPUnit se queda en `^11.5` ✅
+- [x] **`audit.ignore` eliminado de `composer.json`**: 12.70.1 está fuera del rango de los 5 advisories (12.60.0/12.61.1/12.68.0/12.69.0) → `composer audit` reporta **0 advisories, 0 waivers** (los waivers EOL de Laravel 10 quedan formalmente obsoletos)
 
-**Gates de salida:** mismos que Fase 1 (Pint + tests + E2E + audit + smoke).
+**Gates de salida:** Pint ✅ · **228 tests / 1032 aserciones en verde** ✅ · `composer audit --locked` **0 activos, 0 ignorados** ✅ · `schedule:list` OK ✅ · `artisan about` → 12.70.1 ✅
+**Pendiente (compartido con Fase 1):** E2E 17/17 + smoke LATIN9 en servidor/staging.
 
 ---
 
