@@ -45,7 +45,10 @@ check 'grep -qE "card-img-top[^>]*loading=\"lazy\"" "$HTTP_BODY"' 'grid /noticia
 http "$E2E_BASE/entes"
 check 'grep -q "height=\"70\" loading=\"lazy\"" "$HTTP_BODY"' 'grid /entes con lazy' '/entes sin lazy'
 http "$E2E_BASE/sobre-nosotros"
-check 'grep -q "height=\"30\" loading=\"lazy\"" "$HTTP_BODY"' 'logos footer con lazy' 'logos footer sin lazy'
+# El bloque "Entes Afiliados" del footer está oculto (módulo en preparación,
+# equipo externo — PENDIENTES E5): ya no hay logos de partners en el pie.
+check '! grep -q "footer-text\">Entes<" "$HTTP_BODY"' 'footer sin Entes (oculto)' 'footer muestra Entes'
+check '! grep -q "Entes Afiliados" "$HTTP_BODY"' 'sin bloque Entes Afiliados en footer' 'bloque Entes Afiliados visible'
 http "$E2E_BASE/noticias/$slug"
 check '! grep -qE "img-fluid[^>]*loading=\"lazy\"" "$HTTP_BODY"' 'imagen destacada del articulo eager' 'articulo con lazy (LCP)'
 

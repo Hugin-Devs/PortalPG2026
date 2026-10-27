@@ -163,7 +163,7 @@ Portal2026/
 | value | text | nullable |
 | timestamps | | |
 
-Claves: `social_*` (7), `contact_*` (5) y las generales `site_name`, `site_logo`, `nav_funcionarios_url`, `nav_jubilados_url` (panel `/admin/configuracion`). Los valores por defecto de las generales viven en `Setting::defaults()`: el sitio funciona **sin filas** en la tabla.
+Claves: `social_*` (7), `contact_*` (5) y las generales `site_name`, `site_logo`, `nav_funcionarios_url`, `nav_jubilados_url`, `nav_intranet_url` (panel `/admin/configuracion`). Los valores por defecto de las generales viven en `Setting::defaults()`: el sitio funciona **sin filas** en la tabla.
 
 ### 4.8 org_members (Estructura Organizativa)
 | Campo | Tipo | Notas |
@@ -317,7 +317,7 @@ Todas las rutas de gestión llevan además `middleware('permission:...')` (ver s
 | `ContactController` | `editInfo, updateInfo, messages, showMessage, destroyMessage` | ✅ Info de contacto en `settings` (`contact_address/phone/email/hours/map_url`) + bandeja de mensajes (`contacts`); parcial público `_contact-info` con defaults |
 | `RoleController` | `index, update` | ✅ Matriz rol×permiso (un formulario JS por rol); `index` ordena en 3 niveles igual que el sidebar: `group` → `module` → acción (`FIELD()` sobre la parte final del slug); `update` borra y reinserta los permisos del rol |
 | `RrssController` | `index, update` | ✅ Redes sociales: 7 settings `social_facebook/instagram/youtube/x/threads/telegram/whatsapp` — **multi-línea (una URL por línea = varias cuentas por red)**: validación línea a línea (`filter_var(FILTER_VALIDATE_URL)` + `^https?://`, mensaje «La línea N no es una URL válida», `max:4000`) y guardado normalizado (CRLF→LF, sin líneas vacías) |
-| `SettingsController` | `index, update` | ✅ Identidad / Enlaces: `site_name` (required ≤100) + enlaces del navbar (`nav_funcionarios_url`, `nav_jubilados_url`: URL absoluta válida **o** ruta `/...` sin `..` con `file_exists` en `public/`; vacío = ocultar ítem) + logo (upload `image` ≤2 MB a `settings/logo.{ext}` en disco `public`, checkbox "quitar logo"); redirige con flash |
+| `SettingsController` | `index, update` | ✅ Identidad / Enlaces: `site_name` (required ≤100) + enlaces del navbar (`nav_funcionarios_url`, `nav_jubilados_url`, `nav_intranet_url`: URL absoluta válida **o** ruta `/...` sin `..` con `file_exists` en `public/`; vacío = ocultar ítem) + logo (upload `image` ≤2 MB a `settings/logo.{ext}` en disco `public`, checkbox "quitar logo"); redirige con flash |
 | `GacetaController` | `index, store, edit, update, destroy` | ✅ Gacetas Oficiales: subida a `gacetas/` en disco `public` (PDF/imagen ≤20 MB), `numero` (solo dígitos) + `fecha`; `update` puede reemplazar el archivo (borra el anterior); `destroy` borra archivo físico |
 | `VideoController` | `index, store, destacar, destroy` | ✅ Videos (D7): pestaña 1 carga YouTube (URL validada por regex → `embed_url`) **o** archivo (mp4/webm/ogg ≤100 MB a `videos/` en disco `public`); pestaña 2 marca **un solo** `is_featured` (radio + "Ninguno" limpia todos); `destroy` borra archivo físico |
 
@@ -329,7 +329,7 @@ Todas las rutas de gestión llevan además `middleware('permission:...')` (ver s
 
 | Archivo | Descripción |
 |---|---|
-| `layouts/public.blade.php` | Layout público: header con logo y título desde `settings` + **navbar configurable** (ítems Funcionarios Activos/Jubilados ocultos si su enlace está vacío) + footer |
+| `layouts/public.blade.php` | Layout público: header con logo y título desde `settings` + **navbar configurable** (ítems Funcionarios Activos/Jubilados/Intranets GDC ocultos si su enlace está vacío) + footer; enlaces y bloque "Entes Afiliados" **ocultos con comentario Blade** (módulo en preparación — PENDIENTES E5) |
 | `layouts/admin.blade.php` | Layout admin: sidebar con **3 secciones** — "Gestión Noticias" (collapse "Multimedia" con "Medios"/"Videos" + "Gacetas"), "Gestión Portal" (Categorías, Entes Afiliados, Sobre Nosotros, Contacto, Mensajes, Estructura Org., Redes Sociales) y "Configuración Portal" (Identidad / Enlaces, Usuarios, Roles y Permisos); cabecera de sección visible si el rol tiene **algún** permiso de sus ítems vía `User::hasAnyPermission()` (lista de slugs en `@php`), cada ítem solo con su permiso vía `hasPermission()`; collapse Multimedia abierto en `admin.media.*`/`admin.videos.*` (el `ul#mmMenu` lleva `flex-nowrap`: sin él, `.nav { flex-wrap: wrap }` + `flex-direction: column` hacía que "Medios"/"Videos" se envolvieran a una columna lateral durante la animación de `height` de Bootstrap Collapse) + topbar + main; título y logo desde `settings` |
 
 ### 7.2 Públicas (`resources/views/public/`)
@@ -372,7 +372,7 @@ Todas las rutas de gestión llevan además `middleware('permission:...')` (ver s
 | Sobre Nosotros | `about/index.blade.php` | ✅ Edición inline |
 | Contacto | `contact/{index,messages,message-show}` | ✅ Info (5 campos) + bandeja con estado Nuevo/Leído, detalle y borrado |
 | Redes Sociales | `rrss/index.blade.php` | ✅ 7 URLs de redes (vacío = oculto en el sitio) |
-| Identidad / Enlaces | `settings/index.blade.php` | ✅ Nombre del sitio + logo (preview/quitar) + 2 enlaces del navbar; vacío = ocultar ítem |
+| Identidad / Enlaces | `settings/index.blade.php` | ✅ Nombre del sitio + logo (preview/quitar) + 3 enlaces del navbar (Funcionarios Activos, Jubilados, Intranets GDC); vacío = ocultar ítem |
 | Roles y permisos | `roles/index.blade.php` | ✅ Matriz con envío JS; doble cabecera: categoría (`table-secondary`) + módulo (`table-light`, clase `perm-module`), permisos indentados |
 
 ### 7.4 Vistas de error (`resources/views/errors/`)
@@ -707,7 +707,7 @@ php artisan optimize             # config:cache + route:cache + view:cache
 5. Ejecutar `composer audit` y revisar cualquier advisory activo (desde la migración a Laravel 13 no hay bloque `audit.ignore` en `composer.json`: **0 advisories, 0 waivers** — cualquier ID ignorado que aparezca debe justificarse por escrito en SECURITY.md §2).
 6. Permisos: `storage/` y `bootstrap/cache/` deben ser escribibles por el usuario de PHP-FPM/Apache, p. ej. `chown -R www-data:www-data storage bootstrap/cache`.
 7. `.env` con permisos restrictivos (`chmod 600 .env`) y fuera de la raíz web.
-8. Cargar contenido real: entes (`PartnerSeeder` está vacío), URLs de redes sociales desde `/admin/rrss` y enlaces de "Intranet GDC" (Funcionarios Activos / Jubilados) desde `/admin/configuracion` (vacío = ítem oculto); verificar `/admin/login`.
+8. Cargar contenido real: entes (`PartnerSeeder` está vacío), URLs de redes sociales desde `/admin/rrss` y enlaces de "Intranet GDC" (Funcionarios Activos / Jubilados / Intranets GDC) desde `/admin/configuracion` (vacío = ítem oculto); verificar `/admin/login`.
 
 #### G. Actualizaciones posteriores (procedimiento ejecutado el 2026-10-25)
 

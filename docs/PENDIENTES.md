@@ -15,6 +15,9 @@
 
 - [ ] **E1 — Listado de entes afiliados** (bloquea D6)
 
+- [ ] **E5 — Reactivar los enlaces Entes**  
+  Ocultos con comentario Blade el 2026-10-27 (`layouts/public.blade.php`: navbar, enlace del footer y bloque "Entes Afiliados") mientras un equipo externo prepara el módulo de entes. Las rutas `/entes` siguen vivas. Reactivar descomentando los 3 bloques y restaurando las aserciones de `test-entes.sh`/`test-categorias.sh`.
+
 ## B. Pre-release (bloquean la publicación / el release)
 
 - [ ] **R5 — Certificado TLS del dominio**  

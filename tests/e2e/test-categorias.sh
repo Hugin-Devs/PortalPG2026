@@ -43,22 +43,22 @@ http "$E2E_BASE/noticias"
 idx_of() { grep -boF "$1" "$HTTP_BODY" | head -1 | cut -d: -f1; }
 iInicio=$(idx_of 'footer-text">Inicio')
 iNoticias=$(idx_of 'footer-text">Noticias')
-iEntes=$(idx_of 'footer-text">Entes')
 iSobre=$(idx_of 'footer-text">Sobre Nosotros')
 iGacetas=$(idx_of 'footer-text">Gacetas Oficiales')
 iContacto=$(idx_of 'footer-text">Contacto')
 [ -z "$iInicio" ] && iInicio=-1; [ -z "$iNoticias" ] && iNoticias=-1
-[ -z "$iEntes" ] && iEntes=-1; [ -z "$iSobre" ] && iSobre=-1
+[ -z "$iSobre" ] && iSobre=-1
 [ -z "$iGacetas" ] && iGacetas=-1; [ -z "$iContacto" ] && iContacto=-1
 check '[ "$iGacetas" -gt 0 ]' 'footer tiene Gacetas Oficiales' 'falta Gacetas en footer'
+# El enlace Entes del footer está oculto (módulo en preparación, equipo externo)
+if grep -q 'footer-text">Entes<' "$HTTP_BODY"; then fail 'footer muestra Entes (oculto hasta reactivación)'; fi
 order_ok=1
 if [ "$iNoticias" -le "$iInicio" ]; then order_ok=0; fi
-if [ "$iEntes" -le "$iNoticias" ]; then order_ok=0; fi
-if [ "$iSobre" -le "$iEntes" ]; then order_ok=0; fi
+if [ "$iSobre" -le "$iNoticias" ]; then order_ok=0; fi
 if [ "$iGacetas" -le "$iSobre" ]; then order_ok=0; fi
 if [ "$iContacto" -le "$iGacetas" ]; then order_ok=0; fi
-check '[ "$order_ok" = 1 ]' 'orden footer: Inicio | Noticias | Entes | Sobre Nosotros | Gacetas Oficiales | Contacto' \
-  "orden incorrecto: Inicio=$iInicio Noticias=$iNoticias Entes=$iEntes Sobre=$iSobre Gacetas=$iGacetas Contacto=$iContacto"
+check '[ "$order_ok" = 1 ]' 'orden footer: Inicio | Noticias | Sobre Nosotros | Gacetas Oficiales | Contacto' \
+  "orden incorrecto: Inicio=$iInicio Noticias=$iNoticias Sobre=$iSobre Gacetas=$iGacetas Contacto=$iContacto"
 check 'grep -q "gacetas" "$HTTP_BODY"' 'footer linkea a /gacetas' 'falta link a gacetas'
 
 echo '--- 5. Smoke ---'

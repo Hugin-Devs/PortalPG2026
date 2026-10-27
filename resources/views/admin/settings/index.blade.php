@@ -64,10 +64,16 @@
                     @error('nav_funcionarios_url') <div class="invalid-feedback">{{ $message }}</div> @enderror
                 </div>
 
-                <div class="mb-0">
+                <div class="mb-3">
                     <label for="nav_jubilados_url" class="fw-bold">Jubilados</label>
                     <input type="text" name="nav_jubilados_url" id="nav_jubilados_url" class="form-control @error('nav_jubilados_url') is-invalid @enderror" maxlength="255" placeholder="https://... o /documentos/... (vacío = ocultar)" value="{{ old('nav_jubilados_url', $settings['nav_jubilados_url']) }}">
                     @error('nav_jubilados_url') <div class="invalid-feedback">{{ $message }}</div> @enderror
+                </div>
+
+                <div class="mb-0">
+                    <label for="nav_intranet_url" class="fw-bold">Intranets GDC</label>
+                    <input type="text" name="nav_intranet_url" id="nav_intranet_url" class="form-control @error('nav_intranet_url') is-invalid @enderror" maxlength="255" placeholder="https://... o /documentos/... (vacío = ocultar)" value="{{ old('nav_intranet_url', $settings['nav_intranet_url']) }}">
+                    @error('nav_intranet_url') <div class="invalid-feedback">{{ $message }}</div> @enderror
                 </div>
             </div>
         </div>

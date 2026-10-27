@@ -117,6 +117,56 @@ class AdminSettingsControllerTest extends TestCase
         ]);
     }
 
+    public function test_intranet_url_is_saved_and_validated_like_the_others(): void
+    {
+        // Válido: URL absoluta
+        $this->actingAs($this->superadmin())->put('/admin/configuracion', [
+            'site_name' => 'Portal GDC',
+            'nav_funcionarios_url' => '',
+            'nav_jubilados_url' => '',
+            'nav_intranet_url' => 'https://intranet.example.gob.ve/',
+        ])->assertRedirect('/admin/configuracion')->assertSessionHas('success');
+
+        $this->assertDatabaseHas('settings', [
+            'key' => 'nav_intranet_url',
+            'value' => 'https://intranet.example.gob.ve/',
+        ]);
+
+        // Inválido: rechaza con la misma validación que los otros enlaces
+        $this->actingAs($this->superadmin())->put('/admin/configuracion', [
+            'site_name' => 'Portal GDC',
+            'nav_funcionarios_url' => '',
+            'nav_jubilados_url' => '',
+            'nav_intranet_url' => 'intranet-sin-esquema',
+        ])->assertSessionHasErrors('nav_intranet_url');
+
+        $this->assertDatabaseMissing('settings', [
+            'key' => 'nav_intranet_url',
+            'value' => 'intranet-sin-esquema',
+        ]);
+    }
+
+    public function test_intranet_url_empty_hides_the_dropdown_item(): void
+    {
+        $this->actingAs($this->superadmin())->put('/admin/configuracion', [
+            'site_name' => 'Portal GDC',
+            'nav_funcionarios_url' => '',
+            'nav_jubilados_url' => '',
+            'nav_intranet_url' => '',
+        ])->assertRedirect('/admin/configuracion');
+
+        $this->assertDatabaseHas('settings', ['key' => 'nav_intranet_url', 'value' => '']);
+
+        // La vista pública solo emite el ítem si la URL no está vacía
+        $body = $this->get('/')->getContent();
+        $this->assertStringNotContainsString('Intranets GDC', $body);
+
+        Setting::where('key', 'nav_intranet_url')->update(['value' => 'https://intranet.example.gob.ve/']);
+        $body = $this->get('/')->getContent();
+        $this->assertStringContainsString('Intranets GDC', $body);
+        $this->assertStringContainsString('https://intranet.example.gob.ve/', $body);
+    }
+
     public function test_logo_upload_stores_file_and_sidecar(): void
     {
         Storage::fake('public');

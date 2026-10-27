@@ -59,6 +59,7 @@ class SettingsController extends Controller
             'site_name' => ['required', 'string', 'max:100'],
             'nav_funcionarios_url' => ['nullable', 'string', 'max:255', $validateLink],
             'nav_jubilados_url' => ['nullable', 'string', 'max:255', $validateLink],
+            'nav_intranet_url' => ['nullable', 'string', 'max:255', $validateLink],
             'logo' => ['nullable', 'image', 'mimes:jpeg,png,jpg,gif,webp', 'max:2048'],
             'remove_logo' => ['nullable', 'boolean'],
         ]);
@@ -66,6 +67,7 @@ class SettingsController extends Controller
         Setting::updateOrCreate(['key' => 'site_name'], ['value' => trim($data['site_name'])]);
         Setting::updateOrCreate(['key' => 'nav_funcionarios_url'], ['value' => trim($data['nav_funcionarios_url'] ?? '')]);
         Setting::updateOrCreate(['key' => 'nav_jubilados_url'], ['value' => trim($data['nav_jubilados_url'] ?? '')]);
+        Setting::updateOrCreate(['key' => 'nav_intranet_url'], ['value' => trim($data['nav_intranet_url'] ?? '')]);
 
         if ($request->hasFile('logo')) {
             $this->deleteLogo();
