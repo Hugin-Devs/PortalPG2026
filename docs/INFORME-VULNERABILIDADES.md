@@ -79,7 +79,7 @@ Tras cuatro rondas de cierre (remediación inicial + auditoría comprobatoria + 
 
 `FILE-07` (cuotas de almacenamiento), `FILE-09` (sidecars WebP desde imágenes maliciosas), `INJ-03` (XSS reflejado), `INJ-05` (CRLF / open redirect), `INJ-06` (SSTI en Blade), `SC-05` (integridad de `public/vendor/tinymce`), `LOG-03` (exposición de archivos sensibles) y `PRIV-03` (trazabilidad para notificación de brechas). Seguimiento en `PENDIENTES.md` D. *Nota 2026-10-25: el baseline ZAP (pasivo) no cubre estos casos — siguen pendientes de pruebas activas en staging.*
 
-**Verificación final (2026-10-25):** **237 tests PHPUnit OK** (1032 assertions) · **cobertura 82.22%** (Xdebug) · pint passed · `composer audit` 0 activos + 5 ignorados justificados · `npm audit` 0 vulnerabilidades · **17/17 suites E2E** en verde contra PostgreSQL local · **baseline ZAP 2.17.0**: 0 altas / 1 media (waiver TinyMCE) / 2 bajas / 4 informativas (§1.d). Rondas anteriores: 180 tests (2026-10-23), 68 tests + 16/16 E2E (2026-10-08).
+**Verificación final (2026-10-26, rama `Laravel13-Dev`):** **291 tests PHPUnit OK (301 totales)** (1325 assertions) · **cobertura 97.58%** (Xdebug, re-validada sobre Laravel 13) · pint passed · `composer audit --locked` **0 activos / 0 waivers** · `npm audit` 0 · **E2E 17/17** (ejecutados sobre Laravel 10 y sobre Laravel 13) · **baseline ZAP** ejecutado 2026-10-25 y repetido 2026-10-26 con el mismo perfil (sin regresiones). Rondas anteriores: 237 tests / 1032 assertions (2026-10-25), 180 tests (F6), 68 tests + 16/16 E2E (2026-10-08).
 
 ---
 
@@ -111,6 +111,12 @@ Cierre de las tres verificaciones que bloqueaban la publicación:
 
 **Suite total:** 180 → **237 tests** (1032 assertions, 0 fallos) · Pint en verde.
 
+**Re-validación en Laravel 13 (2026-10-26):** tras la migración 10 → 11 → 12 → 13.38.0 (rama `Laravel13-Dev`),
+todo el gate se reprodujo y quedó en verde — 291 tests (301 totales, 1325 assertions), cobertura 97.58%,
+gates pgsql UTF-8 y LATIN9 (301 tests c/u), E2E 17/17, audits 0/0, y **baseline ZAP con tres pasadas:
+2026-10-25 (L10), 2026-10-26 (L13) y final tras el hardening (CSP de nonce + redirects vacíos) con
+0 altas / 0 medias / 1 baja / 4 informativas** (`zap-baseline-final-2026-10-26.{html,json}`).
+
 ---
 
 ## 2. Alcance y metodología
@@ -132,13 +138,13 @@ Cierre de las tres verificaciones que bloqueaban la publicación:
 | F2.1 | SCA | `composer audit --format=json`, `npm audit --json` | `composer-audit.json`, `npm-audit.json` |
 | F2.2 | SAST | `grep`/`Select-String` sobre PHP/Blade, revisión manual | §4 |
 | F2.4 | Config review | Lectura de `config/`, `.env.example`, `.htaccess` | §4.2 |
-| F2.5 | Validación de controles | `vendor/bin/phpunit --testdox` + `--coverage-text` (Xdebug) | **237/237 tests OK (1032 assertions), cobertura 82.22%**; ronda inicial: 68/68 |
+| F2.5 | Validación de controles | `vendor/bin/phpunit --testdox` + `--coverage-text` (Xdebug) | **291/291 tests OK (301 totales, 1325 assertions), cobertura 97.58%** (2026-10-26, Laravel 13); gates pgsql UTF-8 y LATIN9: 301 tests c/u |
 | F3 | Explotación controlada | **Baseline ZAP 2.17.0** (spider + passive scan) ejecutado 2026-10-25; activo/fuzzing no ejecutado por reglas de engagement | `zap-baseline-2026-10-25.{html,json}` · activo pendiente en staging |
 | F4 | Informe | Markdown + CVSS v4.0 (`cvss` 3.6) + SBOM | `INFORME-VULNERABILIDADES.md`, `SBOM-Portal2026.json` |
 
 ### 2.3 Limitaciones
 
-- **DAST baseline ejecutado el 2026-10-25** con OWASP ZAP 2.17.0 contra el servidor local (0 altas / 1 media waiver / 2 bajas — §1.d). Queda pendiente la **revalidación autenticada y la repetición contra el entorno de producción ya desplegado** (2026-10-25, ver `DOCUMENTACION.md` §14.L), además del fuzzing/activo, que no se ejecutó por reglas de engagement.
+- **DAST baseline ejecutado el 2026-10-25** con OWASP ZAP 2.17.0 contra el servidor local (0 altas / 1 media waiver / 2 bajas — §1.d) y **repetido el 2026-10-26 sobre Laravel 13** con idéntico perfil (`zap-baseline-laravel13-2026-10-26.{html,json}`). Queda pendiente la **revalidación autenticada y la repetición contra el entorno de producción ya desplegado** (2026-10-25, ver `DOCUMENTACION.md` §14.L), además del fuzzing/activo, que no se ejecutó por reglas de engagement.
 - No se realizó pentest de infraestructura ni pruebas de denegación de servicio destructivas.
 - El `.env` real no fue inspeccionado para evitar exposición de secretos; se usó `.env.example` como referencia.
 
@@ -442,8 +448,8 @@ Cierre de las tres verificaciones que bloqueaban la publicación:
 
 ## 5. Resumen de pruebas y calidad de código
 
-- **PHPUnit (2026-10-25):** **237 tests, 1032 assertions, 100 % OK** (3 skipped requieren PostgreSQL o el symlink `public/storage`; 6 avisos preexistentes de `iconv` en LATIN9, intencionales). La suite cubre autenticación, permisos, contacto, rate limiting, XSS, sanitización HTML, uploads (extensión por contenido), gacetas (hash), PII (cifrado), headers de seguridad, CORS, cambio forzado de contraseña, restricción de roles, auditoría (37 tests), y desde la ronda R3 también CRUD de entes, bandeja de contacto y validación de configuración.
-- **Cobertura (Xdebug 3.5.3):** **82.22% de líneas** en `app/` (objetivo ≥80%); authn/authz/validación/cifrado ≈100% salvo el fallback de iconv de `App\Support\Latin9` (documentado).
+- **PHPUnit (2026-10-26, Laravel 13 + ronda de hardening):** **291 en verde / 301 totales, 1325 assertions, 100 % OK** (3 skipped requieren PostgreSQL o el symlink `public/storage`; 6 avisos preexistentes de `iconv` en LATIN9, intencionales).
+- **Cobertura (Xdebug 3.5.3):** **97.58% de líneas total** (app 98.05%; objetivo ≥90% superado, 2026-10-26); authn/authz/validación/cifrado ≈100% salvo el fallback de iconv de `App\Support\Latin9`.
 - **E2E (bash + psql):** **17/17 suites en verde** contra PostgreSQL local (2026-10-25).
 - **DAST baseline:** OWASP ZAP 2.17.0 → 0 altas / 1 media (waiver) / 2 bajas / 4 informativas (`zap-baseline-2026-10-25.html`).
 - **Pint / lint:** `vendor/bin/pint --test` **pasa limpio**; se ejecuta como gate antes de cada despliegue.

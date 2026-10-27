@@ -24,6 +24,8 @@
   <source>
     <include>
       <directory suffix=".php">./app</directory>
+      <!-- Seeders: lógica de negocio (cifrados, fechas, idempotencia) con tests propios -->
+      <directory suffix=".php">./database/seeders</directory>
     </include>
   </source>
 </phpunit>

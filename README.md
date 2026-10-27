@@ -6,7 +6,7 @@ Portal web institucional del **Gobierno de Distrito Capital (GDC)**: sitio infor
 
 | Componente | Tecnología |
 |---|---|
-| Backend | Laravel 10 (PHP 8.3+), Blade |
+| Backend | Laravel 13 (PHP 8.3+), Blade — producción aún en Laravel 10 hasta el despliegue del upgrade (U1) |
 | Frontend | Bootstrap 5.3 + Sass, Vite, JavaScript vanilla |
 | Base de datos | PostgreSQL 14+ recomendado (probado con 18.6). Producción: **13.23 / LATIN9** con conexión UTF8 |
 | Editor | TinyMCE 8 auto-hospedado (GPL), Font Awesome y fuentes locales (funciona offline) |
@@ -18,7 +18,7 @@ Sin Livewire, Vue, React ni jQuery.
 Toda la planificación y los entregables viven en **`docs/`**:
 
 - **[docs/DOCUMENTACION.md](docs/DOCUMENTACION.md)** — fuente de verdad del proyecto: esquema de BD, rutas, controladores, vistas, roles y permisos, seeders, **checklist de despliegue en producción (§14)** y tests (§16).
-- **[docs/PENDIENTES.md](docs/PENDIENTES.md)** — checklist vivo de trabajo abierto (R1–R4 cerrados el 2026-10-25 con el despliegue en producción; abiertos: contenido del cliente D6/E1 y los bloqueantes R5 TLS / R6 backup de BD).
+- **[docs/PENDIENTES.md](docs/PENDIENTES.md)** — checklist vivo de trabajo abierto (R1–R4 cerrados el 2026-10-25 con el despliegue en producción; abiertos: contenido del cliente D6/E1, los bloqueantes R5 TLS / R6 backup de BD y U1 = despliegue del upgrade a Laravel 13).
 - **[SECURITY.md](SECURITY.md)** (raíz) — riesgos heredados, waivers y **condiciones obligatorias de despliegue**.
 - **[docs/INFORME-VULNERABILIDADES.md](docs/INFORME-VULNERABILIDADES.md)** — informe de análisis de vulnerabilidades y estado de remediación.
 - **[docs/informe-estado-actual.html](docs/informe-estado-actual.html)** — **entregable imprimible** (instantánea del estado actual, tamaño carta); PDF con `scripts/export-informe.ps1`.
@@ -49,13 +49,13 @@ php artisan serve
 ## Tests
 
 ```bash
-./vendor/bin/phpunit          # Unit + Feature (237 tests, BD sqlite en memoria — ver docs/DOCUMENTACION.md §16)
-./vendor/bin/phpunit --coverage-text   # cobertura (requiere Xdebug; 82.22% actual)
+./vendor/bin/phpunit          # Unit + Feature (291 en verde / 301 totales, BD sqlite en memoria — ver docs/DOCUMENTACION.md §16)
+./vendor/bin/phpunit --coverage-text   # cobertura (requiere Xdebug; 97.58% actual)
 composer lint                 # estilo de código (pint --test); composer lint:fix lo aplica
 ```
 
 Suites E2E en `tests/e2e/` (bash + psql) contra un servidor de desarrollo local; se ejecutan con `bash tests/e2e/run-all.sh` (17/17 en verde — ver §16 de `docs/DOCUMENTACION.md`).
-Baseline DAST con OWASP ZAP: `scripts/zap-baseline.yaml` (informe de referencia en `docs/zap-baseline-2026-10-25.html`).
+Baseline DAST con OWASP ZAP: `scripts/zap-baseline.yaml` (referencias en `docs/zap-baseline-2026-10-25.html` y `docs/zap-baseline-laravel13-2026-10-26.html`).
 
 ## Despliegue
 

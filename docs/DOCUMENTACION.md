@@ -13,7 +13,7 @@ Inspirado en: https://mippci.gob.ve
 | Componente | Versión |
 |---|---|
 | PHP | 8.3+ (obligatorio: `composer.json` fija `^8.3`; 8.1/8.2 EOL) |
-| Laravel | 10.x |
+| Laravel | 13.x (rama `Laravel13-Dev`; producción aún en 10.x hasta U1) |
 | Bootstrap | 5.3+ |
 | Base de datos | PostgreSQL 14+ recomendado (probado con 18.6). Producción opera con **13.23 / LATIN9** — ver §14.K y §14.L |
 | Motor de plantillas | Blade |
@@ -519,15 +519,22 @@ npm run build      # copia TinyMCE a public/vendor + vite build a public/build
 > futuras, en la §C de PENDIENTES.md.
 >
 > **Estado a 2026-10-26**: desarrollo funcional completo, gates de
-> pre-release verificados — **237 tests PHPUnit en verde** (1032 assertions),
-> **cobertura 82.22%**, **E2E 17/17**, **baseline ZAP sin altas** (1 media =
-> waiver TinyMCE), Pint ✅, SCA 0 activos — **y desplegado en el servidor
-> institucional el 2026-10-25** (código en `origin/main`, 7 condiciones de
-> `SECURITY.md` §1 verificadas 7/7, registro en §14.L).
+> pre-release verificados — **291 tests PHPUnit en verde / 301 totales**
+> (1325 assertions), **cobertura 97.58%** (app 98.05%), **E2E 17/17**,
+> **baseline ZAP final: 0 altas / 0 medias / 1 baja / 4 informativas**
+> (waiver TinyMCE `style-src` cerrado con CSP de nonce), Pint ✅, SCA 0/0 —
+> **y desplegado en el servidor institucional el 2026-10-25** (código en
+> `origin/main`, 7 condiciones de `SECURITY.md` §1 verificadas 7/7, registro
+> en §14.L).
+>
+> **Migración a Laravel 13.38.0 completada y validada** en la rama
+> `Laravel13-Dev` el 2026-10-26 (re-validación íntegra en segunda máquina:
+> mismos gates + ZAP repetido sin regresiones — `docs/PLAN-LARAVEL13.md` §6.2);
+> pendiente el despliegue del upgrade (**U1**).
 >
 > Quedan 2 ítems de contenido del cliente (D6/E1) y, como bloqueantes para
-> la salida a internet, el **certificado TLS** y la **copia de seguridad de
-> la BD** (ver [PENDIENTES.md](PENDIENTES.md)).
+> la salida a internet, el **certificado TLS** (R5) y la **copia de seguridad de
+> la BD** (R6) (ver [PENDIENTES.md](PENDIENTES.md)).
 
 ---
 
@@ -931,8 +938,8 @@ Garantías de las suites:
 
 ### PHPUnit (`tests/Unit`, `tests/Feature`)
 
-- Ejecución: `./vendor/bin/phpunit` (o `--testsuite Unit,Feature`) — **237 tests / 1032 assertions**, en verde (3 skipped: requieren PostgreSQL o el symlink `public/storage`; 6 avisos preexistentes de `iconv` en LATIN9, intencionales).
-- **Cobertura (desde R3, 2026-10-25):** con Xdebug 3.5.3 instalado, `./vendor/bin/phpunit --coverage-text --coverage-html coverage-html` → **82.22% de líneas** en `app/` (objetivo ≥80%); authn/authz/validación/cifrado ≈100% salvo el fallback de iconv de `App\Support\Latin9`. El HTML se genera en `/coverage-html` (ignorado por git).
+- Ejecución: `./vendor/bin/phpunit` (o `--testsuite Unit,Feature`) — **291 en verde / 301 totales / 1325 assertions**, en verde (3 skipped: requieren PostgreSQL o el symlink `public/storage`; 6 avisos preexistentes de `iconv` en LATIN9, intencionales).
+- **Cobertura (desde R3, re-validada 2026-10-26 en Laravel 13):** con Xdebug 3.5.3 instalado, `./vendor/bin/phpunit --coverage-text --coverage-html coverage-html` → **97.58% de líneas total** (app 98.05% · database 95.36%; objetivo ≥90% superado); authn/authz/validación/cifrado ≈100% salvo el fallback de iconv de `App\Support\Latin9`. El HTML se genera en `/coverage-html` (ignorado por git).
 - **BD aislada**: `phpunit.xml` define `DB_CONNECTION=sqlite` / `DB_DATABASE=:memory:` (B2 cerrado) — `RefreshDatabase` migra en memoria por test, **nunca toca la BD de desarrollo**. El `APP_KEY` de `phpunit.xml` es una clave **exclusiva de tests**; no usar en producción.
 - Cobertura de flujos críticos:
   - `AuthTest` — login correcto/incorrecto/inactivo, logout, `last_login_at`, mensaje genérico.

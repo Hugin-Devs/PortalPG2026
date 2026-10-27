@@ -79,7 +79,7 @@
         @endphp
 
         @if($carouselCount > 1)
-            <style>
+            <style nonce="{{ request()->attributes->get('csp_nonce') }}">
                 #newsGallery .carousel-control-prev-icon,
                 #newsGallery .carousel-control-next-icon {
                     filter: none;
