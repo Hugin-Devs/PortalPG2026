@@ -18,11 +18,9 @@ Sin Livewire, Vue, React ni jQuery.
 Toda la planificación y los entregables viven en **`docs/`**:
 
 - **[docs/DOCUMENTACION.md](docs/DOCUMENTACION.md)** — fuente de verdad del proyecto: esquema de BD, rutas, controladores, vistas, roles y permisos, seeders, **checklist de despliegue en producción (§14)** y tests (§16).
-- **[docs/PENDIENTES.md](docs/PENDIENTES.md)** — checklist vivo de trabajo abierto (R1–R4 cerrados el 2026-10-25 con el despliegue en producción; abiertos: contenido del cliente D6/E1, los bloqueantes R5 TLS / R6 backup de BD y U1 = despliegue del upgrade a Laravel 13).
-- **[SECURITY.md](SECURITY.md)** (raíz) — riesgos heredados, waivers y **condiciones obligatorias de despliegue**.
-- **[docs/INFORME-VULNERABILIDADES.md](docs/INFORME-VULNERABILIDADES.md)** — informe de análisis de vulnerabilidades y estado de remediación.
-- **[docs/informe-estado-actual.html](docs/informe-estado-actual.html)** — **entregable imprimible** (instantánea del estado actual, tamaño carta); PDF con `scripts/export-informe.ps1`.
-- **[docs/SPECS.md](docs/SPECS.md)** — requisitos originales (julio 2026). Documento **histórico**: prevalece `docs/DOCUMENTACION.md`.
+- **[docs/PENDIENTES.md](docs/PENDIENTES.md)** — checklist vivo de trabajo abierto: R5 (TLS), R6 (backup BD), U1 (despliegue del upgrade Laravel 13) y D6/E1 (contenido).
+- **[SECURITY.md](SECURITY.md)** (raíz) — waivers y **condiciones obligatorias de despliegue**.
+- **[docs/informe-estado-actual.html](docs/informe-estado-actual.html)** — **entregable imprimible** (instantánea del estado de seguridad actual, tamaño carta); PDF con `scripts/export-informe.ps1`.
 
 ## Requisitos de desarrollo
 

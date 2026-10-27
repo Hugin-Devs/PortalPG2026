@@ -511,9 +511,7 @@ npm run build      # copia TinyMCE a public/vendor + vite build a public/build
 
 ## 12. Estado del Desarrollo
 
-> El seguimiento vivo del trabajo vive en [PENDIENTES.md](PENDIENTES.md);
-> el registro histórico de todo lo completado, en
-> [historico-cierres-pendientes.md](historico-cierres-pendientes.md).
+> El seguimiento vivo del trabajo vive en [PENDIENTES.md](PENDIENTES.md).
 > Los riesgos de seguridad, waivers y condiciones de despliegue vigentes
 > están en [SECURITY.md](../SECURITY.md) (raíz del repo). Las mejoras
 > futuras, en la §C de PENDIENTES.md.

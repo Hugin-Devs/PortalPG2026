@@ -148,11 +148,9 @@
 
 ### 6.1 Cierre documental ✅ (2026-10-26)
 
-- [x] `SECURITY.md`: SC-02/A5 cerrados (upgrade ejecutado), fila Laravel 10 EOL y CVE-2026-114509 tachadas/cerradas, compensatorios EOL degradados a buenas prácticas, AES-256-CBC reprogramado (cipher no cambió), cabecera y §4 actualizados (229/238 tests, audit 0/0)
-- [x] `docs/PENDIENTES.md`: A5 marcado como cerrado 2026-10-26 + nota de validación pendiente en cabecera
-- [x] `docs/historico-cierres-pendientes.md`: fila `A5 / SC-02` con el detalle del cierre
+- [x] `SECURITY.md`: SC-02/A5 cerrados (upgrade ejecutado), fila Laravel 10 EOL y CVE-2026-114509 tachadas/cerradas, compensatorios EOL degradados a buenas prácticas, AES-256-CBC reprogramado (cipher no cambió), cabecera y §4 actualizados (audit 0/0)
+- [x] `docs/PENDIENTES.md`: A5 marcado como cerrado 2026-10-26 + nota de validación en cabecera
 - [x] `docs/DOCUMENTACION.md` §14: §14.F.5 sin referencia a `audit.ignore`; nuevo **§14.G.1 "Notas del salto a Laravel 13"** (PHP ≥8.3, lock 13.38.0, migración `drop_personal_access_tokens`, `cache:clear` por la allowlist, **re-login** por `session.serialization=json`, rename CSRF, smoke post-despliegue)
-- [x] `docs/INFORME-VULNERABILIDADES.md`: SC-02 ✅ en las dos tablas de estado, detalle §4.2 cerrado, §6 hoja de ruta al 100%, §7 compensatorios marcados como cumplidos
 
 ### 6.2 Validación local ✅ (2026-10-26) — pendientes: staging y PR
 
