@@ -338,7 +338,7 @@ Todas las rutas de gestión llevan además `middleware('permission:...')` (ver s
 |---|---|---|
 | `home.blade.php` | Hero slider de destacados (imagen de fondo con velo + fallback azul si no hay imagen), categorías, **sección "VIDEOS INSTITUCIONALES"** (si hay `is_featured`: iframe YouTube embed **o** `<video controls>` para archivo subido), grid de noticias, "Lo más leído" | ✅ |
 | `news.blade.php` | Listado paginado de noticias + filtro por categoría (sidebar desktop con conteos + buscador; pills en móvil) | ✅ |
-| `news-show.blade.php` | Detalle de noticia + botones de compartir (FB, X, WhatsApp, Telegram, copiar enlace con vanilla JS y fallback para HTTP plano) + relacionados; contenido vía `rendered_content` (HTML del editor, con compat nl2br para texto plano legado); **carrusel multimedia (D15/D17)**: con portada+galería/videos renderiza carrusel Bootstrap `#newsGallery` (`data-bs-interval="false"`, portada primero) — slides de imagen a **560px** con la foto a proporción natural centrada sobre blanco (sin recorte, sin `loading="lazy"`, `decoding="async"`), `<iframe>` YouTube / `<video>` a 560px, flechas con `aria-label` e iconos oscuros (CSS inline scoped a `#newsGallery`); solo portada = mismo wrapper 560px sin carrusel | ✅ |
+| `news-show.blade.php` | Detalle de noticia + botones de compartir (FB, X, WhatsApp, Telegram, copiar enlace con vanilla JS y fallback para HTTP plano) + relacionados; contenido vía `rendered_content` (HTML del editor, con compat nl2br para texto plano legado); **carrusel multimedia (D15/D17)**: con portada+galería/videos renderiza carrusel Bootstrap `#newsGallery` (`data-bs-interval="false"`, portada primero) — slides de imagen a **560px** con la foto a proporción natural centrada sobre blanco (sin recorte, sin `loading="lazy"`, `decoding="async"`), `<iframe>` YouTube / `<video>` a 560px, flechas con `aria-label` e iconos oscuros (CSS inline scoped a `#newsGallery`); solo portada = mismo wrapper 560px sin carrusel. **Layout "revista" para medios verticales (2026-10-28)**: si **todos** los medios (portada + galería, imágenes y mp4) son portrait, el bloque se extrae a `partials/news-media.blade.php` y se pinta a la derecha (`col-lg-7 order-1 order-lg-2`) con texto a la izquierda (`col-lg-5 order-2 order-lg-1`), con la caja dimensionada por el `aspect-ratio` real del primer medio + `max-height: min(78vh, 760px)`; en móvil el medio queda arriba. Cualquier landscape, cuadrado o embed YouTube (16:9) mantiene el layout clásico. Detección en `App\\Support\\MediaOrientation` (getimagesize + parser MP4 `moov>trak>tkhd`) cacheada por ruta+mtime — tests `NewsShowLayoutTest` y `MediaOrientationTest`; el layout se expone como `data-layout="revista|clasico"` en el `<article>` | ✅ |
 | `news-category.blade.php` | Noticias por categoría + mismo nav de categorías (activa resaltada) | ✅ |
 | `_category-pills.blade.php` | Pills scrollables de categorías (móvil/tablet) | ✅ |
 | `_category-sidebar.blade.php` | Sidebar desktop: buscador + categorías con conteo de publicadas | ✅ |
@@ -519,7 +519,7 @@ npm run build      # copia TinyMCE a public/vendor + vite build a public/build
 > **Estado a 2026-10-28**: **producción en Laravel 13.38.0** (despliegue U1
 > el 2026-10-28 desde `main` = `d4d3e91`; registro en **§14.M**) — 7
 > condiciones de `SECURITY.md` §1 verificadas y re-verificadas tras el
-> upgrade. Gates: **303 tests PHPUnit en verde** (1353 assertions),
+> upgrade. Gates: **317 tests PHPUnit en verde** (1407 assertions),
 > **cobertura 97.58%** (app 98.05%), **E2E 17/17**, **baseline ZAP final:
 > 0 altas / 0 medias / 1 baja / 4 informativas** (waiver TinyMCE
 > `style-src` cerrado con CSP de nonce), Pint ✅, SCA 0/0.
@@ -982,7 +982,7 @@ Garantías de las suites:
 
 ### PHPUnit (`tests/Unit`, `tests/Feature`)
 
-- Ejecución: `./vendor/bin/phpunit` (o `--testsuite Unit,Feature`) — **303 en verde / 1353 assertions** (4 skipped: requieren PostgreSQL o el symlink `public/storage`; 6 avisos preexistentes de `iconv` en LATIN9, intencionales). *Cifra verificada el 2026-10-28 tras el fix de la allowlist de caché (§14.M); incluye el test de regresión del roundtrip por `FileStore`.*
+- Ejecución: `./vendor/bin/phpunit` (o `--testsuite Unit,Feature`) — **317 en verde / 1407 assertions** (4 skipped: requieren PostgreSQL o el symlink `public/storage`; 6 avisos preexistentes de `iconv` en LATIN9, intencionales). *Cifra verificada el 2026-10-28 tras el layout "revista" del detalle de noticias; incluye `NewsShowLayoutTest`, `MediaOrientationTest` y el test de regresión del roundtrip de caché por `FileStore`.*
 - **Cobertura (desde R3, re-validada 2026-10-26 en Laravel 13):** con Xdebug 3.5.3 instalado, `./vendor/bin/phpunit --coverage-text --coverage-html coverage-html` → **97.58% de líneas total** (app 98.05% · database 95.36%; objetivo ≥90% superado); authn/authz/validación/cifrado ≈100% salvo el fallback de iconv de `App\Support\Latin9`. El HTML se genera en `/coverage-html` (ignorado por git).
 - **BD aislada**: `phpunit.xml` define `DB_CONNECTION=sqlite` / `DB_DATABASE=:memory:` (B2 cerrado) — `RefreshDatabase` migra en memoria por test, **nunca toca la BD de desarrollo**. El `APP_KEY` de `phpunit.xml` es una clave **exclusiva de tests**; no usar en producción.
 - Cobertura de flujos críticos:

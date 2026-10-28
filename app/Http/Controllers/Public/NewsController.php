@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Category;
 use App\Models\Post;
 use App\Support\CacheKeys;
+use App\Support\MediaOrientation;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
@@ -70,7 +71,75 @@ class NewsController extends Controller
             'type' => 'article',
         ];
 
-        return view('public.news-show', compact('post', 'related', 'seo'));
+        $galleryItems = $post->postMedia->sortBy('position')->values();
+        [$mediaLayout, $mediaAspect] = $this->mediaLayout($post, $galleryItems);
+
+        return view('public.news-show', compact(
+            'post',
+            'related',
+            'seo',
+            'galleryItems',
+            'mediaLayout',
+            'mediaAspect'
+        ));
+    }
+
+    /**
+     * Layout del bloque de medios del detalle.
+     *
+     * "revista" (texto a la izquierda, medio a la derecha) solo cuando TODOS
+     * los medios adjuntos (destacada + galería) son verticales; cualquier
+     * landscape, cuadrado, embed de YouTube (16:9) o fichero ilegible mantiene
+     * el layout clásico a todo ancho.
+     *
+     * @return array{0:string,1:string|null} [layout, aspect-ratio del primer medio]
+     */
+    private function mediaLayout(Post $post, $galleryItems): array
+    {
+        $orientations = [];
+
+        if ($post->featured_image) {
+            $orientations[] = MediaOrientation::isPortrait(MediaOrientation::image($post->featured_image));
+        }
+
+        foreach ($galleryItems as $media) {
+            if ($media->type === 'image') {
+                $orientations[] = MediaOrientation::isPortrait(MediaOrientation::image($media->path));
+            } elseif ($media->video?->type === 'youtube') {
+                $orientations[] = false;
+            } else {
+                $orientations[] = MediaOrientation::isPortrait(MediaOrientation::video($media->video?->path));
+            }
+        }
+
+        $layout = $orientations !== [] && ! in_array(false, $orientations, true)
+            ? 'revista'
+            : 'clasico';
+
+        return [$layout, $this->firstAspectRatio($post, $galleryItems)];
+    }
+
+    /**
+     * Proporción (WxH) del primer medio legible, para dimensionar el
+     * contenedor en modo revista sin recortes ni letterbox extremo.
+     */
+    private function firstAspectRatio(Post $post, $galleryItems): ?string
+    {
+        $dims = $post->featured_image ? MediaOrientation::image($post->featured_image) : null;
+
+        if ($dims === null) {
+            foreach ($galleryItems as $media) {
+                $dims = $media->type === 'image'
+                    ? MediaOrientation::image($media->path)
+                    : ($media->video?->type === 'youtube' ? null : MediaOrientation::video($media->video?->path));
+
+                if ($dims !== null) {
+                    break;
+                }
+            }
+        }
+
+        return $dims !== null ? $dims['w'].'/'.$dims['h'] : null;
     }
 
     public function category($slug)

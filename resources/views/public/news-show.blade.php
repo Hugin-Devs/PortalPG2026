@@ -15,7 +15,7 @@
         </ol>
     </nav>
 
-    <article>
+    <article data-layout="{{ $mediaLayout }}">
         <h1 class="text-primary fw-bold mb-3">{{ $post->title }}</h1>
 
         <div class="text-muted mb-4">
@@ -73,82 +73,41 @@
             });
         </script>
 
-        @php
-            $galleryItems = $post->postMedia->sortBy('position')->values();
-            $carouselCount = ($post->featured_image ? 1 : 0) + $galleryItems->count();
-        @endphp
-
-        @if($carouselCount > 1)
-            <style nonce="{{ request()->attributes->get('csp_nonce') }}">
-                #newsGallery .carousel-control-prev-icon,
-                #newsGallery .carousel-control-next-icon {
-                    filter: none;
-                }
-                #newsGallery .carousel-control-prev-icon {
-                    background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16' fill='%23333'%3e%3cpath d='M11.354 1.646a.5.5 0 0 1 0 .708L5.707 8l5.647 5.646a.5.5 0 0 1-.708.708l-6-6a.5.5 0 0 1 0-.708l6-6a.5.5 0 0 1 .708 0z'/%3e%3c/svg%3e");
-                }
-                #newsGallery .carousel-control-next-icon {
-                    background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16' fill='%23333'%3e%3cpath d='M4.646 1.646a.5.5 0 0 1 .708 0l6 6a.5.5 0 0 1 0 .708l-6 6a.5.5 0 0 1-.708-.708L10.293 8 4.646 2.354a.5.5 0 0 1 0-.708z'/%3e%3c/svg%3e");
-                }
-            </style>
-            <div id="newsGallery" class="carousel slide rounded mb-4" data-bs-interval="false">
-                <div class="carousel-inner">
-                    @if($post->featured_image)
-                        <div class="carousel-item active">
-                            <div class="d-flex align-items-center justify-content-center bg-white" style="height: 560px;">
-                                <x-img path="storage/{{ $post->featured_image }}" alt="{{ $post->title }}" class="d-block" style="max-height: 100%; max-width: 100%; width: auto; height: auto;" />
-                            </div>
-                        </div>
-                    @endif
-                    @foreach($galleryItems as $index => $media)
-                        <div class="carousel-item {{ (! $post->featured_image && $index === 0) ? 'active' : '' }}">
-                            @if($media->type === 'image')
-                                <div class="d-flex align-items-center justify-content-center bg-white" style="height: 560px;">
-                                    <x-img path="storage/{{ $media->path }}" alt="{{ $post->title }}" class="d-block" style="max-height: 100%; max-width: 100%; width: auto; height: auto;" decoding="async" />
-                                </div>
-                            @elseif($media->video && $media->video->type === 'youtube' && $media->video->embed_url)
-                                <div class="bg-dark d-flex align-items-center justify-content-center" style="height: 560px;">
-                                    <iframe src="{{ $media->video->embed_url }}" title="{{ $media->video->title }}" class="w-100 h-100" frameborder="0" allowfullscreen loading="lazy"></iframe>
-                                </div>
-                            @elseif($media->video?->source_url)
-                                <video src="{{ $media->video->source_url }}" controls class="d-block w-100 bg-dark" style="height: 560px; object-fit: contain;" title="{{ $media->video->title }}" preload="metadata"></video>
-                            @endif
-                        </div>
-                    @endforeach
+        @if($mediaLayout === 'revista')
+            {{-- Todos los medios son verticales: texto a la izquierda y el
+                 carrusel/medio a la derecha, como una revista. En móvil el
+                 medio queda arriba (order-1) y el texto debajo. --}}
+            <div class="row g-4 align-items-start mb-4">
+                <div class="col-lg-7 order-1 order-lg-2">
+                    @include('public.partials.news-media', [
+                        'post' => $post,
+                        'galleryItems' => $galleryItems,
+                        'mediaAspect' => $mediaAspect,
+                        'modoRevista' => true,
+                    ])
                 </div>
-                <button class="carousel-control-prev" type="button" data-bs-target="#newsGallery" data-bs-slide="prev" aria-label="Imagen anterior">
-                    <span class="carousel-control-prev-icon"></span>
-                </button>
-                <button class="carousel-control-next" type="button" data-bs-target="#newsGallery" data-bs-slide="next" aria-label="Imagen siguiente">
-                    <span class="carousel-control-next-icon"></span>
-                </button>
-            </div>
-        @elseif($post->featured_image)
-            <div class="d-flex align-items-center justify-content-center bg-white rounded mb-4" style="height: 560px;">
-                <x-img path="storage/{{ $post->featured_image }}" alt="{{ $post->title }}" class="d-block" style="max-height: 100%; max-width: 100%; width: auto; height: auto;" />
-            </div>
-        @elseif($galleryItems->isNotEmpty())
-            @php $media = $galleryItems->first(); @endphp
-            <div class="rounded mb-4 overflow-hidden" style="height: 560px;">
-                @if($media->type === 'image')
-                    <div class="d-flex align-items-center justify-content-center bg-white h-100">
-                        <x-img path="storage/{{ $media->path }}" alt="{{ $post->title }}" class="d-block" style="max-height: 100%; max-width: 100%; width: auto; height: auto;" decoding="async" />
+                <div class="col-lg-5 order-2 order-lg-1">
+                    <div class="lead mb-4 fw-semibold">{{ $post->excerpt }}</div>
+
+                    <div class="content fs-5 lh-lg">
+                        {!! $post->rendered_content !!}
                     </div>
-                @elseif($media->video && $media->video->type === 'youtube' && $media->video->embed_url)
-                    <div class="bg-dark d-flex align-items-center justify-content-center h-100">
-                        <iframe src="{{ $media->video->embed_url }}" title="{{ $media->video->title }}" class="w-100 h-100" frameborder="0" allowfullscreen loading="lazy"></iframe>
-                    </div>
-                @elseif($media->video?->source_url)
-                    <video src="{{ $media->video->source_url }}" controls class="d-block w-100 h-100 bg-dark" style="object-fit: contain;" title="{{ $media->video->title }}" preload="metadata"></video>
-                @endif
+                </div>
+            </div>
+        @else
+            @include('public.partials.news-media', [
+                'post' => $post,
+                'galleryItems' => $galleryItems,
+                'mediaAspect' => $mediaAspect,
+                'modoRevista' => false,
+            ])
+
+            <div class="lead mb-4 fw-semibold">{{ $post->excerpt }}</div>
+
+            <div class="content fs-5 lh-lg">
+                {!! $post->rendered_content !!}
             </div>
         @endif
-
-        <div class="lead mb-4 fw-semibold">{{ $post->excerpt }}</div>
-
-        <div class="content fs-5 lh-lg">
-            {!! $post->rendered_content !!}
-        </div>
     </article>
 
     @if($related->isNotEmpty())
