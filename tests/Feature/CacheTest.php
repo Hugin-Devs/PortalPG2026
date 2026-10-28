@@ -5,7 +5,9 @@ namespace Tests\Feature;
 use App\Models\Category;
 use App\Models\Partner;
 use App\Models\Post;
+use App\Models\PostMedia;
 use App\Models\User;
+use App\Models\Video;
 use App\Support\CacheKeys;
 use Illuminate\Database\Eloquent\Collection as EloquentCollection;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -110,13 +112,30 @@ class CacheTest extends TestCase
             'status' => 'published',
             'is_featured' => true,
         ]);
+        // Adjunto de vídeo: reproduce el payload real de HomeController
+        // (Post::with('category', 'postMedia.video')) — si PostMedia falta en
+        // la allowlist, la lectura devuelve __PHP_Incomplete_Class y la vista
+        // revienta con "data_get(): ... incomplete object" (bug 2026-10-28).
+        $video = Video::create([
+            'title' => 'Video allowlist',
+            'type' => 'file',
+            'path' => 'videos/allowlist.mp4',
+            'is_featured' => false,
+            'user_id' => $user->id,
+        ]);
+        PostMedia::create([
+            'post_id' => Post::where('slug', 'post-allowlist')->first()->id,
+            'type' => 'video',
+            'video_id' => $video->id,
+            'position' => 0,
+        ]);
 
         $file = Cache::store('file');
         $key = 'allowlist-roundtrip-test';
 
         // Payload idéntico al de HomeController (Collection de Post + relación
         // category eager + casts datetime → Carbon).
-        $file->put($key, Post::with('category')->get(), 60);
+        $file->put($key, Post::with('category', 'postMedia.video')->get(), 60);
         $back = $file->get($key);
 
         $this->assertInstanceOf(EloquentCollection::class, $back);
@@ -125,6 +144,12 @@ class CacheTest extends TestCase
         $this->assertSame('Post para allowlist', $back[0]->title);
         $this->assertInstanceOf(Category::class, $back[0]->category);
         $this->assertInstanceOf(Carbon::class, $back[0]->created_at);
+
+        // La galería debe volver íntegra (no __PHP_Incomplete_Class).
+        $this->assertInstanceOf(EloquentCollection::class, $back[0]->postMedia);
+        $this->assertInstanceOf(PostMedia::class, $back[0]->postMedia->first());
+        $this->assertInstanceOf(Video::class, $back[0]->postMedia->first()->video);
+        $this->assertSame('videos/allowlist.mp4', $back[0]->postMedia->first()->video->path);
 
         // Payload idéntico al de GacetaController::index (cachea ->paginate()).
         $paginator = new LengthAwarePaginator($back, $back->count(), 12, 1);

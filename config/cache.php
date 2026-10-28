@@ -4,6 +4,7 @@ use App\Models\Category;
 use App\Models\Gaceta;
 use App\Models\Partner;
 use App\Models\Post;
+use App\Models\PostMedia;
 use App\Models\Video;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Pagination\LengthAwarePaginator;
@@ -144,6 +145,10 @@ return [
         Gaceta::class,
         Partner::class,
         Post::class,
+        // HomeController cachea Post::with('category', 'postMedia.video'):
+        // sin esta clase la galería vuelve como __PHP_Incomplete_Class y la
+        // vista revienta (incidencia 2026-10-28 en producción).
+        PostMedia::class,
         Video::class,
     ],
 
