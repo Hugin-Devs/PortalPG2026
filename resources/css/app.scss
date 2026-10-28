@@ -161,3 +161,32 @@ h1, h2, h3, h4, h5, h6 {
         height: 40px !important;
     }
 }
+
+// Hero del home en móvil/tabletas: el bloque de texto (titular de 80
+// caracteres + extracto de 202 en los destacados reales) desbordaba la caja
+// fija de 400px porque display-4/lead de Bootstrap crecen con el viewport
+// (33px a 360px de ancho => ~510px de contenido). Fuente acotada con clamp(),
+// extracto a 4 líneas solo en pantallas pequeñas (en desktop se ve completo)
+// y caja que crece si aún así no cabe.
+@media (max-width: 767.98px) {
+    #heroSlider .hero-box {
+        height: auto !important; // !important para ganar al style inline
+        min-height: 400px;
+    }
+
+    #heroSlider .display-4 {
+        font-size: clamp(1.35rem, calc(0.75rem + 2.5vw), 1.75rem);
+    }
+
+    #heroSlider .lead {
+        font-size: clamp(0.95rem, calc(0.6rem + 1.5vw), 1.1rem);
+        display: -webkit-box;
+        -webkit-box-orient: vertical;
+        -webkit-line-clamp: 4;
+        overflow: hidden;
+    }
+
+    #heroSlider .p-4 {
+        padding: 1rem !important;
+    }
+}

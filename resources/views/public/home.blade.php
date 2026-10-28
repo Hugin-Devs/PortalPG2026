@@ -10,7 +10,7 @@
             @forelse($featuredPosts as $index => $post)
             <div class="carousel-item {{ $index == 0 ? 'active' : '' }}">
                 @if($post->featured_image)
-                <div class="position-relative" style="height: 400px; background-color: #273376;">
+                <div class="position-relative hero-box" style="height: 400px; background-color: #273376;">
                     <x-img path="storage/{{ $post->featured_image }}" alt="{{ $post->title }}" class="position-absolute top-0 start-0 w-100 h-100" style="object-fit: cover;" />
                     <div class="position-absolute top-0 start-0 w-100 h-100" style="background-color: rgba(15, 23, 42, 0.55);"></div>
                     <div class="position-relative h-100 d-flex align-items-center justify-content-center text-white">
@@ -24,7 +24,7 @@
                 @else
                     @php $videoMedia = $post->postMedia->where('type', 'video')->first(); @endphp
                     @if($videoMedia && $videoMedia->video && $videoMedia->video->type === 'file' && $videoMedia->video->source_url)
-                    <div class="position-relative" style="height: 400px; background-color: #273376;">
+                    <div class="position-relative hero-box" style="height: 400px; background-color: #273376;">
                         <video src="{{ $videoMedia->video->source_url }}" class="position-absolute top-0 start-0 w-100 h-100" style="object-fit: cover;" preload="metadata" muted></video>
                         <div class="position-absolute top-0 start-0 w-100 h-100" style="background-color: rgba(15, 23, 42, 0.55);"></div>
                         <div class="position-relative h-100 d-flex align-items-center justify-content-center text-white">
@@ -36,7 +36,7 @@
                         </div>
                     </div>
                     @else
-                    <div class="d-flex align-items-center justify-content-center bg-primary text-white" style="height: 400px;">
+                    <div class="d-flex align-items-center justify-content-center bg-primary text-white hero-box" style="height: 400px;">
                         <div class="text-center p-4">
                             <h2 class="display-4 fw-bold">{{ $post->title }}</h2>
                             <p class="lead">{{ $post->excerpt }}</p>
@@ -48,7 +48,7 @@
             </div>
             @empty
             <div class="carousel-item active">
-                <div class="d-flex align-items-center justify-content-center bg-primary text-white" style="height: 400px;">
+                <div class="d-flex align-items-center justify-content-center bg-primary text-white hero-box" style="height: 400px;">
                     <div class="text-center p-4">
                         <h2 class="display-4 fw-bold">Bienvenidos al Portal GDC</h2>
                         <p class="lead">Gobierno de Distrito Capital</p>
