@@ -7,6 +7,7 @@ use App\Models\Media;
 use App\Models\Post;
 use App\Models\PostMedia;
 use App\Models\User;
+use App\Models\Video;
 use App\Services\Webp;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Carbon;
@@ -86,6 +87,12 @@ class NoticiasPrecargadasSeeder extends Seeder
             'excerpt' => 'En el Auditorio del Liceo Ábalos de la parroquia El Valle se llevó a cabo el taller "Prevención de Embarazo a Temprana Edad y en la Adolescencia", dirigido a madres, representantes y la comunidad.',
             'category' => 'educacion',
         ],
+        'Noticia 6' => [
+            'slug' => 'mes-rosa-mujeres-florecen-como-marea-de-solidaridad-y-amor',
+            'title' => 'Mes Rosa: mujeres florecen como gran marea de solidaridad y amor',
+            'excerpt' => 'Sosteniendo con firmeza las banderas de la prevención, seguimos caminando juntas por el futuro y la paz en este Mes Rosa.',
+            'category' => 'cultura',
+        ],
     ];
 
     public function run(): void
@@ -113,14 +120,15 @@ class NoticiasPrecargadasSeeder extends Seeder
 
             [$body, $txtDate] = $this->readTxt($source);
             $images = $this->images($source);
+            $videoFiles = $this->videos($source);
 
-            if ($images === []) {
-                $this->command?->warn("NoticiasPrecargadas: sin imágenes en {$folder}.");
+            if ($images === [] && $videoFiles === []) {
+                $this->command?->warn("NoticiasPrecargadas: sin contenido multimedia en {$folder}.");
 
                 continue;
             }
 
-            $publishedAt = $this->dateFromFilename(basename($images[0])) ?? $txtDate;
+            $publishedAt = ($images !== [] ? $this->dateFromFilename(basename($images[0])) : null) ?? $txtDate;
 
             if ($publishedAt === null) {
                 $this->command?->error("NoticiasPrecargadas: sin fecha utilizable en {$folder}.");
@@ -135,7 +143,7 @@ class NoticiasPrecargadasSeeder extends Seeder
 
             $existing = Post::where('slug', $data['slug'])->first();
 
-            if ($existing !== null && $existing->featured_image !== null) {
+            if ($existing !== null && ($existing->featured_image !== null || $existing->postMedia()->exists())) {
                 continue;
             }
 
@@ -151,7 +159,7 @@ class NoticiasPrecargadasSeeder extends Seeder
                 'views' => $existing->views ?? 0,
             ]);
 
-            $this->attachMedia($post, $images, $user, $publishedAt);
+            $this->attachMedia($post, $images, $videoFiles, $user, $publishedAt);
         }
     }
 
@@ -159,12 +167,12 @@ class NoticiasPrecargadasSeeder extends Seeder
      * Copia las imágenes a uploads/YYYY/MM/, registra cada una en la tabla
      * media y arma la galería (002+ en post_media). La 001 es la portada.
      */
-    private function attachMedia(Post $post, array $images, User $user, Carbon $publishedAt): void
+    private function attachMedia(Post $post, array $images, array $videoFiles, User $user, Carbon $publishedAt): void
     {
         $disk = Storage::disk('public');
         $ym = $publishedAt->format('Y/m');
 
-        $post->postMedia()->where('type', 'image')->delete();
+        $post->postMedia()->delete();
 
         $featuredPath = null;
         $position = 0;
@@ -197,6 +205,29 @@ class NoticiasPrecargadasSeeder extends Seeder
                 'post_id' => $post->id,
                 'type' => 'image',
                 'path' => $path,
+                'position' => ++$position,
+            ]);
+        }
+
+        foreach ($videoFiles as $src) {
+            $ext = strtolower(pathinfo($src, PATHINFO_EXTENSION));
+            $filename = time().'_'.uniqid().'.'.$ext;
+            $path = 'videos/'.$filename;
+
+            $disk->put($path, File::get($src));
+
+            $video = Video::create([
+                'title' => $post->title,
+                'type' => 'file',
+                'path' => $path,
+                'is_featured' => false,
+                'user_id' => $user->id,
+            ]);
+
+            PostMedia::create([
+                'post_id' => $post->id,
+                'type' => 'video',
+                'video_id' => $video->id,
                 'position' => ++$position,
             ]);
         }
@@ -234,6 +265,24 @@ class NoticiasPrecargadasSeeder extends Seeder
         }
 
         return [implode("\n", $body), $date];
+    }
+
+    /**
+     * Videos de la carpeta ordenados por nombre.
+     *
+     * @return array<int, string>
+     */
+    private function videos(string $dir): array
+    {
+        $files = [];
+
+        foreach (['mp4', 'webm', 'ogg'] as $ext) {
+            $files = array_merge($files, glob($dir.'/*.'.$ext) ?: []);
+        }
+
+        sort($files, SORT_STRING);
+
+        return $files;
     }
 
     /**
