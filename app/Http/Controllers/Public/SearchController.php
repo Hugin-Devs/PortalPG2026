@@ -18,7 +18,7 @@ class SearchController extends Controller
         // allí se usa ILIKE para preservar el comportamiento original.
         $operator = DB::connection()->getDriverName() === 'pgsql' ? 'ilike' : 'like';
 
-        $posts = Post::with('category')
+        $posts = Post::with('category', 'postMedia.video')
             ->live()
             ->where(function ($query) use ($q, $operator) {
                 $query->where('title', $operator, "%{$q}%")

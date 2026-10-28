@@ -100,8 +100,8 @@
                             </div>
                         </div>
                     @endif
-                    @foreach($galleryItems as $media)
-                        <div class="carousel-item">
+                    @foreach($galleryItems as $index => $media)
+                        <div class="carousel-item {{ (! $post->featured_image && $index === 0) ? 'active' : '' }}">
                             @if($media->type === 'image')
                                 <div class="d-flex align-items-center justify-content-center bg-white" style="height: 560px;">
                                     <x-img path="storage/{{ $media->path }}" alt="{{ $post->title }}" class="d-block" style="max-height: 100%; max-width: 100%; width: auto; height: auto;" decoding="async" />
@@ -126,6 +126,21 @@
         @elseif($post->featured_image)
             <div class="d-flex align-items-center justify-content-center bg-white rounded mb-4" style="height: 560px;">
                 <x-img path="storage/{{ $post->featured_image }}" alt="{{ $post->title }}" class="d-block" style="max-height: 100%; max-width: 100%; width: auto; height: auto;" />
+            </div>
+        @elseif($galleryItems->isNotEmpty())
+            @php $media = $galleryItems->first(); @endphp
+            <div class="rounded mb-4 overflow-hidden" style="height: 560px;">
+                @if($media->type === 'image')
+                    <div class="d-flex align-items-center justify-content-center bg-white h-100">
+                        <x-img path="storage/{{ $media->path }}" alt="{{ $post->title }}" class="d-block" style="max-height: 100%; max-width: 100%; width: auto; height: auto;" decoding="async" />
+                    </div>
+                @elseif($media->video && $media->video->type === 'youtube' && $media->video->embed_url)
+                    <div class="bg-dark d-flex align-items-center justify-content-center h-100">
+                        <iframe src="{{ $media->video->embed_url }}" title="{{ $media->video->title }}" class="w-100 h-100" frameborder="0" allowfullscreen loading="lazy"></iframe>
+                    </div>
+                @elseif($media->video?->source_url)
+                    <video src="{{ $media->video->source_url }}" controls class="d-block w-100 h-100 bg-dark" style="object-fit: contain;" title="{{ $media->video->title }}" preload="metadata"></video>
+                @endif
             </div>
         @endif
 
