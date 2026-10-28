@@ -1,8 +1,8 @@
 # SECURITY.md — Riesgos, waivers y condiciones de despliegue
 
-> **Estado (2026-10-26):** rama `Laravel13-Dev` lista para el PR de upgrade — Laravel **13.38.0**, PHPUnit **291/301** (1325 assertions), cobertura **97.58%**, E2E **17/17**, gates pgsql UTF-8 y LATIN9 **301 tests c/u**, `composer audit` **0 advisories / 0 waivers**, `npm audit` **0**, SBOM **215 componentes**, **ZAP baseline final: 0 altas / 0 medias / 1 baja (artefacto del servidor dev) / 4 informativas** — evidencia en `docs/zap-baseline-final-2026-10-26.html`.
-> Producción (desplegada 2026-10-25 desde `main`, Laravel 10.50.2): **7/7 condiciones de despliegue verificadas** (§1 · DOCUMENTACION §14.L). Bloqueantes de salida a internet: **R5** (certificado TLS vencido) y **R6** (backup de BD) — `docs/PENDIENTES.md`.
-> Hasta que se despliegue el upgrade, en producción (L10): CVE-2026-48019 (CRLF en email) verificado **no aplicable** (el portal no envía correo; el formulario de contacto solo persiste en BD). *El historial completo de rondas y decisiones vive en el historial de git.*
+> **Estado (2026-10-28):** **producción actualizada a Laravel 13.38.0** (despliegue U1 desde `main` = `d4d3e91`; registro en DOCUMENTACION §14.M). Suite **303 tests / 1353 assertions** en verde, E2E **17/17**, `composer audit` **0 advisories / 0 waivers**, `npm audit` **0**, SBOM **215 componentes**, **ZAP baseline final: 0 altas / 0 medias / 1 baja (artefacto del servidor dev) / 4 informativas** — evidencia en `docs/zap-baseline-final-2026-10-26.html`.
+> **7/7 condiciones de despliegue verificadas** y re-verificadas tras el upgrade (§1 · DOCUMENTACION §14.L y §14.M). Bloqueantes de salida a internet: **R5** (certificado TLS vencido) y **R6** (backup de BD) — `docs/PENDIENTES.md`.
+> El waiver de `style-src 'unsafe-inline'` (TinyMCE) quedó **cerrado** con la CSP de nonce + `style-src-attr` del upgrade; el historial completo de rondas y decisiones vive en el historial de git.
 > **Próxima revisión de waivers: 2026-11-21.**
 
 ## 1. Condiciones obligatorias de despliegue
@@ -10,7 +10,8 @@
 El portal **solo puede publicarse en internet** cuando las 7 condiciones estén verificadas.
 Entorno real desplegado: **Nginx + PHP-FPM en el propio servidor, sin proxy inverso delante**
 (TLS terminado en Nginx, `TRUSTED_PROXIES` vacío). *Estado: **7/7 verificadas el 2026-10-25**
-durante el despliegue real — evidencia en `docs/DOCUMENTACION.md` §14.L.*
+y **re-verificadas el 2026-10-28 tras el upgrade a Laravel 13** — evidencia en
+`docs/DOCUMENTACION.md` §14.L y §14.M.*
 
 | # | Condición | Verificación |
 |---|-----------|--------------|
@@ -58,4 +59,4 @@ Checklist previa al arranque (primer lanzamiento):
 
 ## 4. Política de cambios
 
-Todo PR debe pasar: `php vendor/bin/pint --test`, `php artisan test` (**291 en verde / 301 métodos, 1325 assertions**; 6 notices `iconv` preexistentes en `Latin9Test` y 4 skips por entorno — pgsql/symlink/GD), y si toca auth/authz/validación/cripto: tests nuevos obligatorios (TDD). Antes de cada release: `composer audit` (Laravel 13.38.0: 0 advisories, 0 waivers), `npm audit`, regenerar SBOM, re-ejecutar `bash tests/e2e/run-all.sh` (17/17, requiere PostgreSQL) y repetir el baseline ZAP (`scripts/zap-baseline.yaml`). **PR sin tests = PR rechazado.** El constraint `php: ^8.3` está blindado por test (`SecurityConfigTest`).
+Todo PR debe pasar: `php vendor/bin/pint --test`, `php artisan test` (**303 en verde, 1353 assertions**; 6 notices `iconv` preexistentes en `Latin9Test` y 4 skips por entorno — pgsql/symlink/GD), y si toca auth/authz/validación/cripto: tests nuevos obligatorios (TDD). Antes de cada release: `composer audit` (Laravel 13.38.0: 0 advisories, 0 waivers), `npm audit`, regenerar SBOM, re-ejecutar `bash tests/e2e/run-all.sh` (17/17, requiere PostgreSQL) y repetir el baseline ZAP (`scripts/zap-baseline.yaml`). **PR sin tests = PR rechazado.** El constraint `php: ^8.3` está blindado por test (`SecurityConfigTest`).

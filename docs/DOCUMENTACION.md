@@ -516,19 +516,16 @@ npm run build      # copia TinyMCE a public/vendor + vite build a public/build
 > están en [SECURITY.md](../SECURITY.md) (raíz del repo). Las mejoras
 > futuras, en la §C de PENDIENTES.md.
 >
-> **Estado a 2026-10-26**: desarrollo funcional completo, gates de
-> pre-release verificados — **291 tests PHPUnit en verde / 301 totales**
-> (1325 assertions), **cobertura 97.58%** (app 98.05%), **E2E 17/17**,
-> **baseline ZAP final: 0 altas / 0 medias / 1 baja / 4 informativas**
-> (waiver TinyMCE `style-src` cerrado con CSP de nonce), Pint ✅, SCA 0/0 —
-> **y desplegado en el servidor institucional el 2026-10-25** (código en
-> `origin/main`, 7 condiciones de `SECURITY.md` §1 verificadas 7/7, registro
-> en §14.L).
+> **Estado a 2026-10-28**: **producción en Laravel 13.38.0** (despliegue U1
+> el 2026-10-28 desde `main` = `d4d3e91`; registro en **§14.M**) — 7
+> condiciones de `SECURITY.md` §1 verificadas y re-verificadas tras el
+> upgrade. Gates: **303 tests PHPUnit en verde** (1353 assertions),
+> **cobertura 97.58%** (app 98.05%), **E2E 17/17**, **baseline ZAP final:
+> 0 altas / 0 medias / 1 baja / 4 informativas** (waiver TinyMCE
+> `style-src` cerrado con CSP de nonce), Pint ✅, SCA 0/0.
 >
-> **Migración a Laravel 13.38.0 completada y validada** en la rama
-> `Laravel13-Dev` el 2026-10-26 (re-validación íntegra en segunda máquina:
-> mismos gates + ZAP repetido sin regresiones — `docs/PLAN-LARAVEL13.md` §6.2);
-> pendiente el despliegue del upgrade (**U1**).
+> El despliegue del 2026-10-25 (Laravel 10.50.2) quedó registrado en §14.L;
+> el de la migración completa 10 → 11 → 12 → 13 está en `docs/PLAN-LARAVEL13.md`.
 >
 > Quedan 2 ítems de contenido del cliente (D6/E1) y, como bloqueantes para
 > la salida a internet, el **certificado TLS** (R5) y la **copia de seguridad de
@@ -759,9 +756,11 @@ El procedimiento de G sirve tal cual; al actualizar desde una instalación en La
 7. **Verificación post-despliegue**: `php artisan about` debe mostrar `Laravel Version 13.38.0`; además del smoke de G.4, revisar login + escritura en `/admin` (sesión json) y `tail` del log sin errores de deserialización.
 
 #### H. Cron de programados (obligatorio)
-`app/Console/Kernel.php` programa **2 tareas diarias** — `contacts:prune` a las 03:17 (retención
-GDPR, `CONTACT_RETENTION_DAYS=365`) y `audit:prune` a las 04:23 (`AUDIT_RETENTION_DAYS=400`) —
-y la cola es `sync` (no hace falta worker de jobs). **Sí hay que registrar el cron**:
+`routes/console.php` programa **2 tareas diarias** (facade `Schedule`; desde Laravel 11 el
+schedule vive ahí, no en `app/Console/Kernel.php`, que ya no existe) — `contacts:prune` a las
+03:17 (retención GDPR, `CONTACT_RETENTION_DAYS=365`) y `audit:prune` a las 04:23
+(`AUDIT_RETENTION_DAYS=400`) — y la cola es `sync` (no hace falta worker de jobs).
+**Sí hay que registrar el cron**:
 
 ```cron
 # /etc/cron.d/portal  (root:root, 644, con salto de línea final)
@@ -842,6 +841,53 @@ Actualización de una instalación **ya existente con datos reales** (2 usuarios
 **Rollback:** `git reset --hard aaaeb32345624cbb407fe7e19098c77894c761f4`, restaurar `.env` y `public-assets.tgz` del backup, reinstalar dependencias y `php artisan up`. Las migraciones aplicadas son **aditivas** (índice + cambio de FK), así que no requieren rollback de esquema; no se generó dump de la BD (ver PENDIENTES R6).
 
 **Pendientes tras el despliegue:** certificado TLS (el auto-firmado actual `CN=<IP>` **venció el 2026-06-19**, el navegador rechaza la conexión), copia de seguridad automática de la BD (no hay `pg_dump` instalado) y, como mejora, acotar `expires` a estáticos (§14.2).
+
+#### M. Registro del despliegue de Laravel 13 (2026-10-28)
+
+Actualización del upgrade completo (U1): **Laravel 10.50.2 → 13.38.0** vía `8e06f82` →
+`a55cfa7` (merge del PR #1 `Laravel13-Dev`) y corrección posterior `d4d3e91`. Procedimiento:
+§14.G + §14.G.1. Sin cambios en `.env`, Nginx ni cron (config estilo L10 conservada, decisión D4
+del plan — `CACHE_DRIVER`/`SESSION_DRIVER` siguen siendo las claves leídas).
+
+| Paso | Resultado |
+|---|---|
+| Ventana + backups | `artisan down`; `/home/webgdc/backups/despliegue-2026-10-28-l13/` (`.env` 600, `public-assets.tgz`, `storage.tgz`, `info.txt` con SHA de rollback) |
+| Respaldo de la tabla a dropear | `personal_access_tokens` comprobada con **0 filas** y clonada como `personal_access_tokens_backup_20261028` (`CREATE TABLE … (LIKE … INCLUDING ALL)`). *Lección: `INCLUDING ALL` hereda el DEFAULT que apunta a la secuencia original y el `DROP` falla con `2BP01` — corregido con `ALTER … ALTER COLUMN id DROP DEFAULT` antes de reintentar la migración* |
+| Código | `git fetch && git reset --hard origin/main` + `rm -f public/install.php` |
+| Composer | `composer self-update --2` → **2.5.5 → 2.10.3**; `composer install --no-dev` instala framework **13.38.0**, Carbon 3, Symfony 7.4, Guzzle 8 y retira `doctrine/dbal`/`sanctum` |
+| Assets | `npm ci && npm run build` (29 ficheros en `public/build` + TinyMCE) |
+| Caché | `optimize:clear` **+ `cache:clear`** (§14.G.1.4, allowlist `serializable_classes`) |
+| BD | `migrate --force` → **`drop_personal_access_tokens`** (única migración nueva). `pii:encrypt --dry-run` 0, `webp:generate` sin cambios |
+| Contenido | `db:seed --class=NoticiasPrecargadasSeeder` publica la **Noticia 6** (Mes Rosa) con su vídeo → 6 posts, 1 video |
+| Apertura | `artisan up`; `about` → **Laravel 13.38.0 / PHP 8.3.36**; `schedule:list` → `contacts:prune` 03:17 y `audit:prune` 04:23 |
+
+**Incidencia 1 (resuelta): usuario seed creado por el seeder.** `NoticiasPrecargadasSeeder`
+crea `admin@gdc.gob.ve` (rol `editor`, **contraseña `password`**) si ese email no existe —
+condición que no se cumple en una instalación real cuyos usuarios seed borró `install.php`.
+Se reasignó su contenido (1 post, 1 video) al superadmin real y se **eliminó la cuenta**.
+*Pendiente de corregir en el seeder (guarda "solo si no hay usuarios").*
+
+**Incidencia 2 (resuelta, `d4d3e91`): 500 al renderizar la galería.** La allowlist
+`cache.serializable_classes` no incluía `App\Models\PostMedia`; `HomeController` cachea
+`Post::with('category', 'postMedia.video')` y el store `file` devolvía
+`__PHP_Incomplete_Class` → `data_get(): incomplete object` en `/` y `/noticias/**` (el caché
+`array` de los tests no serializa, por eso no se vio en local). Corregido añadiendo la clase a
+la allowlist + **test de regresión** que hace roundtrip del payload real por `FileStore`
+(`CacheTest::test_cache_serializable_classes_allowlist_roundtrips_cached_payloads`, que
+reproduce el 500 sin el fix).
+
+**Verificación post-upgrade:** `/` ×5 y `/noticias` ×3 → 200 (incluye el segundo request, con
+caché ya poblado); `/noticias/mes-rosa-…`, `/gacetas`, `/contacto`, `/sobre-nosotros`,
+`/entes`, `/sitemap.xml`, `/buscar?q=…`, `/admin/login` → 200; el vídeo se sirve con `206`
+(Range) y la vista embebe `<video src="/storage/videos/…">`; `/storage/prueba.php` y `/.env`
+→ **403**; CSP de nonce + `style-src-attr` y HSTS presentes; sin errores nuevos en el log
+desde el fix. **Re-login obligatorio de todos los usuarios** (sesiones invalidadas por
+`session.serialization = json`, §14.G.1.5).
+
+**Rollback:** `git reset --hard 8e06f82` + `composer install --no-dev` + `npm ci && npm run build`
++ restaurar `public-assets.tgz` y `.env` del backup + `artisan up`. La migración es reversible
+(`down()` recrea `personal_access_tokens` vacía); la tabla respaldo puede borrarse cuando
+exista un dump real de la BD (PENDIENTES R6).
 
 ---
 
@@ -936,7 +982,7 @@ Garantías de las suites:
 
 ### PHPUnit (`tests/Unit`, `tests/Feature`)
 
-- Ejecución: `./vendor/bin/phpunit` (o `--testsuite Unit,Feature`) — **291 en verde / 301 totales / 1325 assertions**, en verde (3 skipped: requieren PostgreSQL o el symlink `public/storage`; 6 avisos preexistentes de `iconv` en LATIN9, intencionales).
+- Ejecución: `./vendor/bin/phpunit` (o `--testsuite Unit,Feature`) — **303 en verde / 1353 assertions** (4 skipped: requieren PostgreSQL o el symlink `public/storage`; 6 avisos preexistentes de `iconv` en LATIN9, intencionales). *Cifra verificada el 2026-10-28 tras el fix de la allowlist de caché (§14.M); incluye el test de regresión del roundtrip por `FileStore`.*
 - **Cobertura (desde R3, re-validada 2026-10-26 en Laravel 13):** con Xdebug 3.5.3 instalado, `./vendor/bin/phpunit --coverage-text --coverage-html coverage-html` → **97.58% de líneas total** (app 98.05% · database 95.36%; objetivo ≥90% superado); authn/authz/validación/cifrado ≈100% salvo el fallback de iconv de `App\Support\Latin9`. El HTML se genera en `/coverage-html` (ignorado por git).
 - **BD aislada**: `phpunit.xml` define `DB_CONNECTION=sqlite` / `DB_DATABASE=:memory:` (B2 cerrado) — `RefreshDatabase` migra en memoria por test, **nunca toca la BD de desarrollo**. El `APP_KEY` de `phpunit.xml` es una clave **exclusiva de tests**; no usar en producción.
 - Cobertura de flujos críticos:

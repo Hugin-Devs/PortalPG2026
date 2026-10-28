@@ -6,7 +6,7 @@ Portal web institucional del **Gobierno de Distrito Capital (GDC)**: sitio infor
 
 | Componente | Tecnología |
 |---|---|
-| Backend | Laravel 13 (PHP 8.3+), Blade — producción aún en Laravel 10 hasta el despliegue del upgrade (U1) |
+| Backend | Laravel 13 (PHP 8.3+), Blade |
 | Frontend | Bootstrap 5.3 + Sass, Vite, JavaScript vanilla |
 | Base de datos | PostgreSQL 14+ recomendado (probado con 18.6). Producción: **13.23 / LATIN9** con conexión UTF8 |
 | Editor | TinyMCE 8 auto-hospedado (GPL), Font Awesome y fuentes locales (funciona offline) |
@@ -57,11 +57,12 @@ Baseline DAST con OWASP ZAP: `scripts/zap-baseline.yaml` (referencias en `docs/z
 
 ## Despliegue
 
-**Estado: desplegado en producción el 2026-10-25** en `https://web.gdc.gob.ve` (Debian 12 + Nginx + PHP-FPM 8.3 + PostgreSQL LATIN9), con `origin/main` = `8e06f82` y las **7 condiciones de [SECURITY.md](SECURITY.md) §1 verificadas 7/7**.
+**Estado: producción en Laravel 13.38.0 desde el 2026-10-28** (`https://web.gdc.gob.ve`, Debian 12 + Nginx + PHP-FPM 8.3 + PostgreSQL LATIN9), con `origin/main` = `d4d3e91` y las **7 condiciones de [SECURITY.md](SECURITY.md) §1 verificadas y re-verificadas tras el upgrade**.
 
-Checklist completo del servidor (vhost, `.env`, orden de arranque, actualizaciones posteriores, cron y registro del despliegue real) en **`docs/DOCUMENTACION.md` §14** (el detalle del despliegue está en **§14.L**). Puntos clave:
+Checklist completo del servidor (vhost, `.env`, orden de arranque, actualizaciones posteriores, cron y registro de los despliegues) en **`docs/DOCUMENTACION.md` §14** — despliegue inicial en **§14.L** (2026-10-25, Laravel 10) y del upgrade a Laravel 13 en **§14.M** (2026-10-28, con las 2 incidencias resueltas). Puntos clave:
 
-- Plantilla **`.env_example_produccion`** → `.env` en el servidor (`chmod 600`, `APP_DEBUG=false`, `TRUSTED_HOSTS=<dominio>`, `DB_SSLMODE=require`); **nunca** copiar el `.env` de desarrollo ni regenerar `APP_KEY` después del primer seed.
-- Actualización típica: `git fetch && git reset --hard origin/main` → `rm -f public/install.php` → `composer install --no-dev` → `npm ci && npm run build` → `optimize:clear` → `migrate --force` → `optimize` (§14.G). **Nunca** un `db:seed` completo en producción.
+- Plantilla **`.env_example_produccion`** → `.env` en el servidor (`chmod 600`, `APP_DEBUG=false`, `TRUSTED_HOSTS=<dominio>`, `DB_SSLMODE=require`); **nunca** copiar el `.env` de desarrollo ni regenerar `APP_KEY` después del primer seed. El salto a Laravel 13 **no exige cambios de `.env`** (config estilo L10 conservada).
+- Actualización típica: `git fetch && git reset --hard origin/main` → `rm -f public/install.php` → `composer install --no-dev` → `npm ci && npm run build` → `optimize:clear` (+ `cache:clear` en el primer despliegue con L13, §14.G.1) → `migrate --force` → `optimize` (§14.G). **Nunca** un `db:seed` completo en producción.
 - Obligatorios: `storage:link` (el enlace debe apuntar al `storage/` de la misma instalación), cron `* * * * * www-data php .../artisan schedule:run` y las 7 condiciones de SECURITY.md §1.
+- Tras un upgrade de framework: **re-login obligatorio de todos los usuarios** (sesiones invalidadas por `session.serialization = json`).
 - Abiertos antes de la salida a internet: **R5 certificado TLS** (el actual venció el 2026-06-19) y **R6 copia de seguridad de la BD**.

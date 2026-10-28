@@ -3,8 +3,8 @@
 > **Fuente viva del trabajo pendiente.** Ir marcando `- [x]` al completar un ítem.
 > Última actualización: 2026-10-26.
 
-**Abiertos: 5** — 2 de contenido del cliente + 2 de bloqueo de salida (TLS y backup de BD) + 1 de release (upgrade).
-*Estado de la rama `Laravel13-Dev` (2026-10-26): Pint ✅ · **291/301 tests · 1325 aserciones · cobertura 97.58%** · gates UTF-8 y LATIN9 301 c/u · E2E 17/17 · **ZAP final 0/0/1/4**, waiver `style-src` cerrado — ver `docs/PLAN-LARAVEL13.md` §6.2.*
+**Abiertos: 5** — 2 de contenido del cliente + 2 de bloqueo de salida (TLS y backup de BD) + 1 de mantenimiento (guarda del seeder).
+*Producción en **Laravel 13.38.0** desde el 2026-10-28 (U1 cerrado; registro en DOCUMENTACION §14.M). Gates: Pint ✅ · **303 tests · 1353 aserciones** · cobertura 97.58% · E2E 17/17 · **ZAP final 0/0/1/4**, waiver `style-src` cerrado · audits 0/0.*
 
 ---
 
@@ -26,8 +26,10 @@
 - [ ] **R6 — Copia de seguridad de la BD**  
   No hay cliente PostgreSQL (`psql`/`pg_dump`) en el servidor ⇒ no existe dump de `portalweb`. El despliegue del 2026-10-25 se hizo con backup de `.env`, `storage/` y assets pero **sin dump de BD** (aceptado explícitamente). Instalar `postgresql-client` y dejar un `pg_dump` diario + verificación de restauración.
 
-- [ ] **U1 — Despliegue del upgrade a Laravel 13**  
-  PR `Laravel13-Dev` → `main` (gates todos en verde: ver `docs/PLAN-LARAVEL13.md` §5.3/§6.2), despliegue con rollback por SHA y smoke de las 7 condiciones (SECURITY.md §1 / DOCUMENTACION §14) repetido tras el upgrade.
+- [x] **U1 — Despliegue del upgrade a Laravel 13** → **desplegado el 2026-10-28** (`8e06f82` L10.50.2 → `a55cfa7`/`d4d3e91` L13.38.0; runbook §14.G + §14.G.1; registro completo en **§14.M**). 7 condiciones re-verificadas; smoke íntegro en verde (incluido el 2º request con caché poblado); vídeo de la Noticia 6 servido con 206. Dos incidencias resueltas en la ventana: la allowlist `cache.serializable_classes` sin `PostMedia` (500 en la galería → fix `d4d3e91` + test de regresión) y el usuario seed creado por el seeder (eliminado; ver U2). Rollback disponible con `8e06f82` + backups del 2026-10-28.
+
+- [ ] **U2 — Corregir la guarda de `NoticiasPrecargadasSeeder`** (no bloqueante)  
+  El seeder crea `admin@gdc.gob.ve` (rol `editor`, contraseña `password`) si ese email no existe, aunque ya haya usuarios reales — en el despliegue del 2026-10-28 creó esa cuenta en producción y hubo que eliminarla (contenido reasignado al superadmin). Debe crear el usuario de respaldo **solo si la tabla `users` está vacía**, o firmar el contenido con el primer superadmin existente. Con test de regresión.
 
 ## C. Diferidos / fuera de alcance (no se van a hacer)
 
