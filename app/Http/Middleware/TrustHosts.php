@@ -38,7 +38,7 @@ class TrustHosts extends Middleware
     }
 
     /**
-     * `web.gdc.gob.ve` → `^web\.gdc\.gob\.ve$` (host exacto);
+     * `www.gdc.gob.ve` → `^www\.gdc\.gob\.ve$` (host exacto);
      * `*.gob.ve` → `^(.+\.)?gob\.ve$` (subdominios).
      */
     protected function hostPattern(string $host): ?string

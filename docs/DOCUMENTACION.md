@@ -594,7 +594,7 @@ Recomendado: **la raíz del vhost apunta a `public/`** — así `.env`, `storage
 
 ```nginx
 server {
-    server_name web.gdc.gob.ve;
+    server_name www.gdc.gob.ve 172.16.0.14;   # dominio público + acceso por IP (§14.N)
     root /var/www/html/PortalPG2026/public;   # solo public/ es accesible por HTTP
     index index.php;
 
@@ -661,7 +661,7 @@ Crear **in situ** desde la plantilla **`.env_example_produccion`** (versionada e
 | `APP_ENV` | `production` |
 | `APP_DEBUG` | **`false`** (con `true`, los errores 500 filtran trazas y datos sensibles) |
 | `APP_KEY` | generarla UNA sola vez con `php artisan key:generate` **antes del primer `db:seed`** y no volver a tocarla: si se regenera con filas ya creadas, todo lo cifrado con la clave anterior (`users.name`, `contacts.name/email/subject/message`) queda ilegible y cualquier lectura revienta con `DecryptException: The MAC is invalid` (p. ej. un re-`db:seed`). Recuperación: restaurar la clave original, o si la BD es descartable `php artisan migrate:fresh --seed --force`, o borrar las filas afectadas con SQL crudo (`psql`/`DB::table`, que no descifran) y re-sembrar — `UserSeeder` imprime exactamente esta guía al detectarlo (§14.E) |
-| `APP_URL` | `https://web.gdc.gob.ve` (dominio real; **definirlo UNA sola vez** — una clave repetida en `.env` confunde al parser y suele ganar la primera) |
+| `APP_URL` | `https://www.gdc.gob.ve` (dominio público real desde 2026-10-28 — §14.N; **definirlo UNA sola vez** — una clave repetida en `.env` confunde al parser y suele ganar la primera) |
 | `DB_HOST` / `DB_DATABASE` / `DB_USERNAME` / `DB_PASSWORD` | BD dedicada de producción (**LATIN9**, ver §14.K) |
 | `DB_CHARSET` | No cambiar: la conexión va en `utf8` aunque la BD sea LATIN9 (§14.K) |
 | `MAIL_*` | SMTP real (el default de `.env.example` es un host de ejemplo que no existe) |
@@ -807,7 +807,7 @@ Actualización de una instalación **ya existente con datos reales** (2 usuarios
 |---|---|
 | Sistema | Debian 12 (bookworm), host `webgdc1`, 4 GB RAM / 18 GB disco |
 | Web | Nginx + PHP-FPM **8.3.35** (`gd`, `pdo_pgsql`, `intl`, `mbstring`, `zip`; sin `bcmath`, que no se usa) |
-| Raíz / dominio | `/var/www/html/PortalPG2026/public` · `https://web.gdc.gob.ve` (DNS interno → servidor) |
+| Raíz / dominio | `/var/www/html/PortalPG2026/public` · `https://web.gdc.gob.ve` (DNS interno → servidor; **hoy el dominio público es `www.gdc.gob.ve` — ver §14.N**) |
 | BD | PostgreSQL **13.23** (`server_encoding=LATIN9`, `client_encoding=UTF8`), servidor de BD externo, `DB_SSLMODE=require` |
 | Herramientas | Composer 2.5.5, Node 26 / npm 11 (ambos presentes, se compila en el servidor) |
 | Acceso | SSH como usuario normal en grupo `www-data`; escalada a root con `su` (no hay `sudo`) |
@@ -901,6 +901,33 @@ desde el fix. **Re-login obligatorio de todos los usuarios** (sesiones invalidad
 + restaurar `public-assets.tgz` y `.env` del backup + `artisan up`. La migración es reversible
 (`down()` recrea `personal_access_tokens` vacía); la tabla respaldo puede borrarse cuando
 exista un dump real de la BD (PENDIENTES R6).
+
+#### N. Cambio de dominio a `www.gdc.gob.ve` (2026-10-28)
+
+El portal salió a internet bajo el dominio **`www.gdc.gob.ve`**:
+
+| Dato | Valor |
+|---|---|
+| DNS público | `www.gdc.gob.ve` → **190.205.103.125** (NAT de borde a `172.16.0.14`, puertos 80 y 443 abiertos — evidenciados por accesos de IPs externas en el access log de Nginx) |
+| `web.gdc.gob.ve` | **NXDOMAIN en DNS público**; dominio interno heredado, ya no se usa |
+| `gdc.gob.ve` (apex) | Pertenece a **otro servidor** (`190.202.23.123` / `172.16.0.28`), no a este portal |
+| Sin proxy delante | Los IPs de cliente llegan intactos ⇒ `TRUSTED_PROXIES` sigue **vacío** |
+
+**Cambios aplicados:**
+
+1. `.env`: `APP_URL=https://www.gdc.gob.ve` (los contextos de consola —`route()` en artisan, sitemap encolado— usaban el dominio muerto) y `TRUSTED_HOSTS=www.gdc.gob.ve,172.16.0.14`. El host `web…` sigue siendo confiable gracias al patrón fijo `^(.+\.)?gdc\.gob\.ve$` de `TrustHosts` (§… `app/Http/Middleware/TrustHosts.php`), y **el acceso por IP se conserva**.
+2. Nginx: `server_name www.gdc.gob.ve 172.16.0.14;` (antes `172.16.0.14 web.gdc.gob.ve` con `www` comentado). El vhost es `default_server`, así que cualquier host cae aquí; **no se añadieron 301** (decisión: cambiar solo la URL).
+3. `public/robots.txt`: añadida la línea `Sitemap: https://www.gdc.gob.ve/sitemap.xml`.
+4. `php artisan optimize` + `cache:clear` para recachear la config y descartar el `sitemap.xml` cacheado.
+5. Referencias operativas de documentos y plantilla (`.env_example_produccion`, README, SECURITY §1, PENDIENTES R5, informe) actualizadas; los registros históricos §14.L/§14.M conservan la URL de su fecha.
+
+**Verificación:** `config:show app.url` → `https://www.gdc.gob.ve`; `trusted_hosts` → `www.gdc.gob.ve,172.16.0.14`; canonical/`og:url`/`/sitemap.xml` → `www` (estos ya salían del Host de la petición, §14.N no los tocó); `Host: www…` 200, `Host: 172.16.0.14` 200, `Host` desconocido **400**; `robots.txt` con `Sitemap:`; smoke 200 y sin errores nuevos en el log.
+
+> ⚠️ **R5 sigue abierto:** el certificado TLS sigue siendo el auto-firmado
+> `CN=172.16.0.14` **vencido el 2026-06-19**, por lo que los usuarios externos ven el
+> aviso de "conexión no privada". Vías en PENDIENTES R5: certificado institucional,
+> Let's Encrypt (viable: DNS público + puerto 80 abierto, requiere instalar `certbot`)
+> o autofirmado nuevo con SAN.
 
 ---
 

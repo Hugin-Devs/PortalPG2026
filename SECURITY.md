@@ -16,12 +16,12 @@ y **re-verificadas el 2026-10-28 tras el upgrade a Laravel 13** — evidencia en
 | # | Condición | Verificación |
 |---|-----------|--------------|
 | 1 | **Eliminar `public/install.php`** del artefacto publicado (instalador one-shot sin autenticación; se autoborra al completarse, pero la ventana existe) | `test ! -f public/install.php && echo OK` en el servidor (⚠️ **vuelve con cada `git pull`/`reset --hard`**: borrar tras cada despliegue) |
-| 2 | **`TRUSTED_PROXIES=<IP del proxy>`** (vacío si no hay proxy delante) y **`TRUSTED_HOSTS=web.gdc.gob.ve`** en el `.env` de producción (sin esto el rate limiting colapsa al bucket del proxy y la auditoría registra la IP del proxy) | `php artisan config:show security.trusted_proxies` y `... trusted_hosts` |
+| 2 | **`TRUSTED_PROXIES=<IP del proxy>`** (vacío si no hay proxy delante) y **`TRUSTED_HOSTS=www.gdc.gob.ve`** en el `.env` de producción (sin esto el rate limiting colapsa al bucket del proxy y la auditoría registra la IP del proxy) | `php artisan config:show security.trusted_proxies` y `... trusted_hosts` |
 | 3 | **`DB_SSLMODE=require`** (cifrar el enlace a PostgreSQL) | `php artisan config:show database.connections.pgsql.sslmode` |
 | 4 | **php.ini de PHP-FPM**: `upload_max_filesize=100M`, `post_max_size=110M`, `expose_php=Off` (vídeos de hasta 100 MB) | `grep -E '^(upload_max_filesize\|post_max_size\|expose_php)' /etc/php/8.3/fpm/php.ini` (ojo: `php -i` de CLI lee otro ini) |
 | 5 | **Nginx: bloquear scripts en `/storage`** (el `.htaccess` de `storage/app/public` solo aplica en Apache): `location ~* \.(php\|phtml\|phar)$ { deny all; }` **y servir los estáticos con `X-Content-Type-Options: nosniff`** (los estáticos no pasan por Laravel: `add_header X-Content-Type-Options nosniff always;` en el bloque `location` de `/build`, `/storage`, `/images`) | `curl -I` sobre `/storage/x.php` (→403) y un `/build/assets/*.js` (→200 + nosniff) |
 | 6 | **Cron de programados**: `* * * * * www-data php /var/www/html/PortalPG2026/artisan schedule:run` (ejecuta `contacts:prune` a las 03:17 y `audit:prune` a las 04:23) | `cat /etc/cron.d/portal` + `php artisan schedule:run` |
-| 7 | **HSTS** (`Strict-Transport-Security: max-age=31536000; includeSubDomains`) en el servidor web y/o proxy, tras confirmar HTTPS end-to-end | `curl -I https://web.gdc.gob.ve/` |
+| 7 | **HSTS** (`Strict-Transport-Security: max-age=31536000; includeSubDomains`) en el servidor web y/o proxy, tras confirmar HTTPS end-to-end | `curl -I https://www.gdc.gob.ve/` |
 
 Checklist previa al arranque (primer lanzamiento):
 

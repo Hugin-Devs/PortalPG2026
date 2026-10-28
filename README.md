@@ -57,7 +57,7 @@ Baseline DAST con OWASP ZAP: `scripts/zap-baseline.yaml` (referencias en `docs/z
 
 ## Despliegue
 
-**Estado: producción en Laravel 13.38.0 desde el 2026-10-28** (`https://web.gdc.gob.ve`, Debian 12 + Nginx + PHP-FPM 8.3 + PostgreSQL LATIN9), con `origin/main` = `d4d3e91` y las **7 condiciones de [SECURITY.md](SECURITY.md) §1 verificadas y re-verificadas tras el upgrade**.
+**Estado: producción en Laravel 13.38.0 desde el 2026-10-28 y publicada en internet en `https://www.gdc.gob.ve`** (Debian 12 + Nginx + PHP-FPM 8.3 + PostgreSQL LATIN9; DNS público `190.205.103.125`), con `main` sincronizado con producción y las **7 condiciones de [SECURITY.md](SECURITY.md) §1 verificadas y re-verificadas tras el upgrade**. *Único bloqueante restante: **R5 — certificado TLS** (sigue el auto-firmado vencido).*
 
 Checklist completo del servidor (vhost, `.env`, orden de arranque, actualizaciones posteriores, cron y registro de los despliegues) en **`docs/DOCUMENTACION.md` §14** — despliegue inicial en **§14.L** (2026-10-25, Laravel 10) y del upgrade a Laravel 13 en **§14.M** (2026-10-28, con las 2 incidencias resueltas). Puntos clave:
 

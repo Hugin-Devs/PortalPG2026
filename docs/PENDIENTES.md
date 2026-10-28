@@ -21,7 +21,7 @@
 ## B. Pre-release (bloquean la publicación / el release)
 
 - [ ] **R5 — Certificado TLS del dominio**  
-  El certificado actual es auto-firmado con `CN=<IP>` y **venció el 2026-06-19**: el navegador rechaza la conexión a `https://web.gdc.gob.ve` (desde consola funciona con `-k`). Hace falta un certificado institucional o CA interna con SAN del dominio (Let's Encrypt no aplica: DNS interno, no hay puerto 80 público). Detalle en DOCUMENTACION.md §14.L.
+  El portal está publicado en `https://www.gdc.gob.ve` (DNS público `190.205.103.125`, 80/443 con NAT hacia `172.16.0.14`), pero el certificado sigue siendo el **auto-firmado `CN=172.16.0.14` vencido el 2026-06-19** ⇒ los navegadores externos rechazan la conexión (desde consola funciona con `-k`). Vías posibles: certificado/CA institucional con SAN del dominio, **Let's Encrypt (ahora viable: DNS público + puerto 80 abierto, requiere instalar `certbot`)** o autofirmado nuevo con SAN (seguiría sin ser de confianza). Detalle en DOCUMENTACION.md §14.N.
 
 - [ ] **R6 — Copia de seguridad de la BD**  
   No hay cliente PostgreSQL (`psql`/`pg_dump`) en el servidor ⇒ no existe dump de `portalweb`. El despliegue del 2026-10-25 se hizo con backup de `.env`, `storage/` y assets pero **sin dump de BD** (aceptado explícitamente). Instalar `postgresql-client` y dejar un `pg_dump` diario + verificación de restauración.

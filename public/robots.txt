@@ -1,2 +1,3 @@
 User-agent: *
 Disallow:
+Sitemap: https://www.gdc.gob.ve/sitemap.xml

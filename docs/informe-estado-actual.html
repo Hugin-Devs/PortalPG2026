@@ -428,10 +428,10 @@
   <thead><tr><th style="width:8%">ID</th><th>Verificación</th><th style="width:26%">Estado</th></tr></thead>
   <tbody>
     <tr><td>R4</td><td>Verificar las 7 condiciones de §8 en el servidor de producción (incluido <code>nosniff</code> en ficheros estáticos)</td><td><span class="ok">Cerrado 2026-10-25 (7/7)</span></td></tr>
-    <tr><td>R5</td><td><strong>Certificado TLS del dominio</strong>: el auto-firmado actual (<code>CN=&lt;IP&gt;</code>) venció el 2026-06-19 y el navegador rechaza la conexión a <code>https://web.gdc.gob.ve</code></td><td><span class="pending">Pendiente — bloquea la salida</span></td></tr>
+    <tr><td>R5</td><td><strong>Certificado TLS del dominio</strong>: el portal está publicado en <code>https://www.gdc.gob.ve</code> pero el certificado sigue siendo el auto-firmado (<code>CN=&lt;IP&gt;</code>) vencido el 2026-06-19, por lo que los navegadores externos rechazan la conexión</td><td><span class="pending">Pendiente — bloquea la salida</span></td></tr>
     <tr><td>R6</td><td><strong>Copia de seguridad de la BD</strong>: no hay <code>pg_dump</code>/<code>psql</code> en el servidor, por lo que no existe dump de la base de datos</td><td><span class="pending">Pendiente — bloquea la salida</span></td></tr>
     <tr><td>D6/E1</td><td>Cargar el listado real de entes afiliados (contenido del cliente)</td><td><span class="pending">Pendiente</span></td></tr>
-    <tr><td>U1</td><td><strong>Despliegue del upgrade a Laravel 13</strong>: PR <code>Laravel13-Dev</code> → <code>main</code> (gates en verde §6), despliegue con rollback por SHA y smoke de §8 repetido</td><td><span class="pending">Pendiente</span></td></tr>
+    <tr><td>U1</td><td><strong>Despliegue del upgrade a Laravel 13</strong>: PR <code>Laravel13-Dev</code> → <code>main</code> (gates en verde §6), despliegue con rollback por SHA y smoke de §8 repetido</td><td><span class="ok">Cerrado 2026-10-28 (Laravel 13.38.0)</span></td></tr>
     <tr><td>—</td><td>DAST <strong>autenticado</strong> y repetición del baseline contra el entorno ya desplegado (mejora recomendada)</td><td><span class="warn">Recomendado</span></td></tr>
   </tbody>
 </table>
