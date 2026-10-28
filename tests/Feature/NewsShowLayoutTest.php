@@ -67,7 +67,8 @@ class NewsShowLayoutTest extends TestCase
             ->assertOk()
             ->assertSee('data-layout="revista"', false)
             ->assertSee('id="newsGallery"', false)
-            ->assertSee('aspect-ratio: 400/700', false);
+            ->assertSee('aspect-ratio: 400/700', false)
+            ->assertSee('background-color: rgba(255, 255, 255, .92)', false, 'El carrusel debe pintar el chip blanco de resaltado de las flechas');
     }
 
     public function test_a_single_landscape_element_in_the_gallery_forces_the_classic_layout(): void
@@ -79,7 +80,8 @@ class NewsShowLayoutTest extends TestCase
         $this->get(route('news.show', $post->slug))
             ->assertOk()
             ->assertSee('data-layout="clasico"', false)
-            ->assertDontSee(self::REVISTA_MEDIO);
+            ->assertDontSee(self::REVISTA_MEDIO)
+            ->assertSee('background-color: rgba(255, 255, 255, .92)', false, 'El chip de las flechas aplica también en el layout clásico');
     }
 
     public function test_youtube_embeds_count_as_landscape(): void

@@ -24,9 +24,29 @@
 
 @if($carouselCount > 1)
     <style nonce="{{ request()->attributes->get('csp_nonce') }}">
+        /* Controles con chip circular blanco (resaltado): Bootstrap los deja a
+           opacity .5 y sobre una foto vertical el glyph #333 se perdía. */
+        #newsGallery .carousel-control-prev,
+        #newsGallery .carousel-control-next {
+            opacity: 1;
+        }
         #newsGallery .carousel-control-prev-icon,
         #newsGallery .carousel-control-next-icon {
             filter: none;
+            width: 2.75rem;
+            height: 2.75rem;
+            border-radius: 50%;
+            background-color: rgba(255, 255, 255, .92);
+            background-size: 1.1rem 1.1rem;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, .35);
+            transition: transform .15s ease, box-shadow .15s ease;
+        }
+        #newsGallery .carousel-control-prev:hover .carousel-control-prev-icon,
+        #newsGallery .carousel-control-next:hover .carousel-control-next-icon,
+        #newsGallery .carousel-control-prev:focus-visible .carousel-control-prev-icon,
+        #newsGallery .carousel-control-next:focus-visible .carousel-control-next-icon {
+            transform: scale(1.06);
+            box-shadow: 0 3px 14px rgba(0, 0, 0, .45);
         }
         #newsGallery .carousel-control-prev-icon {
             background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16' fill='%23333'%3e%3cpath d='M11.354 1.646a.5.5 0 0 1 0 .708L5.707 8l5.647 5.646a.5.5 0 0 1-.708.708l-6-6a.5.5 0 0 1 0-.708l6-6a.5.5 0 0 1 .708 0z'/%3e%3c/svg%3e");
