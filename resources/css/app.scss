@@ -190,3 +190,21 @@ h1, h2, h3, h4, h5, h6 {
         padding: 1rem !important;
     }
 }
+
+// Detalle de noticia (modo revista): el medio flota a la derecha y el texto
+// fluye a su lado y POR DEBAJO a todo el ancho. Sustituye a la rejilla
+// row/col-lg, que dejaba un hueco en blanco al lado del texto cuando el
+// texto o la imagen acababan antes que el otro.
+.news-media-float {
+    width: 100%;
+    margin-bottom: 1rem;
+}
+
+@media (min-width: 992px) {
+    .news-media-float {
+        float: right;
+        width: 50%; // el medio ocupa ~la mitad; el texto fluye alrededor
+        margin-left: 1.5rem;
+        margin-bottom: 0.75rem;
+    }
+}

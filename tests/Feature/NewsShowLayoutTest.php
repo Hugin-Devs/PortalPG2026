@@ -13,18 +13,20 @@ use Tests\Concerns\BuildsMediaFixtures;
 use Tests\TestCase;
 
 /**
- * Layout del detalle de noticia (news-show): el modo "revista" (texto a la
- * izquierda, medio a la derecha) solo se activa cuando TODOS los medios son
- * verticales; cualquier landscape, cuadrado o embed de YouTube (16:9) mantiene
- * el layout clásico a todo ancho con caja de 560 px.
+ * Layout del detalle de noticia (news-show): el modo "revista" solo se activa
+ * cuando TODOS los medios son verticales; cualquier landscape, cuadrado o
+ * embed de YouTube (16:9) mantiene el layout clásico a todo ancho con caja de
+ * 560 px. En modo revista el medio se flota a la derecha (.news-media-float)
+ * para que el texto fluya a su lado y CONTINÚE POR DEBAJO a todo el ancho
+ * (antes, la rejilla row/col-lg dejaba un hueco en blanco al lado del texto).
  */
 class NewsShowLayoutTest extends TestCase
 {
     use BuildsMediaFixtures;
     use RefreshDatabase;
 
-    /** Columnas del medio en el layout revista (desktop a la derecha). */
-    private const REVISTA_MEDIO = 'col-lg-7 order-1 order-lg-2';
+    /** Gancho de estilo del medio flotado en el layout revista (desktop). */
+    private const REVISTA_MEDIO = 'news-media-float';
 
     protected function setUp(): void
     {

@@ -74,11 +74,13 @@
         </script>
 
         @if($mediaLayout === 'revista')
-            {{-- Todos los medios son verticales: texto a la izquierda y el
-                 carrusel/medio a la derecha, como una revista. En móvil el
-                 medio queda arriba (order-1) y el texto debajo. --}}
-            <div class="row g-4 align-items-start mb-4">
-                <div class="col-lg-7 order-1 order-lg-2">
+            {{-- Medio vertical a la derecha con FLUJO: el texto empieza al lado
+                 del carrusel y continúa por debajo a todo el ancho, sin dejar
+                 el hueco en blanco que producía la rejilla row/col de dos
+                 columnas. En móvil/tablet (< lg) el medio va arriba a todo
+                 ancho y el texto debajo (regla .news-media-float en app.scss). --}}
+            <div class="clearfix mb-4">
+                <div class="news-media-float">
                     @include('public.partials.news-media', [
                         'post' => $post,
                         'galleryItems' => $galleryItems,
@@ -86,12 +88,11 @@
                         'modoRevista' => true,
                     ])
                 </div>
-                <div class="col-lg-5 order-2 order-lg-1">
-                    <div class="lead mb-4 fw-semibold">{{ $post->excerpt }}</div>
 
-                    <div class="content fs-5 lh-lg">
-                        {!! $post->rendered_content !!}
-                    </div>
+                <div class="lead mb-4 fw-semibold">{{ $post->excerpt }}</div>
+
+                <div class="content fs-5 lh-lg">
+                    {!! $post->rendered_content !!}
                 </div>
             </div>
         @else
