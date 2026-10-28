@@ -2,6 +2,7 @@
 
 use Illuminate\Foundation\Inspiring;
 use Illuminate\Support\Facades\Artisan;
+use Illuminate\Support\Facades\Schedule;
 
 /*
 |--------------------------------------------------------------------------
@@ -17,3 +18,8 @@ use Illuminate\Support\Facades\Artisan;
 Artisan::command('inspire', function () {
     $this->comment(Inspiring::quote());
 })->purpose('Display an inspiring quote');
+
+// Retención de PII: mensajes de contacto fuera de ventana (GDPR).
+Schedule::command('contacts:prune')->dailyAt('03:17');
+// Retención de logs de auditoría (ventana por defecto 400 días).
+Schedule::command('audit:prune')->dailyAt('04:23');

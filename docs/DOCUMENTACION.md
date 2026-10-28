@@ -13,7 +13,7 @@ Inspirado en: https://mippci.gob.ve
 | Componente | Versión |
 |---|---|
 | PHP | 8.3+ (obligatorio: `composer.json` fija `^8.3`; 8.1/8.2 EOL) |
-| Laravel | 10.x |
+| Laravel | 13.x (rama `Laravel13-Dev`; producción aún en 10.x hasta U1) |
 | Bootstrap | 5.3+ |
 | Base de datos | PostgreSQL 14+ recomendado (probado con 18.6). Producción opera con **13.23 / LATIN9** — ver §14.K y §14.L |
 | Motor de plantillas | Blade |
@@ -163,7 +163,7 @@ Portal2026/
 | value | text | nullable |
 | timestamps | | |
 
-Claves: `social_*` (7), `contact_*` (5) y las generales `site_name`, `site_logo`, `nav_funcionarios_url`, `nav_jubilados_url` (panel `/admin/configuracion`). Los valores por defecto de las generales viven en `Setting::defaults()`: el sitio funciona **sin filas** en la tabla.
+Claves: `social_*` (7), `contact_*` (5) y las generales `site_name`, `site_logo`, `nav_funcionarios_url`, `nav_jubilados_url`, `nav_intranet_url` (panel `/admin/configuracion`). Los valores por defecto de las generales viven en `Setting::defaults()`: el sitio funciona **sin filas** en la tabla.
 
 ### 4.8 org_members (Estructura Organizativa)
 | Campo | Tipo | Notas |
@@ -317,7 +317,7 @@ Todas las rutas de gestión llevan además `middleware('permission:...')` (ver s
 | `ContactController` | `editInfo, updateInfo, messages, showMessage, destroyMessage` | ✅ Info de contacto en `settings` (`contact_address/phone/email/hours/map_url`) + bandeja de mensajes (`contacts`); parcial público `_contact-info` con defaults |
 | `RoleController` | `index, update` | ✅ Matriz rol×permiso (un formulario JS por rol); `index` ordena en 3 niveles igual que el sidebar: `group` → `module` → acción (`FIELD()` sobre la parte final del slug); `update` borra y reinserta los permisos del rol |
 | `RrssController` | `index, update` | ✅ Redes sociales: 7 settings `social_facebook/instagram/youtube/x/threads/telegram/whatsapp` — **multi-línea (una URL por línea = varias cuentas por red)**: validación línea a línea (`filter_var(FILTER_VALIDATE_URL)` + `^https?://`, mensaje «La línea N no es una URL válida», `max:4000`) y guardado normalizado (CRLF→LF, sin líneas vacías) |
-| `SettingsController` | `index, update` | ✅ Identidad / Enlaces: `site_name` (required ≤100) + enlaces del navbar (`nav_funcionarios_url`, `nav_jubilados_url`: URL absoluta válida **o** ruta `/...` sin `..` con `file_exists` en `public/`; vacío = ocultar ítem) + logo (upload `image` ≤2 MB a `settings/logo.{ext}` en disco `public`, checkbox "quitar logo"); redirige con flash |
+| `SettingsController` | `index, update` | ✅ Identidad / Enlaces: `site_name` (required ≤100) + enlaces del navbar (`nav_funcionarios_url`, `nav_jubilados_url`, `nav_intranet_url`: URL absoluta válida **o** ruta `/...` sin `..` con `file_exists` en `public/`; vacío = ocultar ítem) + logo (upload `image` ≤2 MB a `settings/logo.{ext}` en disco `public`, checkbox "quitar logo"); redirige con flash |
 | `GacetaController` | `index, store, edit, update, destroy` | ✅ Gacetas Oficiales: subida a `gacetas/` en disco `public` (PDF/imagen ≤20 MB), `numero` (solo dígitos) + `fecha`; `update` puede reemplazar el archivo (borra el anterior); `destroy` borra archivo físico |
 | `VideoController` | `index, store, destacar, destroy` | ✅ Videos (D7): pestaña 1 carga YouTube (URL validada por regex → `embed_url`) **o** archivo (mp4/webm/ogg ≤100 MB a `videos/` en disco `public`); pestaña 2 marca **un solo** `is_featured` (radio + "Ninguno" limpia todos); `destroy` borra archivo físico |
 
@@ -329,7 +329,7 @@ Todas las rutas de gestión llevan además `middleware('permission:...')` (ver s
 
 | Archivo | Descripción |
 |---|---|
-| `layouts/public.blade.php` | Layout público: header con logo y título desde `settings` + **navbar configurable** (ítems Funcionarios Activos/Jubilados ocultos si su enlace está vacío) + footer |
+| `layouts/public.blade.php` | Layout público: header con logo y título desde `settings` + **navbar configurable** (ítems Funcionarios Activos/Jubilados/Intranets GDC ocultos si su enlace está vacío) + footer; enlaces y bloque "Entes Afiliados" **ocultos con comentario Blade** (módulo en preparación — PENDIENTES E5) |
 | `layouts/admin.blade.php` | Layout admin: sidebar con **3 secciones** — "Gestión Noticias" (collapse "Multimedia" con "Medios"/"Videos" + "Gacetas"), "Gestión Portal" (Categorías, Entes Afiliados, Sobre Nosotros, Contacto, Mensajes, Estructura Org., Redes Sociales) y "Configuración Portal" (Identidad / Enlaces, Usuarios, Roles y Permisos); cabecera de sección visible si el rol tiene **algún** permiso de sus ítems vía `User::hasAnyPermission()` (lista de slugs en `@php`), cada ítem solo con su permiso vía `hasPermission()`; collapse Multimedia abierto en `admin.media.*`/`admin.videos.*` (el `ul#mmMenu` lleva `flex-nowrap`: sin él, `.nav { flex-wrap: wrap }` + `flex-direction: column` hacía que "Medios"/"Videos" se envolvieran a una columna lateral durante la animación de `height` de Bootstrap Collapse) + topbar + main; título y logo desde `settings` |
 
 ### 7.2 Públicas (`resources/views/public/`)
@@ -372,7 +372,7 @@ Todas las rutas de gestión llevan además `middleware('permission:...')` (ver s
 | Sobre Nosotros | `about/index.blade.php` | ✅ Edición inline |
 | Contacto | `contact/{index,messages,message-show}` | ✅ Info (5 campos) + bandeja con estado Nuevo/Leído, detalle y borrado |
 | Redes Sociales | `rrss/index.blade.php` | ✅ 7 URLs de redes (vacío = oculto en el sitio) |
-| Identidad / Enlaces | `settings/index.blade.php` | ✅ Nombre del sitio + logo (preview/quitar) + 2 enlaces del navbar; vacío = ocultar ítem |
+| Identidad / Enlaces | `settings/index.blade.php` | ✅ Nombre del sitio + logo (preview/quitar) + 3 enlaces del navbar (Funcionarios Activos, Jubilados, Intranets GDC); vacío = ocultar ítem |
 | Roles y permisos | `roles/index.blade.php` | ✅ Matriz con envío JS; doble cabecera: categoría (`table-secondary`) + módulo (`table-light`, clase `perm-module`), permisos indentados |
 
 ### 7.4 Vistas de error (`resources/views/errors/`)
@@ -511,23 +511,28 @@ npm run build      # copia TinyMCE a public/vendor + vite build a public/build
 
 ## 12. Estado del Desarrollo
 
-> El seguimiento vivo del trabajo vive en [PENDIENTES.md](PENDIENTES.md);
-> el registro histórico de todo lo completado, en
-> [historico-cierres-pendientes.md](historico-cierres-pendientes.md).
+> El seguimiento vivo del trabajo vive en [PENDIENTES.md](PENDIENTES.md).
 > Los riesgos de seguridad, waivers y condiciones de despliegue vigentes
 > están en [SECURITY.md](../SECURITY.md) (raíz del repo). Las mejoras
 > futuras, en la §C de PENDIENTES.md.
 >
 > **Estado a 2026-10-26**: desarrollo funcional completo, gates de
-> pre-release verificados — **237 tests PHPUnit en verde** (1032 assertions),
-> **cobertura 82.22%**, **E2E 17/17**, **baseline ZAP sin altas** (1 media =
-> waiver TinyMCE), Pint ✅, SCA 0 activos — **y desplegado en el servidor
-> institucional el 2026-10-25** (código en `origin/main`, 7 condiciones de
-> `SECURITY.md` §1 verificadas 7/7, registro en §14.L).
+> pre-release verificados — **291 tests PHPUnit en verde / 301 totales**
+> (1325 assertions), **cobertura 97.58%** (app 98.05%), **E2E 17/17**,
+> **baseline ZAP final: 0 altas / 0 medias / 1 baja / 4 informativas**
+> (waiver TinyMCE `style-src` cerrado con CSP de nonce), Pint ✅, SCA 0/0 —
+> **y desplegado en el servidor institucional el 2026-10-25** (código en
+> `origin/main`, 7 condiciones de `SECURITY.md` §1 verificadas 7/7, registro
+> en §14.L).
+>
+> **Migración a Laravel 13.38.0 completada y validada** en la rama
+> `Laravel13-Dev` el 2026-10-26 (re-validación íntegra en segunda máquina:
+> mismos gates + ZAP repetido sin regresiones — `docs/PLAN-LARAVEL13.md` §6.2);
+> pendiente el despliegue del upgrade (**U1**).
 >
 > Quedan 2 ítems de contenido del cliente (D6/E1) y, como bloqueantes para
-> la salida a internet, el **certificado TLS** y la **copia de seguridad de
-> la BD** (ver [PENDIENTES.md](PENDIENTES.md)).
+> la salida a internet, el **certificado TLS** (R5) y la **copia de seguridad de
+> la BD** (R6) (ver [PENDIENTES.md](PENDIENTES.md)).
 
 ---
 
@@ -699,10 +704,10 @@ php artisan optimize             # config:cache + route:cache + view:cache
 2. Confirmar `APP_DEBUG=false` y `APP_ENV=production`.
 3. **Cifrar PII heredado**: `php artisan pii:encrypt` (idempotente; `--dry-run` para previsualizar). Re-cifra `contacts.name/email/subject/message` y `users.name` que sigan en texto plano tras la migración `encrypt_pii_columns`.
 4. **HTTPS obligatorio** y HSTS fijado en el servidor web (`Strict-Transport-Security: max-age=31536000; includeSubDomains`). La app también lo emite en producción. Si hay proxy/CDN, configurar `TRUSTED_PROXIES` (CSV de IPs o `*`) y `TRUSTED_HOSTS` (CSV de dominios) en `.env`.
-5. Ejecutar `composer audit` y revisar los advisories ocultos por el bloque `audit.ignore` de `composer.json`.
+5. Ejecutar `composer audit` y revisar cualquier advisory activo (desde la migración a Laravel 13 no hay bloque `audit.ignore` en `composer.json`: **0 advisories, 0 waivers** — cualquier ID ignorado que aparezca debe justificarse por escrito en SECURITY.md §2).
 6. Permisos: `storage/` y `bootstrap/cache/` deben ser escribibles por el usuario de PHP-FPM/Apache, p. ej. `chown -R www-data:www-data storage bootstrap/cache`.
 7. `.env` con permisos restrictivos (`chmod 600 .env`) y fuera de la raíz web.
-8. Cargar contenido real: entes (`PartnerSeeder` está vacío), URLs de redes sociales desde `/admin/rrss` y enlaces de "Intranet GDC" (Funcionarios Activos / Jubilados) desde `/admin/configuracion` (vacío = ítem oculto); verificar `/admin/login`.
+8. Cargar contenido real: entes (`PartnerSeeder` está vacío), URLs de redes sociales desde `/admin/rrss` y enlaces de "Intranet GDC" (Funcionarios Activos / Jubilados / Intranets GDC) desde `/admin/configuracion` (vacío = ítem oculto); verificar `/admin/login`.
 
 #### G. Actualizaciones posteriores (procedimiento ejecutado el 2026-10-25)
 
@@ -740,6 +745,18 @@ tail -50 storage/logs/laravel-$(date +%Y-%m-%d).log
 > **Nunca** en una actualización: `key:generate` (rompe el PII cifrado), `migrate:fresh`, `db:seed`
 > completo (`UserSeeder`/`NoticiasPrecargadasSeeder` recrean usuarios seed) ni `git pull` con
 > cambios locales sin revisar (`git status` debe estar limpio salvo `public/install.php` borrado).
+
+#### G.1 Notas del salto a Laravel 13 (rama `Laravel13-Dev`, docs/PLAN-LARAVEL13.md)
+
+El procedimiento de G sirve tal cual; al actualizar desde una instalación en Laravel 10/11/12:
+
+1. **PHP**: el servidor debe tener **PHP ≥ 8.3** (sin cambio respecto a la instalación actual).
+2. **Dependencias**: `composer install --no-dev` resuelve el lock a **`laravel/framework` 13.38.0** (`^13.10.1`). En la primera actualización que suba de 10.x/11.x/12.x, si el servidor no tiene Composer, hay que regenerar `vendor/` localmente con el lock nuevo y subirlo completo (incluye el salto Guzzle 7 → 8).
+3. **Migración nueva**: `2026_10_26_100000_drop_personal_access_tokens_table` (Sanctum se eliminó; la tabla `personal_access_tokens` se dropea). La cubre el `php artisan migrate --force` del paso G.3.
+4. **`php artisan cache:clear` además de `optimize:clear`** en el primer despliegue: `config/cache.php` añade la allowlist `serializable_classes` (Laravel 13 endurece la deserialización del store `file`); vaciar el caché evita leer entradas previas al cambio.
+5. **Re-login obligatorio de todos los usuarios**: `config/session.php` fija `serialization = 'json'` (endurecimiento anti-deserialización, decisión D3 del plan) — las sesiones existentes quedan inválidas al desplegar y cada usuario deberá iniciar sesión de nuevo. No requiere acción más allá de comunicarlo.
+6. **CSRF**: el middleware de la app es ahora `App\Http\Middleware\PreventRequestForgery` (antes `VerifyCsrfToken`; renombrado por el framework en L13). El comportamiento para formularios clásicos (`@csrf`) y para `curl` sin cabeceras `Sec-Fetch-Site` no cambia (se valida el token). No hay referencias en `.env`, Nginx ni cron que actualizar.
+7. **Verificación post-despliegue**: `php artisan about` debe mostrar `Laravel Version 13.38.0`; además del smoke de G.4, revisar login + escritura en `/admin` (sesión json) y `tail` del log sin errores de deserialización.
 
 #### H. Cron de programados (obligatorio)
 `app/Console/Kernel.php` programa **2 tareas diarias** — `contacts:prune` a las 03:17 (retención
@@ -919,8 +936,8 @@ Garantías de las suites:
 
 ### PHPUnit (`tests/Unit`, `tests/Feature`)
 
-- Ejecución: `./vendor/bin/phpunit` (o `--testsuite Unit,Feature`) — **237 tests / 1032 assertions**, en verde (3 skipped: requieren PostgreSQL o el symlink `public/storage`; 6 avisos preexistentes de `iconv` en LATIN9, intencionales).
-- **Cobertura (desde R3, 2026-10-25):** con Xdebug 3.5.3 instalado, `./vendor/bin/phpunit --coverage-text --coverage-html coverage-html` → **82.22% de líneas** en `app/` (objetivo ≥80%); authn/authz/validación/cifrado ≈100% salvo el fallback de iconv de `App\Support\Latin9`. El HTML se genera en `/coverage-html` (ignorado por git).
+- Ejecución: `./vendor/bin/phpunit` (o `--testsuite Unit,Feature`) — **291 en verde / 301 totales / 1325 assertions**, en verde (3 skipped: requieren PostgreSQL o el symlink `public/storage`; 6 avisos preexistentes de `iconv` en LATIN9, intencionales).
+- **Cobertura (desde R3, re-validada 2026-10-26 en Laravel 13):** con Xdebug 3.5.3 instalado, `./vendor/bin/phpunit --coverage-text --coverage-html coverage-html` → **97.58% de líneas total** (app 98.05% · database 95.36%; objetivo ≥90% superado); authn/authz/validación/cifrado ≈100% salvo el fallback de iconv de `App\Support\Latin9`. El HTML se genera en `/coverage-html` (ignorado por git).
 - **BD aislada**: `phpunit.xml` define `DB_CONNECTION=sqlite` / `DB_DATABASE=:memory:` (B2 cerrado) — `RefreshDatabase` migra en memoria por test, **nunca toca la BD de desarrollo**. El `APP_KEY` de `phpunit.xml` es una clave **exclusiva de tests**; no usar en producción.
 - Cobertura de flujos críticos:
   - `AuthTest` — login correcto/incorrecto/inactivo, logout, `last_login_at`, mensaje genérico.

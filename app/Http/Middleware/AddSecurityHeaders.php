@@ -23,17 +23,30 @@ class AddSecurityHeaders
         // expose_php=Off como primera línea; esto es defensa en profundidad.
         header_remove('X-Powered-By');
 
+        // ZAP baseline (Big Redirect): las 3xx de Symfony/ Laravel llevan un
+        // cuerpo HTML de "refresh" (~378 B, solo repite la URL de destino).
+        // Los navegadores solo necesitan la cabecera Location; vaciar el
+        // cuerpo elimina la alerta sin efecto funcional.
+        if ($response->isRedirection()) {
+            $response->setContent('');
+        }
+
         $response->headers->set('X-Frame-Options', 'SAMEORIGIN');
         $response->headers->set('X-Content-Type-Options', 'nosniff');
         $response->headers->set('Referrer-Policy', 'strict-origin-when-cross-origin');
         $response->headers->set('Permissions-Policy', 'accelerometer=(), camera=(), geolocation=(), gyroscope=(), magnetometer=(), microphone=(), payment=(), usb=()');
 
-        // CSP: 'unsafe-eval' fue retirado (verificado: ni TinyMCE 8 ni Vite lo
-        // usan). 'unsafe-inline' ya no es necesario en script-src gracias al
-        // nonce por petición. style-src mantiene 'unsafe-inline' por TinyMCE.
+        // CSP (endurecida 2026-10-26, ZAP): sin 'unsafe-inline' en style-src —
+        // los <style> inline legítimos reciben el nonce de la petición y los
+        // atributos style="…" (TinyMCE, utilidades) se permiten vía
+        // style-src-attr (CSP3; los navegadores sin soporte de style-src-attr
+        // caen a style-src con nonce y perderían solo los style=" inline").
+        // 'unsafe-eval' fue retirado (verificado: ni TinyMCE 8 ni Vite lo
+        // usan). script-src mantiene el nonce por petición (G7).
         $csp = "default-src 'self'; "
             ."script-src 'self' 'nonce-{$nonce}'; "
-            ."style-src 'self' 'unsafe-inline'; "
+            ."style-src 'self' 'nonce-{$nonce}'; "
+            ."style-src-attr 'unsafe-inline'; "
             ."img-src 'self' data: blob:; "
             ."font-src 'self'; "
             .'frame-src https://www.youtube.com https://www.google.com; '

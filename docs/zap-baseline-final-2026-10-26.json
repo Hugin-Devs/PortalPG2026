@@ -1,0 +1,591 @@
+{
+	"@programName": "ZAP",
+	"@version": "2.17.0",
+	"@generated": "Mon, 26 Oct 2026 22:30:20",
+	"created": "2026-10-27T02:30:20.049887600Z",
+	"insights":[
+		{
+			"level": "Low",
+			"reason": "Warning",
+			"site": "",
+			"key": "insight.log.error",
+			"description": "ZAP errors logged - see the zap.log file for details",
+			"statistic": "1"
+		},
+		{
+			"level": "Low",
+			"reason": "Warning",
+			"site": "",
+			"key": "insight.log.warn",
+			"description": "ZAP warnings logged - see the zap.log file for details",
+			"statistic": "2"
+		},
+		{
+			"level": "Info",
+			"reason": "Informational",
+			"site": "http://127.0.0.1:8000",
+			"key": "insight.code.2xx",
+			"description": "Percentage of responses with status code 2xx",
+			"statistic": "93"
+		},
+		{
+			"level": "Info",
+			"reason": "Informational",
+			"site": "http://127.0.0.1:8000",
+			"key": "insight.code.3xx",
+			"description": "Percentage of responses with status code 3xx",
+			"statistic": "3"
+		},
+		{
+			"level": "Info",
+			"reason": "Informational",
+			"site": "http://127.0.0.1:8000",
+			"key": "insight.code.4xx",
+			"description": "Percentage of responses with status code 4xx",
+			"statistic": "3"
+		},
+		{
+			"level": "Info",
+			"reason": "Informational",
+			"site": "http://127.0.0.1:8000",
+			"key": "insight.endpoint.ctype.application/javascript",
+			"description": "Percentage of endpoints with content type application/javascript",
+			"statistic": "3"
+		},
+		{
+			"level": "Info",
+			"reason": "Informational",
+			"site": "http://127.0.0.1:8000",
+			"key": "insight.endpoint.ctype.image/png",
+			"description": "Percentage of endpoints with content type image/png",
+			"statistic": "3"
+		},
+		{
+			"level": "Info",
+			"reason": "Informational",
+			"site": "http://127.0.0.1:8000",
+			"key": "insight.endpoint.ctype.text/css",
+			"description": "Percentage of endpoints with content type text/css",
+			"statistic": "7"
+		},
+		{
+			"level": "Info",
+			"reason": "Informational",
+			"site": "http://127.0.0.1:8000",
+			"key": "insight.endpoint.ctype.text/html",
+			"description": "Percentage of endpoints with content type text/html",
+			"statistic": "78"
+		},
+		{
+			"level": "Info",
+			"reason": "Informational",
+			"site": "http://127.0.0.1:8000",
+			"key": "insight.endpoint.ctype.text/plain",
+			"description": "Percentage of endpoints with content type text/plain",
+			"statistic": "3"
+		},
+		{
+			"level": "Info",
+			"reason": "Informational",
+			"site": "http://127.0.0.1:8000",
+			"key": "insight.endpoint.ctype.text/xml",
+			"description": "Percentage of endpoints with content type text/xml",
+			"statistic": "3"
+		},
+		{
+			"level": "Info",
+			"reason": "Informational",
+			"site": "http://127.0.0.1:8000",
+			"key": "insight.endpoint.method.GET",
+			"description": "Percentage of endpoints with method GET",
+			"statistic": "92"
+		},
+		{
+			"level": "Info",
+			"reason": "Informational",
+			"site": "http://127.0.0.1:8000",
+			"key": "insight.endpoint.method.POST",
+			"description": "Percentage of endpoints with method POST",
+			"statistic": "7"
+		},
+		{
+			"level": "Info",
+			"reason": "Informational",
+			"site": "http://127.0.0.1:8000",
+			"key": "insight.endpoint.total",
+			"description": "Count of total endpoints",
+			"statistic": "28"
+		},
+		{
+			"level": "Info",
+			"reason": "Informational",
+			"site": "http://127.0.0.1:8000",
+			"key": "insight.response.slow",
+			"description": "Percentage of slow responses",
+			"statistic": "100"
+		}
+	],
+	"site":[ 
+		{
+			"@name": "http://127.0.0.1:8000",
+			"@host": "127.0.0.1",
+			"@port": "8000",
+			"@ssl": "false",
+			"alerts": [ 
+				{
+					"pluginid": "10021",
+					"alertRef": "10021",
+					"alert": "X-Content-Type-Options Header Missing",
+					"name": "X-Content-Type-Options Header Missing",
+					"riskcode": "1",
+					"confidence": "2",
+					"riskdesc": "Low (Medium)",
+					"desc": "<p>The Anti-MIME-Sniffing header X-Content-Type-Options was not set to 'nosniff'. This allows older versions of Internet Explorer and Chrome to perform MIME-sniffing on the response body, potentially causing the response body to be interpreted and displayed as a content type other than the declared content type. Current (early 2014) and legacy versions of Firefox will use the declared content type (if one is set), rather than performing MIME-sniffing.</p>",
+					"instances":[ 
+						{
+							"id": "47",
+							"uri": "http://127.0.0.1:8000/build/assets/app-B1OV_Nlo.js",
+							"nodeName": "http:\/\/127.0.0.1:8000\/build\/assets\/app-B1OV_Nlo.js",
+							"method": "GET",
+							"param": "x-content-type-options",
+							"attack": "",
+							"evidence": "",
+							"otherinfo": "This issue still applies to error type pages (401, 403, 500, etc.) as those pages are often still affected by injection issues, in which case there is still concern for browsers sniffing pages away from their actual content type.\nAt \"High\" threshold this scan rule will not alert on client or server error responses."
+						},
+						{
+							"id": "39",
+							"uri": "http://127.0.0.1:8000/build/assets/app-CEDLwc82.css",
+							"nodeName": "http:\/\/127.0.0.1:8000\/build\/assets\/app-CEDLwc82.css",
+							"method": "GET",
+							"param": "x-content-type-options",
+							"attack": "",
+							"evidence": "",
+							"otherinfo": "This issue still applies to error type pages (401, 403, 500, etc.) as those pages are often still affected by injection issues, in which case there is still concern for browsers sniffing pages away from their actual content type.\nAt \"High\" threshold this scan rule will not alert on client or server error responses."
+						},
+						{
+							"id": "40",
+							"uri": "http://127.0.0.1:8000/build/assets/app-iZujeXA1.css",
+							"nodeName": "http:\/\/127.0.0.1:8000\/build\/assets\/app-iZujeXA1.css",
+							"method": "GET",
+							"param": "x-content-type-options",
+							"attack": "",
+							"evidence": "",
+							"otherinfo": "This issue still applies to error type pages (401, 403, 500, etc.) as those pages are often still affected by injection issues, in which case there is still concern for browsers sniffing pages away from their actual content type.\nAt \"High\" threshold this scan rule will not alert on client or server error responses."
+						},
+						{
+							"id": "43",
+							"uri": "http://127.0.0.1:8000/images/logo.png",
+							"nodeName": "http:\/\/127.0.0.1:8000\/images\/logo.png",
+							"method": "GET",
+							"param": "x-content-type-options",
+							"attack": "",
+							"evidence": "",
+							"otherinfo": "This issue still applies to error type pages (401, 403, 500, etc.) as those pages are often still affected by injection issues, in which case there is still concern for browsers sniffing pages away from their actual content type.\nAt \"High\" threshold this scan rule will not alert on client or server error responses."
+						},
+						{
+							"id": "6",
+							"uri": "http://127.0.0.1:8000/robots.txt",
+							"nodeName": "http:\/\/127.0.0.1:8000\/robots.txt",
+							"method": "GET",
+							"param": "x-content-type-options",
+							"attack": "",
+							"evidence": "",
+							"otherinfo": "This issue still applies to error type pages (401, 403, 500, etc.) as those pages are often still affected by injection issues, in which case there is still concern for browsers sniffing pages away from their actual content type.\nAt \"High\" threshold this scan rule will not alert on client or server error responses."
+						}
+					],
+					"count": "5",
+					"systemic": true,
+					"solution": "<p>Ensure that the application/web server sets the Content-Type header appropriately, and that it sets the X-Content-Type-Options header to 'nosniff' for all web pages.</p><p>If possible, ensure that the end user uses a standards-compliant and modern web browser that does not perform MIME-sniffing at all, or that can be directed by the web application/web server to not perform MIME-sniffing.</p>",
+					"otherinfo": "<p>This issue still applies to error type pages (401, 403, 500, etc.) as those pages are often still affected by injection issues, in which case there is still concern for browsers sniffing pages away from their actual content type.</p><p>At \"High\" threshold this scan rule will not alert on client or server error responses.</p>",
+					"reference": "<p>https://learn.microsoft.com/en-us/previous-versions/windows/internet-explorer/ie-developer/compatibility/gg622941(v=vs.85)</p><p>https://owasp.org/www-community/Security_Headers</p>",
+					"cweid": "693",
+					"wascid": "15",
+					"sourceid": "59"
+				},
+				{
+					"pluginid": "10111",
+					"alertRef": "10111",
+					"alert": "Authentication Request Identified",
+					"name": "Authentication Request Identified",
+					"riskcode": "0",
+					"confidence": "3",
+					"riskdesc": "Informational (High)",
+					"desc": "<p>The given request has been identified as an authentication request. The 'Other Info' field contains a set of key=value lines which identify any relevant fields. If the request is in a context which has an Authentication Method set to \"Auto-Detect\" then this rule will change the authentication to match the request identified.</p>",
+					"instances":[ 
+						{
+							"id": "48",
+							"uri": "http://127.0.0.1:8000/admin/login",
+							"nodeName": "http:\/\/127.0.0.1:8000\/admin\/login ()(_token,email,password)",
+							"method": "POST",
+							"param": "email",
+							"attack": "",
+							"evidence": "password",
+							"otherinfo": "userParam=email\nuserValue=zaproxy@example.com\npasswordParam=password\nreferer=http://127.0.0.1:8000/admin/login\ncsrfToken=_token"
+						}
+					],
+					"count": "1",
+					"systemic": false,
+					"solution": "<p>This is an informational alert rather than a vulnerability and so there is nothing to fix.</p>",
+					"otherinfo": "<p>userParam=email</p><p>userValue=zaproxy@example.com</p><p>passwordParam=password</p><p>referer=http://127.0.0.1:8000/admin/login</p><p>csrfToken=_token</p>",
+					"reference": "<p>https://www.zaproxy.org/docs/desktop/addons/authentication-helper/auth-req-id/</p>",
+					"cweid": "-1",
+					"wascid": "-1",
+					"sourceid": "63"
+				},
+				{
+					"pluginid": "10027",
+					"alertRef": "10027",
+					"alert": "Information Disclosure - Suspicious Comments",
+					"name": "Information Disclosure - Suspicious Comments",
+					"riskcode": "0",
+					"confidence": "1",
+					"riskdesc": "Informational (Low)",
+					"desc": "<p>The response appears to contain suspicious comments which may help an attacker.</p>",
+					"instances":[ 
+						{
+							"id": "44",
+							"uri": "http://127.0.0.1:8000/build/assets/app-B1OV_Nlo.js",
+							"nodeName": "http:\/\/127.0.0.1:8000\/build\/assets\/app-B1OV_Nlo.js",
+							"method": "GET",
+							"param": "",
+							"attack": "",
+							"evidence": "query",
+							"otherinfo": "The following pattern was used: \\bQUERY\\b and was detected in likely comment: \"//localhost`,V={...kt,...Ot};function Ft(e,t){return gt(e,new V.classes.URLSearchParams,{visitor:function(e,t,n,r){return V.isNo\", see evidence field for the suspicious comment/snippet."
+						}
+					],
+					"count": "1",
+					"systemic": false,
+					"solution": "<p>Remove all comments that return information that may help an attacker and fix any underlying problems they refer to.</p>",
+					"otherinfo": "<p>The following pattern was used: \\bQUERY\\b and was detected in likely comment: \"//localhost`,V={...kt,...Ot};function Ft(e,t){return gt(e,new V.classes.URLSearchParams,{visitor:function(e,t,n,r){return V.isNo\", see evidence field for the suspicious comment/snippet.</p>",
+					"reference": "",
+					"cweid": "615",
+					"wascid": "13",
+					"sourceid": "59"
+				},
+				{
+					"pluginid": "10109",
+					"alertRef": "10109",
+					"alert": "Modern Web Application",
+					"name": "Modern Web Application",
+					"riskcode": "0",
+					"confidence": "2",
+					"riskdesc": "Informational (Medium)",
+					"desc": "<p>The application appears to be a modern web application. If you need to explore it automatically then the Ajax Spider may well be more effective than the standard one.</p>",
+					"instances":[ 
+						{
+							"id": "1",
+							"uri": "http://127.0.0.1:8000/",
+							"nodeName": "http:\/\/127.0.0.1:8000\/",
+							"method": "GET",
+							"param": "",
+							"attack": "",
+							"evidence": "<a class=\"nav-link\" href=\"#\" id=\"serviciosDropdown\" role=\"button\" data-bs-toggle=\"dropdown\" aria-expanded=\"false\" aria-haspopup=\"true\">Intranet GDC</a>",
+							"otherinfo": "Links have been found that do not have traditional href attributes, which is an indication that this is a modern web application."
+						},
+						{
+							"id": "11",
+							"uri": "http://127.0.0.1:8000/entes",
+							"nodeName": "http:\/\/127.0.0.1:8000\/entes",
+							"method": "GET",
+							"param": "",
+							"attack": "",
+							"evidence": "<a class=\"nav-link\" href=\"#\" id=\"serviciosDropdown\" role=\"button\" data-bs-toggle=\"dropdown\" aria-expanded=\"false\" aria-haspopup=\"true\">Intranet GDC</a>",
+							"otherinfo": "Links have been found that do not have traditional href attributes, which is an indication that this is a modern web application."
+						},
+						{
+							"id": "10",
+							"uri": "http://127.0.0.1:8000/gacetas",
+							"nodeName": "http:\/\/127.0.0.1:8000\/gacetas",
+							"method": "GET",
+							"param": "",
+							"attack": "",
+							"evidence": "<a class=\"nav-link\" href=\"#\" id=\"serviciosDropdown\" role=\"button\" data-bs-toggle=\"dropdown\" aria-expanded=\"false\" aria-haspopup=\"true\">Intranet GDC</a>",
+							"otherinfo": "Links have been found that do not have traditional href attributes, which is an indication that this is a modern web application."
+						},
+						{
+							"id": "7",
+							"uri": "http://127.0.0.1:8000/noticias",
+							"nodeName": "http:\/\/127.0.0.1:8000\/noticias",
+							"method": "GET",
+							"param": "",
+							"attack": "",
+							"evidence": "<a class=\"nav-link\" href=\"#\" id=\"serviciosDropdown\" role=\"button\" data-bs-toggle=\"dropdown\" aria-expanded=\"false\" aria-haspopup=\"true\">Intranet GDC</a>",
+							"otherinfo": "Links have been found that do not have traditional href attributes, which is an indication that this is a modern web application."
+						},
+						{
+							"id": "13",
+							"uri": "http://127.0.0.1:8000/sobre-nosotros",
+							"nodeName": "http:\/\/127.0.0.1:8000\/sobre-nosotros",
+							"method": "GET",
+							"param": "",
+							"attack": "",
+							"evidence": "<a class=\"nav-link\" href=\"#\" id=\"serviciosDropdown\" role=\"button\" data-bs-toggle=\"dropdown\" aria-expanded=\"false\" aria-haspopup=\"true\">Intranet GDC</a>",
+							"otherinfo": "Links have been found that do not have traditional href attributes, which is an indication that this is a modern web application."
+						}
+					],
+					"count": "5",
+					"systemic": true,
+					"solution": "<p>This is an informational alert and so no changes are required.</p>",
+					"otherinfo": "<p>Links have been found that do not have traditional href attributes, which is an indication that this is a modern web application.</p>",
+					"reference": "",
+					"cweid": "-1",
+					"wascid": "-1",
+					"sourceid": "1"
+				},
+				{
+					"pluginid": "10112",
+					"alertRef": "10112",
+					"alert": "Session Management Response Identified",
+					"name": "Session Management Response Identified",
+					"riskcode": "0",
+					"confidence": "2",
+					"riskdesc": "Informational (Medium)",
+					"desc": "<p>The given response has been identified as containing a session management token. The 'Other Info' field contains a set of header tokens that can be used in the Header Based Session Management Method. If the request is in a context which has a Session Management Method set to \"Auto-Detect\" then this rule will change the session management to use the tokens identified.</p>",
+					"instances":[ 
+						{
+							"id": "0",
+							"uri": "http://127.0.0.1:8000/",
+							"nodeName": "http:\/\/127.0.0.1:8000\/",
+							"method": "GET",
+							"param": "laravel_session",
+							"attack": "",
+							"evidence": "laravel_session",
+							"otherinfo": "cookie:laravel_session\ncookie:XSRF-TOKEN"
+						},
+						{
+							"id": "14",
+							"uri": "http://127.0.0.1:8000/admin/login",
+							"nodeName": "http:\/\/127.0.0.1:8000\/admin\/login",
+							"method": "GET",
+							"param": "laravel_session",
+							"attack": "",
+							"evidence": "laravel_session",
+							"otherinfo": "cookie:laravel_session\ncookie:XSRF-TOKEN"
+						},
+						{
+							"id": "50",
+							"uri": "http://127.0.0.1:8000/buscar",
+							"nodeName": "http:\/\/127.0.0.1:8000\/buscar",
+							"method": "GET",
+							"param": "laravel_session",
+							"attack": "",
+							"evidence": "laravel_session",
+							"otherinfo": "cookie:laravel_session\ncookie:XSRF-TOKEN"
+						},
+						{
+							"id": "41",
+							"uri": "http://127.0.0.1:8000/buscar?q",
+							"nodeName": "http:\/\/127.0.0.1:8000\/buscar (q)",
+							"method": "GET",
+							"param": "laravel_session",
+							"attack": "",
+							"evidence": "laravel_session",
+							"otherinfo": "cookie:laravel_session\ncookie:XSRF-TOKEN"
+						},
+						{
+							"id": "19",
+							"uri": "http://127.0.0.1:8000/categoria/comunal",
+							"nodeName": "http:\/\/127.0.0.1:8000\/categoria\/comunal",
+							"method": "GET",
+							"param": "laravel_session",
+							"attack": "",
+							"evidence": "laravel_session",
+							"otherinfo": "cookie:laravel_session\ncookie:XSRF-TOKEN"
+						},
+						{
+							"id": "22",
+							"uri": "http://127.0.0.1:8000/categoria/cultura",
+							"nodeName": "http:\/\/127.0.0.1:8000\/categoria\/cultura",
+							"method": "GET",
+							"param": "laravel_session",
+							"attack": "",
+							"evidence": "laravel_session",
+							"otherinfo": "cookie:laravel_session\ncookie:XSRF-TOKEN"
+						},
+						{
+							"id": "21",
+							"uri": "http://127.0.0.1:8000/categoria/deporte",
+							"nodeName": "http:\/\/127.0.0.1:8000\/categoria\/deporte",
+							"method": "GET",
+							"param": "laravel_session",
+							"attack": "",
+							"evidence": "laravel_session",
+							"otherinfo": "cookie:laravel_session\ncookie:XSRF-TOKEN"
+						},
+						{
+							"id": "25",
+							"uri": "http://127.0.0.1:8000/categoria/educacion",
+							"nodeName": "http:\/\/127.0.0.1:8000\/categoria\/educacion",
+							"method": "GET",
+							"param": "laravel_session",
+							"attack": "",
+							"evidence": "laravel_session",
+							"otherinfo": "cookie:laravel_session\ncookie:XSRF-TOKEN"
+						},
+						{
+							"id": "15",
+							"uri": "http://127.0.0.1:8000/categoria/nacionales",
+							"nodeName": "http:\/\/127.0.0.1:8000\/categoria\/nacionales",
+							"method": "GET",
+							"param": "laravel_session",
+							"attack": "",
+							"evidence": "laravel_session",
+							"otherinfo": "cookie:laravel_session\ncookie:XSRF-TOKEN"
+						},
+						{
+							"id": "17",
+							"uri": "http://127.0.0.1:8000/categoria/politica",
+							"nodeName": "http:\/\/127.0.0.1:8000\/categoria\/politica",
+							"method": "GET",
+							"param": "laravel_session",
+							"attack": "",
+							"evidence": "laravel_session",
+							"otherinfo": "cookie:laravel_session\ncookie:XSRF-TOKEN"
+						},
+						{
+							"id": "37",
+							"uri": "http://127.0.0.1:8000/contacto",
+							"nodeName": "http:\/\/127.0.0.1:8000\/contacto",
+							"method": "GET",
+							"param": "laravel_session",
+							"attack": "",
+							"evidence": "laravel_session",
+							"otherinfo": "cookie:laravel_session\ncookie:XSRF-TOKEN"
+						},
+						{
+							"id": "8",
+							"uri": "http://127.0.0.1:8000/entes",
+							"nodeName": "http:\/\/127.0.0.1:8000\/entes",
+							"method": "GET",
+							"param": "laravel_session",
+							"attack": "",
+							"evidence": "laravel_session",
+							"otherinfo": "cookie:laravel_session\ncookie:XSRF-TOKEN"
+						},
+						{
+							"id": "9",
+							"uri": "http://127.0.0.1:8000/gacetas",
+							"nodeName": "http:\/\/127.0.0.1:8000\/gacetas",
+							"method": "GET",
+							"param": "laravel_session",
+							"attack": "",
+							"evidence": "laravel_session",
+							"otherinfo": "cookie:laravel_session\ncookie:XSRF-TOKEN"
+						},
+						{
+							"id": "5",
+							"uri": "http://127.0.0.1:8000/noticias",
+							"nodeName": "http:\/\/127.0.0.1:8000\/noticias",
+							"method": "GET",
+							"param": "laravel_session",
+							"attack": "",
+							"evidence": "laravel_session",
+							"otherinfo": "cookie:laravel_session\ncookie:XSRF-TOKEN"
+						},
+						{
+							"id": "27",
+							"uri": "http://127.0.0.1:8000/noticias/caracas-recibio-el-fuego-patrio-en-los-iv-juegos-deportivos-nacionales-comunales",
+							"nodeName": "http:\/\/127.0.0.1:8000\/noticias\/caracas-recibio-el-fuego-patrio-en-los-iv-juegos-deportivos-nacionales-comunales",
+							"method": "GET",
+							"param": "laravel_session",
+							"attack": "",
+							"evidence": "laravel_session",
+							"otherinfo": "cookie:laravel_session\ncookie:XSRF-TOKEN"
+						},
+						{
+							"id": "33",
+							"uri": "http://127.0.0.1:8000/noticias/liceo-abalos-acogio-taller-de-prevencion-de-embarazo-a-temprana-edad",
+							"nodeName": "http:\/\/127.0.0.1:8000\/noticias\/liceo-abalos-acogio-taller-de-prevencion-de-embarazo-a-temprana-edad",
+							"method": "GET",
+							"param": "laravel_session",
+							"attack": "",
+							"evidence": "laravel_session",
+							"otherinfo": "cookie:laravel_session\ncookie:XSRF-TOKEN"
+						},
+						{
+							"id": "31",
+							"uri": "http://127.0.0.1:8000/noticias/punto-de-salud-del-campamento-ce-andres-bello-opera-en-servicio-continuo",
+							"nodeName": "http:\/\/127.0.0.1:8000\/noticias\/punto-de-salud-del-campamento-ce-andres-bello-opera-en-servicio-continuo",
+							"method": "GET",
+							"param": "laravel_session",
+							"attack": "",
+							"evidence": "laravel_session",
+							"otherinfo": "cookie:laravel_session\ncookie:XSRF-TOKEN"
+						},
+						{
+							"id": "28",
+							"uri": "http://127.0.0.1:8000/noticias/trabajadores-de-caracas-marchan-a-la-asamblea-en-respaldo-a-la-mesa-de-dialogo",
+							"nodeName": "http:\/\/127.0.0.1:8000\/noticias\/trabajadores-de-caracas-marchan-a-la-asamblea-en-respaldo-a-la-mesa-de-dialogo",
+							"method": "GET",
+							"param": "laravel_session",
+							"attack": "",
+							"evidence": "laravel_session",
+							"otherinfo": "cookie:laravel_session\ncookie:XSRF-TOKEN"
+						},
+						{
+							"id": "34",
+							"uri": "http://127.0.0.1:8000/noticias/vuelos-directos-caracas-roma-suscriben-memorando-con-ita-airways-para-marzo-de-2027",
+							"nodeName": "http:\/\/127.0.0.1:8000\/noticias\/vuelos-directos-caracas-roma-suscriben-memorando-con-ita-airways-para-marzo-de-2027",
+							"method": "GET",
+							"param": "laravel_session",
+							"attack": "",
+							"evidence": "laravel_session",
+							"otherinfo": "cookie:laravel_session\ncookie:XSRF-TOKEN"
+						},
+						{
+							"id": "4",
+							"uri": "http://127.0.0.1:8000/sitemap.xml",
+							"nodeName": "http:\/\/127.0.0.1:8000\/sitemap.xml",
+							"method": "GET",
+							"param": "laravel_session",
+							"attack": "",
+							"evidence": "laravel_session",
+							"otherinfo": "cookie:laravel_session\ncookie:XSRF-TOKEN"
+						},
+						{
+							"id": "12",
+							"uri": "http://127.0.0.1:8000/sobre-nosotros",
+							"nodeName": "http:\/\/127.0.0.1:8000\/sobre-nosotros",
+							"method": "GET",
+							"param": "laravel_session",
+							"attack": "",
+							"evidence": "laravel_session",
+							"otherinfo": "cookie:laravel_session\ncookie:XSRF-TOKEN"
+						},
+						{
+							"id": "49",
+							"uri": "http://127.0.0.1:8000/admin/login",
+							"nodeName": "http:\/\/127.0.0.1:8000\/admin\/login ()(_token,email,password)",
+							"method": "POST",
+							"param": "laravel_session",
+							"attack": "",
+							"evidence": "laravel_session",
+							"otherinfo": "cookie:laravel_session\ncookie:XSRF-TOKEN"
+						},
+						{
+							"id": "42",
+							"uri": "http://127.0.0.1:8000/contacto",
+							"nodeName": "http:\/\/127.0.0.1:8000\/contacto ()(_token,email,message,name,subject)",
+							"method": "POST",
+							"param": "laravel_session",
+							"attack": "",
+							"evidence": "laravel_session",
+							"otherinfo": "cookie:laravel_session"
+						}
+					],
+					"count": "23",
+					"systemic": false,
+					"solution": "<p>This is an informational alert rather than a vulnerability and so there is nothing to fix.</p>",
+					"otherinfo": "<p>cookie:laravel_session</p><p>cookie:XSRF-TOKEN</p>",
+					"reference": "<p>https://www.zaproxy.org/docs/desktop/addons/authentication-helper/session-mgmt-id/</p>",
+					"cweid": "-1",
+					"wascid": "-1",
+					"sourceid": "1"
+				}
+			]
+		}
+	],
+	"sequences":[
+	]
+
+}

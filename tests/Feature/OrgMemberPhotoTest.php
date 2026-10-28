@@ -6,6 +6,7 @@ use App\Models\OrgMember;
 use App\Models\User;
 use Database\Seeders\PermissionSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use PHPUnit\Framework\Attributes\DataProvider;
 use Tests\TestCase;
 
 class OrgMemberPhotoTest extends TestCase
@@ -42,9 +43,7 @@ class OrgMemberPhotoTest extends TestCase
         ])->assertRedirect('/admin/estructura');
     }
 
-    /**
-     * @dataProvider dangerousPhotosProvider
-     */
+    #[DataProvider('dangerousPhotosProvider')]
     public function test_dangerous_photo_paths_are_rejected(string $photo): void
     {
         $admin = User::factory()->create(['role' => 'admin']);

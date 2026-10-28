@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Error {{ $code }} - Portal GDC</title>
-    <style>
+    <style nonce="{{ request()->attributes->get('csp_nonce') }}">
         * { box-sizing: border-box; }
         body { margin: 0; min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 24px; background: #f4f6fb; color: #212529; font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; }
         .error-card { max-width: 560px; width: 100%; padding: 48px 32px; text-align: center; background: #fff; border-radius: 12px; box-shadow: 0 4px 24px rgba(39, 51, 118, 0.12); }

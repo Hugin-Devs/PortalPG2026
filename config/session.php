@@ -50,6 +50,20 @@ return [
 
     /*
     |--------------------------------------------------------------------------
+    | Session Serialization
+    |--------------------------------------------------------------------------
+    |
+    | "json" (Laravel 13) evita la deserialización PHP de objetos en sesión,
+    | cerrando cadenas de explotación vía APP_KEY. Adoptado en la Fase 3 de
+    | docs/PLAN-LARAVEL13.md: invalida las sesiones activas al desplegar
+    | (los usuarios deberán iniciar sesión de nuevo — ver runbook §14).
+    |
+    */
+
+    'serialization' => 'json',
+
+    /*
+    |--------------------------------------------------------------------------
     | Session File Location
     |--------------------------------------------------------------------------
     |

@@ -1,5 +1,13 @@
 <?php
 
+use App\Models\Category;
+use App\Models\Gaceta;
+use App\Models\Partner;
+use App\Models\Post;
+use App\Models\Video;
+use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Pagination\LengthAwarePaginator;
+use Illuminate\Support\Carbon;
 use Illuminate\Support\Str;
 
 return [
@@ -106,5 +114,37 @@ return [
     */
 
     'prefix' => env('CACHE_PREFIX', Str::slug(env('APP_NAME', 'laravel'), '_').'_cache_'),
+
+    /*
+    |--------------------------------------------------------------------------
+    | Cache Unserialization Allowlist
+    |--------------------------------------------------------------------------
+    |
+    | Endurecimiento Laravel 13 (Fase 3, docs/PLAN-LARAVEL13.md): el store
+    | "file" (producción) hace unserialize() de los valores; restringir las
+    | clases permitidas rompe cadenas de gadgets si un atacante logra escribir
+    | en storage/framework/cache (p. ej. vía SQLi → RCE).
+    |
+    | IMPORTANTE: solo se listan las clases que esta app cachea hoy como
+    | objetos (Cache::remember devolviendo Eloquent Collections/paginadores y
+    | modelos con casts datetime). Si se añade un caché con un objeto nuevo,
+    | añadir su clase aquí — si falta, la lectura se corrompe en silencio
+    | (__PHP_Incomplete_Class). Los escalares (int/string/array plano) no
+    | necesitan estar en la lista. Ver tests/Feature/CacheTest.php.
+    |
+    */
+
+    'serializable_classes' => [
+        Collection::class,
+        LengthAwarePaginator::class,
+        Carbon::class,
+        DateTime::class,
+        DateTimeZone::class,
+        Category::class,
+        Gaceta::class,
+        Partner::class,
+        Post::class,
+        Video::class,
+    ],
 
 ];

@@ -8,13 +8,13 @@ mkdir -p "$tmp"
 
 declare -A SNAP=()
 declare -A SNAP_EXIST=()
-SNAP_KEYS=(site_name site_logo nav_funcionarios_url nav_jubilados_url)
+SNAP_KEYS=(site_name site_logo nav_funcionarios_url nav_jubilados_url nav_intranet_url)
 q=$(printf "'%s'," "${SNAP_KEYS[@]}"); q="${q%,}"
 while IFS=$'\t' read -r k v; do
   [ -z "$k" ] && continue
   SNAP["$k"]="$v"; SNAP_EXIST["$k"]=1
 done < <(sqlt "SELECT \"key\", \"value\" FROM settings WHERE \"key\" IN ($q);")
-echo "snapshot settings: ${#SNAP_EXIST[@]}/4 claves preservadas"
+echo "snapshot settings: ${#SNAP_EXIST[@]}/5 claves preservadas"
 
 snapLogoPath=''; hadLogoFile=0; hadLogoWebp=0
 if [ "${SNAP_EXIST[site_logo]:-}" = 1 ] && [ -n "${SNAP[site_logo]:-}" ]; then
@@ -39,7 +39,7 @@ login 'admin@gdc.gob.ve'
 superJar="$COOKIE_JAR"
 http "$E2E_BASE/admin/configuracion"
 check '[ "$HTTP_STATUS" = 200 ]' 'superadmin GET 200' "GET $HTTP_STATUS"
-for f in site_name logo nav_funcionarios_url nav_jubilados_url; do
+for f in site_name logo nav_funcionarios_url nav_jubilados_url nav_intranet_url; do
   check "grep -q \"name=\\\"$f\\\"\" \"\$HTTP_BODY\"" "input $f" "falta input $f"
 done
 check 'grep -q "<h1>Identidad / Enlaces" "$HTTP_BODY"' 'titulo Identidad / Enlaces' 'sin titulo'
@@ -142,6 +142,25 @@ v=$(sql 'SELECT "value" FROM settings WHERE "key"='"'"'nav_funcionarios_url'"'"'
 check '[ "$v" = "/images/logo.png" ]' "nav_funcionarios=/images/logo.png ($v)" 'valor no guardado'
 http "$E2E_BASE/"
 check 'grep -qF "href=\"/images/logo.png\">Funcionarios Activos</a>" "$HTTP_BODY"' 'navbar con ruta relativa' 'navbar sin ruta relativa'
+
+echo '--- 8b. Intranets GDC: nuevo enlace del dropdown ---'
+put_settings \
+  --data-urlencode 'site_name=Portal GDC E2E' \
+  --data-urlencode 'nav_funcionarios_url=/images/logo.png' \
+  --data-urlencode 'nav_jubilados_url=' \
+  --data-urlencode 'nav_intranet_url=https://intranet.example.gob.ve/'
+http "$E2E_BASE/"
+check 'grep -q "Intranets GDC" "$HTTP_BODY"' 'dropdown muestra Intranets GDC' 'falta Intranets GDC en navbar'
+check 'grep -q "https://intranet.example.gob.ve/" "$HTTP_BODY"' 'dropdown linkea a la URL guardada' 'URL de Intranets GDC ausente'
+# vacío = ocultar el ítem
+put_settings \
+  --data-urlencode 'site_name=Portal GDC E2E' \
+  --data-urlencode 'nav_funcionarios_url=/images/logo.png' \
+  --data-urlencode 'nav_jubilados_url=' \
+  --data-urlencode 'nav_intranet_url='
+http "$E2E_BASE/"
+check '! grep -q "Intranets GDC" "$HTTP_BODY"' 'Intranets GDC oculto con URL vacía' 'Intranets GDC visible sin URL'
+echo 'INTRANETS GDC OK'
 
 echo '--- 9. site_name obligatorio ---'
 put_settings \

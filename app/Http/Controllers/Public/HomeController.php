@@ -21,14 +21,14 @@ class HomeController extends Controller
             'url' => route('home'),
         ];
 
-        $featuredPosts = Cache::remember(CacheKeys::HOME_FEATURED, $ttl, fn () => Post::with('category')
+        $featuredPosts = Cache::remember(CacheKeys::HOME_FEATURED, $ttl, fn () => Post::with('category', 'postMedia.video')
             ->where('is_featured', true)
             ->live()
             ->recent()
             ->take(3)
             ->get());
 
-        $latestPosts = Cache::remember(CacheKeys::HOME_LATEST, $ttl, fn () => Post::with('category')
+        $latestPosts = Cache::remember(CacheKeys::HOME_LATEST, $ttl, fn () => Post::with('category', 'postMedia.video')
             ->live()
             ->recent()
             ->take(4)

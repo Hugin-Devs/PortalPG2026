@@ -7,11 +7,10 @@ use App\Models\Concerns\StoresLatin9;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
-use Laravel\Sanctum\HasApiTokens;
 
 class User extends Authenticatable
 {
-    use HasApiTokens, HasFactory, Notifiable, StoresLatin9;
+    use HasFactory, Notifiable, StoresLatin9;
 
     /**
      * The attributes that are mass assignable.

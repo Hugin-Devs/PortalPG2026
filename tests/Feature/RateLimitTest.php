@@ -85,6 +85,7 @@ class RateLimitTest extends TestCase
         ]);
 
         $response->assertRedirect('/admin/login');
+        $response->assertSessionHasErrors('email');
         $this->assertStringContainsString('Demasiados intentos', session('errors')->first('email'));
     }
 }

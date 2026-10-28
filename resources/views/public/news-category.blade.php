@@ -30,9 +30,14 @@
                         @if($post->featured_image)
                             <x-img path="storage/{{ $post->featured_image }}" class="card-img-top" alt="{{ $post->title }}" loading="lazy" decoding="async" style="height: 200px; object-fit: cover;" />
                         @else
-                            <div class="bg-light d-flex align-items-center justify-content-center" style="height: 200px;">
-                                <span class="text-muted">Sin imagen</span>
-                            </div>
+                            @php $videoMedia = $post->postMedia->where('type', 'video')->first(); @endphp
+                            @if($videoMedia && $videoMedia->video && $videoMedia->video->type === 'file' && $videoMedia->video->source_url)
+                                <video src="{{ $videoMedia->video->source_url }}" class="card-img-top w-100 bg-dark" style="height: 200px; object-fit: cover;" preload="metadata" muted></video>
+                            @else
+                                <div class="bg-light d-flex align-items-center justify-content-center" style="height: 200px;">
+                                    <span class="text-muted">Sin imagen</span>
+                                </div>
+                            @endif
                         @endif
                         <div class="card-body d-flex flex-column">
                             <h5 class="card-title">{{ $post->title }}</h5>

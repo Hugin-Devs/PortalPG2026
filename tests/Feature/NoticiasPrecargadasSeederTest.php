@@ -34,9 +34,10 @@ class NoticiasPrecargadasSeederTest extends TestCase
             'vuelos-directos-caracas-roma-suscriben-memorando-con-ita-airways-para-marzo-de-2027' => ['2026-10-13 16:30', 'nacionales', 2],
             'punto-de-salud-del-campamento-ce-andres-bello-opera-en-servicio-continuo' => ['2026-10-13 16:30', 'comunal', 3],
             'liceo-abalos-acogio-taller-de-prevencion-de-embarazo-a-temprana-edad' => ['2026-10-13 13:00', 'educacion', 2],
+            'mes-rosa-mujeres-florecen-como-marea-de-solidaridad-y-amor' => ['2026-10-22 12:00', 'cultura', 0],
         ];
 
-        $this->assertDatabaseCount('posts', 5);
+        $this->assertDatabaseCount('posts', 6);
 
         foreach ($esperadas as $slug => [$fecha, $categoria, $galeria]) {
             $post = Post::where('slug', $slug)->firstOrFail();
@@ -45,9 +46,14 @@ class NoticiasPrecargadasSeederTest extends TestCase
             $this->assertSame($fecha, $post->published_at->format('Y-m-d H:i'));
             $this->assertSame($categoria, $post->category->slug);
             $this->assertFalse($post->is_featured);
-            $this->assertNotNull($post->featured_image);
-            $this->assertStringStartsWith('uploads/2026/10/', $post->featured_image);
-            Storage::disk('public')->assertExists($post->featured_image);
+            if ($slug === 'mes-rosa-mujeres-florecen-como-marea-de-solidaridad-y-amor') {
+                $this->assertNull($post->featured_image);
+                $this->assertSame(1, $post->postMedia()->where('type', 'video')->count());
+            } else {
+                $this->assertNotNull($post->featured_image);
+                $this->assertStringStartsWith('uploads/2026/10/', $post->featured_image);
+                Storage::disk('public')->assertExists($post->featured_image);
+            }
             $this->assertSame($galeria, $post->postMedia()->where('type', 'image')->count());
             $this->assertStringContainsString('<p>', $post->content);
             $this->assertStringNotContainsString('Fecha:', $post->content);
@@ -56,6 +62,7 @@ class NoticiasPrecargadasSeederTest extends TestCase
 
         $this->assertSame(15, Media::count());
         $this->assertSame(10, PostMedia::where('type', 'image')->count());
+        $this->assertSame(1, PostMedia::where('type', 'video')->count());
 
         $noticia1 = Post::where('slug', 'caracas-recibio-el-fuego-patrio-en-los-iv-juegos-deportivos-nacionales-comunales')->firstOrFail();
         $this->assertStringContainsString('@nicolasmaduro', $noticia1->content);
@@ -96,7 +103,7 @@ class NoticiasPrecargadasSeederTest extends TestCase
 
         $this->assertSame(0, Post::withTrashed()->where('slug', 'like', 'noticia-destacada-%')->count());
         $this->assertNull(Post::withTrashed()->find($visible->id), 'Las placeholders se purgan con borrado físico, incluso la visible');
-        $this->assertDatabaseCount('posts', 5);
+        $this->assertDatabaseCount('posts', 6);
     }
 
     public function test_is_idempotent_when_run_twice(): void
@@ -108,7 +115,7 @@ class NoticiasPrecargadasSeederTest extends TestCase
 
         $this->seed(NoticiasPrecargadasSeeder::class);
 
-        $this->assertSame(5, $posts);
+        $this->assertSame(6, $posts);
         $this->assertSame($posts, Post::count());
         $this->assertSame($media, Media::count());
         $this->assertSame($galeria, PostMedia::count());

@@ -14,7 +14,7 @@ class NewsController extends Controller
 {
     public function index()
     {
-        $posts = Post::with('category')
+        $posts = Post::with('category', 'postMedia.video')
             ->live()
             ->recent()
             ->paginate(9);
@@ -71,7 +71,7 @@ class NewsController extends Controller
     {
         $category = Category::where('slug', $slug)->firstOrFail();
 
-        $posts = Post::with('category')
+        $posts = Post::with('category', 'postMedia.video')
             ->where('category_id', $category->id)
             ->live()
             ->recent()

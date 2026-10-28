@@ -21,6 +21,7 @@ class Setting extends Model
             'site_logo' => '',
             'nav_funcionarios_url' => 'https://www.gdc.gob.ve/extranet/',
             'nav_jubilados_url' => '',
+            'nav_intranet_url' => '',
         ];
     }
 

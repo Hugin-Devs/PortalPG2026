@@ -46,7 +46,9 @@
                     <ul class="navbar-nav ms-auto w-100 justify-content-end">
                         <li class="nav-item"><a class="nav-link {{ request()->routeIs('home') ? 'active' : '' }}" href="{{ url('/') }}">Inicio</a></li>
                         <li class="nav-item"><a class="nav-link {{ request()->routeIs('news.*') ? 'active' : '' }}" href="{{ route('news.index') }}">Noticias</a></li>
-                        <li class="nav-item"><a class="nav-link {{ request()->routeIs('entes.*') ? 'active' : '' }}" href="{{ route('entes.index') }}">Entes</a></li>
+                        {{-- Oculto temporalmente: módulo de entes en preparación por equipo externo.
+                             Reactivar descomentando. Las rutas /entes siguen vivas. --}}
+                        {{-- <li class="nav-item"><a class="nav-link {{ request()->routeIs('entes.*') ? 'active' : '' }}" href="{{ route('entes.index') }}">Entes</a></li> --}}
                         <li class="nav-item"><a class="nav-link {{ request()->routeIs('about.index') ? 'active' : '' }}" href="{{ route('about.index') }}">Sobre Nosotros</a></li>
                         <li class="nav-item"><a class="nav-link {{ request()->routeIs('gacetas.*') ? 'active' : '' }}" href="{{ route('gacetas.index') }}">Gacetas Oficiales</a></li>
                         <li class="nav-item dropdown">
@@ -57,6 +59,9 @@
                                 @endif
                                 @if($site['nav_jubilados_url'] !== '')
                                     <li><a class="dropdown-item" target="_blank" rel="noopener" href="{{ $site['nav_jubilados_url'] }}">Jubilados</a></li>
+                                @endif
+                                @if($site['nav_intranet_url'] !== '')
+                                    <li><a class="dropdown-item" target="_blank" rel="noopener" href="{{ $site['nav_intranet_url'] }}">Intranets GDC</a></li>
                                 @endif
                                 <li><a class="dropdown-item" href="{{ url('/admin/login') }}">Gestión Aplicaciones</a></li>
                             </ul>
@@ -86,12 +91,16 @@
                     <ul class="list-unstyled small">
                         <li><a href="{{ url('/') }}" class="text-decoration-none footer-link"><i class="fas fa-arrow-right text-primary me-1"></i><span class="footer-text">Inicio</span></a></li>
                         <li><a href="{{ route('news.index') }}" class="text-decoration-none footer-link"><i class="fas fa-arrow-right text-primary me-1"></i><span class="footer-text">Noticias</span></a></li>
-                        <li><a href="{{ route('entes.index') }}" class="text-decoration-none footer-link"><i class="fas fa-arrow-right text-primary me-1"></i><span class="footer-text">Entes</span></a></li>
+                        {{-- Oculto temporalmente: módulo de entes en preparación por equipo externo. Reactivar descomentando. --}}
+                        {{-- <li><a href="{{ route('entes.index') }}" class="text-decoration-none footer-link"><i class="fas fa-arrow-right text-primary me-1"></i><span class="footer-text">Entes</span></a></li> --}}
                         <li><a href="{{ route('about.index') }}" class="text-decoration-none footer-link"><i class="fas fa-arrow-right text-primary me-1"></i><span class="footer-text">Sobre Nosotros</span></a></li>
                         <li><a href="{{ route('gacetas.index') }}" class="text-decoration-none footer-link"><i class="fas fa-arrow-right text-primary me-1"></i><span class="footer-text">Gacetas Oficiales</span></a></li>
                         <li><a href="{{ route('contact.index') }}" class="text-decoration-none footer-link"><i class="fas fa-arrow-right text-primary me-1"></i><span class="footer-text">Contacto</span></a></li>
                     </ul>
                 </div>
+                {{-- Bloque "Entes Afiliados" oculto temporalmente: módulo de entes en preparación
+                     por equipo externo. Reactivar descomentando (incluye la consulta a Partner). --}}
+                {{--
                 <div class="col-md-3">
                     <h6 style="color: #212529;">Entes Afiliados</h6>
                     <div class="d-flex flex-wrap gap-2">
@@ -110,6 +119,7 @@
                         @endforeach
                     </div>
                 </div>
+                --}}
             </div>
             <hr class="my-3" style="border-color: #212529;">
             <p class="text-center small mb-0" style="color: #212529;">&copy; {{ date('Y') }} GDC. Todos los derechos reservados.</p>

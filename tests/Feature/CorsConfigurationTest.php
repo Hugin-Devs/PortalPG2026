@@ -11,7 +11,7 @@ class CorsConfigurationTest extends TestCase
 
     public function test_cors_is_limited_to_nonexistent_api_routes(): void
     {
-        $this->assertSame(['api/*', 'sanctum/csrf-cookie'], config('cors.paths'));
+        $this->assertSame(['api/*'], config('cors.paths'));
         $this->assertSame(['*'], config('cors.allowed_origins'));
     }
 
@@ -20,7 +20,7 @@ class CorsConfigurationTest extends TestCase
         $response = $this->get('/');
 
         // El middleware HandleCors no añade Access-Control-Allow-Origin cuando
-        // la ruta no coincide con `paths` (actualmente solo `api/*` y Sanctum).
+        // la ruta no coincide con `paths` (actualmente solo `api/*`, que no existe).
         $this->assertFalse(
             $response->headers->has('Access-Control-Allow-Origin'),
             'Las páginas públicas no deben exponer CORS origins globales.'

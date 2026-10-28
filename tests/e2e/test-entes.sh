@@ -13,11 +13,13 @@ login 'admin@gdc.gob.ve'
 grep -q 'Admin GDC' "$HTTP_BODY" || fail 'login fallido'
 echo 'LOGIN OK'
 
-# --- 1. /entes vacio: estado vacio + nav activo ---
+# --- 1. /entes: estado vacio + nav Entes oculto (módulo en preparación) ---
 http "$E2E_BASE/entes"
 grep -q 'Pr' "$HTTP_BODY" || fail 'falta estado vacio'
-grep -qE '<a class="nav-link active" href="[^"]*">Entes</a>' "$HTTP_BODY" || fail 'nav Entes NO activo en /entes'
-echo 'VACIO + NAV ACTIVO OK'
+if grep -qE '>Entes</a>' "$HTTP_BODY"; then
+  fail 'nav Entes visible indebidamente (oculto hasta que el equipo externo entregue el módulo)'
+fi
+echo 'VACIO + NAV OCULTO OK'
 
 # Fixture: el .ps1 esperaba partners preexistentes (data-name >= 3 tras crear A+B).
 sql "DELETE FROM partners WHERE slug='e2e-ente-fixture';" >/dev/null
