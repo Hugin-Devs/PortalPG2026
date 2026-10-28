@@ -1,7 +1,7 @@
 # SECURITY.md — Riesgos, waivers y condiciones de despliegue
 
-> **Estado (2026-10-28):** **producción actualizada a Laravel 13.38.0** (despliegue U1 desde `main` = `d4d3e91`; registro en DOCUMENTACION §14.M). Suite **303 tests / 1353 assertions** en verde, E2E **17/17**, `composer audit` **0 advisories / 0 waivers**, `npm audit` **0**, SBOM **215 componentes**, **ZAP baseline final: 0 altas / 0 medias / 1 baja (artefacto del servidor dev) / 4 informativas** — evidencia en `docs/zap-baseline-final-2026-10-26.html`.
-> **7/7 condiciones de despliegue verificadas** y re-verificadas tras el upgrade (§1 · DOCUMENTACION §14.L y §14.M). Bloqueantes de salida a internet: **R5** (certificado TLS vencido) y **R6** (backup de BD) — `docs/PENDIENTES.md`.
+> **Estado (2026-10-28):** **producción actualizada a Laravel 13.38.0** (despliegue U1 desde `main` = `d4d3e91`; registro en DOCUMENTACION §14.M) y **publicada en internet en `https://www.gdc.gob.ve`** con **TLS de Let's Encrypt emitido con certbot** (§14.P) e **intranet servida por proxy inverso** (§14.O). Suite **322 tests / 1439 assertions** en verde, E2E **17/17**, `composer audit` **0 advisories / 0 waivers**, `npm audit` **0**, SBOM **215 componentes**, **ZAP baseline final: 0 altas / 0 medias / 1 baja (artefacto del servidor dev) / 4 informativas** — evidencia en `docs/zap-baseline-final-2026-10-26.html`.
+> **7/7 condiciones de despliegue verificadas** y re-verificadas tras el upgrade (§1 · DOCUMENTACION §14.L y §14.M). Único bloqueante de salida a internet restante: **R6** (backup de BD); **R5 (TLS) quedó cerrado el 2026-10-28** con renovación automática — `docs/PENDIENTES.md`.
 > El waiver de `style-src 'unsafe-inline'` (TinyMCE) quedó **cerrado** con la CSP de nonce + `style-src-attr` del upgrade; el historial completo de rondas y decisiones vive en el historial de git.
 > **Próxima revisión de waivers: 2026-11-21.**
 

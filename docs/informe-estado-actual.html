@@ -186,13 +186,14 @@
   </table>
 
   <div class="status-banner">
-    Estado global: DESPLEGADO EN PRODUCCIÓN (2026-10-25) — SALIDA A INTERNET PENDIENTE DE TLS Y BACKUP · UPGRADE A LARAVEL 13 VALIDADO, PENDIENTE DE DESPLIEGUE
+    Estado global: PUBLICADO EN INTERNET EN https://www.gdc.gob.ve — LARAVEL 13.38.0 DESPLEGADO (2026-10-28), TLS RESUELTO CON LET'S ENCRYPT, INTRANET SERVIDA POR PROXY
     <small>
       17 hallazgos del análisis: <strong>16 remediados en producción</strong> y el 17.º (<strong>SC-02,
-      Laravel 10 EOL</strong>) <strong>cerrado en la rama de migración</strong> el 2026-10-26 con la
-      migración a Laravel 13.38.0 (waiver levantado). Las 7 condiciones de despliegue (§8) verificadas
-      <strong>7/7 el 2026-10-25</strong>; abiertas las verificaciones de §9 (certificado TLS vencido,
-      copia de seguridad de la BD, contenido D6/E1 y despliegue del upgrade).
+      Laravel 10 EOL</strong>) <strong>cerrado</strong> el 2026-10-26 con la migración a Laravel
+      13.38.0 (waiver levantado). Las 7 condiciones de despliegue (§8) verificadas
+      <strong>7/7 el 2026-10-25 y re-verificadas tras el upgrade</strong>; R4, R5 (TLS) y U1
+      <strong>cerrados</strong>; abiertas las verificaciones de §9 (copia de seguridad de la BD y
+      contenido D6/E1).
     </small>
   </div>
 
@@ -225,14 +226,15 @@
     <tr><td>Dependencias PHP (<code>composer audit</code>)</td><td><span class="ok">0 advisories · 0 waivers</span> sobre Laravel 13 (en producción L10: 5 waivers justificados hasta el upgrade — §5.2)</td></tr>
     <tr><td>Dependencias JS (<code>npm audit</code>)</td><td><span class="ok">0 vulnerabilidades</span></td></tr>
     <tr><td>SBOM (CycloneDX 1.5)</td><td>215 componentes (rama Laravel 13, incluye <code>laravel/framework@13.38.0</code>)</td></tr>
-    <tr><td>Riesgo residual</td><td><span class="pending">Salida a internet</span>: TLS vencido (R5) y backup de BD (R6) · <span class="warn">Despliegue del upgrade L13</span> (PR) · contenido D6/E1</td></tr>
+    <tr><td>Riesgo residual</td><td><span class="pending">Salida a internet</span>: backup de BD (R6) · contenido D6/E1 · <span class="ok">TLS (R5) resuelto 2026-10-28 con Let's Encrypt</span></td></tr>
   </tbody>
 </table>
 
 <div class="note">
-  <strong>Recomendación:</strong> para la salida a internet, resolver R5 (certificado TLS) y R6 (copia de
-  seguridad de la BD) y revalidar en el entorno ya desplegado. Para el upgrade: fusionar
-  <code>Laravel13-Dev</code> (gates §6 en verde), desplegar con rollback por SHA y repetir el smoke de §8.
+  <strong>Recomendación:</strong> queda <strong>R6 (copia de seguridad de la BD)</strong> como único bloqueante de
+  salida a internet — instalar <code>postgresql-client</code> y automatizar <code>pg_dump</code> — más el contenido D6/E1.
+  El upgrade de §9 ya está <strong>desplegado</strong> (2026-10-28) y R5 se resolvió con certbot
+  (renovación automática, §14.P del runbook).
 </div>
 
 <!-- ============================ 2 ============================ -->
@@ -428,7 +430,7 @@
   <thead><tr><th style="width:8%">ID</th><th>Verificación</th><th style="width:26%">Estado</th></tr></thead>
   <tbody>
     <tr><td>R4</td><td>Verificar las 7 condiciones de §8 en el servidor de producción (incluido <code>nosniff</code> en ficheros estáticos)</td><td><span class="ok">Cerrado 2026-10-25 (7/7)</span></td></tr>
-    <tr><td>R5</td><td><strong>Certificado TLS del dominio</strong>: el portal está publicado en <code>https://www.gdc.gob.ve</code> pero el certificado sigue siendo el auto-firmado (<code>CN=&lt;IP&gt;</code>) vencido el 2026-06-19, por lo que los navegadores externos rechazan la conexión</td><td><span class="pending">Pendiente — bloquea la salida</span></td></tr>
+    <tr><td>R5</td><td><strong>Certificado TLS del dominio</strong>: el portal estaba publicado con el auto-firmado vencido (<code>CN=&lt;IP&gt;</code>, caducó el 2026-06-19) y los navegadores externos rechazaban la conexión</td><td><span class="ok">Cerrado 2026-10-28 — Let's Encrypt (certbot), válido hasta 2027-01-26, renovación automática)</span></td></tr>
     <tr><td>R6</td><td><strong>Copia de seguridad de la BD</strong>: no hay <code>pg_dump</code>/<code>psql</code> en el servidor, por lo que no existe dump de la base de datos</td><td><span class="pending">Pendiente — bloquea la salida</span></td></tr>
     <tr><td>D6/E1</td><td>Cargar el listado real de entes afiliados (contenido del cliente)</td><td><span class="pending">Pendiente</span></td></tr>
     <tr><td>U1</td><td><strong>Despliegue del upgrade a Laravel 13</strong>: PR <code>Laravel13-Dev</code> → <code>main</code> (gates en verde §6), despliegue con rollback por SHA y smoke de §8 repetido</td><td><span class="ok">Cerrado 2026-10-28 (Laravel 13.38.0)</span></td></tr>
@@ -439,8 +441,9 @@
 <p class="small">
   Cerrados: <strong>R1</strong> (E2E 17/17), <strong>R2</strong> (baseline ZAP, repetido en L13),
   <strong>R3</strong> (cobertura, cerrada al 97.58% el 2026-10-26), <strong>R4</strong> (7 condiciones de despliegue verificadas
-  en el servidor real durante el despliegue, 2026-10-25) y <strong>SC-02/A5</strong> (migración a
-  Laravel 13 validada, 2026-10-26).
+  en el servidor real durante el despliegue, 2026-10-25), <strong>SC-02/A5</strong> (migración a
+  Laravel 13 validada, 2026-10-26), <strong>U1</strong> (upgrade desplegado en producción, 2026-10-28) y
+  <strong>R5</strong> (certificado Let's Encrypt emitido con certbot y renovación automática, 2026-10-28).
 </p>
 
 <!-- ============================ 10 ============================ -->
@@ -451,20 +454,22 @@
   para un portal institucional de su naturaleza</strong>: los 16 hallazgos remediados en producción cubren
   autenticación, autorización, inyección/XSS, subida de archivos, integridad documental, protección de PII,
   auditoría y cadena de suministro, y cada remediación está blindada por pruebas automatizadas de regresión
-  (291 pruebas en verde; gates PostgreSQL UTF-8 y LATIN9 con 301 tests c/u en verde).
+  (322 pruebas en verde / 1439 assertions; gates PostgreSQL UTF-8 y LATIN9 en verde en la validación del upgrade).
 </p>
 <p>
   El riesgo residual de framework que venía aceptado (<strong>SC-02, Laravel 10 EOL</strong>) quedó
   <strong>cerrado el 2026-10-26</strong> con la migración a Laravel 13.38.0, ejecutada por fases
   (10 → 11 → 12 → 13) y validada íntegramente en la rama <code>Laravel13-Dev</code> — incluido el
-  baseline DAST repetido sin regresiones. Lo que queda no es de código sino de operación: <strong>el
-  certificado TLS (R5) y la copia de seguridad de la BD (R6) bloquean la salida a Internet</strong>,
-  el upgrade exige PR y despliegue (U1), y persisten el contenido D6/E1 y las mejoras recomendadas
+  baseline DAST repetido sin regresiones. Lo que queda no es de código sino de operación: <strong>la
+  copia de seguridad de la BD (R6) es el único bloqueo de salida a Internet</strong> (R5/TLS se
+  resolvió el 2026-10-28 con Let's Encrypt) y persisten el contenido D6/E1 y las mejoras recomendadas
   (DAST autenticado).
 </p>
 <p>
-  Con R5 (TLS) y R6 (backup) resueltos y el upgrade de §9 desplegado, el sistema queda
-  <strong>apto para la salida a Internet</strong> bajo la postura de riesgo descrita en este informe.
+  Con R6 (backup) resuelto, el sistema queda <strong>apto para la salida a Internet</strong> bajo la
+  postura de riesgo descrita en este informe: publicado en <code>https://www.gdc.gob.ve</code>,
+  Laravel 13.38.0 desplegado, TLS de confianza con renovación automática e intranet accesible a
+  través del portal.
 </p>
 
 <!-- ============================ ANEXO ============================ -->

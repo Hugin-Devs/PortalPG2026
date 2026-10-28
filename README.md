@@ -18,7 +18,7 @@ Sin Livewire, Vue, React ni jQuery.
 Toda la planificación y los entregables viven en **`docs/`**:
 
 - **[docs/DOCUMENTACION.md](docs/DOCUMENTACION.md)** — fuente de verdad del proyecto: esquema de BD, rutas, controladores, vistas, roles y permisos, seeders, **checklist de despliegue en producción (§14)** y tests (§16).
-- **[docs/PENDIENTES.md](docs/PENDIENTES.md)** — checklist vivo de trabajo abierto: R5 (TLS), R6 (backup BD), U1 (despliegue del upgrade Laravel 13) y D6/E1 (contenido).
+- **[docs/PENDIENTES.md](docs/PENDIENTES.md)** — checklist vivo de trabajo abierto: R6 (backup BD), U2 (guarda del seeder), D6/E1 y E5 (contenido); R1–R5 y U1 cerrados (TLS resuelto el 2026-10-28).
 - **[SECURITY.md](SECURITY.md)** (raíz) — waivers y **condiciones obligatorias de despliegue**.
 - **[docs/informe-estado-actual.html](docs/informe-estado-actual.html)** — **entregable imprimible** (instantánea del estado de seguridad actual, tamaño carta); PDF con `scripts/export-informe.ps1`.
 
@@ -57,7 +57,7 @@ Baseline DAST con OWASP ZAP: `scripts/zap-baseline.yaml` (referencias en `docs/z
 
 ## Despliegue
 
-**Estado: producción en Laravel 13.38.0 desde el 2026-10-28 y publicada en internet en `https://www.gdc.gob.ve`** (Debian 12 + Nginx + PHP-FPM 8.3 + PostgreSQL LATIN9; DNS público `190.205.103.125`), con `main` sincronizado con producción y las **7 condiciones de [SECURITY.md](SECURITY.md) §1 verificadas y re-verificadas tras el upgrade**. *Único bloqueante restante: **R5 — certificado TLS** (sigue el auto-firmado vencido).*
+**Estado: producción en Laravel 13.38.0 desde el 2026-10-28 y publicada en internet en `https://www.gdc.gob.ve`** (Debian 12 + Nginx + PHP-FPM 8.3 + PostgreSQL LATIN9; DNS público `190.205.103.125`), con `main` sincronizado con producción, las **7 condiciones de [SECURITY.md](SECURITY.md) §1 verificadas y re-verificadas tras el upgrade**, **TLS de Let's Encrypt con renovación automática** e **intranet (extranet/jubilados) servida por proxy inverso**. *Único bloqueante restante: **R6 — copia de seguridad de la BD**.*
 
 Checklist completo del servidor (vhost, `.env`, orden de arranque, actualizaciones posteriores, cron y registro de los despliegues) en **`docs/DOCUMENTACION.md` §14** — despliegue inicial en **§14.L** (2026-10-25, Laravel 10) y del upgrade a Laravel 13 en **§14.M** (2026-10-28, con las 2 incidencias resueltas). Puntos clave:
 
@@ -65,4 +65,6 @@ Checklist completo del servidor (vhost, `.env`, orden de arranque, actualizacion
 - Actualización típica: `git fetch && git reset --hard origin/main` → `rm -f public/install.php` → `composer install --no-dev` → `npm ci && npm run build` → `optimize:clear` (+ `cache:clear` en el primer despliegue con L13, §14.G.1) → `migrate --force` → `optimize` (§14.G). **Nunca** un `db:seed` completo en producción.
 - Obligatorios: `storage:link` (el enlace debe apuntar al `storage/` de la misma instalación), cron `* * * * * www-data php .../artisan schedule:run` y las 7 condiciones de SECURITY.md §1.
 - Tras un upgrade de framework: **re-login obligatorio de todos los usuarios** (sesiones invalidadas por `session.serialization = json`).
-- Abiertos antes de la salida a internet: **R5 certificado TLS** (el actual venció el 2026-06-19) y **R6 copia de seguridad de la BD**.
+- Intranet: los sistemas internos viven en `172.16.0.13` (sin salida a internet) y se publican bajo el dominio del portal con `proxy_pass` en Nginx (`/extranet/`, `/intranet_jubilados/`), con `proxy_redirect` por origen y fallback de `/sistema/*` al home — §14.O.
+- TLS: certificado **Let's Encrypt** en `/etc/letsencrypt/live/www.gdc.gob.ve/` (certbot + `certbot.timer`, renovación automática con hook de recarga de Nginx) — §14.P.
+- Abiertos antes de la salida a internet: **R6 copia de seguridad de la BD** (R5/TLS cerrado el 2026-10-28).

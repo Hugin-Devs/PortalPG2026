@@ -1,10 +1,10 @@
 # PENDIENTES — Checklist de trabajo
 
 > **Fuente viva del trabajo pendiente.** Ir marcando `- [x]` al completar un ítem.
-> Última actualización: 2026-10-26.
+> Última actualización: 2026-10-28 (TLS resuelto con Let's Encrypt + intranet por proxy).
 
-**Abiertos: 5** — 2 de contenido del cliente + 2 de bloqueo de salida (TLS y backup de BD) + 1 de mantenimiento (guarda del seeder).
-*Producción en **Laravel 13.38.0** desde el 2026-10-28 (U1 cerrado; registro en DOCUMENTACION §14.M). Gates: Pint ✅ · **303 tests · 1353 aserciones** · cobertura 97.58% · E2E 17/17 · **ZAP final 0/0/1/4**, waiver `style-src` cerrado · audits 0/0.*
+**Abiertos: 4** — 2 de contenido del cliente + 1 de bloqueo de salida (backup de BD) + 1 de mantenimiento (guarda del seeder).
+*Producción en **Laravel 13.38.0** desde el 2026-10-28 (U1 cerrado; registro en DOCUMENTACION §14.M), **publicada en internet** con intranet por proxy (§14.O) y **TLS de Let's Encrypt** (§14.P, R5 cerrado). Gates: Pint ✅ · **322 tests · 1439 aserciones** · cobertura 97.58% · E2E 17/17 · **ZAP final 0/0/1/4**, waiver `style-src` cerrado · audits 0/0.*
 
 ---
 
@@ -20,8 +20,7 @@
 
 ## B. Pre-release (bloquean la publicación / el release)
 
-- [ ] **R5 — Certificado TLS del dominio**  
-  El portal está publicado en `https://www.gdc.gob.ve` (DNS público `190.205.103.125`, 80/443 con NAT hacia `172.16.0.14`), pero el certificado sigue siendo el **auto-firmado `CN=172.16.0.14` vencido el 2026-06-19** ⇒ los navegadores externos rechazan la conexión (desde consola funciona con `-k`). Vías posibles: certificado/CA institucional con SAN del dominio, **Let's Encrypt (ahora viable: DNS público + puerto 80 abierto, requiere instalar `certbot`)** o autofirmado nuevo con SAN (seguiría sin ser de confianza). Detalle en DOCUMENTACION.md §14.N.
+- [x] **R5 — Certificado TLS del dominio** → **cerrado el 2026-10-28 con Let's Encrypt**: instalado `certbot` (apt), reto ACME por webroot (el `return 301` del bloque :80 se bajó a `location /` para no interceptar `/.well-known/acme-challenge/`) y emitido el certificado de `www.gdc.gob.ve` (ECDSA, cadena completa) → `ssl_certificate` del vhost apunta a `/etc/letsencrypt/live/www.gdc.gob.ve/{fullchain,privkey}.pem`, **válido hasta 2027-01-26**, con `certbot.timer` activo, `renew --dry-run` OK y hook de despliegue que recarga Nginx. Verificado `curl -I` **sin `-k`** → 200 desde el servidor y desde el exterior (verify 0). Registro en DOCUMENTACION.md §14.P.
 
 - [ ] **R6 — Copia de seguridad de la BD**  
   No hay cliente PostgreSQL (`psql`/`pg_dump`) en el servidor ⇒ no existe dump de `portalweb`. El despliegue del 2026-10-25 se hizo con backup de `.env`, `storage/` y assets pero **sin dump de BD** (aceptado explícitamente). Instalar `postgresql-client` y dejar un `pg_dump` diario + verificación de restauración.

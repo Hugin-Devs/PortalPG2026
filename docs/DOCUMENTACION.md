@@ -522,14 +522,17 @@ npm run build      # copia TinyMCE a public/vendor + vite build a public/build
 > upgrade. Gates: **322 tests PHPUnit en verde** (1439 assertions),
 > **cobertura 97.58%** (app 98.05%), **E2E 17/17**, **baseline ZAP final:
 > 0 altas / 0 medias / 1 baja / 4 informativas** (waiver TinyMCE
-> `style-src` cerrado con CSP de nonce), Pint ✅, SCA 0/0.
+> `style-src` cerrado con CSP de nonce), Pint ✅, SCA 0/0. **Publicada en
+> internet en `https://www.gdc.gob.ve` con la intranet servida por proxy
+> (§14.O) y TLS de Let's Encrypt con renovación automática (§14.P).**
 >
 > El despliegue del 2026-10-25 (Laravel 10.50.2) quedó registrado en §14.L;
 > el de la migración completa 10 → 11 → 12 → 13 está en `docs/PLAN-LARAVEL13.md`.
 >
-> Quedan 2 ítems de contenido del cliente (D6/E1) y, como bloqueantes para
-> la salida a internet, el **certificado TLS** (R5) y la **copia de seguridad de
-> la BD** (R6) (ver [PENDIENTES.md](PENDIENTES.md)).
+> Quedan 2 ítems de contenido del cliente (D6/E1) y, como **único bloqueante
+> para la salida a internet**, la **copia de seguridad de la BD** (R6). El
+> **certificado TLS (R5) quedó resuelto el 2026-10-28** con Let's Encrypt y
+> renovación automática (§14.P) — ver [PENDIENTES.md](PENDIENTES.md).
 
 ---
 
@@ -594,9 +597,13 @@ Recomendado: **la raíz del vhost apunta a `public/`** — así `.env`, `storage
 
 ```nginx
 server {
+    listen 443 ssl;
+    ssl_certificate     /etc/letsencrypt/live/www.gdc.gob.ve/fullchain.pem;  # Let's Encrypt (§14.P)
+    ssl_certificate_key /etc/letsencrypt/live/www.gdc.gob.ve/privkey.pem;
     server_name www.gdc.gob.ve 172.16.0.14;   # dominio público + acceso por IP (§14.N)
     root /var/www/html/PortalPG2026/public;   # solo public/ es accesible por HTTP
     index index.php;
+    client_max_body_size 110m;                # alineado con php.ini y SECURITY condición 4 (§14.O)
 
     location / {
         try_files $uri $uri/ /index.php?$query_string;
@@ -618,6 +625,10 @@ server {
         try_files $uri =404;
         add_header X-Content-Type-Options nosniff always;
     }
+
+    # Intranet por proxy (§14.O): /extranet/ e /intranet_jubilados/ hacia
+    # https://172.16.0.13 con proxy_redirect por origen y /sistema/* → home.
+    # Los bloques completos están en §14.O.
 
     location ~ /\.(?!well-known) { deny all; }   # bloquea .env, .git, .htaccess
 
@@ -704,7 +715,7 @@ php artisan optimize             # config:cache + route:cache + view:cache
 5. Ejecutar `composer audit` y revisar cualquier advisory activo (desde la migración a Laravel 13 no hay bloque `audit.ignore` en `composer.json`: **0 advisories, 0 waivers** — cualquier ID ignorado que aparezca debe justificarse por escrito en SECURITY.md §2).
 6. Permisos: `storage/` y `bootstrap/cache/` deben ser escribibles por el usuario de PHP-FPM/Apache, p. ej. `chown -R www-data:www-data storage bootstrap/cache`.
 7. `.env` con permisos restrictivos (`chmod 600 .env`) y fuera de la raíz web.
-8. Cargar contenido real: entes (`PartnerSeeder` está vacío), URLs de redes sociales desde `/admin/rrss` y enlaces de "Intranet GDC" (Funcionarios Activos / Jubilados / Intranets GDC) desde `/admin/configuracion` (vacío = ítem oculto); verificar `/admin/login`.
+8. Cargar contenido real: entes (`PartnerSeeder` está vacío), URLs de redes sociales desde `/admin/rrss` y enlaces de "Intranet GDC" desde `/admin/configuracion` (vacío = ítem oculto). **Valores en producción (2026-10-28):** `nav_funcionarios_url = https://www.gdc.gob.ve/extranet/login.php`, `nav_jubilados_url = https://www.gdc.gob.ve/intranet_jubilados/login.php` (ambos servidos por proxy — §14.O), `nav_intranet_url` vacío; verificar `/admin/login`.
 
 #### G. Actualizaciones posteriores (procedimiento ejecutado el 2026-10-25)
 
@@ -923,11 +934,96 @@ El portal salió a internet bajo el dominio **`www.gdc.gob.ve`**:
 
 **Verificación:** `config:show app.url` → `https://www.gdc.gob.ve`; `trusted_hosts` → `www.gdc.gob.ve,172.16.0.14`; canonical/`og:url`/`/sitemap.xml` → `www` (estos ya salían del Host de la petición, §14.N no los tocó); `Host: www…` 200, `Host: 172.16.0.14` 200, `Host` desconocido **400**; `robots.txt` con `Sitemap:`; smoke 200 y sin errores nuevos en el log.
 
-> ⚠️ **R5 sigue abierto:** el certificado TLS sigue siendo el auto-firmado
-> `CN=172.16.0.14` **vencido el 2026-06-19**, por lo que los usuarios externos ven el
-> aviso de "conexión no privada". Vías en PENDIENTES R5: certificado institucional,
-> Let's Encrypt (viable: DNS público + puerto 80 abierto, requiere instalar `certbot`)
-> o autofirmado nuevo con SAN.
+> ✅ **R5 resuelto el 2026-10-28** con Let's Encrypt — ver **§14.P**.
+
+#### O. Intranet por proxy y redirects por origen (2026-10-28)
+
+Los sistemas de intranet (Funcionarios Activos y Jubilados) viven en **otro servidor,
+`172.16.0.13`**, que **no tiene ni tendrá salida a internet** (solo red local). El portal los
+publica bajo `https://www.gdc.gob.ve/…` con un **reverse proxy de Nginx** — un *link simbólico*
+no sirve porque los ficheros no están en este servidor.
+
+| Dato | Valor |
+|---|---|
+| Backend | `https://172.16.0.13` (nginx; cert Let's Encrypt de `www.gdc.gob.ve`, 22 cerrado ⇒ sin acceso SSH) |
+| Rutas publicadas | `/extranet/` → backend `/extranet/` · `/intranet_jubilados/` → backend `/intranet_jubilados/` |
+| No se publica | `/sistema/…` (landing antigua, hoy el propio portal) |
+| Settings del navbar | `nav_funcionarios_url = https://www.gdc.gob.ve/extranet/login.php`, `nav_jubilados_url = https://www.gdc.gob.ve/intranet_jubilados/login.php`, `nav_intranet_url` vacío (oculto) |
+| Acceso | público (decisión del cliente) |
+
+**Bloques en el vhost** (junto a los `^~ /storage|/build|/images`, §14.2):
+
+```nginx
+    # --- Intranet (2026-10-28): proxy al servidor interno 172.16.0.13, que no
+    # tiene ni tendra salida a internet; el portal lo alcanza por la red local.
+    # El prefijo ^~ evita que la regex .php del portal capture estos ficheros.
+    location ^~ /extranet/ {
+        proxy_pass https://172.16.0.13/extranet/;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+        proxy_ssl_server_name on;
+        proxy_ssl_name www.gdc.gob.ve;      # SNI: el cert del backend es de www
+        proxy_read_timeout 60s;
+        expires -1;                         # anula el `expires 1y` del server{}: sin esto
+                                            # la pagina de login se cachea 1 ano en el navegador
+        # Post-login la app redirige a /sistema/frontend (landing antigua):
+        # aqui se reescribe al destino del sistema de origen.
+        proxy_redirect ~^(https?://[^/]+)?/sistema(/.*)?$ /extranet/usuarioslist.php;
+    }
+
+    location ^~ /intranet_jubilados/ {
+        proxy_pass https://172.16.0.13/intranet_jubilados/;
+        # (mismos proxy_set_header / proxy_ssl / read_timeout / expires -1)
+        # Post-login: jubilados vuelve al home del portal (por el momento).
+        proxy_redirect ~^(https?://[^/]+)?/sistema(/.*)?$ /;
+    }
+
+    # Red de seguridad: /sistema/* (landing antigua) vuelve al home, nunca 404.
+    location ^~ /sistema {
+        return 302 https://$host/;
+    }
+
+    client_max_body_size 110m;   # alineado con php.ini (110M) y SECURITY condicion 4;
+                                 # antes el global de nginx.conf era 8m (subidas >8 MB daban 413)
+```
+
+**Notas:**
+- `proxy_redirect` se aplica **por bloque**, así que el "origen" determina el destino: extranet →
+  `/extranet/usuarioslist.php`, jubilados → `/`. El regex cubre cualquier variante de `Location`
+  (`https://www.gdc.gob.ve/sistema/frontend`, `https://172.16.0.13/sistema/frontend/`, `/sistema/…`).
+- Formularios (`action="login.php"`) y redirecciones internas del backend son **relativos** ⇒
+  funcionan sin reescritura; las cookies (`PHPSESSID; path=/`, sin `Domain`) también.
+- **Mixed content aceptado**: 3 recursos externos en `http://` de esas páginas (jquery 1.9.1 de
+  googleapis y css/js de colorbox) no cargan bajo HTTPS; el resto (bootstrap, jquery local, css
+  propios) sí. El Nginx del portal **no tiene `sub_filter`** para reescribirlos.
+- Si algún flujo de login redirige a una ruta distinta de `/sistema/…`, basta añadir otra línea
+  `proxy_redirect` en el bloque correspondiente (la prueba de login es manual: no hay credenciales
+  en el despliegue).
+
+**Verificación:** `/extranet/login.php` e `/intranet_jubilados/login.php` → **200** vía portal;
+asset relativo (`/extranet/bootstrap3/css/bootstrap.css`) → 200; `/extranet/` → 302 `login.php`
+(limpio); `/sistema/frontend` → **302 → `/`**; respuestas con `Cache-Control: no-cache` (sin
+`max-age` de 1 año); `/` y `/admin/login` → 200; `/storage/prueba.php` y `/.env` → **403**.
+
+#### P. Certificado Let's Encrypt (cierre de R5 — 2026-10-28)
+
+| Paso | Detalle |
+|---|---|
+| 1. Cliente | `apt-get update && apt-get install -y certbot` → **certbot 4.0.0**, con `certbot.timer` **enabled/active** |
+| 2. Reto ACME | webroot en `/var/www/le`. ⚠️ El bloque :80 tenía `return 301` **a nivel de server** (se ejecuta antes de cualquier `location` y habría interceptado el reto): se bajó a `location / { return 301 …; }` y se añadió `location ^~ /.well-known/acme-challenge/ { root /var/www/le; }` |
+| 3. Emisión | `certbot certonly --webroot -w /var/www/le -d www.gdc.gob.ve --agree-tos -m tecnologiagdcweb@gmail.com` → `/etc/letsencrypt/live/www.gdc.gob.ve/{fullchain.pem,privkey.pem}` — **ECDSA, válido hasta 2027-01-26** |
+| 4. vhost | `ssl_certificate` y `ssl_certificate_key` del bloque :443 apuntan a los ficheros de letsencrypt (los antiguos `/etc/nginx/certificate/*` quedan como respaldo) + `nginx -t` y reload |
+| 5. Renovación | `certbot.timer` (2/día) + hook `/etc/letsencrypt/renewal-hooks/deploy/nginx-reload.sh` que recarga Nginx tras cada renovación. `certbot renew --dry-run` → **simulación correcta** |
+
+**Verificación:** `curl -I https://www.gdc.gob.ve/` **sin `-k`** → **200 (ssl_verify=0)** desde el
+servidor y desde un equipo externo; handshake: `subject=CN=www.gdc.gob.ve`, `issuer=Let's Encrypt`,
+`Verify return code: 0 (ok)`.
+
+> **Nota operativa:** el DNS `www.gdc.gob.ve` ya apunta al portal (NAT `190.205.103.125` →
+> `172.16.0.14`), por lo que **las renovaciones solo pueden hacerse desde aquí**; el certificado
+> Let's Encrypt que tenía `172.16.0.13` (hasta 2027-01-06) dejará de poderse renovar allí.
 
 ---
 
