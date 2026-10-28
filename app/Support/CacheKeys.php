@@ -47,6 +47,18 @@ class CacheKeys
         Cache::forget(self::NEWS_CATEGORIES_NAV);
     }
 
+    /**
+     * Invalida solo el ranking "Lo más leído" del home.
+     *
+     * Se usa al contar una vista (NewsController::show): el incremento no
+     * dispara el observer `saved`, y sin este flush la barra lateral pinta
+     * números y orden congelados hasta PORTAL_CACHE_TTL (1 h por defecto).
+     */
+    public static function flushMostRead(): void
+    {
+        Cache::forget(self::HOME_MOST_READ);
+    }
+
     public static function flushEntes(): void
     {
         Cache::forget(self::ENTES_INDEX);

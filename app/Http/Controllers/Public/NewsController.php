@@ -39,6 +39,12 @@ class NewsController extends Controller
 
         $post->increment('views');
 
+        // El ranking del home viene de un caché con TTL largo
+        // (CacheKeys::HOME_MOST_READ) y el incremento no pasa por el
+        // observer `saved`, así que hay que invalidarlo a mano para que
+        // "Lo más leído" no pinte números ni orden desfasados.
+        CacheKeys::flushMostRead();
+
         $day = now()->toDateString();
         // Upsert atómico sobre el índice único (day, post_id): en PostgreSQL
         // compila a ON CONFLICT ... DO UPDATE y elimina la carrera

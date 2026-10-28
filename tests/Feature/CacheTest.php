@@ -162,4 +162,56 @@ class CacheTest extends TestCase
 
         $file->forget($key);
     }
+
+    /**
+     * Regresión (2026-10-28): el ranking "Lo más leído" del home viene de un
+     * caché con TTL largo y NewsController::show cuenta vistas con
+     * increment(), que dispara `updating`/`updated` pero NO el observer
+     * `saved`. Sin flushManual la barra lateral pinta números y orden
+     * congelados hasta PORTAL_CACHE_TTL mientras el detalle muestra el
+     * contador vivo.
+     */
+    public function test_viewing_a_post_invalidates_the_home_most_read_cache(): void
+    {
+        $user = User::factory()->create();
+        $category = Category::factory()->create();
+
+        Post::create([
+            'user_id' => $user->id,
+            'category_id' => $category->id,
+            'title' => 'Líder de vistas',
+            'slug' => 'lider-de-vistas',
+            'excerpt' => 'Resumen',
+            'content' => '<p>Contenido</p>',
+            'status' => 'published',
+            'views' => 10,
+        ]);
+        $second = Post::create([
+            'user_id' => $user->id,
+            'category_id' => $category->id,
+            'title' => 'Segundo de vistas',
+            'slug' => 'segundo-de-vistas',
+            'excerpt' => 'Resumen',
+            'content' => '<p>Contenido</p>',
+            'status' => 'published',
+            'views' => 5,
+        ]);
+
+        // Primer render: el ranking queda cacheado con los valores actuales.
+        $this->get('/')->assertOk()->assertSee('10 vistas');
+        $this->assertTrue(Cache::has(CacheKeys::HOME_MOST_READ));
+
+        // Visitar la noticia incrementa sus vistas (5 → 6) y debe invalidar
+        // el ranking, no el resto de claves del home.
+        $this->get(route('news.show', 'segundo-de-vistas'))->assertOk();
+        $this->assertSame(6, $second->fresh()->views);
+        $this->assertFalse(
+            Cache::has(CacheKeys::HOME_MOST_READ),
+            'Visitar una noticia debe vaciar CacheKeys::HOME_MOST_READ para que "Lo más leído" no quede desfasado.'
+        );
+        $this->assertTrue(Cache::has(CacheKeys::HOME_LATEST));
+
+        // Siguiente visita al home: números y orden refrescados.
+        $this->get('/')->assertOk()->assertSee('6 vistas');
+    }
 }
