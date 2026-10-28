@@ -122,7 +122,7 @@
                 --}}
             </div>
             <hr class="my-3" style="border-color: #212529;">
-            <p class="text-center small mb-0" style="color: #212529;">&copy; {{ date('Y') }} GDC. Todos los derechos reservados.</p>
+            <p class="text-center small mb-0" style="color: #212529;">&copy; {{ date('Y') }} GDC, Dirección General de Tecnología, Todos los derechos reservados.</p>
         </div>
     </footer>
     <script nonce="{{ request()->attributes->get('csp_nonce') }}">
