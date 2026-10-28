@@ -76,11 +76,11 @@
         @yield('content')
     </main>
 
-    <footer class="pt-4 pb-3" style="background: url('{{ asset('images/Banner_final.png') }}') center/cover no-repeat !important; color: #212529;">
+    <footer class="pt-4 pb-3" style="background: url('{{ asset('images/Banner_Final.png') }}') center/cover no-repeat !important; color: #212529;">
         <div class="container">
             <div class="row">
                 <div class="col-md-6">
-                    <h5 style="color: #212529;">Gobierno de Distrito Capital</h5>
+                    <h5 style="color: #212529;">Gobierno del Distrito Capital</h5>
                     <p class="small">Portal institucional oficial</p>
                     <div class="mt-2">
                         @include('public._social-links', ['linkClass' => 'text-dark', 'ulClass' => 'gap-3'])
