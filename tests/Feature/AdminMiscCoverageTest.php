@@ -181,15 +181,18 @@ class AdminMiscCoverageTest extends TestCase
     {
         $mw = new TrustHosts($this->app);
 
+        // Los patrones deben salir anclados como regexps (contrato Symfony 7):
+        // un globo tipo "*.gdc.gob.ve" se compila crudo y provoca 500 en prod.
         $base = $mw->hosts();
-        $this->assertContains('localhost', $base);
-        $this->assertContains('127.0.0.1', $base);
-        $this->assertContains('*.gdc.gob.ve', $base);
+        $this->assertContains('^localhost$', $base);
+        $this->assertContains('^127\.0\.0\.1$', $base);
+        $this->assertContains('^(.+\.)?gdc\.gob\.ve$', $base);
 
-        config(['security.trusted_hosts' => 'intra.gob.ve, otro.test']);
+        config(['security.trusted_hosts' => 'intra.gob.ve, otro.test, *.priv.gob.ve']);
         $hosts = (new TrustHosts($this->app))->hosts();
-        $this->assertContains('intra.gob.ve', $hosts);
-        $this->assertContains('otro.test', $hosts);
+        $this->assertContains('^intra\.gob\.ve$', $hosts);
+        $this->assertContains('^otro\.test$', $hosts);
+        $this->assertContains('^(.+\.)?priv\.gob\.ve$', $hosts);
 
         config(['security.trusted_hosts' => ' , ']);
         $this->assertSame($base, (new TrustHosts($this->app))->hosts());

@@ -519,7 +519,7 @@ npm run build      # copia TinyMCE a public/vendor + vite build a public/build
 > **Estado a 2026-10-28**: **producción en Laravel 13.38.0** (despliegue U1
 > el 2026-10-28 desde `main` = `d4d3e91`; registro en **§14.M**) — 7
 > condiciones de `SECURITY.md` §1 verificadas y re-verificadas tras el
-> upgrade. Gates: **317 tests PHPUnit en verde** (1407 assertions),
+> upgrade. Gates: **320 tests PHPUnit en verde** (1430 assertions),
 > **cobertura 97.58%** (app 98.05%), **E2E 17/17**, **baseline ZAP final:
 > 0 altas / 0 medias / 1 baja / 4 informativas** (waiver TinyMCE
 > `style-src` cerrado con CSP de nonce), Pint ✅, SCA 0/0.
@@ -876,6 +876,19 @@ la allowlist + **test de regresión** que hace roundtrip del payload real por `F
 (`CacheTest::test_cache_serializable_classes_allowlist_roundtrips_cached_payloads`, que
 reproduce el 500 sin el fix).
 
+**Incidencia 3 (resuelta): 500 en cualquier Host fuera de `APP_URL` (58 en una hora).**
+`app/Http/Middleware/TrustHosts.php` seguía devolviendo los **globos de Laravel 10**
+(`*.gdc.gob.ve`), pero desde Laravel 11/Symfony 7 `Request::setTrustedHosts()` los compila
+como **regex crudos** (`{*.gdc.gob.ve}i` → `quantifier does not follow a repeatable item`).
+Consecuencia: las peticiones con `Host: web.gdc.gob.ve` casaban con el primer patrón (por eso
+el smoke normal pasaba), pero **cualquier otro Host** — acceso por IP, `www.…`, escáneres
+externos que ya llegan por el 443 — recibía 500 con `ErrorException` en el log. Corregido
+devolviendo regexps anclados (`^…$`, con `^(.+\.)?` para subdominios) y convirtiendo las
+entradas de `TRUSTED_HOSTS` (también acepta `*.dominio`); regresión cubierta por
+`TrustHostsTest` (valida que cada patrón compila, que los hosts canónicos se aceptan y que un
+Host desconocido se **rechaza limpio** en vez de romperse). Verificado: con el código antiguo
+el test da 2 errores + 1 fallo.
+
 **Verificación post-upgrade:** `/` ×5 y `/noticias` ×3 → 200 (incluye el segundo request, con
 caché ya poblado); `/noticias/mes-rosa-…`, `/gacetas`, `/contacto`, `/sobre-nosotros`,
 `/entes`, `/sitemap.xml`, `/buscar?q=…`, `/admin/login` → 200; el vídeo se sirve con `206`
@@ -982,7 +995,7 @@ Garantías de las suites:
 
 ### PHPUnit (`tests/Unit`, `tests/Feature`)
 
-- Ejecución: `./vendor/bin/phpunit` (o `--testsuite Unit,Feature`) — **317 en verde / 1407 assertions** (4 skipped: requieren PostgreSQL o el symlink `public/storage`; 6 avisos preexistentes de `iconv` en LATIN9, intencionales). *Cifra verificada el 2026-10-28 tras el layout "revista" del detalle de noticias; incluye `NewsShowLayoutTest`, `MediaOrientationTest` y el test de regresión del roundtrip de caché por `FileStore`.*
+- Ejecución: `./vendor/bin/phpunit` (o `--testsuite Unit,Feature`) — **320 en verde / 1430 assertions** (4 skipped: requieren PostgreSQL o el symlink `public/storage`; 6 avisos preexistentes de `iconv` en LATIN9, intencionales). *Cifra verificada el 2026-10-28 tras el layout "revista" del detalle de noticias; incluye `NewsShowLayoutTest`, `MediaOrientationTest`, `TrustHostsTest` y el test de regresión del roundtrip de caché por `FileStore`.*
 - **Cobertura (desde R3, re-validada 2026-10-26 en Laravel 13):** con Xdebug 3.5.3 instalado, `./vendor/bin/phpunit --coverage-text --coverage-html coverage-html` → **97.58% de líneas total** (app 98.05% · database 95.36%; objetivo ≥90% superado); authn/authz/validación/cifrado ≈100% salvo el fallback de iconv de `App\Support\Latin9`. El HTML se genera en `/coverage-html` (ignorado por git).
 - **BD aislada**: `phpunit.xml` define `DB_CONNECTION=sqlite` / `DB_DATABASE=:memory:` (B2 cerrado) — `RefreshDatabase` migra en memoria por test, **nunca toca la BD de desarrollo**. El `APP_KEY` de `phpunit.xml` es una clave **exclusiva de tests**; no usar en producción.
 - Cobertura de flujos críticos:
