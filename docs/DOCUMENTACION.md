@@ -523,8 +523,9 @@ npm run build      # copia TinyMCE a public/vendor + vite build a public/build
 > **cobertura 97.58%** (app 98.05%), **E2E 17/17**, **baseline ZAP final:
 > 0 altas / 0 medias / 1 baja / 4 informativas** (waiver TinyMCE
 > `style-src` cerrado con CSP de nonce), Pint ✅, SCA 0/0. **Publicada en
-> internet en `https://www.gdc.gob.ve` con la intranet servida por proxy
-> (§14.O) y TLS de Let's Encrypt con renovación automática (§14.P).**
+> internet en `https://www.gdc.gob.ve` con TLS de Let's Encrypt con renovación
+> automática (§14.P); la intranet está temporalmente despublicada con
+> `scripts/intranet.sh` (§14.O).**
 >
 > El despliegue del 2026-10-25 (Laravel 10.50.2) quedó registrado en §14.L;
 > el de la migración completa 10 → 11 → 12 → 13 está en `docs/PLAN-LARAVEL13.md`.
@@ -715,7 +716,7 @@ php artisan optimize             # config:cache + route:cache + view:cache
 5. Ejecutar `composer audit` y revisar cualquier advisory activo (desde la migración a Laravel 13 no hay bloque `audit.ignore` en `composer.json`: **0 advisories, 0 waivers** — cualquier ID ignorado que aparezca debe justificarse por escrito en SECURITY.md §2).
 6. Permisos: `storage/` y `bootstrap/cache/` deben ser escribibles por el usuario de PHP-FPM/Apache, p. ej. `chown -R www-data:www-data storage bootstrap/cache`.
 7. `.env` con permisos restrictivos (`chmod 600 .env`) y fuera de la raíz web.
-8. Cargar contenido real: entes (`PartnerSeeder` está vacío), URLs de redes sociales desde `/admin/rrss` y enlaces de "Intranet GDC" desde `/admin/configuracion` (vacío = ítem oculto). **Valores en producción (2026-10-28):** `nav_funcionarios_url = https://www.gdc.gob.ve/extranet/login.php`, `nav_jubilados_url = https://www.gdc.gob.ve/intranet_jubilados/login.php` (ambos servidos por proxy — §14.O), `nav_intranet_url` vacío; verificar `/admin/login`.
+8. Cargar contenido real: entes (`PartnerSeeder` está vacío), URLs de redes sociales desde `/admin/rrss` y enlaces de "Intranet GDC" desde `/admin/configuracion` (vacío = ítem oculto). **Estado actual (desde 2026-10-28): los dos enlaces están vacíos** (ítems ocultos) y el proxy de intranet está desactivado (§14.O, `scripts/intranet.sh`); para reactivar: `intranet.sh on` y rellenar `nav_funcionarios_url = https://www.gdc.gob.ve/extranet/login.php` y `nav_jubilados_url = https://www.gdc.gob.ve/intranet_jubilados/login.php` (PENDIENTES E6). Verificar `/admin/login`.
 
 #### G. Actualizaciones posteriores (procedimiento ejecutado el 2026-10-25)
 
@@ -943,15 +944,38 @@ Los sistemas de intranet (Funcionarios Activos y Jubilados) viven en **otro serv
 publica bajo `https://www.gdc.gob.ve/…` con un **reverse proxy de Nginx** — un *link simbólico*
 no sirve porque los ficheros no están en este servidor.
 
+> **⚠️ Desactivada temporalmente el 2026-10-28** (decisión del cliente: la intranet **no debe
+> estar expuesta** por la ruta del portal). El cambio se hace con **`scripts/intranet.sh`**
+> desde la **consola** del servidor (el acceso SSH desde la máquina de trabajo quedó limitado
+> por red):
+>
+> ```bash
+> # traer el script (una vez; sale desde GitHub)
+> su -s /bin/bash www-data -c "cd /var/www/html/PortalPG2026 && git fetch origin && git reset --hard origin/main"
+> bash /var/www/html/PortalPG2026/scripts/intranet.sh off      # desvincular
+> bash /var/www/html/PortalPG2026/scripts/intranet.sh on       # reactivar
+> bash /var/www/html/PortalPG2026/scripts/intranet.sh status   # solo informa
+> ```
+>
+> El script migra los bloques de este apartado a
+> `/etc/nginx/snippets/intranet.conf` y alterna una única línea `include` en el vhost
+> (backup previo + puerta `nginx -t`: si la config no valida, restaura el backup y **no**
+> recarga). Con `off`, `/extranet/*` e `/intranet_jubilados/*` caen en el Laravel del portal
+> → **404**. **Los enlaces del navbar se vacían aparte** en `/admin/configuracion`
+> (`nav_funcionarios_url` y `nav_jubilados_url` = vacío ⇒ ítem oculto): ver PENDIENTES **E6**
+> para la reactivación completa.
+
 | Dato | Valor |
 |---|---|
 | Backend | `https://172.16.0.13` (nginx; cert Let's Encrypt de `www.gdc.gob.ve`, 22 cerrado ⇒ sin acceso SSH) |
-| Rutas publicadas | `/extranet/` → backend `/extranet/` · `/intranet_jubilados/` → backend `/intranet_jubilados/` |
-| No se publica | `/sistema/…` (landing antigua, hoy el propio portal) |
-| Settings del navbar | `nav_funcionarios_url = https://www.gdc.gob.ve/extranet/login.php`, `nav_jubilados_url = https://www.gdc.gob.ve/intranet_jubilados/login.php`, `nav_intranet_url` vacío (oculto) |
-| Acceso | público (decisión del cliente) |
+| Rutas que se publicarían | `/extranet/` → backend `/extranet/` · `/intranet_jubilados/` → backend `/intranet_jubilados/` (**hoy desactivadas**: devuelven 404) |
+| No se publica | `/sistema/…` (landing antigua, hoy el propio portal; el fallback `302 → /` se mantiene activo) |
+| Settings del navbar | **vacíos** desde 2026-10-28 (ítems ocultos). Valores a restaurar: `nav_funcionarios_url = https://www.gdc.gob.ve/extranet/login.php`, `nav_jubilados_url = https://www.gdc.gob.ve/intranet_jubilados/login.php`; `nav_intranet_url` sigue vacío |
+| Acceso | público cuando está activada (decisión del cliente) |
 
-**Bloques en el vhost** (junto a los `^~ /storage|/build|/images`, §14.2):
+**Bloques** (su contenido vive hoy en `/etc/nginx/snippets/intranet.conf`; en el vhost solo
+queda la línea `include snippets/intranet.conf;` que alterna `scripts/intranet.sh on|off`).
+Se documentan aquí completos:
 
 ```nginx
     # --- Intranet (2026-10-28): proxy al servidor interno 172.16.0.13, que no

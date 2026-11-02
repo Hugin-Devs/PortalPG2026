@@ -1,10 +1,10 @@
 # PENDIENTES — Checklist de trabajo
 
 > **Fuente viva del trabajo pendiente.** Ir marcando `- [x]` al completar un ítem.
-> Última actualización: 2026-10-28 (TLS resuelto con Let's Encrypt + intranet por proxy).
+> Última actualización: 2026-10-28 (intranet despublicada con `scripts/intranet.sh`).
 
-**Abiertos: 4** — 2 de contenido del cliente + 1 de bloqueo de salida (backup de BD) + 1 de mantenimiento (guarda del seeder).
-*Producción en **Laravel 13.38.0** desde el 2026-10-28 (U1 cerrado; registro en DOCUMENTACION §14.M), **publicada en internet** con intranet por proxy (§14.O) y **TLS de Let's Encrypt** (§14.P, R5 cerrado). Gates: Pint ✅ · **322 tests · 1439 aserciones** · cobertura 97.58% · E2E 17/17 · **ZAP final 0/0/1/4**, waiver `style-src` cerrado · audits 0/0.*
+**Abiertos: 5** — 2 de contenido del cliente + 1 de bloqueo de salida (backup de BD) + 1 de reactivación (intranet) + 1 de mantenimiento (guarda del seeder).
+*Producción en **Laravel 13.38.0** desde el 2026-10-28 (U1 cerrado; registro en DOCUMENTACION §14.M), **publicada en internet** con **TLS de Let's Encrypt** (§14.P, R5 cerrado) e **intranet temporalmente despublicada** (§14.O, E6). Gates: Pint ✅ · **322 tests · 1439 aserciones** · cobertura 97.58% · E2E 17/17 · **ZAP final 0/0/1/4**, waiver `style-src` cerrado · audits 0/0.*
 
 ---
 
@@ -17,6 +17,9 @@
 
 - [ ] **E5 — Reactivar los enlaces Entes**  
   Ocultos con comentario Blade el 2026-10-27 (`layouts/public.blade.php`: navbar, enlace del footer y bloque "Entes Afiliados") mientras un equipo externo prepara el módulo de entes. Las rutas `/entes` siguen vivas. Reactivar descomentando los 3 bloques y restaurando las aserciones de `test-entes.sh`/`test-categorias.sh`.
+
+- [ ] **E6 — Reactivar la intranet (extranet y jubilados)**  
+  Desvinculada el 2026-10-28: el proxy de Nginx quedó desactivado con **`scripts/intranet.sh off`** (bloques migrados a `/etc/nginx/snippets/intranet.conf`, línea `include` comentada) y los enlaces del navbar quedaron **vacíos** (ítems ocultos). Reactivar desde la consola del servidor: `bash /var/www/html/PortalPG2026/scripts/intranet.sh on` (o `status` para comprobar) y rellenar en `/admin/configuracion` `nav_funcionarios_url = https://www.gdc.gob.ve/extranet/login.php` y `nav_jubilados_url = https://www.gdc.gob.ve/intranet_jubilados/login.php`. Detalle en DOCUMENTACION.md §14.O.
 
 ## B. Pre-release (bloquean la publicación / el release)
 
