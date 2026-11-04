@@ -12,7 +12,7 @@ echo "settings contact_* previos: $contactSnapshotCount claves preservadas"
 echo '--- 0b. Seeder idempotente (2a corrida) ---'
 ( cd "$E2E_ROOT" && php artisan db:seed --class=PermissionSeeder --no-interaction >/dev/null 2>&1 )
 cnt=$(sql 'SELECT COUNT(*) FROM permissions;')
-check '[ "$cnt" = 41 ]' "seeder x2: 41 permisos ($cnt)" "permisos != 41: $cnt"
+check '[ "$cnt" = 42 ]' "seeder x2: 42 permisos ($cnt)" "permisos != 42: $cnt"
 
 echo '--- 1. Login superadmin + GET /admin/contacto ---'
 login 'admin@gdc.gob.ve'

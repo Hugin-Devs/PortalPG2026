@@ -4,7 +4,7 @@
 > Última actualización: 2026-10-28 (intranet despublicada con `scripts/intranet.sh`).
 
 **Abiertos: 5** — 2 de contenido del cliente + 1 de bloqueo de salida (backup de BD) + 1 de reactivación (intranet) + 1 de mantenimiento (guarda del seeder).
-*Producción en **Laravel 13.38.0** desde el 2026-10-28 (U1 cerrado; registro en DOCUMENTACION §14.M), **publicada en internet** con **TLS de Let's Encrypt** (§14.P, R5 cerrado) e **intranet temporalmente despublicada** (§14.O, E6). Gates: Pint ✅ · **322 tests · 1439 aserciones** · cobertura 97.58% · E2E 17/17 · **ZAP final 0/0/1/4**, waiver `style-src` cerrado · audits 0/0.*
+*Producción en **Laravel 13.38.0** desde el 2026-10-28 (U1 cerrado; registro en DOCUMENTACION §14.M), **publicada en internet** con **TLS de Let's Encrypt** (§14.P, R5 cerrado) e **intranet temporalmente despublicada** (§14.O, E6). Gates: Pint ✅ · **363 tests · 1692 aserciones** · cobertura 97.58% · E2E 17/17 · **ZAP final 0/0/1/4**, waiver `style-src` cerrado · audits 0/0.*
 
 ---
 

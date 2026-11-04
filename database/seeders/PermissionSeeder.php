@@ -43,6 +43,7 @@ class PermissionSeeder extends Seeder
             ['name' => 'Editar Sobre Nosotros', 'slug' => 'about.edit', 'group' => 'Gestión Portal', 'module' => 'Sobre Nosotros'],
             ['name' => 'Editar información de contacto', 'slug' => 'contact.edit', 'group' => 'Gestión Portal', 'module' => 'Contacto'],
             ['name' => 'Ver mensajes de contacto', 'slug' => 'contact.view', 'group' => 'Gestión Portal', 'module' => 'Mensajes'],
+            ['name' => 'Exportar mensajes a PDF', 'slug' => 'contact.export', 'group' => 'Gestión Portal', 'module' => 'Mensajes'],
             ['name' => 'Eliminar mensajes de contacto', 'slug' => 'contact.delete', 'group' => 'Gestión Portal', 'module' => 'Mensajes'],
             ['name' => 'Ver estructura', 'slug' => 'org.view', 'group' => 'Gestión Portal', 'module' => 'Estructura Org.'],
             ['name' => 'Crear estructura', 'slug' => 'org.create', 'group' => 'Gestión Portal', 'module' => 'Estructura Org.'],

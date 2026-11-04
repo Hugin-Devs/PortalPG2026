@@ -5,6 +5,9 @@
     <div class="d-flex justify-content-between align-items-center mb-4">
         <h1>Mensaje de Contacto</h1>
         <div>
+            @if(auth()->user()->hasPermission('contact.export'))
+            <a href="{{ route('admin.contact.message.pdf', $contact) }}" class="btn btn-outline-primary me-1"><i class="fa-solid fa-file-pdf me-1"></i>Exportar PDF</a>
+            @endif
             @if(auth()->user()->hasPermission('contact.delete'))
             <form action="{{ url('/admin/contacto/mensajes/' . $contact->id) }}" method="POST" class="d-inline">
                 @csrf

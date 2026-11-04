@@ -25,7 +25,7 @@
                     <th>Nombre</th>
                     <th>Email</th>
                     <th style="width: 160px;">Fecha</th>
-                    <th style="width: 90px;"></th>
+                    <th style="width: 150px;"></th>
                 </tr>
             </thead>
             <tbody>
@@ -47,6 +47,9 @@
                     <td>{{ $msg->email }}</td>
                     <td>{{ $msg->created_at->format('d/m/Y H:i') }}</td>
                     <td>
+                        @if(auth()->user()->hasPermission('contact.export'))
+                        <a href="{{ route('admin.contact.message.pdf', $msg->id) }}" class="btn btn-sm btn-outline-primary me-1" title="Exportar PDF"><i class="fa-solid fa-file-pdf"></i></a>
+                        @endif
                         @if(auth()->user()->hasPermission('contact.delete'))
                         <form action="{{ url('/admin/contacto/mensajes/' . $msg->id) }}" method="POST">
                             @csrf

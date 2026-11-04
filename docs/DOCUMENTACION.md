@@ -278,6 +278,7 @@ Todas las rutas de gestión llevan además `middleware('permission:...')` (ver s
 | GET/PUT | `/admin/nosotros` | `about.edit` | `Admin\AboutController` |
 | GET/PUT | `/admin/contacto` | `contact.edit` | `Admin\ContactController` |
 | GET/DELETE | `/admin/contacto/mensajes` (+ `/{contact}`) | `contact.view` / `contact.delete` | `Admin\ContactController` |
+| GET | `/admin/contacto/mensajes/{contact}/pdf` | `contact.export` | `Admin\ContactController@exportPdf` (descarga PDF individual) |
 | GET | `/admin/estructura` (+ crear/editar/PUT/DELETE) | `org.*` | `Admin\OrgMemberController` |
 | GET/POST | `/admin/roles` | `roles.manage` | `Admin\RoleController` |
 | GET/PUT | `/admin/rrss` | `rrss.manage` | `Admin\RrssController` |
@@ -318,7 +319,7 @@ Todas las rutas de gestión llevan además `middleware('permission:...')` (ver s
 | `MediaController` | `index, store, destroy` | ✅ Subida **múltiple** a disco `public` en **`uploads/YYYY/MM/`** (carpeta por año/mes desde D15, `files[]`, 10 MB por archivo), requiere `storage:link`; respuesta **JSON** (`{location}`) para el editor TinyMCE; **biblioteca reutilizable** desde el modal "Elegir de la biblioteca" de noticias + botón "Copiar URL" |
 | `OrgMemberController` | CRUD completo | ✅ Estructura organizativa |
 | `AboutController` | `index, update` | ✅ Edición de "Sobre Nosotros" |
-| `ContactController` | `editInfo, updateInfo, messages, showMessage, destroyMessage` | ✅ Info de contacto en `settings` (`contact_address/phone/email/hours/map_url`) + bandeja de mensajes (`contacts`); parcial público `_contact-info` con defaults |
+| `ContactController` | `editInfo, updateInfo, messages, showMessage, exportPdf, destroyMessage` | ✅ Info de contacto en `settings` (`contact_address/phone/email/hours/map_url`) + bandeja de mensajes (`contacts`); **exportación individual a PDF** (`contact.export`, permiso solo-superadmin) con cintillo institucional compuesto con GD (`cintilloPng`, franja de `images/banner.png` en "cover" + `images/logo.png`), descarga en caliente sin persistencia y auditoría `contact.exported` **sin PII**; parcial público `_contact-info` con defaults |
 | `RoleController` | `index, update` | ✅ Matriz rol×permiso (un formulario JS por rol); `index` ordena en 3 niveles igual que el sidebar: `group` → `module` → acción (`FIELD()` sobre la parte final del slug); `update` borra y reinserta los permisos del rol |
 | `RrssController` | `index, update` | ✅ Redes sociales: 7 settings `social_facebook/instagram/youtube/x/threads/telegram/whatsapp` — **multi-línea (una URL por línea = varias cuentas por red)**: validación línea a línea (`filter_var(FILTER_VALIDATE_URL)` + `^https?://`, mensaje «La línea N no es una URL válida», `max:4000`) y guardado normalizado (CRLF→LF, sin líneas vacías) |
 | `SettingsController` | `index, update` | ✅ Identidad / Enlaces: `site_name` (required ≤100) + enlaces del navbar (`nav_funcionarios_url`, `nav_jubilados_url`, `nav_intranet_url`: URL absoluta válida **o** ruta `/...` sin `..` con `file_exists` en `public/`; vacío = ocultar ítem) + logo (upload `image` ≤2 MB a `settings/logo.{ext}` en disco `public`, checkbox "quitar logo"); redirige con flash |
@@ -374,7 +375,7 @@ Todas las rutas de gestión llevan además `middleware('permission:...')` (ver s
 | Gacetas Oficiales | `gacetas/{index,edit}` | ✅ Grid + formulario "Nueva Gaceta" (archivo + N° + fecha) y edición con preview |
 | Estructura org. | `org-members/{index,create,edit}` | ✅ |
 | Sobre Nosotros | `about/index.blade.php` | ✅ Edición inline |
-| Contacto | `contact/{index,messages,message-show}` | ✅ Info (5 campos) + bandeja con estado Nuevo/Leído, detalle y borrado |
+| Contacto | `contact/{index,messages,message-show}` + `pdf/contact-message` | ✅ Info (5 campos) + bandeja con estado Nuevo/Leído, detalle y borrado; botón **Exportar PDF** (y icono por fila) con `contact.export` que descarga el mensaje con cintillo institucional |
 | Redes Sociales | `rrss/index.blade.php` | ✅ 7 URLs de redes (vacío = oculto en el sitio) |
 | Identidad / Enlaces | `settings/index.blade.php` | ✅ Nombre del sitio + logo (preview/quitar) + 3 enlaces del navbar (Funcionarios Activos, Jubilados, Intranets GDC); vacío = ocultar ítem |
 | Roles y permisos | `roles/index.blade.php` | ✅ Matriz con envío JS; doble cabecera: categoría (`table-secondary`) + módulo (`table-light`, clase `perm-module`), permisos indentados |
@@ -435,8 +436,8 @@ Páginas personalizadas en español para todos los tipos de error HTTP, con bot�
 
 ### Sistema de permisos (granular, por rol)
 
-- **Tabla**: `permissions` (41 permisos con `slug` tipo `news.create`) + `role_permission` (rol ↔ permiso, con índice único). Reparto de asignaciones (68 filas): superadmin 41 (todos), admin 22, editor 5 (`news.view/create/edit`, `media.view`, `media.upload`). Slugs de solo-superadmin (19): `news.delete`, `media.delete`, los 4 de `videos.*`, `partners.create/edit/delete`, `org.delete`, `rrss.manage`, `settings.manage`, los 4 de `users.*`, `roles.manage`, `audit.view`, `audit.export`.
-- **Grupos** (`permissions.group`, 1er nivel): los 41 permisos están agrupados en los **mismos 3 nombres que las secciones del sidebar** — `Gestión Noticias` (16: `news.*`, `media.*`, `videos.*`, `gacetas.*`), `Gestión Portal` (17: `categories.*`, `partners.*`, `about.*`, `contact.*`, `org.*`, `rrss.manage`) y `Configuración Portal` (8: `settings.manage`, `users.*`, `roles.manage`, `audit.*`).
+- **Tabla**: `permissions` (42 permisos con `slug` tipo `news.create`) + `role_permission` (rol ↔ permiso, con índice único). Reparto de asignaciones (69 filas): superadmin 42 (todos), admin 22, editor 5 (`news.view/create/edit`, `media.view`, `media.upload`). Slugs de solo-superadmin (20): `news.delete`, `media.delete`, los 4 de `videos.*`, `partners.create/edit/delete`, `org.delete`, `rrss.manage`, `settings.manage`, los 4 de `users.*`, `roles.manage`, `audit.view`, `audit.export`, `contact.export`.
+- **Grupos** (`permissions.group`, 1er nivel): los 42 permisos están agrupados en los **mismos 3 nombres que las secciones del sidebar** — `Gestión Noticias` (16: `news.*`, `media.*`, `videos.*`, `gacetas.*`), `Gestión Portal` (18: `categories.*`, `partners.*`, `about.*`, `contact.*`, `org.*`, `rrss.manage`) y `Configuración Portal` (8: `settings.manage`, `users.*`, `roles.manage`, `audit.*`).
 - **Módulos** (`permissions.module`, 2º nivel): cada permiso indica además el **módulo/función = ítem del sidebar** (15 en total): `Noticias`, `Medios`, `Videos`, `Gacetas` · `Categorías`, `Entes Afiliados`, `Sobre Nosotros`, `Contacto` (solo `contact.edit`), `Mensajes` (`contact.view/delete`), `Estructura Org.`, `Redes Sociales` · `Identidad / Enlaces`, `Usuarios`, `Roles y Permisos`, `Auditoría` (`audit.view/export`). La vista `/admin/roles` renderiza categoría → módulo → permiso, ordenadas con `FIELD()` (categoría, módulo y acción `view/create/upload/edit/manage/delete`); los módulos no se repiten entre categorías.
 - **Middleware**: alias `permission` registrado en `app/Http/Kernel.php` → `App\Http\Middleware\CheckPermission`. Aplicado ruta a ruta en `routes/web.php` (ej. `->middleware('permission:news.edit')`). El rol `superadmin` tiene bypass. El alias `role` → `App\Http\Middleware\CheckRole` también está registrado, pero hoy no se usa en ninguna ruta.
 - **Consulta en vista**: `auth()->user()->hasPermission('slug')` y `hasAnyPermission([slugs])` (`app/Models/User.php`) — las vistas del admin ocultan botones/menús sin permiso; el sidebar usa `hasAnyPermission()` para decidir si la cabecera de cada sección ("Gestión Noticias", "Gestión Portal", "Configuración Portal") es visible.
@@ -465,7 +466,7 @@ Ejecutan en este orden (definido en `DatabaseSeeder`):
 | `CategorySeeder` | 6 categorías: Nacionales, Política, Comunal, Cultura, Deporte, Educación |
 | `NoticiasPrecargadasSeeder` | **Seeder por defecto de las noticias**: lote de noticias reales desde `public/Noticias Precargadas/` (D16): por carpeta, imágenes `001…NNN` + un `.txt` con el cuerpo y una línea final `Fecha:` (metadato); 001 → `featured_image`, 002+ → galería `post_media`; fecha del sello del nombre de la 001 (fallback: línea Fecha); copia a `uploads/YYYY/MM/` + fila `media` + sidecar WebP; texto íntegro (solo se excluye la línea Fecha); idempotente (omite posts ya sembrados con portada); **purga** con `withTrashed()` + `forceDelete()` de las placeholders `noticia-destacada-*` (borrado físico); corre tras `CategorySeeder`; si aún no hay usuarios, crea `admin@gdc.gob.ve` con `firstOrCreate` |
 | `UserSeeder` | 3 usuarios: superadmin, admin, editor (password `password`) — `firstOrCreate` + restaura nombre/rol canónicos |
-| `PermissionSeeder` | 41 permisos en 2 niveles alineados al sidebar: `group` = 3 categorías (`Gestión Noticias` 16 / `Gestión Portal` 17 / `Configuración Portal` 8) y `module` = 15 módulos/ítems (incluye `settings.manage` con nombre "Editar identidad y enlaces", los 4 `videos.*` y `audit.view`/`audit.export`, solo superadmin) + asignaciones a los 3 roles (41/22/5 = 68 filas) — idempotente y **migrador**: `updateOrCreate` corrige `group`/`module`/`name` de filas existentes |
+| `PermissionSeeder` | 42 permisos en 2 niveles alineados al sidebar: `group` = 3 categorías (`Gestión Noticias` 16 / `Gestión Portal` 18 / `Configuración Portal` 8) y `module` = 15 módulos/ítems (incluye `settings.manage` con nombre "Editar identidad y enlaces", los 4 `videos.*`, `audit.view`/`audit.export` y `contact.export`, solo superadmin) + asignaciones a los 3 roles (42/22/5 = 69 filas) — idempotente y **migrador**: `updateOrCreate` corrige `group`/`module`/`name` de filas existentes |
 | `PartnerSeeder` | **Borrador** — array vacío, pendiente de contenido (name, description, url, order; slug auto y logo vía panel) |
 | `ContactSettingSeeder` | Los 5 settings de contacto (`contact_address/phone/email/hours/map_url`) con los valores por defecto — `firstOrCreate`: **no pisa** lo editado desde `/admin/contacto` |
 | `SocialSettingSeeder` | Los 7 settings de redes (`social_facebook/instagram/youtube/x/threads/telegram/whatsapp`) — `REDES` es el **espacio para pegar las URLs reales** (una por línea; varias líneas = varias cuentas de la misma red, D14); crea las claves faltantes y **rellena solo los valores vacíos**: nunca pisa lo editado desde `/admin/rrss` |
@@ -523,7 +524,7 @@ npm run build      # copia TinyMCE a public/vendor + vite build a public/build
 > **Estado a 2026-10-28**: **producción en Laravel 13.38.0** (despliegue U1
 > el 2026-10-28 desde `main` = `d4d3e91`; registro en **§14.M**) — 7
 > condiciones de `SECURITY.md` §1 verificadas y re-verificadas tras el
-> upgrade. Gates: **322 tests PHPUnit en verde** (1439 assertions),
+> upgrade. Gates: **363 tests PHPUnit en verde** (1692 assertions),
 > **cobertura 97.58%** (app 98.05%), **E2E 17/17**, **baseline ZAP final:
 > 0 altas / 0 medias / 1 baja / 4 informativas** (waiver TinyMCE
 > `style-src` cerrado con CSP de nonce), Pint ✅, SCA 0/0. **Publicada en
@@ -836,7 +837,7 @@ Actualización de una instalación **ya existente con datos reales** (2 usuarios
 3. `composer install --no-dev --optimize-autoloader` (3 actualizaciones de seguridad Symfony, 38 paquetes dev retirados) y `npm ci && npm run build` (123 módulos + TinyMCE).
 4. **Symlink reparado**: `public/storage` apuntaba a una copia residual en `/home/webgdc/PortalPG2026/storage/app/public` (los ficheros nuevos no se servían) → repuntado al `storage/` real de la instalación; 0 ficheros pendientes de migrar.
 5. `.env`: eliminado `APP_URL` duplicado (quedó `https://web.gdc.gob.ve`), `SESSION_LIFETIME` 120→60, `TRUSTED_HOSTS=web.gdc.gob.ve` (`TRUSTED_PROXIES` vacío: no hay proxy delante), añadidas `BCRYPT_ROUNDS`, `LOGIN_LOCKOUT_ATTEMPTS/DECAY`, `PASSWORD_CHANGE_RATE_LIMIT`, `CONTACT_RETENTION_DAYS`, `AUDIT_RETENTION_DAYS`, y `chmod 600`.
-6. `optimize:clear` → `migrate --force` (**29/29**: índice + FK `nullOnDelete` de `activity_logs`) → `db:seed --class=PermissionSeeder --force` (**41 permisos**, incluye `audit.export`) → `pii:encrypt --dry-run` (**0** pendientes) → `webp:generate` (0 nuevos) → `optimize` + `view:cache`.
+6. `optimize:clear` → `migrate --force` (**29/29**: índice + FK `nullOnDelete` de `activity_logs`) → `db:seed --class=PermissionSeeder --force` (**42 permisos**, incluye `audit.export` y `contact.export`) → `pii:encrypt --dry-run` (**0** pendientes) → `webp:generate` (0 nuevos) → `optimize` + `view:cache`.
 7. Infraestructura: `php.ini` de FPM a 100M/110M/256M/60 + `expose_php=Off` y reinicio de FPM; `/etc/cron.d/portal` con `schedule:run` como `www-data`; vhost Nginx con los bloques `^~ /storage|/build|/images` + denegación de dotfiles (§14.2) y `nginx -t` + reload.
 8. `php artisan up` y verificación (tabla siguiente).
 
@@ -973,7 +974,7 @@ no sirve porque los ficheros no están en este servidor.
 |---|---|
 | Backend | `https://172.16.0.13` (nginx; cert Let's Encrypt de `www.gdc.gob.ve`, 22 cerrado ⇒ sin acceso SSH) |
 | Rutas que se publicarían | `/extranet/` → backend `/extranet/` · `/intranet_jubilados/` → backend `/intranet_jubilados/` (**hoy desactivadas**: devuelven 404) |
-| No se publica | `/sistema/…` (landing antigua, hoy el propio portal; el fallback `302 → /` se mantiene activo) |
+| No se publica | `/sistema/…` (landing antigua, hoy el propio portal). El fallback `302 → /` **se perdió en la migración de `scripts/intranet.sh` y no se restaura** mientras la intranet esté desactivada (404 sin riesgo; decisión 2026-10-28) |
 | Settings del navbar | **vacíos** desde 2026-10-28 (ítems ocultos). Valores a restaurar: `nav_funcionarios_url = https://www.gdc.gob.ve/extranet/login.php`, `nav_jubilados_url = https://www.gdc.gob.ve/intranet_jubilados/login.php`; `nav_intranet_url` sigue vacío |
 | Acceso | público cuando está activada (decisión del cliente) |
 
@@ -1029,11 +1030,20 @@ Se documentan aquí completos:
 - Si algún flujo de login redirige a una ruta distinta de `/sistema/…`, basta añadir otra línea
   `proxy_redirect` en el bloque correspondiente (la prueba de login es manual: no hay credenciales
   en el despliegue).
+- **Estado tras `scripts/intranet.sh off` (2026-10-28):** los bloques de arriba viven ahora en
+  **`/etc/nginx/snippets/intranet.conf`** (el vhost solo conserva la línea `include` comentada,
+  que alterna el script) y el bloque `location ^~ /sistema { … }` **se perdió durante la
+  migración**: decisión del cliente **no restaurarlo** mientras la intranet esté desactivada —
+  nada enlaza a `/sistema` en ese estado (responde 404, sin riesgo). Al reactivar con
+  `intranet.sh on`, reinsertar ese bloque si se quiere el fallback de nuevo.
 
-**Verificación:** `/extranet/login.php` e `/intranet_jubilados/login.php` → **200** vía portal;
+**Verificación (con la intranet activa):** `/extranet/login.php` e `/intranet_jubilados/login.php` → **200** vía portal;
 asset relativo (`/extranet/bootstrap3/css/bootstrap.css`) → 200; `/extranet/` → 302 `login.php`
 (limpio); `/sistema/frontend` → **302 → `/`**; respuestas con `Cache-Control: no-cache` (sin
 `max-age` de 1 año); `/` y `/admin/login` → 200; `/storage/prueba.php` y `/.env` → **403**.
+
+**Verificación (desactivada, 2026-10-28):** `/extranet/login.php`, `/intranet_jubilados/login.php`
+y `/sistema/frontend` → **404**; el navbar ya no pinta los ítems; `/` y `/admin/login` → 200.
 
 #### P. Certificado Let's Encrypt (cierre de R5 — 2026-10-28)
 
@@ -1116,7 +1126,7 @@ las credenciales de BD y la base URL se configuran por variables de entorno (`E2
 | `test-categorias.sh` | Filtro por categoría en /noticias y /categoria/{slug}; orden y links del footer |
 | `test-gacetas.sh` | CRUD de Gacetas Oficiales + vista pública + permisos |
 | `test-social.sh` | Módulo Redes Sociales (permisos, `rrss.manage` en grupo "Gestión Portal") + formulario multi-línea (7 textareas, validación URL por línea, «línea N»), iconos **solo-footer** con **1 icono por URL** (multi-cuenta: 2 FB = 2 iconos + tooltip `Red — URL`), seeder no pisa editados, snapshot/restauración multi-línea segura vía tabla auxiliar (12 secciones) |
-| `test-settings.sh` | Identidad / Enlaces (`/admin/configuracion`): nombre del sitio (títulos), logo (upload/quitar), enlaces navbar (URL absoluta, ruta válida, `..`, ruta inexistente), ocultar ítem vacío, `site_name` obligatorio, permisos (40/67, `settings.manage` solo superadmin, 3 grupos + 15 módulos incl. Auditoría, doble cabecera en `/admin/roles`), snapshot/restauración |
+| `test-settings.sh` | Identidad / Enlaces (`/admin/configuracion`): nombre del sitio (títulos), logo (upload/quitar), enlaces navbar (URL absoluta, ruta válida, `..`, ruta inexistente), ocultar ítem vacío, `site_name` obligatorio, permisos (42/69, `settings.manage` solo superadmin, 3 grupos + 15 módulos incl. Auditoría, doble cabecera en `/admin/roles`), snapshot/restauración |
 | `test-users.sh` | `is_active`/`last_login_at`: bloqueo de login a inactivos, registro de último acceso, guard de auto-desactivación |
 | `test-wysiwyg.sh` | Editor TinyMCE (assets offline), HTML crudo en detalle, compat texto plano, **D15: sin plugin image ni handler de subida + imagen inline eliminada del texto con aviso visible**, endpoint JSON de la biblioteca Medios, "Copiar URL" en medios, permisos del editor |
 | `test-contact-info.sh` | Info de contacto en settings + defaults + permisos |
@@ -1124,7 +1134,7 @@ las credenciales de BD y la base URL se configuran por variables de entorno (`E2
 | `test-entes.sh` | CRUD de Entes afiliados + slugs + nav activo + buscador con filtro client-side |
 | `test-media.sh` | Medios + imagen destacada de noticias + biblioteca |
 | `test-noticias.sh` | Flujo de aprobación (D12): badges Pendiente/Programada/Publicado, botón Aprobar individual + auditoría `news.approved`, aprobación masiva (solo borradores, omitidas las no-borrador), editor sin UI de aprobación (sin checkboxes/masivo/Aprobar, 403 en rutas `news.approve`, selects deshabilitados, intento de publicar → draft + flash warning), programación (404 público hasta la fecha, badge Programada, vaciar fecha = publicar ya), editor no adelanta programadas; **D15 multimedia**: crear noticia con portada + 2 imágenes de galería + video YouTube + archivo mp4 → `post_media` con rutas `uploads/YYYY/MM/`, videos en el módulo sin `is_featured`, carrusel de 5 ítems con la portada primero, reorden ↑/↓, `remove_media[]` y tope de 3 videos; limpieza no destructiva |
-| `test-videos.sh` | Módulo Videos: permisos `videos.*` (40/67, solo superadmin), sidebar (sección + dropdown por rol, 403 admin/editor), cargar YouTube (válida/inválida) + subir mp4, destacar/cambiar/"Ninguno" (siempre ≤1 `is_featured`), home refleja la portada, borrado + limpieza |
+| `test-videos.sh` | Módulo Videos: permisos `videos.*` (42/69, solo superadmin), sidebar (sección + dropdown por rol, 403 admin/editor), cargar YouTube (válida/inválida) + subir mp4, destacar/cambiar/"Ninguno" (siempre ≤1 `is_featured`), home refleja la portada, borrado + limpieza |
 | `test-partners.sh` | Upload/replace/quitar logo de entes (incl. sidecars `.webp`) |
 | `test-share.sh` | Botones de compartir + lazy loading |
 | `test-webp.sh` | WebP con fallback (D9): `webp:generate` (backfill + idempotencia), sidecar al subir, GET `.webp` 200 `image/webp`, GIF y PNG corrupto sin conversión (contador `ilegibles`, exit 0), `<picture>` con fallback en `/noticias`, destroy borra original + sidecar, `picture{display:contents}` en el build |
@@ -1146,10 +1156,11 @@ Garantías de las suites:
 
 ### PHPUnit (`tests/Unit`, `tests/Feature`)
 
-- Ejecución: `./vendor/bin/phpunit` (o `--testsuite Unit,Feature`) — **322 en verde / 1439 assertions** (4 skipped: requieren PostgreSQL o el symlink `public/storage`; 6 avisos preexistentes de `iconv` en LATIN9, intencionales). *Cifra verificada el 2026-10-28 tras el layout "revista" del detalle de noticias; incluye `NewsShowLayoutTest`, `MediaOrientationTest`, `TrustHostsTest` y el test de regresión del roundtrip de caché por `FileStore`.*
+- Ejecución: `./vendor/bin/phpunit` (o `--testsuite Unit,Feature`) — **363 en verde / 1692 assertions** (4 skipped: requieren PostgreSQL o el symlink `public/storage`; 6 avisos preexistentes de `iconv` en LATIN9, intencionales). *Cifra verificada el 2026-10-28 tras la exportación de mensajes a PDF; incluye `AdminContactPdfTest`, `NewsShowLayoutTest`, `MediaOrientationTest`, `TrustHostsTest` y el test de regresión del roundtrip de caché por `FileStore`.*
 - **Cobertura (desde R3, re-validada 2026-10-26 en Laravel 13):** con Xdebug 3.5.3 instalado, `./vendor/bin/phpunit --coverage-text --coverage-html coverage-html` → **97.58% de líneas total** (app 98.05% · database 95.36%; objetivo ≥90% superado); authn/authz/validación/cifrado ≈100% salvo el fallback de iconv de `App\Support\Latin9`. El HTML se genera en `/coverage-html` (ignorado por git).
 - **BD aislada**: `phpunit.xml` define `DB_CONNECTION=sqlite` / `DB_DATABASE=:memory:` (B2 cerrado) — `RefreshDatabase` migra en memoria por test, **nunca toca la BD de desarrollo**. El `APP_KEY` de `phpunit.xml` es una clave **exclusiva de tests**; no usar en producción.
 - Cobertura de flujos críticos:
+  - `AdminContactPdfTest` — exportación individual de mensajes a PDF (permiso `contact.export`): descarga con `Content-Type: application/pdf`, cintillo embebido (>50 KB), 403 para el rol `admin` (tiene `contact.view` pero no `contact.export`), auditoría `contact.exported` **sin PII** y redirección a login para invitados.
   - `AuthTest` — login correcto/incorrecto/inactivo, logout, `last_login_at`, mensaje genérico.
   - `AuditLogTest` — login/logout/fallido, cambio de contraseña, CRUD de usuarios, roles, noticias, mensajes; acceso a `/admin/auditoria` solo superadmin.
   - `CacheTest` — consultas de home/cacheadas y invalidación por observers al crear posts/entes.

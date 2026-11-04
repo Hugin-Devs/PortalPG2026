@@ -22,9 +22,9 @@ echo 'pre-limpieza: artefactos VidTest* removidos'
 echo '--- 1. Permisos videos.* ---'
 ( cd "$E2E_ROOT" && php artisan db:seed --class=PermissionSeeder --force >/dev/null 2>&1 )
 pc=$(sql 'SELECT COUNT(*) FROM permissions;')
-check '[ "$pc" = 41 ]' "permisos totales 41 tras videos (got $pc)" "permisos != 41 (got $pc)"
+check '[ "$pc" = 42 ]' "permisos totales 42 tras videos (got $pc)" "permisos != 42 (got $pc)"
 rc=$(sql 'SELECT COUNT(*) FROM role_permission;')
-check '[ "$rc" = 68 ]' "68 asignaciones 41+22+5 (got $rc)" "asignaciones != 68 (got $rc)"
+check '[ "$rc" = 69 ]' "69 asignaciones 42+22+5 (got $rc)" "asignaciones != 69 (got $rc)"
 c=$(sql "SELECT COUNT(*) FROM permissions WHERE slug='videos.view' AND \"group\" LIKE 'Gesti%Noticias' AND \"module\"='Videos';")
 check '[ "$c" = 1 ]' 'videos.view en grupo Gestion Noticias, modulo Videos' "videos.view mal ubicado (got $c)"
 c=$(sql "SELECT COUNT(*) FROM permissions WHERE slug LIKE 'videos.%';")
