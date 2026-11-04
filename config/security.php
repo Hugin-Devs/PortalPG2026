@@ -19,6 +19,7 @@ return [
         'contact' => (int) env('CONTACT_RATE_LIMIT', 10),
         'search' => (int) env('SEARCH_RATE_LIMIT', 60),
         'password_change' => (int) env('PASSWORD_CHANGE_RATE_LIMIT', 10),
+        'import' => (int) env('NEWS_IMPORT_RATE_LIMIT', 20),
     ],
 
     /*

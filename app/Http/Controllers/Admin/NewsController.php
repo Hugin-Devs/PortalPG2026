@@ -197,14 +197,17 @@ class NewsController extends Controller
             return redirect('/admin/noticias')->with('warning', 'Solo se pueden aprobar noticias en borrador.');
         }
 
+        // Conserva la fecha de IG si el borrador ya tiene published_at
+        // (import); si es null, publica "ahora" (flujo manual).
         $post->update([
             'status' => 'published',
-            'published_at' => now(),
+            'published_at' => $post->published_at ?? now(),
         ]);
 
         Audit::log('news.approved', Post::class, $post->id, "Noticia aprobada: {$post->title}", [
             'published_at' => $post->published_at?->toDateTimeString(),
             'scheduled' => false,
+            'kept_published_at' => $post->wasChanged('published_at') === false,
         ]);
 
         return redirect('/admin/noticias')->with('success', "Noticia aprobada: {$post->title}");
@@ -227,9 +230,10 @@ class NewsController extends Controller
         $approved = 0;
 
         foreach ($drafts as $post) {
+            // Conserva published_at existente (fecha de IG); si es null → now().
             $post->update([
                 'status' => 'published',
-                'published_at' => now(),
+                'published_at' => $post->published_at ?? now(),
             ]);
             Audit::log('news.approved', Post::class, $post->id, "Noticia aprobada (masiva): {$post->title}", [
                 'published_at' => $post->published_at?->toDateTimeString(),

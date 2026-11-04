@@ -6,6 +6,7 @@ use App\Http\Controllers\Admin\CategoryController;
 use App\Http\Controllers\Admin\DashboardController;
 use App\Http\Controllers\Admin\MediaController;
 use App\Http\Controllers\Admin\NewsController;
+use App\Http\Controllers\Admin\NewsImportController;
 use App\Http\Controllers\Admin\OrgMemberController;
 use App\Http\Controllers\Admin\PartnerController;
 use App\Http\Controllers\Admin\RoleController;
@@ -53,6 +54,9 @@ Route::prefix('admin')->group(function () {
 
         // Admin - Noticias
         Route::get('/noticias', [NewsController::class, 'index'])->name('admin.news.index')->middleware('permission:news.view');
+        // Import IG: solo admins (news.approve). Antes de /noticias/{post}/… por si acaso.
+        Route::get('/noticias/importar', [NewsImportController::class, 'show'])->name('admin.news.import')->middleware('permission:news.approve');
+        Route::post('/noticias/importar', [NewsImportController::class, 'store'])->name('admin.news.import.store')->middleware('permission:news.approve')->middleware('throttle:import');
         Route::get('/noticias/crear', [NewsController::class, 'create'])->name('admin.news.create')->middleware('permission:news.create');
         Route::post('/noticias', [NewsController::class, 'store'])->name('admin.news.store')->middleware('permission:news.create');
         Route::post('/noticias/publicar', [NewsController::class, 'bulkPublish'])->name('admin.news.bulkPublish')->middleware('permission:news.approve');
