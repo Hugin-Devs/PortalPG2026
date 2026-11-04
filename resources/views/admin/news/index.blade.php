@@ -11,6 +11,9 @@
             @if(auth()->user()->hasPermission('news.create'))
             <a href="{{ url('/admin/noticias/crear') }}" class="btn btn-primary">Nueva Noticia</a>
             @endif
+            @if(auth()->user()->hasPermission('news.approve'))
+            <a href="{{ url('/admin/noticias/importar') }}" class="btn btn-outline-primary">Importar IG</a>
+            @endif
         </div>
     </div>
 

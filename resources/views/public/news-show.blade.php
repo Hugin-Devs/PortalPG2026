@@ -24,6 +24,13 @@
                 <span class="ms-3">Categoría: <a href="{{ route('news.category', $post->category->slug) }}" class="text-primary">{{ $post->category->name }}</a></span>
             @endif
             <span class="ms-3">{{ $post->views }} vistas</span>
+            @if($post->source_url)
+                <span class="ms-3">
+                    <a href="{{ $post->source_url }}" target="_blank" rel="noopener noreferrer" class="text-primary">
+                        Ver publicación original en Instagram <i class="fa-brands fa-instagram"></i>
+                    </a>
+                </span>
+            @endif
         </div>
 
         @php

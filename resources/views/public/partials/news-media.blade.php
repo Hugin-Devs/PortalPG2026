@@ -22,6 +22,14 @@
         : 'height: 560px; object-fit: contain;';
 @endphp
 
+@if(!empty($post->source_url))
+    <div class="mb-2" data-testid="ig-source-link">
+        <a href="{{ $post->source_url }}" target="_blank" rel="noopener noreferrer" class="btn btn-outline-primary btn-sm">
+            Ver publicación original en Instagram <i class="fa-brands fa-instagram"></i>
+        </a>
+    </div>
+@endif
+
 @if($carouselCount > 1)
     <style nonce="{{ request()->attributes->get('csp_nonce') }}">
         /* Controles con chip circular blanco (resaltado): Bootstrap los deja a

@@ -84,5 +84,11 @@ class AppServiceProvider extends ServiceProvider
             return Limit::perMinute((int) config('security.rate_limits.password_change'))
                 ->by('password-change:'.($request->user()?->id ?? 0).':'.$request->ip());
         });
+
+        // Import IG: por usuario+IP (endpoint autenticado que llama a la red).
+        RateLimiter::for('import', function (Request $request) {
+            return Limit::perMinute((int) config('security.rate_limits.import'))
+                ->by('import:'.($request->user()?->id ?? 0).':'.$request->ip());
+        });
     }
 }

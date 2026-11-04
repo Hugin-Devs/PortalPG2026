@@ -48,6 +48,7 @@ class SecurityConfigTest extends TestCase
         $this->assertIsInt(config('security.rate_limits.contact'));
         $this->assertIsInt(config('security.rate_limits.search'));
         $this->assertIsInt(config('security.rate_limits.password_change'));
+        $this->assertIsInt(config('security.rate_limits.import'));
         $this->assertIsInt(config('security.login_lockout.attempts'));
         $this->assertIsInt(config('security.login_lockout.decay_seconds'));
         $this->assertIsString(config('security.trusted_proxies'));
