@@ -47,7 +47,7 @@ php artisan serve
 ## Tests
 
 ```bash
-./vendor/bin/phpunit          # Unit + Feature (371 en verde / 1728 assertions, BD sqlite en memoria — ver docs/DOCUMENTACION.md §16)
+./vendor/bin/phpunit          # Unit + Feature (372 en verde / 1734 assertions, BD sqlite en memoria — ver docs/DOCUMENTACION.md §16)
 ./vendor/bin/phpunit --coverage-text   # cobertura (requiere Xdebug; 97.58% actual)
 composer lint                 # estilo de código (pint --test); composer lint:fix lo aplica
 ```

@@ -369,7 +369,7 @@ Todas las rutas de gestión llevan además `middleware('permission:...')` (ver s
 |---|---|---|
 | Auth | `auth/login.blade.php` | ✅ Login independiente |
 | Dashboard | `dashboard/index.blade.php` | ✅ Tarjetas (`col-6/col-md-4/col-xl-3`, icono FA + `stat-number`, link al módulo) con `hasPermission()` por tarjeta: Noticias, Visitas del mes, Usuarios, Mensajes sin leer, Gacetas, Medios, Entes, Videos, Categorías (editor ve 3, admin 7, superadmin 9) + gráfico `.dash-bar` de 30 días (barras CSS con `title` por día, estado vacío si no hay visitas) + tabla "Últimas noticias publicadas"; sin botón logout (lo tiene el layout) |
-| Noticias | `news/{index,create,edit}` + parciales `news/_image-field`, `news/_gallery-field`, `news/_editor` | ✅ Imagen de portada: preview + upload + modal de biblioteca (vanilla JS inline); **galería y videos** (D15): imágenes múltiples con reorden ↑/↓ y remove, videos existentes/en nuevos; contenido con **TinyMCE 8 auto-hospedado** (`public/vendor/tinymce`, español, **sin plugin image** desde D15 — las imágenes se gestionan con portada/galería) |
+| Noticias | `news/{index,create,edit}` + parciales `news/_image-field`, `news/_gallery-field`, `news/_editor` | ✅ Imagen de portada: preview + upload + modal de biblioteca (vanilla JS inline); **galería y videos** (D15): imágenes múltiples con reorden ↑/↓ y remove, videos existentes mediante **selector tipo biblioteca** (`#videoLibraryModal`: tarjetas clicables, filtro por título y chips con `attach_video[]`; tope `GALLERY_VIDEO_MAX` en cliente + servidor) o nuevos (URL/archivo); contenido con **TinyMCE 8 auto-hospedado** (`public/vendor/tinymce`, español, **sin plugin image** desde D15 — las imágenes se gestionan con portada/galería) |
 | Categorías | `categories/{index,create,edit}` | ✅ |
 | Usuarios | `users/{index,create,edit}` | ✅ Columnas Estado (Activo/Inactivo) y Última conexión; checkbox "Usuario activo" |
 | Entes afiliados | `partners/{index,create,edit}` | ✅ Subida de logo (`file`, preview, quitar) |
@@ -527,7 +527,7 @@ npm run build      # copia TinyMCE a public/vendor + vite build a public/build
 > **Estado a 2026-11-06**: **producción en Laravel 13.38.0** (despliegue U1
 > el 2026-10-28 desde `main` = `d4d3e91`; registro en **§14.M**) — 7
 > condiciones de `SECURITY.md` §1 verificadas y re-verificadas tras el
-> upgrade. Gates: **371 tests PHPUnit en verde** (1728 assertions),
+> upgrade. Gates: **372 tests PHPUnit en verde** (1734 assertions),
 > **cobertura 97.58%** (app 98.05%), **E2E 17/17 (re-validado 2026-11-06)**, **baseline ZAP final:
 > 0 altas / 0 medias / 1 baja / 4 informativas** (waiver TinyMCE
 > `style-src` cerrado con CSP de nonce), Pint ✅, SCA 0/0. **Publicada en
@@ -1147,7 +1147,7 @@ las credenciales de BD y la base URL se configuran por variables de entorno (`E2
 | `test-contact-messages.sh` | Bandeja de mensajes (`contacts`) |
 | `test-entes.sh` | CRUD de Entes afiliados + slugs + nav activo + buscador con filtro client-side |
 | `test-media.sh` | Medios + imagen destacada de noticias + biblioteca |
-| `test-noticias.sh` | Flujo de aprobación (D12): badges Pendiente/Programada/Publicado, botón Aprobar individual + auditoría `news.approved`, aprobación masiva (solo borradores, omitidas las no-borrador), editor sin UI de aprobación (sin checkboxes/masivo/Aprobar, 403 en rutas `news.approve`, selects deshabilitados, intento de publicar → draft + flash warning), programación (404 público hasta la fecha, badge Programada, vaciar fecha = publicar ya), editor no adelanta programadas; **D15 multimedia**: crear noticia con portada + 2 imágenes de galería + video YouTube + archivo mp4 → `post_media` con rutas `uploads/YYYY/MM/`, videos en el módulo sin `is_featured`, carrusel de 5 ítems con la portada primero, reorden ↑/↓, `remove_media[]` y tope de 3 videos; limpieza no destructiva |
+| `test-noticias.sh` | Flujo de aprobación (D12): badges Pendiente/Programada/Publicado, botón Aprobar individual + auditoría `news.approved`, aprobación masiva (solo borradores, omitidas las no-borrador), editor sin UI de aprobación (sin checkboxes/masivo/Aprobar, 403 en rutas `news.approve`, selects deshabilitados, intento de publicar → draft + flash warning), programación (404 público hasta la fecha, badge Programada, vaciar fecha = publicar ya), editor no adelanta programadas; **D15 multimedia**: crear noticia con portada + 2 imágenes de galería + video YouTube + archivo mp4 → `post_media` con rutas `uploads/YYYY/MM/`, videos en el módulo sin `is_featured`, carrusel de 5 ítems con la portada primero, reorden ↑/↓, `remove_media[]` y tope de 3 videos; **selector de videos de biblioteca** (`#videoLibraryModal` + chips, sin checkboxes por video) y `attach_video[]` funcional; limpieza no destructiva |
 | `test-videos.sh` | Módulo Videos: permisos `videos.*` (42/69, solo superadmin), sidebar (sección + dropdown por rol, 403 admin/editor), cargar YouTube (válida/inválida) + subir mp4, destacar/cambiar/"Ninguno" (siempre ≤1 `is_featured`), home refleja la portada, borrado + limpieza |
 | `test-partners.sh` | Upload/replace/quitar logo de entes (incl. sidecars `.webp`) |
 | `test-share.sh` | Botones de compartir + lazy loading |
@@ -1170,7 +1170,7 @@ Garantías de las suites:
 
 ### PHPUnit (`tests/Unit`, `tests/Feature`)
 
-- Ejecución: `./vendor/bin/phpunit` (o `--testsuite Unit,Feature`) — **371 en verde / 1728 assertions** (4 skipped: requieren PostgreSQL o el symlink `public/storage`; 6 avisos preexistentes de `iconv` en LATIN9, intencionales). *Cifra verificada el 2026-11-06 tras añadir `ExtranetMaintenanceTest` (8 tests, vista de mantenimiento `/extranet/*`); incluye `AdminContactPdfTest`, `NewsShowLayoutTest`, `MediaOrientationTest`, `TrustHostsTest` y el test de regresión del roundtrip de caché por `FileStore`.*
+- Ejecución: `./vendor/bin/phpunit` (o `--testsuite Unit,Feature`) — **372 en verde / 1734 assertions** (4 skipped: requieren PostgreSQL o el symlink `public/storage`; 6 avisos preexistentes de `iconv` en LATIN9, intencionales). *Cifra verificada el 2026-11-06 tras añadir el test de vista del selector de videos de biblioteca en `PostMediaTest` y `ExtranetMaintenanceTest` (8 tests, vista de mantenimiento `/extranet/*`); incluye `AdminContactPdfTest`, `NewsShowLayoutTest`, `MediaOrientationTest`, `TrustHostsTest` y el test de regresión del roundtrip de caché por `FileStore`.*
 - **Cobertura (desde R3, re-validada 2026-10-26 en Laravel 13):** con Xdebug 3.5.3 instalado, `./vendor/bin/phpunit --coverage-text --coverage-html coverage-html` → **97.58% de líneas total** (app 98.05% · database 95.36%; objetivo ≥90% superado); authn/authz/validación/cifrado ≈100% salvo el fallback de iconv de `App\Support\Latin9`. El HTML se genera en `/coverage-html` (ignorado por git).
 - **BD aislada**: `phpunit.xml` define `DB_CONNECTION=sqlite` / `DB_DATABASE=:memory:` (B2 cerrado) — `RefreshDatabase` migra en memoria por test, **nunca toca la BD de desarrollo**. El `APP_KEY` de `phpunit.xml` es una clave **exclusiva de tests**; no usar en producción.
 - Cobertura de flujos críticos:

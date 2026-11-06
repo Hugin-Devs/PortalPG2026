@@ -284,6 +284,28 @@ check 'grep -qF "ximo 3 videos" "$HTTP_BODY"' 'mensaje de tope de videos visible
 vidAfter=$(sql "SELECT COUNT(*) FROM videos WHERE title LIKE 'E2E Multimedia%';")
 check '[ "$vidAfter" = 2 ]' "no se crearon videos de mas ($vidAfter)" "videos: $vidAfter"
 
+COOKIE_JAR="$superJar"
+echo '--- 9b. Selector de videos de biblioteca (modal, chips, attach_video) ---'
+http "$E2E_BASE/admin/noticias/crear"
+check 'grep -q "videoLibraryModal" "$HTTP_BODY"' 'modal de biblioteca de videos presente' 'falta modal de videos'
+check 'grep -q "Elegir videos de la biblioteca" "$HTTP_BODY"' 'boton "Elegir videos de la biblioteca"' 'falta boton de videos'
+check 'grep -q "videoAttachChips" "$HTTP_BODY"' 'zona de chips de videos presente' 'faltan chips de videos'
+check '! grep -q "id=\"attachV" "$HTTP_BODY"' 'sin un checkbox por video (selector modal)' 'quedan checkboxes legacy'
+vidId=$(sql "SELECT id FROM videos WHERE title LIKE 'E2E Multimedia%' ORDER BY id LIMIT 1;")
+token=$(require_token "$HTTP_BODY") || exit 1
+http "$E2E_BASE/admin/noticias" \
+  --form-string "_token=$token" \
+  --form-string 'title=E2E Multimedia Attach' \
+  --form-string 'category_id=1' \
+  --form-string 'excerpt=Extracto attach' \
+  --form-string 'content=<p>Attach</p>' \
+  --form-string 'status=published' \
+  --form-string "attach_video[]=$vidId"
+check '[[ "$HTTP_FINAL" == */admin/noticias ]]' 'noticia con video de biblioteca creada' "fallo crear con attach ($HTTP_FINAL)"
+idVA=$(sql "SELECT id FROM posts WHERE title='E2E Multimedia Attach';")
+pmV=$(sql "SELECT COUNT(*) FROM post_media WHERE post_id=$idVA AND type='video' AND video_id=$vidId;")
+check '[ "$pmV" = 1 ]' "attach_video enlazado en post_media ($pmV)" "post_media attach: $pmV"
+
 echo '--- 10. Cleanup ---'
 for id in "$idA" "$idB" "$idC" "$idP" "$idS" "$idF"; do
   [ -z "$id" ] && continue

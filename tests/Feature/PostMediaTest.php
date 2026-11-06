@@ -268,6 +268,27 @@ class PostMediaTest extends TestCase
         Storage::disk('public')->delete('uploads/2026/01/own.jpg');
     }
 
+    public function test_news_form_uses_a_video_library_picker_instead_of_one_checkbox_per_video(): void
+    {
+        Video::create([
+            'title' => 'PM Biblioteca',
+            'type' => 'youtube',
+            'url' => 'https://www.youtube.com/watch?v=dQw4w9WgXcQ',
+            'user_id' => $this->admin()->id,
+        ]);
+
+        $html = $this->actingAs($this->admin())
+            ->get('/admin/noticias/crear')
+            ->assertOk()
+            ->getContent();
+
+        $this->assertStringContainsString('videoLibraryModal', $html);
+        $this->assertStringContainsString('Elegir videos de la biblioteca', $html);
+        $this->assertStringContainsString('videoAttachChips', $html);
+        $this->assertStringNotContainsString('type="checkbox" name="attach_video[]"', $html);
+        $this->assertStringNotContainsString('id="attachV', $html);
+    }
+
     public function test_attach_existing_video_from_module(): void
     {
         $post = $this->news();
