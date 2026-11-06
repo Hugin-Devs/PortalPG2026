@@ -208,3 +208,21 @@ h1, h2, h3, h4, h5, h6 {
         margin-bottom: 0.75rem;
     }
 }
+
+// Panel admin: sidebar fijo. Sin esto el <aside> se estira a la altura del
+// contenido (flex stretch) y el menú sale de vista al hacer scroll en páginas
+// largas (dashboard, listados, auditoría). sticky + height:100vh clava el menú
+// arriba a la izquierda mientras el contenido scrollea la página con el
+// scroll normal del navegador; overflow-y:auto da scroll interno al menú si
+// no cabe (p. ej. superadmin con Multimedia desplegado).
+// align-self anula el stretch del flex: sin él, el aside tomaría toda la
+// altura del contenedor y sticky no tendría recorrido.
+.admin-sidebar {
+    position: sticky;
+    top: 0;
+    align-self: flex-start;
+    width: 250px;
+    min-width: 250px;
+    height: 100vh;
+    overflow-y: auto;
+}

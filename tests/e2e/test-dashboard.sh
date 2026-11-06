@@ -56,6 +56,19 @@ check '[ "$card" = "$cat" ]' "categorias=$cat" 'conteo categorias no coincide'
 logoutForms=$(grep -o 'action="[^"]*admin/logout"' "$HTTP_BODY" | wc -l)
 check '[ "$logoutForms" = 1 ]' "exactamente 1 form logout (got $logoutForms)" "forms logout: $logoutForms (stub duplicado?)"
 
+echo '--- 2b. Sidebar sticky (admin-sidebar) ---'
+# El aside del layout admin lleva la clase .admin-sidebar (position:sticky en
+# app.scss): el menú permanece visible al hacer scroll en páginas largas.
+check 'grep -q "admin-sidebar" "$HTTP_BODY"' 'aside con clase admin-sidebar' 'falta la clase en el layout'
+cssOk=0
+for f in "$E2E_ROOT"/public/build/assets/app-*.css; do
+  [ -f "$f" ] || continue
+  # grep -z = fichero entero como una sola línea (el CSS viene minificado en
+  # una sola línea); la regla debe llevar position:sticky dentro de su bloque.
+  if grep -zq 'admin-sidebar{[^}]*position:[[:space:]]*sticky' "$f"; then cssOk=1; fi
+done
+check '[ "$cssOk" = 1 ]' 'CSS compilado con .admin-sidebar{...position:sticky}' 'regla ausente del build (npm run build)'
+
 echo '--- 3. Ultimas noticias publicadas ---'
 row=$(sqlt "SELECT id, title FROM posts WHERE status='published' AND deleted_at IS NULL AND (published_at IS NULL OR published_at <= now()) ORDER BY published_at DESC, id DESC LIMIT 1;")
 pidU="${row%%$'\t'*}"; titleU="${row#*$'\t'}"

@@ -13,7 +13,7 @@
 </head>
 <body>
     <div class="d-flex">
-        <aside class="bg-dark text-white p-3" style="width: 250px; min-height: 100vh;">
+        <aside class="bg-dark text-white p-3 admin-sidebar">
             <div class="text-center mb-3">
                 <x-img path="{{ $siteLogo }}" alt="GDC" height="50" />
                 <h5 class="mt-2">Admin GDC</h5>
