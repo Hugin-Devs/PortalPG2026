@@ -96,6 +96,28 @@ http "$E2E_BASE/admin"
 card=$(stat_num visitas)
 check '[ "$card" = "$afterMonth" ]' "tarjeta visitas refleja el nuevo mes ($afterMonth)" "tarjeta=$card vs SQL=$afterMonth"
 
+echo '--- 4b. Tracking: visitas al portal (home + footer movil, dedup sesion/dia) ---'
+sessionJar="$COOKIE_JAR"
+http "$E2E_BASE/"
+check '[ "$HTTP_STATUS" = 200 ]' 'GET home 200' "home -> $HTTP_STATUS"
+check 'grep -q "VISITAS AL PORTAL" "$HTTP_BODY"' 'widget VISITAS AL PORTAL en home' 'sin widget de visitas'
+check 'grep -q "visitantes únicos acumulados" "$HTTP_BODY"' 'subtitulo del contador' 'sin subtitulo del contador'
+check 'grep -q "d-none d-lg-block" "$HTTP_BODY"' 'contador del sidebar solo en lg+' 'falta breakpoint del sidebar'
+check 'grep -q "d-lg-none" "$HTTP_BODY"' 'contador en el footer movil (home)' 'falta bloque del footer movil'
+v1=$(sql "SELECT COALESCE(SUM(count),0) FROM daily_visits;")
+http "$E2E_BASE/"
+v2=$(sql "SELECT COALESCE(SUM(count),0) FROM daily_visits;")
+check '[ "$v2" = "$v1" ]' "refresco de home no suma (sesion/dia: $v1)" "F5 inflo: $v1 -> $v2"
+todayV=$(sql "SELECT COALESCE(SUM(count),0) FROM daily_visits WHERE day = CURRENT_DATE;")
+check '[ "$todayV" -ge 1 ]' "daily_visits de hoy registrada ($todayV)" 'sin fila de hoy'
+COOKIE_JAR="$E2E_TMP/e2e-${E2E_SUITE}-bot.jar"; rm -f "$COOKIE_JAR"
+http "$E2E_BASE/" -A 'Mozilla/5.0 (compatible; Googlebot/2.1; +http://www.google.com/bot.html)'
+vBot=$(sql "SELECT COALESCE(SUM(count),0) FROM daily_visits;")
+check '[ "$vBot" = "$v2" ]' 'bot no suma visita' "bot inflo: $v2 -> $vBot"
+# Restaura la sesion y el cuerpo del dashboard para la seccion 5.
+COOKIE_JAR="$sessionJar"
+http "$E2E_BASE/admin"
+
 echo '--- 5. Grafico de 30 dias ---'
 check 'grep -q "data-chart=\"daily\"" "$HTTP_BODY"' 'contenedor data-chart=daily' 'sin contenedor del grafico'
 bars=$(grep -o 'class="dash-bar' "$HTTP_BODY" | wc -l)
@@ -141,5 +163,5 @@ for pair in "$jarSuper:superadmin" "$jarEditor:editor" "$jarAdmin:admin"; do
 done
 
 echo ''
-echo 'Nota: las filas daily_views creadas por esta suite se conservan (datos agregados reales, sin borrar).'
+echo 'Nota: las filas daily_views/daily_visits creadas por esta suite se conservan (datos agregados reales, sin borrar).'
 summary 'DASHBOARD'

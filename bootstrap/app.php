@@ -5,6 +5,7 @@ use App\Http\Middleware\AssignRequestId;
 use App\Http\Middleware\Authenticate;
 use App\Http\Middleware\CheckPermission;
 use App\Http\Middleware\CheckRole;
+use App\Http\Middleware\CountPortalVisit;
 use App\Http\Middleware\EnsurePasswordChanged;
 use App\Http\Middleware\PreventRequestForgery as AppPreventRequestForgery;
 use App\Http\Middleware\PreventRequestsDuringMaintenance;
@@ -46,10 +47,14 @@ return Application::configure(basePath: dirname(__DIR__))
 
         // El grupo "web" por defecto trae PreventRequestForgery (antes
         // VerifyCsrfToken); esta app usa su propia subclase (cookie XSRF-TOKEN
-        // con HttpOnly — fix ZAP R2).
-        $middleware->web(replace: [
-            PreventRequestForgery::class => AppPreventRequestForgery::class,
-        ]);
+        // con HttpOnly — fix ZAP R2). CountPortalVisit se añade al final del
+        // grupo para contar visitas con la sesión ya iniciada (ver §4.14).
+        $middleware->web(
+            append: [CountPortalVisit::class],
+            replace: [
+                PreventRequestForgery::class => AppPreventRequestForgery::class,
+            ],
+        );
 
         $middleware->alias([
             'auth' => Authenticate::class,

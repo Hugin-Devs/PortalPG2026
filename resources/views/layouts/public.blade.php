@@ -78,6 +78,13 @@
 
     <footer class="pt-4 pb-3" style="background: url('{{ asset('images/Banner_Final.png') }}') center/cover no-repeat !important; color: #212529;">
         <div class="container">
+            @if(request()->routeIs('home') && isset($visitsTotal))
+                {{-- En móvil (<lg) el contador del home baja al footer: el sidebar
+                     del home solo se muestra en lg+ (ver home.blade.php). --}}
+                <div class="d-lg-none mb-3">
+                    @include('public._visits-widget')
+                </div>
+            @endif
             <div class="row">
                 <div class="col-md-6">
                     <h5 style="color: #212529;">Gobierno del Distrito Capital</h5>

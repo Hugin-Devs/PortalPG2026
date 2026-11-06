@@ -159,6 +159,12 @@
                         @endforelse
                     </div>
                 </div>
+
+                {{-- Contador de visitas: en móvil vive en el footer (d-lg-none),
+                     así que aquí solo se muestra a partir de lg. --}}
+                <div class="d-none d-lg-block mt-4">
+                    @include('public._visits-widget')
+                </div>
             </div>
         </div>
     </section>

@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Public;
 
 use App\Http\Controllers\Controller;
 use App\Models\Category;
+use App\Models\DailyVisit;
 use App\Models\Post;
 use App\Models\Video;
 use App\Support\CacheKeys;
@@ -45,8 +46,13 @@ class HomeController extends Controller
 
         $videos = Cache::remember(CacheKeys::HOME_VIDEOS, $ttl, fn () => Video::where('is_featured', true)->get());
 
+        // Contador público de visitas del portal. Se consulta directo (la tabla
+        // guarda una fila por día, el SUM es trivial) para que el número esté
+        // siempre fresco; no pasa por el caché del home.
+        $visitsTotal = DailyVisit::total();
+
         return view('public.home', compact(
-            'featuredPosts', 'latestPosts', 'categories', 'mostRead', 'videos', 'seo'
+            'featuredPosts', 'latestPosts', 'categories', 'mostRead', 'videos', 'seo', 'visitsTotal'
         ));
     }
 }

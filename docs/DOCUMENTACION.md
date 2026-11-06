@@ -236,6 +236,17 @@ Claves: `social_*` (7), `contact_*` (5) y las generales `site_name`, `site_logo`
 - **Nota histórica**: la versión MariaDB usaba `INSERT ... ON DUPLICATE KEY UPDATE`; al migrar a PostgreSQL (oct-2026) se sustituyó por `ON CONFLICT ... DO UPDATE` sobre el índice único `(day, post_id)`, conservando la atomicidad y eliminando la carrera insert/increment.
 - **Sin backfill**: el conteo diario comienza con la activación; no hay histórico anterior. Consumidores: tarjeta "Visitas del mes" y gráfico de 30 días del dashboard (D1).
 
+### 4.14 daily_visits (visitas únicas al portal)
+| Campo | Tipo | Notas |
+|---|---|---|
+| day | date PK | día calendario con la timezone de la app; una fila por día |
+| count | unsigned int | visitas únicas del día (default 0) |
+
+- **Registro**: middleware `App\Http\Middleware\CountPortalVisit`, añadido con `$middleware->web(append: …)` en `bootstrap/app.php` (corre **después de `StartSession`**). Solo cuenta **GET** con respuesta **2xx y `Content-Type: text/html`**; excluye prefijos `/admin`, `/storage` y `/extranet`, y descarta bots conocidos por User-Agent (`bot|crawl|spider|…`). El incremento es un upsert atómico `ON CONFLICT ("day") DO UPDATE SET count = daily_visits.count + 1` (mismo patrón que `daily_views`).
+- **Dedup por sesión y día**: la marca `portal_visited:{YYYY-MM-DD}` se guarda en la propia sesión; refrescar (F5) u abrir otra pestaña con la misma sesión no infla el contador. No se deduplica por IP (evita subcontar redes compartidas/NAT).
+- **Lectura**: `Public\HomeController@index` pasa `$visitsTotal = DailyVisit::total()` (SUM directo, sin caché: la tabla guarda ≤1 fila/día) al home. El widget (`public/_visits-widget.blade.php`) se muestra en el sidebar del home en **≥992 px** (`d-none d-lg-block`) y en el footer, **solo en home y solo <992 px** (`d-lg-none`).
+- **Sin backfill**: el contador arranca en 0 al desplegar; no hay histórico de visitas anteriores al tracking.
+
 ---
 
 ## 5. Rutas
@@ -295,7 +306,7 @@ Todas las rutas de gestión llevan además `middleware('permission:...')` (ver s
 
 | Controlador | Métodos | Estado |
 |---|---|---|
-| `HomeController` | `index()` | ✅ Destacados + últimos + categorías + "más leído" + **video destacado** (`Video::where('is_featured')`, 0 ó 1; vacío = oculta la sección) |
+| `HomeController` | `index()` | ✅ Destacados + últimos + categorías + "más leído" + **video destacado** (`Video::where('is_featured')`, 0 ó 1; vacío = oculta la sección) + **contador de visitas del portal** (`DailyVisit::total()`, §4.14) |
 | `NewsController` | `index()` | ✅ Listado paginado + categorías para el filtro (sidebar/pills) |
 | | `show($slug)` | ✅ Detalle + incrementa `views` + relacionados |
 | | `category($slug)` | ✅ Filtrado por categoría |
@@ -336,14 +347,14 @@ Todas las rutas de gestión llevan además `middleware('permission:...')` (ver s
 
 | Archivo | Descripción |
 |---|---|
-| `layouts/public.blade.php` | Layout público: header con logo y título desde `settings` + **navbar configurable** (ítems Funcionarios Activos/Jubilados/Intranets GDC ocultos si su enlace está vacío) + footer; enlaces y bloque "Entes Afiliados" **ocultos con comentario Blade** (módulo en preparación — PENDIENTES E5) |
+| `layouts/public.blade.php` | Layout público: header con logo y título desde `settings` + **navbar configurable** (ítems Funcionarios Activos/Jubilados/Intranets GDC ocultos si su enlace está vacío) + footer; enlaces y bloque "Entes Afiliados" **ocultos con comentario Blade** (módulo en preparación — PENDIENTES E5); en **home y <992 px** el footer incluye el contador de visitas del portal (`_visits-widget`, §4.14) — en ≥992 px vive en el sidebar del home |
 | `layouts/admin.blade.php` | Layout admin: sidebar con **3 secciones** — "Gestión Noticias" (collapse "Multimedia" con "Medios"/"Videos" + "Gacetas"), "Gestión Portal" (Categorías, Entes Afiliados, Sobre Nosotros, Contacto, Mensajes, Estructura Org., Redes Sociales) y "Configuración Portal" (Identidad / Enlaces, Usuarios, Roles y Permisos); cabecera de sección visible si el rol tiene **algún** permiso de sus ítems vía `User::hasAnyPermission()` (lista de slugs en `@php`), cada ítem solo con su permiso vía `hasPermission()`; collapse Multimedia abierto en `admin.media.*`/`admin.videos.*` (el `ul#mmMenu` lleva `flex-nowrap`: sin él, `.nav { flex-wrap: wrap }` + `flex-direction: column` hacía que "Medios"/"Videos" se envolvieran a una columna lateral durante la animación de `height` de Bootstrap Collapse); el `<aside>` lleva la clase **`.admin-sidebar`** (`app.scss`): **sticky** (`position: sticky; top:0; height:100vh; overflow-y:auto` + `align-self: flex-start`) — el menú permanece visible al hacer scroll en páginas largas (dashboard, listados) y el propio sidebar tiene scroll interno si el menú no cabe (superadmin con Multimedia desplegado) + topbar + main; título y logo desde `settings` |
 
 ### 7.2 Públicas (`resources/views/public/`)
 
 | Archivo | Secciones | Estado |
 |---|---|---|
-| `home.blade.php` | Hero slider de destacados (imagen de fondo con velo + fallback azul si no hay imagen), categorías, **sección "VIDEOS INSTITUCIONALES"** (si hay `is_featured`: iframe YouTube embed **o** `<video controls>` para archivo subido), grid de noticias, "Lo más leído". **Ajuste móvil (2026-10-28)**: con los destacados reales (titular de 80 caracteres + extracto de 202) el bloque desbordaba la caja fija de 400 px, así que en **≤768 px** (`app.scss`) la fuente se acota con `clamp()`, el extracto se corta a **4 líneas** (CSS con `-webkit-line-clamp`; en desktop se ve completo) y la caja `hero-box` crece (`height: auto; min-height: 400px`) si aún así no cabe | ✅ |
+| `home.blade.php` | Hero slider de destacados (imagen de fondo con velo + fallback azul si no hay imagen), categorías, **sección "VIDEOS INSTITUCIONALES"** (si hay `is_featured`: iframe YouTube embed **o** `<video controls>` para archivo subido), grid de noticias, "Lo más leído" + **contador de visitas del portal** debajo (`_visits-widget`, §4.14; en móvil ese widget se mueve al footer del layout). **Ajuste móvil (2026-10-28)**: con los destacados reales (titular de 80 caracteres + extracto de 202) el bloque desbordaba la caja fija de 400 px, así que en **≤768 px** (`app.scss`) la fuente se acota con `clamp()`, el extracto se corta a **4 líneas** (CSS con `-webkit-line-clamp`; en desktop se ve completo) y la caja `hero-box` crece (`height: auto; min-height: 400px`) si aún así no cabe | ✅ |
 | `news.blade.php` | Listado paginado de noticias + filtro por categoría (sidebar desktop con conteos + buscador; pills en móvil) | ✅ |
 | `news-show.blade.php` | Detalle de noticia + botones de compartir (FB, X, WhatsApp, Telegram, copiar enlace con vanilla JS y fallback para HTTP plano) + relacionados; contenido vía `rendered_content` (HTML del editor, con compat nl2br para texto plano legado); **carrusel multimedia (D15/D17)**: con portada+galería/videos renderiza carrusel Bootstrap `#newsGallery` (`data-bs-interval="false"`, portada primero) — slides de imagen a **560px** con la foto a proporción natural centrada sobre blanco (sin recorte, sin `loading="lazy"`, `decoding="async"`), `<iframe>` YouTube / `<video>` a 560px, flechas con `aria-label` e iconos oscuros (CSS inline scoped a `#newsGallery`); solo portada = mismo wrapper 560px sin carrusel. **Layout "revista" para medios verticales (2026-10-28)**: si **todos** los medios (portada + galería, imágenes y mp4) son portrait, el bloque se extrae a `partials/news-media.blade.php` y se **flota a la derecha** con `.news-media-float` (50% del ancho en ≥992 px, regla en `app.scss`) para que el texto fluya a su lado y **continúe por debajo a todo el ancho** — sin el hueco en blanco que dejaba la rejilla `row` + `col-lg-7`/`col-lg-5` original, que encerraba el texto en su columna; la caja se dimensiona con el `aspect-ratio` real del primer medio + `max-height: min(78vh, 760px)`; en móvil/tablet (<992 px) el medio va arriba a todo ancho y el texto debajo. Cualquier landscape, cuadrado o embed YouTube (16:9) mantiene el layout clásico. Detección en `App\\Support\\MediaOrientation` (getimagesize + parser MP4 `moov>trak>tkhd`) cacheada por ruta+mtime — tests `NewsShowLayoutTest` y `MediaOrientationTest`; el layout se expone como `data-layout="revista|clasico"` en el `<article>` | ✅ |
 | `news-category.blade.php` | Noticias por categoría + mismo nav de categorías (activa resaltada) | ✅ |
@@ -527,7 +538,7 @@ npm run build      # copia TinyMCE a public/vendor + vite build a public/build
 > **Estado a 2026-11-06**: **producción en Laravel 13.38.0** (despliegue U1
 > el 2026-10-28 desde `main` = `d4d3e91`; registro en **§14.M**) — 7
 > condiciones de `SECURITY.md` §1 verificadas y re-verificadas tras el
-> upgrade. Gates: **372 tests PHPUnit en verde** (1734 assertions),
+> upgrade. Gates: **375 tests PHPUnit en verde** (1751 assertions),
 > **cobertura 97.58%** (app 98.05%), **E2E 17/17 (re-validado 2026-11-06)**, **baseline ZAP final:
 > 0 altas / 0 medias / 1 baja / 4 informativas** (waiver TinyMCE
 > `style-src` cerrado con CSP de nonce), Pint ✅, SCA 0/0. **Publicada en
@@ -1153,7 +1164,7 @@ las credenciales de BD y la base URL se configuran por variables de entorno (`E2
 | `test-share.sh` | Botones de compartir + lazy loading |
 | `test-webp.sh` | WebP con fallback (D9): `webp:generate` (backfill + idempotencia), sidecar al subir, GET `.webp` 200 `image/webp`, GIF y PNG corrupto sin conversión (contador `ilegibles`, exit 0), `<picture>` con fallback en `/noticias`, destroy borra original + sidecar, `picture{display:contents}` en el build |
 | `test-errors.sh` | Páginas de error HTTP (incl. 503 real vía `artisan down`) + **vista de mantenimiento `/extranet/*`** (503 + `Retry-After` en GET y POST, ruta profunda, jubilados sigue 404) |
-| `test-dashboard.sh` | Dashboard (D1): redirect sin sesión, 9 tarjetas con conteos vs SQL dinámicos, tracking `daily_views` (+1 en `views` lifetime y en la tarjeta tras leer un artículo), gráfico de exactamente 30 barras + total del período, filtrado por rol (editor 3 tarjetas / admin 7 / superadmin 9), exactamente 1 form de logout, smoke de los 3 roles |
+| `test-dashboard.sh` | Dashboard (D1): redirect sin sesión, 9 tarjetas con conteos vs SQL dinámicos, tracking `daily_views` (+1 en `views` lifetime y en la tarjeta tras leer un artículo), gráfico de exactamente 30 barras + total del período, filtrado por rol (editor 3 tarjetas / admin 7 / superadmin 9), exactamente 1 form de logout, **contador de visitas del portal** (widget "VISITAS AL PORTAL" en home, dedup sesión/día: refrescar no suma, bot no suma), smoke de los 3 roles |
 
 Ejecución:
 
@@ -1170,7 +1181,7 @@ Garantías de las suites:
 
 ### PHPUnit (`tests/Unit`, `tests/Feature`)
 
-- Ejecución: `./vendor/bin/phpunit` (o `--testsuite Unit,Feature`) — **372 en verde / 1734 assertions** (4 skipped: requieren PostgreSQL o el symlink `public/storage`; 6 avisos preexistentes de `iconv` en LATIN9, intencionales). *Cifra verificada el 2026-11-06 tras añadir el test de vista del selector de videos de biblioteca en `PostMediaTest` y `ExtranetMaintenanceTest` (8 tests, vista de mantenimiento `/extranet/*`); incluye `AdminContactPdfTest`, `NewsShowLayoutTest`, `MediaOrientationTest`, `TrustHostsTest` y el test de regresión del roundtrip de caché por `FileStore`.*
+- Ejecución: `./vendor/bin/phpunit` (o `--testsuite Unit,Feature`) — **375 en verde / 1751 assertions** (4 skipped: requieren PostgreSQL o el symlink `public/storage`; 6 avisos preexistentes de `iconv` en LATIN9, intencionales). *Cifra verificada el 2026-11-06 tras añadir `PortalVisitsTest` (3 tests, contador de visitas del portal §4.14), el test de vista del selector de videos de biblioteca en `PostMediaTest` y `ExtranetMaintenanceTest` (8 tests, vista de mantenimiento `/extranet/*`); incluye `AdminContactPdfTest`, `NewsShowLayoutTest`, `MediaOrientationTest`, `TrustHostsTest` y el test de regresión del roundtrip de caché por `FileStore`.*
 - **Cobertura (desde R3, re-validada 2026-10-26 en Laravel 13):** con Xdebug 3.5.3 instalado, `./vendor/bin/phpunit --coverage-text --coverage-html coverage-html` → **97.58% de líneas total** (app 98.05% · database 95.36%; objetivo ≥90% superado); authn/authz/validación/cifrado ≈100% salvo el fallback de iconv de `App\Support\Latin9`. El HTML se genera en `/coverage-html` (ignorado por git).
 - **BD aislada**: `phpunit.xml` define `DB_CONNECTION=sqlite` / `DB_DATABASE=:memory:` (B2 cerrado) — `RefreshDatabase` migra en memoria por test, **nunca toca la BD de desarrollo**. El `APP_KEY` de `phpunit.xml` es una clave **exclusiva de tests**; no usar en producción.
 - Cobertura de flujos críticos:
@@ -1189,6 +1200,7 @@ Garantías de las suites:
   - `OrgMemberPhotoTest` — validación de rutas/extensiones en `org_members.photo`.
   - `PasswordChangeTest` — cambio forzado de contraseña en primer login.
   - `PermissionTest` — 403/200 por rol, `hasPermission()` con reparto canónico 41/22/5, `PermissionSeeder`.
+  - `PortalVisitsTest` — contador de visitas del portal (§4.14): GET público suma 1 y la misma sesión no suma al refrescar; no cuentan `/admin`, POST, 404, HEAD ni User-Agent de bot; el home renderiza el widget (sidebar `d-none d-lg-block` + footer móvil `d-lg-none`) con el total formateado y el resto de páginas públicas no lo incluye.
   - `PiiEncryptionTest` — cifrado de PII heredado via `php artisan pii:encrypt`.
   - `NoticiasPrecargadasSeederTest` — D16 (+purga de placeholders): lote de 5 noticias precargadas desde `public/Noticias Precargadas/` — fechas correctas por sello de nombre (con fallback a la línea `Fecha:` del txt, excluida del cuerpo), categorías asignadas, portada + galerías 3/0/2/3/2 en `uploads/2026/10/`, 15 filas `media`, texto íntegro (`@nicolasmaduro`, `#13oct`) en `<p>`, posiciones consecutivas, re-ejecución sin duplicar posts/archivos/filas y **purga de placeholders `noticia-destacada-*`** (incluidas filas soft-deleted, borrado físico).
   - `PostMediaTest` — D15: galería de noticias — portada+imágenes en `uploads/YYYY/MM/` y carrusel público (portada primero), orden por posición y botón ↑/↓ (`move`), límites 10 imágenes y 3 videos con mensaje en español, URL YouTube nueva crea registro en el módulo `videos` sin `is_featured`, archivo mp4 en `videos/`, `remove_media` exige filas propias y conserva el archivo en disco, video existente enlazado y solo portada = imagen estática sin carrusel (wrapper 560px a proporción natural desde D17).
