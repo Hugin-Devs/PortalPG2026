@@ -47,7 +47,7 @@ php artisan serve
 ## Tests
 
 ```bash
-./vendor/bin/phpunit          # Unit + Feature (363 en verde / 1692 assertions, BD sqlite en memoria — ver docs/DOCUMENTACION.md §16)
+./vendor/bin/phpunit          # Unit + Feature (371 en verde / 1728 assertions, BD sqlite en memoria — ver docs/DOCUMENTACION.md §16)
 ./vendor/bin/phpunit --coverage-text   # cobertura (requiere Xdebug; 97.58% actual)
 composer lint                 # estilo de código (pint --test); composer lint:fix lo aplica
 ```
@@ -65,6 +65,6 @@ Checklist completo del servidor (vhost, `.env`, orden de arranque, actualizacion
 - Actualización típica: `git fetch && git reset --hard origin/main` → `rm -f public/install.php` → `composer install --no-dev` → `npm ci && npm run build` → `optimize:clear` (+ `cache:clear` en el primer despliegue con L13, §14.G.1) → `migrate --force` → `optimize` (§14.G). **Nunca** un `db:seed` completo en producción.
 - Obligatorios: `storage:link` (el enlace debe apuntar al `storage/` de la misma instalación), cron `* * * * * www-data php .../artisan schedule:run` y las 7 condiciones de SECURITY.md §1.
 - Tras un upgrade de framework: **re-login obligatorio de todos los usuarios** (sesiones invalidadas por `session.serialization = json`).
-- Intranet: los sistemas internos viven en `172.16.0.13` (sin salida a internet) y se publican bajo el dominio del portal con `proxy_pass` en Nginx (`/extranet/`, `/intranet_jubilados/`), con `proxy_redirect` por origen y fallback de `/sistema/*` al home — §14.O. **Estado: desactivada el 2026-10-28** con `scripts/intranet.sh off` (se reactiva con `on` + rellenar los enlaces en `/admin/configuracion`, ver PENDIENTES E6).
+- Intranet: los sistemas internos viven en `172.16.0.13` (sin salida a internet) y se publican bajo el dominio del portal con `proxy_pass` en Nginx (`/extranet/`, `/intranet_jubilados/`), con `proxy_redirect` por origen y fallback de `/sistema/*` al home — §14.O. **Estado: desactivada el 2026-10-28** con `scripts/intranet.sh off` (se reactiva con `on` + rellenar los enlaces en `/admin/configuracion`, ver PENDIENTES E6); mientras esté desactivada, `/extranet/*` responde **503 con la vista de mantenimiento** del portal en vez de 404 (§14.O).
 - TLS: certificado **Let's Encrypt** en `/etc/letsencrypt/live/www.gdc.gob.ve/` (certbot + `certbot.timer`, renovación automática con hook de recarga de Nginx) — §14.P.
 - Abiertos antes de la salida a internet: **R6 copia de seguridad de la BD** (R5/TLS cerrado el 2026-10-28).

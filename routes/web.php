@@ -19,10 +19,12 @@ use App\Http\Controllers\Public\ContactController;
 use App\Http\Controllers\Public\EnteController;
 use App\Http\Controllers\Public\GacetaController;
 use App\Http\Controllers\Public\HomeController;
+use App\Http\Controllers\Public\MaintenanceController;
 use App\Http\Controllers\Public\NewsController as PublicNewsController;
 use App\Http\Controllers\Public\PageController;
 use App\Http\Controllers\Public\SearchController;
 use App\Http\Controllers\Public\SitemapController;
+use App\Http\Middleware\PreventRequestForgery;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', [HomeController::class, 'index'])->name('home');
@@ -39,6 +41,17 @@ Route::get('/gacetas', [GacetaController::class, 'index'])->name('gacetas.index'
 Route::get('/buscar', [SearchController::class, 'index'])->name('search')->middleware('throttle:search');
 Route::get('/sitemap.xml', [SitemapController::class, 'index'])->name('sitemap');
 Route::get('/pagina/{slug}', [PageController::class, 'show'])->name('page.show');
+
+// Intranet despublicada (docs/DOCUMENTACION.md §14.O): con `scripts/intranet.sh off`
+// el proxy de Nginx no intercepta /extranet/ y cualquier URL de ese prefijo cae en
+// Laravel — responde 503 con la vista de mantenimiento en lugar de un 404.
+// GET+HEAD+POST: también un submit cacheado del login antiguo del sistema externo.
+// CSRF se omite en estas rutas: son una vista estática, sin efectos secundarios que
+// proteger (el patrón solo casa con /extranet/...).
+Route::match(['GET', 'HEAD', 'POST'], '/extranet/{path?}', [MaintenanceController::class, 'extranet'])
+    ->where('path', '.*')
+    ->withoutMiddleware([PreventRequestForgery::class])
+    ->name('maintenance.extranet');
 
 Route::prefix('admin')->group(function () {
     Route::get('/login', [AuthController::class, 'showLogin'])->name('login');

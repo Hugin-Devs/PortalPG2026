@@ -256,6 +256,7 @@ Claves: `social_*` (7), `contact_*` (5) y las generales `site_name`, `site_logo`
 | GET | `/buscar` | `Public\SearchController@index` | search |
 | GET | `/gacetas` | `Public\GacetaController@index` | gacetas.index |
 | GET | `/pagina/{slug}` | `Public\PageController@show` | page.show |
+| GET/HEAD/POST | `/extranet/{path?}` | `Public\MaintenanceController@extranet` — **503** "Sitio en mantenimiento" mientras la intranet está despublicada (§14.O); CSRF excluido (vista estática) | maintenance.extranet |
 | GET | `/servicios` | redirect 301 → `/entes` | (compatibilidad) |
 
 ### 5.2 Admin (prefijo `/admin`, dentro de middleware `auth`)
@@ -302,6 +303,7 @@ Todas las rutas de gestión llevan además `middleware('permission:...')` (ver s
 | `AboutController` | `index()` | ✅ Página institucional |
 | `ContactController` | `index, store` | ✅ Valida y **persiste** en `contacts` (bandeja en el admin) |
 | `PageController` | `show($slug)` | ✅ Páginas estáticas |
+| `MaintenanceController` | `extranet()` | ✅ **503** con `mantenimiento.blade.php` (standalone + `Retry-After: 3600`) para **todo** `/extranet/*` mientras la intranet está despublicada (`intranet.sh off`, §14.O); GET+HEAD+POST (un submit cacheado del login antiguo también ve la vista); CSRF excluido en la ruta (`withoutMiddleware`: vista estática sin efectos secundarios). Con el proxy `on` Nginx intercepta antes que Laravel y la vista deja de verse sola |
 | `GacetaController` | `index()` | ✅ Listado de gacetas ordenado por `fecha DESC, numero DESC` (paginado 12); cada card abre el archivo en pestaña nueva |
 | `SearchController` | `index()` | ✅ Búsqueda por título/contenido/extracto |
 
@@ -355,6 +357,7 @@ Todas las rutas de gestión llevan además `middleware('permission:...')` (ver s
 | `gacetas.blade.php` | Gacetas Oficiales: grid de cards (miniatura real si es imagen, icono PDF si no), "Gaceta Oficial N° {numero}" + fecha; click abre el archivo en pestaña nueva | ✅ |
 | `_social-links.blade.php` | Parcial de íconos de redes (1 query `whereIn`; solo renderiza URLs `http(s)://`; vacío = oculto) — solo en el footer | ✅ |
 | `_contact-info.blade.php` | Parcial con datos de contacto desde `settings` (dirección, teléfono, email, horario, mapa) + defaults — en home, /contacto y /sobre-nosotros | ✅ |
+| `mantenimiento.blade.php` | **"Sitio en mantenimiento"** para `/extranet/*` (intranet despublicada, §14.O): 503 vía `errors._standalone` (sin layout/BD/Vite), botones Volver/Reintentar/Ir al inicio + header `Retry-After: 3600` | ✅ |
 
 > **Componente de imágenes**: las vistas públicas + logos (header/footer público, sidebar admin y login) usan el componente Blade `<x-img path="storage/..." ...attrs>` (`resources/views/components/img.blade.php`) en lugar de `<img>`: si existe el sidecar `.webp` (mismo nombre con extensión `.webp`, ver `App\Services\Webp`) emite `<picture>` con `<source type="image/webp">` y el `<img src>` apuntando al **original como fallback**; si no existe, `<img>` idéntico al anterior (bitácora transparente para el navegador). Los atributos (`alt`, `class`, `loading`, etc.) se pasan tal cual y conservan su orden. La regla CSS `picture { display: contents; }` (en `app.scss`) evita que el `<picture>` altere layout, gap de línea base o posicionamiento.
 
@@ -387,7 +390,7 @@ Páginas personalizadas en español para todos los tipos de error HTTP, con bot�
 | Código | Tipo | Presentación |
 |---|---|---|
 | 400, 401, 403, 404, 405, 408, 410, 419, 422, 429 | 4xx | Extienden `layouts.public` (parcial `_box`); 419 agrega **Recargar e intentar**, 401 **Iniciar sesión**, 403 **Ir al panel** si hay sesión |
-| 500, 503 | 5xx | Standalone (parcial `_standalone`, HTML+CSS inline, sin layout/BD/Vite) para renderizar aunque el sitio esté caído; 503 agrega **Reintentar** |
+| 500, 503 | 5xx | Standalone (parcial `_standalone`, HTML+CSS+JS inline con nonce, sin layout/BD/Vite) para renderizar aunque el sitio esté caído; 503 agrega **Reintentar**. El parcial lleva su propio JS inline (`data-action="reload|back"`) con el nonce de la CSP — también lo usan las vistas 4xx vía layouts |
 
 ---
 
@@ -521,16 +524,17 @@ npm run build      # copia TinyMCE a public/vendor + vite build a public/build
 > están en [SECURITY.md](../SECURITY.md) (raíz del repo). Las mejoras
 > futuras, en la §C de PENDIENTES.md.
 >
-> **Estado a 2026-10-28**: **producción en Laravel 13.38.0** (despliegue U1
+> **Estado a 2026-11-06**: **producción en Laravel 13.38.0** (despliegue U1
 > el 2026-10-28 desde `main` = `d4d3e91`; registro en **§14.M**) — 7
 > condiciones de `SECURITY.md` §1 verificadas y re-verificadas tras el
-> upgrade. Gates: **363 tests PHPUnit en verde** (1692 assertions),
-> **cobertura 97.58%** (app 98.05%), **E2E 17/17**, **baseline ZAP final:
+> upgrade. Gates: **371 tests PHPUnit en verde** (1728 assertions),
+> **cobertura 97.58%** (app 98.05%), **E2E 17/17 (re-validado 2026-11-06)**, **baseline ZAP final:
 > 0 altas / 0 medias / 1 baja / 4 informativas** (waiver TinyMCE
 > `style-src` cerrado con CSP de nonce), Pint ✅, SCA 0/0. **Publicada en
 > internet en `https://www.gdc.gob.ve` con TLS de Let's Encrypt con renovación
 > automática (§14.P); la intranet está temporalmente despublicada con
-> `scripts/intranet.sh` (§14.O).**
+> `scripts/intranet.sh` (§14.O) — desde 2026-11-06 `/extranet/*` responde
+> **503 con la vista de mantenimiento** en vez de 404 (§5.1/§6.1).**
 >
 > El despliegue del 2026-10-25 (Laravel 10.50.2) quedó registrado en §14.L;
 > el de la migración completa 10 → 11 → 12 → 13 está en `docs/PLAN-LARAVEL13.md`.
@@ -965,15 +969,17 @@ no sirve porque los ficheros no están en este servidor.
 > El script migra los bloques de este apartado a
 > `/etc/nginx/snippets/intranet.conf` y alterna una única línea `include` en el vhost
 > (backup previo + puerta `nginx -t`: si la config no valida, restaura el backup y **no**
-> recarga). Con `off`, `/extranet/*` e `/intranet_jubilados/*` caen en el Laravel del portal
-> → **404**. **Los enlaces del navbar se vacían aparte** en `/admin/configuracion`
+> recarga). Con `off`, `/extranet/*` cae en el Laravel del portal → **503 con la vista
+> de mantenimiento** (`maintenance.extranet`, ver §5.1/§6.1) en lugar del 404 anterior, y
+> `/intranet_jubilados/*` → **404** (fuera de alcance de esa vista). **Los enlaces del
+> navbar se vacían aparte** en `/admin/configuracion`
 > (`nav_funcionarios_url` y `nav_jubilados_url` = vacío ⇒ ítem oculto): ver PENDIENTES **E6**
 > para la reactivación completa.
 
 | Dato | Valor |
 |---|---|
 | Backend | `https://172.16.0.13` (nginx; cert Let's Encrypt de `www.gdc.gob.ve`, 22 cerrado ⇒ sin acceso SSH) |
-| Rutas que se publicarían | `/extranet/` → backend `/extranet/` · `/intranet_jubilados/` → backend `/intranet_jubilados/` (**hoy desactivadas**: devuelven 404) |
+| Rutas que se publicarían | `/extranet/` → backend `/extranet/` · `/intranet_jubilados/` → backend `/intranet_jubilados/` (**hoy desactivadas**: `/extranet/*` → **503 mantenimiento** vía Laravel, `/intranet_jubilados/*` → 404) |
 | No se publica | `/sistema/…` (landing antigua, hoy el propio portal). El fallback `302 → /` **se perdió en la migración de `scripts/intranet.sh` y no se restaura** mientras la intranet esté desactivada (404 sin riesgo; decisión 2026-10-28) |
 | Settings del navbar | **vacíos** desde 2026-10-28 (ítems ocultos). Valores a restaurar: `nav_funcionarios_url = https://www.gdc.gob.ve/extranet/login.php`, `nav_jubilados_url = https://www.gdc.gob.ve/intranet_jubilados/login.php`; `nav_intranet_url` sigue vacío |
 | Acceso | público cuando está activada (decisión del cliente) |
@@ -1044,6 +1050,14 @@ asset relativo (`/extranet/bootstrap3/css/bootstrap.css`) → 200; `/extranet/` 
 
 **Verificación (desactivada, 2026-10-28):** `/extranet/login.php`, `/intranet_jubilados/login.php`
 y `/sistema/frontend` → **404**; el navbar ya no pinta los ítems; `/` y `/admin/login` → 200.
+
+**Verificación (desactivada + vista de mantenimiento, desde el 2026-11-06):**
+`GET|POST /extranet/login.php`, `/extranet/usuarioslist.php` y cualquier otra ruta bajo
+`/extranet/` → **503** con la vista "Sitio en mantenimiento" (header `Retry-After: 3600`);
+`/intranet_jubilados/login.php` → sigue **404** (fuera de alcance); `/` y `/admin/login` → 200.
+La vista se apaga sola al reactivar el proxy con `intranet.sh on` (Nginx intercepta
+`location ^~ /extranet/` antes que Laravel) — no requiere desplegar ni quitar nada.
+Comprobación: `curl -skI https://www.gdc.gob.ve/extranet/login.php` → `503` + `Retry-After: 3600`.
 
 #### P. Certificado Let's Encrypt (cierre de R5 — 2026-10-28)
 
@@ -1138,7 +1152,7 @@ las credenciales de BD y la base URL se configuran por variables de entorno (`E2
 | `test-partners.sh` | Upload/replace/quitar logo de entes (incl. sidecars `.webp`) |
 | `test-share.sh` | Botones de compartir + lazy loading |
 | `test-webp.sh` | WebP con fallback (D9): `webp:generate` (backfill + idempotencia), sidecar al subir, GET `.webp` 200 `image/webp`, GIF y PNG corrupto sin conversión (contador `ilegibles`, exit 0), `<picture>` con fallback en `/noticias`, destroy borra original + sidecar, `picture{display:contents}` en el build |
-| `test-errors.sh` | Páginas de error HTTP (incl. 503 real vía `artisan down`) |
+| `test-errors.sh` | Páginas de error HTTP (incl. 503 real vía `artisan down`) + **vista de mantenimiento `/extranet/*`** (503 + `Retry-After` en GET y POST, ruta profunda, jubilados sigue 404) |
 | `test-dashboard.sh` | Dashboard (D1): redirect sin sesión, 9 tarjetas con conteos vs SQL dinámicos, tracking `daily_views` (+1 en `views` lifetime y en la tarjeta tras leer un artículo), gráfico de exactamente 30 barras + total del período, filtrado por rol (editor 3 tarjetas / admin 7 / superadmin 9), exactamente 1 form de logout, smoke de los 3 roles |
 
 Ejecución:
@@ -1156,7 +1170,7 @@ Garantías de las suites:
 
 ### PHPUnit (`tests/Unit`, `tests/Feature`)
 
-- Ejecución: `./vendor/bin/phpunit` (o `--testsuite Unit,Feature`) — **363 en verde / 1692 assertions** (4 skipped: requieren PostgreSQL o el symlink `public/storage`; 6 avisos preexistentes de `iconv` en LATIN9, intencionales). *Cifra verificada el 2026-10-28 tras la exportación de mensajes a PDF; incluye `AdminContactPdfTest`, `NewsShowLayoutTest`, `MediaOrientationTest`, `TrustHostsTest` y el test de regresión del roundtrip de caché por `FileStore`.*
+- Ejecución: `./vendor/bin/phpunit` (o `--testsuite Unit,Feature`) — **371 en verde / 1728 assertions** (4 skipped: requieren PostgreSQL o el symlink `public/storage`; 6 avisos preexistentes de `iconv` en LATIN9, intencionales). *Cifra verificada el 2026-11-06 tras añadir `ExtranetMaintenanceTest` (8 tests, vista de mantenimiento `/extranet/*`); incluye `AdminContactPdfTest`, `NewsShowLayoutTest`, `MediaOrientationTest`, `TrustHostsTest` y el test de regresión del roundtrip de caché por `FileStore`.*
 - **Cobertura (desde R3, re-validada 2026-10-26 en Laravel 13):** con Xdebug 3.5.3 instalado, `./vendor/bin/phpunit --coverage-text --coverage-html coverage-html` → **97.58% de líneas total** (app 98.05% · database 95.36%; objetivo ≥90% superado); authn/authz/validación/cifrado ≈100% salvo el fallback de iconv de `App\Support\Latin9`. El HTML se genera en `/coverage-html` (ignorado por git).
 - **BD aislada**: `phpunit.xml` define `DB_CONNECTION=sqlite` / `DB_DATABASE=:memory:` (B2 cerrado) — `RefreshDatabase` migra en memoria por test, **nunca toca la BD de desarrollo**. El `APP_KEY` de `phpunit.xml` es una clave **exclusiva de tests**; no usar en producción.
 - Cobertura de flujos críticos:
@@ -1166,6 +1180,7 @@ Garantías de las suites:
   - `CacheTest` — consultas de home/cacheadas y invalidación por observers al crear posts/entes.
   - `ContactStoreTest` — POST `/contacto` válido/inválido, `read_at` no manipulable.
   - `EditorCannotPublishTest` — editor sin `news.approve` no puede publicar (queda en draft + `warning`); editor **con** el permiso sí publica.
+  - `ExtranetMaintenanceTest` — `/extranet/*` con la intranet despublicada (§14.O): 503 con "Sitio en mantenimiento" en GET/HEAD/POST (POST **sin token CSRF** — `withoutMiddleware` en la ruta), `Retry-After: 3600`, headers de seguridad y vista standalone (sin layout/Vite); fuera de alcance: `/intranet_jubilados/*` y las 404 normales siguen 404; el portal sigue 200.
   - `GacetaHashTest` — hash SHA-256 al subir/actualizar gacetas.
   - `HomeHeroTest` — ganchos del hero (`hero-box` en las 4 ramas) y que el extracto **no** se trunca en servidor: el corte a 4 líneas del hero es CSS y solo en ≤768 px (ver `app.scss`).
   - `HtmlSanitizationTest` — sanitización HTML (XSS); desde D15 las imágenes inline `data:` y cualquier `<img>` en el texto se **eliminan** (portada/galería es la única vía) y se emite el aviso `warning`.

@@ -141,18 +141,23 @@ systemctl reload nginx
 echo "Nginx recargado."
 
 # ------------------------------------------------------------ verificación ---
-log "Verificación (esperado: con 'off' los dos 404; con 'on' los dos 200)"
+# Con 'off' el prefijo /extranet/* lo sirve Laravel con la vista de mantenimiento
+# (503, route maintenance.extranet — docs/DOCUMENTACION.md §14.O); jubilados
+# sigue fuera de alcance y devuelve 404.
+log "Verificación (esperado: con 'off' extranet 503 y jubilados 404; con 'on' los dos 200)"
 report
 E=$(http_code /extranet/login.php)
 J=$(http_code /intranet_jubilados/login.php)
 H=$(http_code /)
 if [ "$MODE" = "off" ]; then
-    if [ "$E" = "404" ] && [ "$J" = "404" ] && [ "$H" = "200" ]; then
-        echo "OK: la intranet ya NO está publicada por la ruta del portal."
+    if [ "$E" = "503" ] && [ "$J" = "404" ] && [ "$H" = "200" ]; then
+        echo "OK: la intranet ya NO está publicada por la ruta del portal"
+        echo "    (/extranet/* muestra la vista de mantenimiento, 503)."
         echo "    Recuerda vaciar nav_funcionarios_url y nav_jubilados_url en"
         echo "    /admin/configuracion para que los enlaces desaparezcan del navbar."
     else
         echo "AVISO: los códigos no son los esperados; revisa $VF y el estado de la app."
+        echo "       (con el código desplegado: extranet=503, jubilados=404, portal=200)"
         exit 1
     fi
 else

@@ -1,10 +1,10 @@
 # PENDIENTES — Checklist de trabajo
 
 > **Fuente viva del trabajo pendiente.** Ir marcando `- [x]` al completar un ítem.
-> Última actualización: 2026-10-28 (intranet despublicada con `scripts/intranet.sh`).
+> Última actualización: 2026-11-06 (vista de mantenimiento `/extranet/*`, DOCUMENTACION §14.O).
 
 **Abiertos: 5** — 2 de contenido del cliente + 1 de bloqueo de salida (backup de BD) + 1 de reactivación (intranet) + 1 de mantenimiento (guarda del seeder).
-*Producción en **Laravel 13.38.0** desde el 2026-10-28 (U1 cerrado; registro en DOCUMENTACION §14.M), **publicada en internet** con **TLS de Let's Encrypt** (§14.P, R5 cerrado) e **intranet temporalmente despublicada** (§14.O, E6). Gates: Pint ✅ · **363 tests · 1692 aserciones** · cobertura 97.58% · E2E 17/17 · **ZAP final 0/0/1/4**, waiver `style-src` cerrado · audits 0/0.*
+*Producción en **Laravel 13.38.0** desde el 2026-10-28 (U1 cerrado; registro en DOCUMENTACION §14.M), **publicada en internet** con **TLS de Let's Encrypt** (§14.P, R5 cerrado) e **intranet temporalmente despublicada** (§14.O, E6) — mientras tanto `/extranet/*` responde **503 con la vista de mantenimiento**. Gates: Pint ✅ · **371 tests · 1728 aserciones** · cobertura 97.58% · E2E 17/17 (re-validado 2026-11-06) · **ZAP final 0/0/1/4**, waiver `style-src` cerrado · audits 0/0.*
 
 ---
 
@@ -20,6 +20,7 @@
 
 - [ ] **E6 — Reactivar la intranet (extranet y jubilados)**  
   Desvinculada el 2026-10-28: el proxy de Nginx quedó desactivado con **`scripts/intranet.sh off`** (bloques migrados a `/etc/nginx/snippets/intranet.conf`, línea `include` comentada) y los enlaces del navbar quedaron **vacíos** (ítems ocultos). Reactivar desde la consola del servidor: `bash /var/www/html/PortalPG2026/scripts/intranet.sh on` (o `status` para comprobar) y rellenar en `/admin/configuracion` `nav_funcionarios_url = https://www.gdc.gob.ve/extranet/login.php` y `nav_jubilados_url = https://www.gdc.gob.ve/intranet_jubilados/login.php`. Detalle en DOCUMENTACION.md §14.O.
+  *Nota (2026-11-06): mientras siga desactivada, `/extranet/*` muestra la **vista de mantenimiento (503)** del portal en vez de 404 (route `maintenance.extranet`); al hacer `on`, el proxy intercepta antes que Laravel y la vista deja de verse **sin desplegar nada**. `intranet.sh off` ahora verifica `extranet=503` (antes 404).*
 
 ## B. Pre-release (bloquean la publicación / el release)
 

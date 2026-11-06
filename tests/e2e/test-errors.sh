@@ -52,7 +52,23 @@ check 'grep -q "Reintentar" "$HTTP_BODY"' 'boton Reintentar' 'sin boton reintent
 check 'grep -q "Ir al inicio" "$HTTP_BODY"' 'boton Ir al inicio' 'sin boton inicio'
 ( cd "$E2E_ROOT" && php artisan up --no-interaction >/dev/null 2>&1 )
 
-echo '--- 7. Smoke (site de vuelta) ---'
+echo '--- 7. Mantenimiento /extranet (intranet despublicada, 503) ---'
+http "$E2E_BASE/extranet/login.php"
+check '[ "$HTTP_STATUS" = 503 ]' "status 503 (got $HTTP_STATUS)" 'status != 503'
+check 'grep -q "Sitio en mantenimiento" "$HTTP_BODY"' 'titulo en espanol' 'titulo no encontrado'
+check 'grep -q "Ir al inicio" "$HTTP_BODY"' 'boton Ir al inicio' 'sin boton inicio'
+ra=$(curl -skI "$E2E_BASE/extranet/login.php" | tr -d '\r' | grep -i '^retry-after:' || true)
+check '[ "$ra" = "Retry-After: 3600" ]' "header Retry-After 3600 (got: ${ra:-ninguno})" 'sin header Retry-After'
+http "$E2E_BASE/extranet/usuarioslist.php" --data-urlencode 'user=x'
+check '[ "$HTTP_STATUS" = 503 ]' "POST 503 (got $HTTP_STATUS)" 'status != 503'
+check 'grep -q "Sitio en mantenimiento" "$HTTP_BODY"' 'POST titulo en espanol' 'titulo no encontrado'
+http "$E2E_BASE/extranet/ruta/profunda.php"
+check '[ "$HTTP_STATUS" = 503 ]' "ruta profunda 503 (got $HTTP_STATUS)" 'status != 503'
+# Fuera de alcance: jubilados no esta cubierto por la vista de mantenimiento.
+http "$E2E_BASE/intranet_jubilados/login.php"
+check '[ "$HTTP_STATUS" = 404 ]' "jubilados sigue 404 (got $HTTP_STATUS)" 'status != 404'
+
+echo '--- 8. Smoke (site de vuelta) ---'
 for p in / /contacto /noticias; do
   http "$E2E_BASE$p"
   check '[ "$HTTP_STATUS" = 200 ]' "$p 200" "$p $HTTP_STATUS"

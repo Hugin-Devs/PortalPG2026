@@ -33,5 +33,19 @@
         </div>
         <p class="brand">Gobierno de Distrito Capital</p>
     </div>
+    <script nonce="{{ request()->attributes->get('csp_nonce') }}">
+        document.querySelectorAll('[data-action="reload"]').forEach(function (btn) {
+            btn.addEventListener('click', function () { window.location.reload(); });
+        });
+        document.querySelectorAll('[data-action="back"]').forEach(function (btn) {
+            btn.addEventListener('click', function () {
+                if (history.length > 1) {
+                    history.back();
+                } else {
+                    window.location.href = btn.dataset.fallback || '/';
+                }
+            });
+        });
+    </script>
 </body>
 </html>
